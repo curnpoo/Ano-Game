@@ -265,12 +265,26 @@ function App() {
         />
       )}
 
-      {currentScreen === 'lobby' && room && player && (
-        <LobbyScreen
-          room={room}
-          currentPlayerId={player.id}
-          onUploadImage={handleUploadImage}
-        />
+      {currentScreen === 'lobby' && player && (
+        room ? (
+          <LobbyScreen
+            room={room}
+            currentPlayerId={player.id}
+            onUploadImage={handleUploadImage}
+          />
+        ) : (
+          <div className="min-h-screen bg-90s-animated flex items-center justify-center">
+            <div className="bg-white rounded-[2rem] p-8 text-center pop-in"
+              style={{
+                boxShadow: '0 15px 0 rgba(155, 89, 182, 0.3)',
+                border: '5px solid #FF69B4'
+              }}>
+              <div className="text-6xl animate-bounce mb-4">🎮</div>
+              <div className="text-2xl font-bold text-purple-600">Setting up room...</div>
+              <div className="text-gray-500 mt-2">Just a moment!</div>
+            </div>
+          </div>
+        )
       )}
 
       {currentScreen === 'game' && room && room.currentImage && (
