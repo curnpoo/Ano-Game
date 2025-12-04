@@ -142,24 +142,32 @@ function App() {
     setCurrentScreen('name-entry');
   };
 
-  const handleTimeUp = async () => {
-    setIsDrawing(false);
-    if (roomCode && player) {
+  const handleTimeUp = useCallback(async () => {
+    if (!room || !player || !roomCode) return;
+
+    // Only the current player should trigger the end turn
+    const isMyTurn = room.turnOrder[room.currentTurnIndex] === player.id;
+    if (isMyTurn && room.turnStatus === 'drawing') {
+      console.log('Time up! Ending turn...');
+      setIsDrawing(false);
+
       const newAnnotation = {
         playerId: player.id,
         playerName: player.name,
         playerColor: player.color,
-        roundNumber: room?.roundNumber || 0,
+        roundNumber: room.roundNumber || 0,
         drawingData: strokes,
         submittedAt: Date.now()
       };
+
       try {
         await StorageService.endTurn(roomCode, newAnnotation);
       } catch (err) {
         console.error('Failed to end turn:', err);
+        showToast('Failed to submit turn. Try again!', 'error');
       }
     }
-  };
+  }, [room, player, roomCode, strokes, showToast]);
 
   const handleReady = async () => {
     if (roomCode) {
@@ -290,8 +298,38 @@ function App() {
       {currentScreen === 'game' && room && room.currentImage && (
         <div className="fixed inset-0 bg-90s-animated flex flex-col">
           {/* Main Game Area */}
-          <div className="flex-1 relative flex items-center justify-center p-4 overflow-hidden">
-            <div className="relative w-full max-w-4xl aspect-[4/3] max-h-[80vh]"
+          <div className="flex-1 relative flex flex-col items-center justify-center p-4 overflow-hidden">
+
+            {/* Top Bar with Turn Info and Timer */}
+            <div className="w-full max-w-4xl flex justify-between items-center mb-4 px-4 z-20">
+              <div className="bg-white/95 backdrop-blur-sm px-5 py-3 rounded-2xl pop-in"
+                style={{
+                  boxShadow: '0 6px 0 rgba(155, 89, 182, 0.3), 0 12px 24px rgba(0, 0, 0, 0.15)',
+                  border: '3px solid #FF69B4'
+                }}>
+                <div className="text-sm text-pink-400 font-bold">🎮 Current Turn</div>
+                <div className="font-bold text-xl"
+                  style={{
+                    background: 'linear-gradient(135deg, #FF69B4, #9B59B6)',
+                    WebkitBackgroundClip: 'text',
+                    WebkitTextFillColor: 'transparent'
+                  }}>
+                  {isMyTurn ? "✨ It's your turn! ✨" : `${currentPlayerName}'s turn`}
+                </div>
+              </div>
+
+              {isMyTurn && room.turnStatus === 'drawing' && (
+                <div className="scale-90 origin-right">
+                  <Timer
+                    endsAt={room.turnEndsAt || Date.now() + 10000}
+                    onTimeUp={handleTimeUp}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Image Container */}
+            <div className="relative w-full max-w-4xl aspect-[4/3] max-h-[70vh]"
               style={{
                 borderRadius: '2rem',
                 overflow: 'hidden',
@@ -308,68 +346,35 @@ function App() {
                 isDrawingEnabled={isDrawing}
                 onStrokesChange={setStrokes}
               />
-
-              {/* Turn Info Overlay */}
-              <div className="absolute top-4 left-4 right-4 flex justify-between items-start pointer-events-none">
-                <div className="bg-white/95 backdrop-blur-sm px-5 py-3 rounded-2xl pop-in"
-                  style={{
-                    boxShadow: '0 6px 0 rgba(155, 89, 182, 0.3), 0 12px 24px rgba(0, 0, 0, 0.15)',
-                    border: '3px solid #FF69B4'
-                  }}>
-                  <div className="text-sm text-pink-400 font-bold">🎮 Current Turn</div>
-                  <div className="font-bold text-xl"
-                    style={{
-                      background: 'linear-gradient(135deg, #FF69B4, #9B59B6)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent'
-                    }}>
-                    {isMyTurn ? "✨ It's your turn! ✨" : `${currentPlayerName}'s turn`}
-                  </div>
-                </div>
-
-                {isMyTurn && room.turnStatus === 'drawing' && (
-                  <div className="pointer-events-auto">
-                    <Timer
-                      endsAt={room.turnEndsAt || Date.now() + 10000}
-                      onTimeUp={handleTimeUp}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Ready Button Overlay */}
-              {isMyTurn && room.turnStatus === 'waiting' && (
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-10">
-                  <div className="bg-white p-10 rounded-[2rem] text-center space-y-6 max-w-sm mx-4 pop-in"
-                    style={{
-                      boxShadow: '0 15px 0 rgba(155, 89, 182, 0.4), 0 30px 60px rgba(0, 0, 0, 0.3)',
-                      border: '5px solid transparent',
-                      backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #32CD32, #00D9FF, #9B59B6)',
-                      backgroundOrigin: 'border-box',
-                      backgroundClip: 'padding-box, border-box'
-                    }}>
-                    <div className="text-7xl bounce-scale">🎨</div>
-                    <div>
-                      <h3 className="text-3xl font-bold"
-                        style={{
-                          background: 'linear-gradient(135deg, #32CD32, #00D9FF)',
-                          WebkitBackgroundClip: 'text',
-                          WebkitTextFillColor: 'transparent'
-                        }}>
-                        It's Your Turn!
-                      </h3>
-                      <p className="text-lg text-gray-500 font-medium mt-2">You have 10 seconds to draw! ⏱️</p>
-                    </div>
-                    <button
-                      onClick={handleReady}
-                      className="w-full btn-90s bg-gradient-to-r from-lime-400 via-cyan-400 to-purple-500 text-white font-bold text-2xl py-5 jelly-hover"
-                    >
-                      🚀 READY! 🚀
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
+
+            {/* Ready Button Overlay - Now outside image but centered over it */}
+            {isMyTurn && room.turnStatus === 'waiting' && (
+              <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
+                <div className="bg-white/90 backdrop-blur-md p-8 rounded-[2rem] text-center space-y-4 max-w-xs mx-4 pop-in pointer-events-auto scale-90"
+                  style={{
+                    boxShadow: '0 15px 0 rgba(155, 89, 182, 0.4), 0 30px 60px rgba(0, 0, 0, 0.3)',
+                    border: '4px solid transparent',
+                    backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #32CD32, #00D9FF, #9B59B6)',
+                    backgroundOrigin: 'border-box',
+                    backgroundClip: 'padding-box, border-box'
+                  }}>
+                  <div className="text-5xl animate-bounce">🎨</div>
+                  <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-500">
+                    Ready to Draw?
+                  </h3>
+                  <p className="text-gray-500 font-medium text-sm">
+                    You have 10 seconds to add your masterpiece!
+                  </p>
+                  <button
+                    onClick={handleReady}
+                    className="w-full btn-90s bg-gradient-to-r from-lime-400 to-emerald-500 text-white font-bold text-lg py-3 jelly-hover"
+                  >
+                    I'm Ready! 🚀
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Toolbar Area */}
