@@ -608,35 +608,53 @@ export const StorageService = {
         const result = await runTransaction(roomRef, (room) => {
             if (!room) return null;
 
-            // Ensure waitingPlayers is handled correctly (convert to array if needed for processing)
+            // Normalize lists
+            let players = room.players || [];
+            if (!Array.isArray(players)) players = Object.values(players);
+            room.players = players; // Ensure arrays
+
             let waitingPlayers = room.waitingPlayers || [];
             if (!Array.isArray(waitingPlayers)) waitingPlayers = Object.values(waitingPlayers);
+            room.waitingPlayers = waitingPlayers;
 
-            const waitingIndex = waitingPlayers.findIndex((p: Player) => p.id === playerId);
-            if (waitingIndex === -1) return undefined; // Abort transaction if not found
+            let playerObj: Player | null = null;
 
-            const player = waitingPlayers[waitingIndex];
-
-            // Remove from waiting (create new array to be safe)
-            const newWaitingPlayers = waitingPlayers.filter((p: Player) => p.id !== playerId);
-            room.waitingPlayers = newWaitingPlayers;
-
-            // Add to players
-            if (!room.players) room.players = [];
-            else if (!Array.isArray(room.players)) room.players = Object.values(room.players);
-
-            // Check if already in players to avoid dups
-            if (!room.players.some((p: Player) => p.id === playerId)) {
-                room.players.push(player);
+            // 1. Check if already in active players
+            const playerIndex = players.findIndex((p: Player) => p.id === playerId);
+            if (playerIndex >= 0) {
+                playerObj = players[playerIndex];
             }
+            // 2. If not, check waiting players
+            else {
+                const waitingIndex = waitingPlayers.findIndex((p: Player) => p.id === playerId);
+                if (waitingIndex >= 0) {
+                    playerObj = waitingPlayers[waitingIndex];
+                    // Move from waiting to players
+                    room.waitingPlayers.splice(waitingIndex, 1);
+                    room.players.push(playerObj);
+                }
+            }
+
+            // If found nowhere, abort
+            if (!playerObj) return undefined;
 
             // Initialize State based on status
             if (!room.playerStates) room.playerStates = {};
 
+            // Force status to waiting/active so they can join
             if (room.status === 'drawing' || room.status === 'uploading') {
-                room.playerStates[playerId] = { status: 'waiting' };
+                // Only reset if they don't have a valid state or we want to force them in
+                // If they are 'submitted', don't reset them!
+                const currentState = room.playerStates[playerId];
+                if (!currentState || currentState.status !== 'submitted') {
+                    room.playerStates[playerId] = { status: 'waiting' };
+                }
             } else if (room.status === 'voting') {
-                room.playerStates[playerId] = { status: 'waiting' };
+                // Determine if they should be waiting
+                const currentState = room.playerStates[playerId];
+                if (!currentState || currentState.status !== 'submitted') {
+                    room.playerStates[playerId] = { status: 'waiting' };
+                }
             }
 
             if (!room.scores) room.scores = {};
@@ -646,7 +664,7 @@ export const StorageService = {
         });
 
         if (!result.committed) {
-            throw new Error("Could not join game (player not in waiting list or conflict)");
+            throw new Error("Could not join game (player not found in room)");
         }
     }
 };
