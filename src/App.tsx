@@ -320,10 +320,35 @@ function App() {
   };
 
   const handleEndGame = async () => {
-    if (!roomCode) return;
+    if (!roomCode || !room) return;
     try {
-      await StorageService.resetGame(roomCode);
-      showToast('Game ended 🛑', 'info');
+      // Determine reason and leader
+      let reason: 'cancelled' | 'early' = 'early';
+      let leaderName: string | undefined;
+
+      if (room.status === 'lobby') {
+        reason = 'cancelled';
+      } else {
+        // Find leader
+        if (room.scores) {
+          const leaderId = Object.entries(room.scores).sort(([, a], [, b]) => b - a)[0]?.[0];
+          const leader = room.players.find(p => p.id === leaderId);
+          if (leader) leaderName = leader.name;
+        }
+      }
+
+      // Update history before closing
+      StorageService.updateHistoryEndState(roomCode, reason, leaderName);
+
+      // Close room (delete from Firebase)
+      await StorageService.closeRoom(roomCode);
+
+      // Clear local state
+      StorageService.leaveRoom();
+      setRoomCode(null);
+      setCurrentScreen('room-selection');
+
+      showToast('Game ended and room closed 🛑', 'info');
     } catch (err) {
       console.error('Failed to end game:', err);
       showToast('Failed to end game', 'error');

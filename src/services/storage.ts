@@ -1,4 +1,4 @@
-import { ref, set, get, onValue, runTransaction } from 'firebase/database';
+import { ref, set, get, onValue, runTransaction, remove } from 'firebase/database';
 import { database } from '../firebase';
 import type { GameRoom, Player, GameSettings, BlockInfo, PlayerState, PlayerDrawing, RoundResult, RoomHistoryEntry } from '../types';
 
@@ -76,11 +76,13 @@ export const StorageService = {
     // --- History ---
     saveRoomToHistory: (room: GameRoom) => {
         const history = StorageService.getHistory();
+        const host = room.players.find(p => p.id === room.hostId);
         const newEntry: RoomHistoryEntry = {
             roomCode: room.roomCode,
             lastSeen: Date.now(),
             playerCount: room.players.length,
-            roundNumber: room.roundNumber
+            roundNumber: room.roundNumber,
+            hostName: host?.name
         };
 
         // Remove existing entry for this room
@@ -101,8 +103,24 @@ export const StorageService = {
         const index = history.findIndex(h => h.roomCode === roomCode);
         if (index >= 0) {
             history[index].winnerName = winnerName;
+            history[index].endReason = 'finished';
             localStorage.setItem('aic_room_history', JSON.stringify(history));
         }
+    },
+
+    updateHistoryEndState: (roomCode: string, reason: 'finished' | 'early' | 'cancelled', leaderName?: string) => {
+        const history = StorageService.getHistory();
+        const index = history.findIndex(h => h.roomCode === roomCode);
+        if (index >= 0) {
+            history[index].endReason = reason;
+            if (leaderName) history[index].leaderName = leaderName;
+            localStorage.setItem('aic_room_history', JSON.stringify(history));
+        }
+    },
+
+    closeRoom: async (roomCode: string): Promise<void> => {
+        const roomRef = ref(database, `${ROOMS_PATH}/${roomCode}`);
+        await remove(roomRef);
     },
 
     // --- Room Management ---

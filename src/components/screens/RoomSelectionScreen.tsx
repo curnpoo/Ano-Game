@@ -151,18 +151,29 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
                                                     </span>
                                                 ) : (
                                                     <span className="bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded-full font-bold">
-                                                        ● Ended
+                                                        ● {game.endReason === 'cancelled' ? 'Cancelled' : 'Ended'}
                                                     </span>
                                                 )}
                                             </div>
                                             <div className="text-sm text-gray-500 mt-1">
+                                                {game.hostName && <span className="font-medium text-purple-600 mr-2">Host: {game.hostName} •</span>}
                                                 {game.playerCount} Players • Round {game.roundNumber}
                                             </div>
-                                            {game.winnerName && (
+
+                                            {/* Status/Result Message */}
+                                            {game.winnerName ? (
                                                 <div className="text-sm font-bold text-amber-500 mt-1">
                                                     🏆 Winner: {game.winnerName}
                                                 </div>
-                                            )}
+                                            ) : game.leaderName ? (
+                                                <div className="text-sm font-bold text-purple-500 mt-1">
+                                                    👑 Leader: {game.leaderName} (Ended early)
+                                                </div>
+                                            ) : game.endReason === 'cancelled' ? (
+                                                <div className="text-sm italic text-gray-400 mt-1">
+                                                    Ended before start
+                                                </div>
+                                            ) : null}
                                         </div>
 
                                         {game.isActive ? (

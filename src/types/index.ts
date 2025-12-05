@@ -115,7 +115,10 @@ export interface Annotation {
 export interface RoomHistoryEntry {
     roomCode: string;
     lastSeen: number;
+    hostName?: string;
     winnerName?: string;
     playerCount?: number;
     roundNumber?: number;
+    endReason?: 'finished' | 'early' | 'cancelled';
+    leaderName?: string;
 }
