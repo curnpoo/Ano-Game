@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { GameRoom } from '../../types';
+import { Confetti } from '../common/Confetti';
+import { vibrate, HapticPatterns } from '../../utils/haptics';
 
 interface FinalResultsScreenProps {
     room: GameRoom;
@@ -17,7 +19,10 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
 
     useEffect(() => {
         setMounted(true);
-        setTimeout(() => setShowConfetti(true), 800);
+        setTimeout(() => {
+            setShowConfetti(true);
+            vibrate(HapticPatterns.success);
+        }, 800);
     }, []);
 
     const isHost = room.hostId === currentPlayerId;
@@ -32,25 +37,7 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
     return (
         <div className={`min-h-screen bg-90s-animated flex flex-col items-center justify-center p-4 relative overflow-hidden ${mounted ? 'pop-in' : 'opacity-0'}`}>
             {/* Confetti Effect */}
-            {showConfetti && (
-                <div className="absolute inset-0 pointer-events-none">
-                    {Array.from({ length: 50 }).map((_, i) => (
-                        <div
-                            key={i}
-                            className="absolute animate-bounce"
-                            style={{
-                                left: `${Math.random() * 100}%`,
-                                top: `${Math.random() * 100}%`,
-                                fontSize: `${20 + Math.random() * 20}px`,
-                                animationDelay: `${Math.random() * 2}s`,
-                                animationDuration: `${1 + Math.random()}s`
-                            }}
-                        >
-                            {['🎉', '🎊', '✨', '🌟', '💫', '🏆'][Math.floor(Math.random() * 6)]}
-                        </div>
-                    ))}
-                </div>
-            )}
+            {showConfetti && <Confetti />}
 
             {/* Header */}
             <div className="text-center mb-8 z-10">

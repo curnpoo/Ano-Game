@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { GameRoom, GameSettings } from '../../types';
 import { GameSettingsPanel } from '../game/GameSettingsPanel';
 import { AvatarDisplay } from '../common/AvatarDisplay';
+import { vibrate, HapticPatterns } from '../../utils/haptics';
 
 interface LobbyScreenProps {
     room: GameRoom;
@@ -35,6 +36,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     const isHost = room.hostId === currentPlayerId;
 
     const copyRoomCode = () => {
+        vibrate(HapticPatterns.success);
         navigator.clipboard.writeText(room.roomCode);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);

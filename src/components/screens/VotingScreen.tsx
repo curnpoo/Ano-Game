@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { GameRoom } from '../../types';
 import { AvatarDisplay } from '../common/AvatarDisplay';
+import { vibrate, HapticPatterns } from '../../utils/haptics';
 
 interface VotingScreenProps {
     room: GameRoom;
@@ -42,6 +43,7 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
 
     const handleVote = () => {
         if (!isOwnDrawing && currentDrawing && !hasVoted) {
+            vibrate(HapticPatterns.success);
             onVote(currentDrawing.player.id);
             setHasVoted(true);
         }
@@ -162,7 +164,10 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                     {drawings.map((_, i) => (
                         <button
                             key={i}
-                            onClick={() => setSelectedIndex(i)}
+                            onClick={() => {
+                                vibrate();
+                                setSelectedIndex(i);
+                            }}
                             className={`w-3 h-3 rounded-full transition-all ${i === selectedIndex
                                 ? 'bg-white scale-125'
                                 : 'bg-white/40 hover:bg-white/60'
@@ -177,7 +182,10 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                 {/* Navigation Arrows */}
                 <div className="flex items-center gap-4">
                     <button
-                        onClick={() => setSelectedIndex(Math.max(0, selectedIndex - 1))}
+                        onClick={() => {
+                            vibrate();
+                            setSelectedIndex(Math.max(0, selectedIndex - 1));
+                        }}
                         disabled={selectedIndex === 0}
                         className={`w-12 h-12 rounded-full text-2xl transition-all ${selectedIndex === 0
                             ? 'bg-gray-200 text-gray-400'
@@ -207,7 +215,10 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                     )}
 
                     <button
-                        onClick={() => setSelectedIndex(Math.min(drawings.length - 1, selectedIndex + 1))}
+                        onClick={() => {
+                            vibrate();
+                            setSelectedIndex(Math.min(drawings.length - 1, selectedIndex + 1));
+                        }}
                         disabled={selectedIndex === drawings.length - 1}
                         className={`w-12 h-12 rounded-full text-2xl transition-all ${selectedIndex === drawings.length - 1
                             ? 'bg-gray-200 text-gray-400'

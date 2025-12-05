@@ -1,5 +1,6 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import type { DrawingStroke } from '../../types';
+import { vibrate, HapticPatterns } from '../../utils/haptics';
 
 interface GameCanvasProps {
     imageUrl: string;
@@ -132,6 +133,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         if (!isDrawingEnabled) return;
         // Only prevent default on touch to allow mouse interactions elsewhere if needed
         if ('touches' in e) e.preventDefault();
+
+        // Haptic feedback
+        vibrate(HapticPatterns.soft);
 
         setIsDrawing(true);
         const point = getPoint(e);

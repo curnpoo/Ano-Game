@@ -1,6 +1,6 @@
 {
-    "name": "Annotated Image Game",
-    "short_name": "Ano Game",
+    "name": "Fill the Blank",
+    "short_name": "FillTheBlank",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#ffffff",

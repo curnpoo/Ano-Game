@@ -1,4 +1,5 @@
 import React from 'react';
+import { vibrate } from '../../utils/haptics';
 
 interface ToolbarProps {
     brushColor: string;
@@ -52,7 +53,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 {SIZES.map((s) => (
                     <button
                         key={s.label}
-                        onClick={() => onSizeChange(s.size)}
+                        onClick={() => {
+                            vibrate();
+                            onSizeChange(s.size);
+                        }}
                         className={`w-9 h-9 rounded-xl font-bold flex items-center justify-center transition-all ${brushSize === s.size
                             ? 'bg-purple-500 text-white'
                             : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -69,6 +73,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     <button
                         key={color}
                         onClick={() => {
+                            vibrate();
                             onColorChange(color);
                             if (isEraser) onEraserToggle(); // Turn off eraser when color selected
                         }}
@@ -86,7 +91,10 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
             {/* Eraser Toggle */}
             <button
-                onClick={onEraserToggle}
+                onClick={() => {
+                    vibrate();
+                    onEraserToggle();
+                }}
                 className={`w-9 h-9 rounded-xl font-bold flex items-center justify-center transition-all ${isEraser
                     ? 'bg-pink-500 text-white scale-110'
                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -99,14 +107,20 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             {/* Actions */}
             <div className="flex gap-1 pl-2 border-l-2 border-gray-200">
                 <button
-                    onClick={onUndo}
+                    onClick={() => {
+                        vibrate();
+                        onUndo();
+                    }}
                     className="w-9 h-9 rounded-xl bg-yellow-100 text-lg flex items-center justify-center transition-all hover:bg-yellow-200 active:scale-95"
                     title="Undo"
                 >
                     ↩️
                 </button>
                 <button
-                    onClick={onClear}
+                    onClick={() => {
+                        vibrate();
+                        onClear();
+                    }}
                     className="w-9 h-9 rounded-xl bg-red-100 text-lg flex items-center justify-center transition-all hover:bg-red-200 active:scale-95"
                     title="Clear All"
                 >
