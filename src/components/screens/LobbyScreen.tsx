@@ -174,24 +174,36 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                 {isHost ? (
                     <button
                         onClick={onStartGame}
-                        className="w-full bg-white rounded-[2rem] p-6 text-center relative cursor-pointer hover:scale-[1.02] transition-transform group"
+                        disabled={room.players.length < 2}
+                        className={`w-full rounded-[2rem] p-6 text-center relative transition-transform group ${room.players.length < 2
+                            ? 'opacity-75 cursor-not-allowed grayscale bg-gray-100'
+                            : 'bg-white cursor-pointer hover:scale-[1.02]'
+                            }`}
                         style={{
-                            boxShadow: '0 10px 0 rgba(255, 140, 0, 0.3), 0 20px 40px rgba(0, 0, 0, 0.15)',
-                            border: '4px solid #FF8C00',
-                            background: 'linear-gradient(135deg, #fff7ed, #fffbeb)'
+                            boxShadow: room.players.length < 2
+                                ? '0 4px 0 rgba(150, 150, 150, 0.2)'
+                                : '0 10px 0 rgba(255, 140, 0, 0.3), 0 20px 40px rgba(0, 0, 0, 0.15)',
+                            border: room.players.length < 2
+                                ? '4px solid #ccc'
+                                : '4px solid #FF8C00',
+                            background: room.players.length < 2
+                                ? '#f5f5f5'
+                                : 'linear-gradient(135deg, #fff7ed, #fffbeb)'
                         }}>
                         <div className="space-y-3 pointer-events-none">
                             <div className="text-5xl bounce-scale">🚀</div>
                             <div>
                                 <h3 className="text-2xl font-bold"
                                     style={{
-                                        background: 'linear-gradient(135deg, #FF8C00, #FF69B4)',
+                                        background: room.players.length < 2
+                                            ? '#999'
+                                            : 'linear-gradient(135deg, #FF8C00, #FF69B4)',
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent'
                                     }}>
                                     Start Game!
                                 </h3>
-                                <p className="text-orange-400 font-medium mt-1 text-sm">
+                                <p className={`font-medium mt-1 text-sm ${room.players.length < 2 ? 'text-gray-500' : 'text-orange-400'}`}>
                                     {room.players.length < 2 ? '⚠️ Need at least 2 players' : 'Click to begin Round 1'}
                                 </p>
                             </div>
