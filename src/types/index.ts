@@ -72,7 +72,7 @@ export interface GameRoom {
         uploadedBy: string;
         uploadedAt: number;
     } | null;
-    block?: BlockInfo;
+    block?: BlockInfo | null;
 
     // Player data
     players: Player[];

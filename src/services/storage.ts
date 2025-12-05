@@ -26,33 +26,33 @@ export const StorageService = {
         return data as GameRoom;
     },
 
-    // Generate random block for the image
+    // Generate random block for the image (25-35% of image size)
     generateBlock: (): BlockInfo => {
         const isCircle = Math.random() > 0.5;
-        const size = 25 + Math.random() * 15; // 25-40% of image
+        const size = 25 + Math.random() * 10; // 25-35% of image
 
         if (isCircle) {
             // Circle somewhere in the middle area
             return {
                 type: 'circle',
-                x: 30 + Math.random() * 40, // 30-70%
-                y: 30 + Math.random() * 40,
+                x: 25 + Math.random() * 30, // 25-55% (centered area)
+                y: 25 + Math.random() * 30,
                 size
             };
         } else {
             // Square in one of the corners
             const corners = [
                 { x: 5, y: 5 },    // top-left
-                { x: 65, y: 5 },   // top-right
-                { x: 5, y: 65 },   // bottom-left
-                { x: 65, y: 65 }   // bottom-right
+                { x: 60, y: 5 },   // top-right
+                { x: 5, y: 60 },   // bottom-left
+                { x: 60, y: 60 }   // bottom-right
             ];
             const corner = corners[Math.floor(Math.random() * corners.length)];
             return {
                 type: 'square',
-                x: corner.x + Math.random() * 10,
-                y: corner.y + Math.random() * 10,
-                size: size * 0.9
+                x: corner.x,
+                y: corner.y,
+                size
             };
         }
     },
@@ -311,7 +311,7 @@ export const StorageService = {
             ...r,
             status: 'lobby',
             currentImage: null,
-            block: undefined,
+            block: null, // Firebase doesn't accept undefined
             playerStates: {},
             votes: {}
         }));
@@ -324,7 +324,7 @@ export const StorageService = {
             status: 'lobby',
             roundNumber: 0,
             currentImage: null,
-            block: undefined,
+            block: null, // Firebase doesn't accept undefined
             playerStates: {},
             votes: {},
             scores: {},

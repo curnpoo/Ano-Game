@@ -32,11 +32,12 @@ function App() {
 
   // Drawing State
   const [brushColor, setBrushColor] = useState('#FF69B4');
-  const [brushSize, setBrushSize] = useState(8);
+  const [brushSize, setBrushSize] = useState(12);
   const [strokes, setStrokes] = useState<DrawingStroke[]>([]);
   const strokesRef = useRef<DrawingStroke[]>([]);
   const [isMyTimerRunning, setIsMyTimerRunning] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
+  const [isEraser, setIsEraser] = useState(false);
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -251,6 +252,10 @@ function App() {
     setStrokes([]);
   };
 
+  const handleEraserToggle = () => {
+    setIsEraser(prev => !prev);
+  };
+
   // Get my player state
   const myPlayerState = room?.playerStates?.[player?.id || ''];
   const hasSubmitted = myPlayerState?.status === 'submitted';
@@ -382,8 +387,8 @@ function App() {
                 {isMyTimerRunning && !hasSubmitted && (
                   <GameCanvas
                     imageUrl={room.currentImage.url}
-                    brushColor={brushColor}
-                    brushSize={brushSize}
+                    brushColor={isEraser ? '#FFFFFF' : brushColor}
+                    brushSize={isEraser ? brushSize * 2 : brushSize}
                     isDrawingEnabled={true}
                     onStrokesChange={setStrokes}
                   />
@@ -418,8 +423,10 @@ function App() {
                 <Toolbar
                   brushColor={brushColor}
                   brushSize={brushSize}
+                  isEraser={isEraser}
                   onColorChange={setBrushColor}
                   onSizeChange={setBrushSize}
+                  onEraserToggle={handleEraserToggle}
                   onUndo={handleUndo}
                   onClear={handleClear}
                 />

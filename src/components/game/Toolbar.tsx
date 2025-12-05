@@ -3,8 +3,10 @@ import React from 'react';
 interface ToolbarProps {
     brushColor: string;
     brushSize: number;
+    isEraser: boolean;
     onColorChange: (color: string) => void;
     onSizeChange: (size: number) => void;
+    onEraserToggle: () => void;
     onUndo: () => void;
     onClear: () => void;
 }
@@ -19,95 +21,94 @@ const COLORS = [
     '#4169E1', // Blue
     '#9B59B6', // Purple
     '#000000', // Black
-    '#FFFFFF', // White
 ];
 
 const SIZES = [
-    { label: 'S', size: 3, emoji: '✏️' },
-    { label: 'M', size: 8, emoji: '🖊️' },
-    { label: 'L', size: 15, emoji: '🖌️' },
+    { label: 'S', size: 5, emoji: '•' },
+    { label: 'M', size: 12, emoji: '●' },
+    { label: 'L', size: 24, emoji: '⬤' },
 ];
 
 export const Toolbar: React.FC<ToolbarProps> = ({
     brushColor,
     brushSize,
+    isEraser,
     onColorChange,
     onSizeChange,
+    onEraserToggle,
     onUndo,
     onClear,
 }) => {
     return (
-        <div className="rounded-[1.5rem] p-2 sm:p-3 flex items-center justify-between gap-2 sm:gap-3 w-full max-w-lg overflow-x-auto gpu-accelerate"
+        <div className="rounded-2xl p-2 flex items-center gap-2 w-full max-w-md overflow-x-auto"
             style={{
-                background: 'linear-gradient(135deg, #fff 0%, #f8f4ff 100%)',
-                boxShadow: '0 -5px 30px rgba(155, 89, 182, 0.2), 0 8px 0 rgba(155, 89, 182, 0.2)',
-                border: '4px solid transparent',
-                backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #FF69B4, #9B59B6, #00D9FF)',
-                backgroundOrigin: 'border-box',
-                backgroundClip: 'padding-box, border-box'
+                background: 'white',
+                boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
+                border: '3px solid #9B59B6'
             }}>
 
             {/* Sizes */}
-            <div className="flex space-x-1 sm:space-x-2 pr-2 sm:pr-3 border-r-4 border-dashed border-pink-200">
+            <div className="flex gap-1 pr-2 border-r-2 border-gray-200">
                 {SIZES.map((s) => (
                     <button
                         key={s.label}
                         onClick={() => onSizeChange(s.size)}
-                        className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl font-bold flex items-center justify-center transition-all jelly-hover text-sm sm:text-base ${brushSize === s.size
-                            ? 'bg-gradient-to-br from-pink-500 to-purple-500 text-white scale-110'
-                            : 'bg-gradient-to-br from-pink-100 to-purple-100 text-purple-600 hover:scale-105'
+                        className={`w-9 h-9 rounded-xl font-bold flex items-center justify-center transition-all ${brushSize === s.size
+                            ? 'bg-purple-500 text-white'
+                            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                             }`}
-                        style={{
-                            boxShadow: brushSize === s.size
-                                ? '0 4px 0 rgba(155, 89, 182, 0.4)'
-                                : '0 3px 0 rgba(155, 89, 182, 0.2)'
-                        }}
                     >
                         {s.emoji}
                     </button>
                 ))}
             </div>
 
-            {/* Colors - scrollable row */}
-            <div className="flex space-x-1 sm:space-x-2 flex-1 justify-center overflow-x-auto py-1 stagger-children">
+            {/* Colors */}
+            <div className="flex gap-1 flex-1 overflow-x-auto py-1">
                 {COLORS.map((color) => (
                     <button
                         key={color}
-                        onClick={() => onColorChange(color)}
-                        className={`w-7 h-7 sm:w-9 sm:h-9 rounded-full transition-all flex-shrink-0 pop-in ${brushColor === color
-                            ? 'scale-125 ring-2 sm:ring-4 ring-purple-400 ring-offset-1 sm:ring-offset-2'
+                        onClick={() => {
+                            onColorChange(color);
+                            if (isEraser) onEraserToggle(); // Turn off eraser when color selected
+                        }}
+                        className={`w-7 h-7 rounded-full transition-all flex-shrink-0 ${!isEraser && brushColor === color
+                            ? 'scale-125 ring-3 ring-purple-400 ring-offset-2'
                             : 'hover:scale-110'
                             }`}
                         style={{
                             backgroundColor: color,
-                            boxShadow: brushColor === color
-                                ? `0 0 15px ${color}, 0 3px 0 rgba(0,0,0,0.2)`
-                                : `0 2px 0 rgba(0,0,0,0.2)`,
-                            border: color === '#FFFFFF' ? '2px solid #ddd' : 'none'
+                            border: '2px solid rgba(0,0,0,0.1)'
                         }}
                     />
                 ))}
             </div>
 
+            {/* Eraser Toggle */}
+            <button
+                onClick={onEraserToggle}
+                className={`w-9 h-9 rounded-xl font-bold flex items-center justify-center transition-all ${isEraser
+                    ? 'bg-pink-500 text-white scale-110'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                title="Eraser"
+            >
+                🧽
+            </button>
+
             {/* Actions */}
-            <div className="flex space-x-1 sm:space-x-2 pl-2 sm:pl-3 border-l-4 border-dashed border-pink-200">
+            <div className="flex gap-1 pl-2 border-l-2 border-gray-200">
                 <button
                     onClick={onUndo}
-                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-yellow-100 to-orange-100 text-lg sm:text-xl flex items-center justify-center transition-all hover:scale-105 jelly-hover"
-                    style={{
-                        boxShadow: '0 3px 0 rgba(255, 140, 0, 0.3)'
-                    }}
+                    className="w-9 h-9 rounded-xl bg-yellow-100 text-lg flex items-center justify-center transition-all hover:bg-yellow-200 active:scale-95"
                     title="Undo"
                 >
                     ↩️
                 </button>
                 <button
                     onClick={onClear}
-                    className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-red-100 to-pink-100 text-lg sm:text-xl flex items-center justify-center transition-all hover:scale-105 jelly-hover"
-                    style={{
-                        boxShadow: '0 3px 0 rgba(255, 105, 180, 0.3)'
-                    }}
-                    title="Clear"
+                    className="w-9 h-9 rounded-xl bg-red-100 text-lg flex items-center justify-center transition-all hover:bg-red-200 active:scale-95"
+                    title="Clear All"
                 >
                     🗑️
                 </button>
