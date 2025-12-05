@@ -14,6 +14,7 @@ interface Bubble {
     message: ChatMessage;
     x: number;
     y: number;
+    rotation: number;
     createdAt: number;
 }
 
@@ -62,36 +63,33 @@ export const FloatingChat = ({ roomCode, player, messages }: FloatingChatProps) 
 
     const createBubble = (msg: ChatMessage): Bubble => {
         // Random position logic:
-        // Prioritize Left and Right sides to avoid center canvas and bottom toolbar
-        const zones = ['left', 'right', 'left', 'right', 'top']; // Higher weight to sides
-        const zone = zones[Math.floor(Math.random() * zones.length)];
+        // Truly random scattering (avoiding dead center 30-70%X, 30-70%Y)
+        // We defined "Zones" before, but user wants "random place on screen"
+        // Let's make it a bit more chaotic but still safe-ish.
 
-        let x = 50;
-        let y = 50;
+        // Random Rotation (-15 to 15 degrees)
+        const rotation = Math.random() * 30 - 15;
 
-        switch (zone) {
-            case 'top':
-                // Top 15-25% (avoid absolute top header)
-                x = 20 + Math.random() * 60;
-                y = 15 + Math.random() * 10;
-                break;
-            case 'left':
-                // Left 2-15%
-                x = 2 + Math.random() * 13;
-                y = 20 + Math.random() * 50; // Avoid very bottom
-                break;
-            case 'right':
-                // Right 85-98%
-                x = 85 + Math.random() * 13;
-                y = 20 + Math.random() * 50; // Avoid very bottom
-                break;
+        let x, y;
+
+        // Try to generate a valid position (up to 5 attempts)
+        for (let i = 0; i < 5; i++) {
+            x = 5 + Math.random() * 90;
+            y = 10 + Math.random() * 80;
+
+            // Simple check if it's in the middle (30-70% X and Y)
+            if (x > 30 && x < 70 && y > 30 && y < 70) {
+                continue; // Try again
+            }
+            break; // Good enough
         }
 
         return {
-            id: generateId(), // Local bubble ID
+            id: generateId(),
             message: msg,
-            x,
-            y,
+            x: x || 50,
+            y: y || 85,
+            rotation,
             createdAt: Date.now()
         };
     };
@@ -120,58 +118,73 @@ export const FloatingChat = ({ roomCode, player, messages }: FloatingChatProps) 
                         left: `${b.x}%`,
                         top: `${b.y}%`,
                         maxWidth: '200px',
-                        transform: 'translate(-50%, -50%)', // Center on coordinate
-                    }}
+                        transform: 'translate(-50%, -50%)', // Centering logic handles the position
+                        // CSS custom property for dynamic rotation in animation
+                        '--bubble-rotate': `${b.rotation}deg`
+                    } as React.CSSProperties}
                 >
                     {/* Avatar/Name */}
                     <div
-                        className="w-10 h-10 rounded-full bg-white border-2 flex items-center justify-center text-lg shadow-md mb-1 z-10 relative"
-                        style={{ borderColor: b.message.playerName === player.name ? '#FF69B4' : '#ccc' }} // Highlight self?
+                        className="w-8 h-8 rounded-full bg-white border-2 flex items-center justify-center text-sm shadow-md mb-1 z-10 relative"
+                        style={{ borderColor: b.message.playerName === player.name ? '#FF69B4' : '#ccc' }}
                     >
                         {/* Use emoji or initial */}
                         {b.message.playerAvatar || b.message.playerName.charAt(0)}
                     </div>
 
-                    {/* Message Bubble */}
-                    <div className="bg-white/90 backdrop-blur-sm px-4 py-2 rounded-2xl shadow-lg border border-purple-100 text-sm font-medium text-gray-800 break-words w-full text-center relative">
+                    {/* Message Bubble - 90s Style */}
+                    <div
+                        className="bg-white/95 px-4 py-2 rounded-2xl shadow-lg border-2 text-sm font-bold text-gray-800 break-words w-full text-center relative bubble-tail"
+                        style={{
+                            borderColor: b.message.playerName === player.name ? '#FF69B4' : '#9B59B6',
+                            transform: `rotate(${b.rotation}deg)`
+                        }}
+                    >
                         {b.message.text}
-                        {/* Little triangle pointer (optional, CSS might be complex, skipping for simplicity) */}
                     </div>
                 </div>
             ))}
 
             {/* Input Trigger / Field */}
-            <div className="absolute bottom-24 right-4 pointer-events-auto flex flex-col items-end gap-2">
-                {isInputVisible ? (
-                    <div className="bg-white p-2 rounded-2xl shadow-xl flex gap-2 border-2 border-purple-500 pop-in w-[250px]">
-                        <input
-                            type="text"
-                            value={inputText}
-                            onChange={e => setInputText(e.target.value)}
-                            className="flex-1 bg-gray-50 rounded-xl px-3 outline-none text-sm"
-                            placeholder="Data!"
-                            maxLength={50}
-                            autoFocus
-                            onKeyDown={e => e.key === 'Enter' && handleSend()}
-                        />
-                        <button
-                            onClick={handleSend}
-                            className="bg-purple-600 text-white rounded-xl px-3 py-2 font-bold hover:bg-purple-700 active:scale-95 transition-all text-xs"
-                        >
-                            SEND
-                        </button>
-                    </div>
-                ) : (
-                    <button
-                        onClick={() => setIsInputVisible(true)}
-                        className="w-12 h-12 rounded-full bg-white/80 backdrop-blur shadow-lg border-2 border-purple-400 flex items-center justify-center text-2xl hover:scale-110 transition-all hover:bg-white active:scale-95"
-                    >
-                        💬
-                    </button>
-                )}
+            <div className="absolute bottom-24 right-4 pointer-events-auto flex items-center justify-end">
+                {/* Collapsed/Expanded Container */}
+                <div
+                    className={`bg-white rounded-full shadow-xl flex items-center border-2 border-purple-500 overflow-hidden transition-all duration-300 ease-out ${isInputVisible ? 'w-[280px] p-1' : 'w-12 h-12 p-0 justify-center cursor-pointer hover:scale-110 active:scale-95'
+                        }`}
+                    onClick={() => !isInputVisible && setIsInputVisible(true)}
+                >
+                    {!isInputVisible ? (
+                        <span className="text-2xl">💬</span>
+                    ) : (
+                        <div className="flex w-full gap-2 pl-2">
+                            <input
+                                type="text"
+                                value={inputText}
+                                onChange={e => setInputText(e.target.value)}
+                                className="flex-1 bg-transparent outline-none text-sm font-medium"
+                                placeholder="Say something..."
+                                maxLength={50}
+                                autoFocus
+                                onKeyDown={e => e.key === 'Enter' && handleSend()}
+                                onBlur={() => {
+                                    // Delay closing to allow button click
+                                    setTimeout(() => {
+                                        // optional: if empty close?
+                                    }, 200);
+                                }}
+                            />
+                            <button
+                                onClick={(e) => { e.stopPropagation(); handleSend(); }}
+                                className="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold hover:bg-purple-700 transition-colors flex-shrink-0"
+                            >
+                                ↑
+                            </button>
+                        </div>
+                    )}
+                </div>
             </div>
 
-            {/* Click outside to close input (optional overlay) */}
+            {/* Click outside to close input */}
             {isInputVisible && (
                 <div
                     className="fixed inset-0 z-[-1] pointer-events-auto"

@@ -78,8 +78,43 @@ body {
   }
 }
 
-.bubble-float {
-  animation: bubble-float 4s ease-in-out infinite;
+/* Bubble Float Animation (Bobbing + Wiggle) */
+@keyframes bubble-float-bob {
+  0% {
+    transform: translateY(0) rotate(var(--bubble-rotate, 0deg));
+  }
+
+  50% {
+    transform: translateY(-20px) rotate(calc(var(--bubble-rotate, 0deg) + 5deg));
+  }
+
+  100% {
+    transform: translateY(0) rotate(var(--bubble-rotate, 0deg));
+  }
+}
+
+@keyframes bubble-fade-out {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  80% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0) translateY(-50px);
+  }
+}
+
+.animate-float-fade {
+  /* Combine animations */
+  animation:
+    bubble-float-bob 3s ease-in-out infinite,
+    bubble-fade-out 10s forwards;
 }
 
 /* Jelly Bounce Animation */
@@ -474,4 +509,29 @@ body {
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #FFE135 0%, #FF8C00 100%);
+}
+
+/* Chat Input Expansion */
+.chat-input-container {
+  transition: width 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+  width: 3rem;
+  /* Initial collapsed width (icon size) */
+  opacity: 0;
+  overflow: hidden;
+}
+
+.chat-input-container.expanded {
+  width: 250px;
+  opacity: 1;
+}
+
+.chat-icon-btn {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+}
+
+.chat-icon-btn.hidden-icon {
+  transform: scale(0);
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
 }
