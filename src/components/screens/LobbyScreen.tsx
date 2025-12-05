@@ -11,6 +11,7 @@ interface LobbyScreenProps {
     onSettingsChange: (settings: Partial<GameSettings>) => void;
     onLeave: () => void;
     onKick: (playerId: string) => void;
+    onJoinGame: () => void;
 }
 
 export const LobbyScreen: React.FC<LobbyScreenProps> = ({
@@ -18,7 +19,8 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     currentPlayerId,
     onStartGame,
     onSettingsChange,
-    onKick
+    onKick,
+    onJoinGame
 }) => {
     const [mounted, setMounted] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -48,6 +50,24 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
         if (!lastSeen) return true;
         return Date.now() - lastSeen > 10000; // 10 seconds
     };
+
+    // If somehow we are in LobbyScreen but the game is active, show Rejoin
+    if (room.status !== 'lobby') {
+        return (
+            <div className="min-h-screen bg-90s-animated flex flex-col items-center justify-center p-4">
+                <div className="bg-white rounded-2xl p-8 shadow-2xl text-center max-w-md w-full">
+                    <h2 className="text-2xl font-bold mb-4 text-purple-600">Game in Progress!</h2>
+                    <p className="mb-6 text-gray-600">The game is currently in the <strong>{room.status}</strong> phase.</p>
+                    <button
+                        onClick={onJoinGame}
+                        className="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-white font-bold py-4 rounded-xl shadow-lg hover:scale-105 transition-transform"
+                    >
+                        🚀 Rejoin Game
+                    </button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-90s-animated flex flex-col p-4 relative overflow-hidden"

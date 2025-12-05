@@ -624,9 +624,13 @@ export const StorageService = {
             // Initialize State based on status
             if (!room.playerStates) room.playerStates = {};
 
+            // If joining during drawing/uploading, set as waiting so screens don't error
+            // If joining during voting, they need to vote to proceed, so they are just a voter
             if (room.status === 'drawing' || room.status === 'uploading') {
-                // Determine timer state logic? 
-                // Mostly just need to set them as 'waiting' so they see the Ready screen
+                room.playerStates[playerId] = { status: 'waiting' };
+            } else if (room.status === 'voting') {
+                // They join as a voter. No drawing.
+                // Status doesn't strictly matter for VotingScreen but good to be consistent
                 room.playerStates[playerId] = { status: 'waiting' };
             }
 

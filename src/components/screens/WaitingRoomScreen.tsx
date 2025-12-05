@@ -95,6 +95,29 @@ export const WaitingRoomScreen: React.FC<WaitingRoomScreenProps> = ({
                     </div>
                 )}
 
+                {/* Show who is uploading */}
+                {room.status === 'uploading' && (
+                    <div className="mt-4">
+                        <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2">
+                            Waiting for Uploader
+                        </div>
+                        {(() => {
+                            const uploader = room.players.find(p => p.id === (room.currentUploaderId || room.hostId));
+                            return uploader ? (
+                                <div className="flex items-center justify-center gap-2 bg-white border border-orange-200 px-4 py-2 rounded-xl shadow-sm animate-bounce-gentle">
+                                    <span className="text-2xl">{uploader.avatar || '📸'}</span>
+                                    <div className="text-left">
+                                        <div className="font-bold text-gray-700">{uploader.name}</div>
+                                        <div className="text-xs text-orange-500 font-medium">Picking an image...</div>
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="text-sm text-gray-400 italic">Unknown Uploader</div>
+                            );
+                        })()}
+                    </div>
+                )}
+
                 <div className="mt-8 pt-6 border-t-2 border-gray-100 space-y-4">
                     <p className="text-gray-400 text-sm">
                         Sit tight! You've been added to the queue.
@@ -102,8 +125,8 @@ export const WaitingRoomScreen: React.FC<WaitingRoomScreenProps> = ({
                         You'll join automatically in the next round.
                     </p>
 
-                    {/* Join Now Button */}
-                    {(room.status === 'drawing' || room.status === 'uploading') && (
+                    {/* Join Now Button - Allow for any active game state */}
+                    {(room.status !== 'lobby') && (
                         <button
                             onClick={onJoinGame}
                             className="w-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-transform flex items-center justify-center gap-2"
