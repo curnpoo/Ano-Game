@@ -6,6 +6,98 @@ export interface Player {
     lastSeen: number;
 }
 
+export interface DrawingStroke {
+    points: { x: number; y: number }[];
+    color: string;
+    size: number;
+}
+
+export interface PlayerDrawing {
+    playerId: string;
+    playerName: string;
+    playerColor: string;
+    strokes: DrawingStroke[];
+    submittedAt: number;
+}
+
+export interface GameSettings {
+    timerDuration: number; // seconds (10, 15, 20, 30)
+    totalRounds: number; // (3, 5, 7, 10)
+}
+
+export interface BlockInfo {
+    type: 'square' | 'circle';
+    // Position as percentage of image (0-100)
+    x: number;
+    y: number;
+    size: number; // percentage of image width
+}
+
+export type PlayerStatus = 'waiting' | 'ready' | 'drawing' | 'submitted';
+
+export interface PlayerState {
+    status: PlayerStatus;
+    timerStartedAt?: number;
+    drawing?: PlayerDrawing;
+}
+
+export interface Vote {
+    oderId: string;
+    votedForId: string;
+    votedAt: number;
+}
+
+export interface RoundResult {
+    roundNumber: number;
+    rankings: {
+        playerId: string;
+        playerName: string;
+        votes: number;
+        points: number;
+    }[];
+}
+
+export type GameStatus = 'lobby' | 'drawing' | 'voting' | 'results' | 'final';
+
+export interface GameRoom {
+    roomCode: string;
+    hostId: string;
+    status: GameStatus;
+    settings: GameSettings;
+
+    // Current round info
+    roundNumber: number;
+    currentImage?: {
+        url: string;
+        uploadedBy: string;
+        uploadedAt: number;
+    } | null;
+    block?: BlockInfo;
+
+    // Player data
+    players: Player[];
+    playerStates: { [playerId: string]: PlayerState };
+
+    // Voting
+    votes: { [oderId: string]: string }; // oderId -> votedForId
+
+    // Scores (accumulated across rounds)
+    scores: { [playerId: string]: number };
+
+    // Round history
+    roundResults: RoundResult[];
+
+    createdAt: number;
+}
+
+export interface PlayerSession {
+    oderId: string;
+    playerName: string;
+    currentRoom?: string;
+    assignedColor: string;
+}
+
+// Legacy type for backwards compat during migration
 export interface Annotation {
     playerId: string;
     playerName: string;
@@ -13,38 +105,4 @@ export interface Annotation {
     roundNumber: number;
     drawingData: DrawingStroke[];
     submittedAt: number;
-}
-
-export interface DrawingStroke {
-    points: { x: number; y: number }[];
-    color: string;
-    size: number;
-}
-
-export interface GameRoom {
-    roomCode: string;
-    status: 'lobby' | 'annotating' | 'reviewing';
-    currentImage?: {
-        url: string;
-        uploadedBy: string;
-        uploadedAt: number;
-    } | null;
-    roundNumber: number;
-    // Turn-based fields
-    turnOrder: string[]; // Array of player IDs
-    currentTurnIndex: number;
-    turnStatus: 'waiting' | 'drawing'; // 'waiting' for ready, 'drawing' with timer
-    turnEndsAt?: number | null;
-    players: Player[];
-    annotations: Annotation[];
-    roundStartedAt?: number;
-    roundEndsAt?: number;
-    createdAt: number;
-}
-
-export interface PlayerSession {
-    playerId: string;
-    playerName: string;
-    currentRoom?: string;
-    assignedColor: string;
 }
