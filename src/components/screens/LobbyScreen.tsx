@@ -6,14 +6,14 @@ import { AvatarDisplay } from '../common/AvatarDisplay';
 interface LobbyScreenProps {
     room: GameRoom;
     currentPlayerId: string;
-    onUploadImage: (file: File) => void;
+    onStartGame: () => void;
     onSettingsChange: (settings: Partial<GameSettings>) => void;
 }
 
 export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     room,
     currentPlayerId,
-    onUploadImage,
+    onStartGame,
     onSettingsChange
 }) => {
     const [mounted, setMounted] = useState(false);
@@ -28,12 +28,6 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     }
 
     const isHost = room.hostId === currentPlayerId;
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            onUploadImage(e.target.files[0]);
-        }
-    };
 
     const copyRoomCode = () => {
         navigator.clipboard.writeText(room.roomCode);
@@ -154,41 +148,39 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                     </div>
                 </div>
 
-                {/* Upload Area - Only host can start round */}
+                {/* Start Game Area - Only host can start */}
                 {isHost ? (
-                    <div className="bg-white rounded-[2rem] p-6 text-center relative cursor-pointer hover:scale-[1.02] transition-transform"
+                    <button
+                        onClick={onStartGame}
+                        className="w-full bg-white rounded-[2rem] p-6 text-center relative cursor-pointer hover:scale-[1.02] transition-transform group"
                         style={{
                             boxShadow: '0 10px 0 rgba(255, 140, 0, 0.3), 0 20px 40px rgba(0, 0, 0, 0.15)',
-                            border: '4px dashed #FF8C00',
+                            border: '4px solid #FF8C00',
                             background: 'linear-gradient(135deg, #fff7ed, #fffbeb)'
                         }}>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={handleFileChange}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                        />
                         <div className="space-y-3 pointer-events-none">
-                            <div className="text-5xl bounce-scale">📤</div>
+                            <div className="text-5xl bounce-scale">🚀</div>
                             <div>
-                                <h3 className="text-xl font-bold"
+                                <h3 className="text-2xl font-bold"
                                     style={{
                                         background: 'linear-gradient(135deg, #FF8C00, #FF69B4)',
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent'
                                     }}>
-                                    Upload Image to Start Round!
+                                    Start Game!
                                 </h3>
-                                <p className="text-orange-400 font-medium mt-1 text-sm">👆 Tap or drag & drop</p>
+                                <p className="text-orange-400 font-medium mt-1 text-sm">
+                                    {room.players.length < 2 ? '⚠️ Need at least 2 players' : 'Click to begin Round 1'}
+                                </p>
                             </div>
                         </div>
-                    </div>
+                    </button>
                 ) : (
                     <div className="bg-white/90 rounded-2xl p-6 text-center"
                         style={{ boxShadow: '0 6px 0 rgba(155, 89, 182, 0.2)' }}>
                         <div className="text-4xl mb-2 animate-pulse">⏳</div>
                         <p className="font-bold text-purple-600">
-                            Waiting for host to start the round...
+                            Waiting for host to start the game...
                         </p>
                     </div>
                 )}

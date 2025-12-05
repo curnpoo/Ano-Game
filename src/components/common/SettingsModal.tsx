@@ -5,8 +5,11 @@ import { GameCanvas } from '../game/GameCanvas';
 interface SettingsModalProps {
     player: Player;
     roomCode: string | null;
+    isHost?: boolean;
     onClose: () => void;
     onUpdateProfile: (profileData: Partial<Player>) => void;
+    onLeaveGame?: () => void;
+    onEndGame?: () => void;
 }
 
 const COLORS = ['#FF69B4', '#9B59B6', '#3498DB', '#1ABC9C', '#F1C40F', '#E67E22', '#E74C3C', '#34495E', '#000000'];
@@ -21,7 +24,15 @@ const FRAMES = [
 
 const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
 
-export const SettingsModal: React.FC<SettingsModalProps> = ({ player, roomCode, onClose, onUpdateProfile }) => {
+export const SettingsModal: React.FC<SettingsModalProps> = ({
+    player,
+    roomCode,
+    isHost,
+    onClose,
+    onUpdateProfile,
+    onLeaveGame,
+    onEndGame
+}) => {
     const [name, setName] = useState(player.name);
     const [strokes, setStrokes] = useState<DrawingStroke[]>(player.avatarStrokes || []);
     const [color, setColor] = useState(player.color);
@@ -144,7 +155,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ player, roomCode, 
                     </div>
                 </div>
 
-                <div className="p-6 border-t border-gray-100 sticky bottom-0 bg-white">
+                <div className="p-6 border-t border-gray-100 sticky bottom-0 bg-white space-y-4">
                     <button
                         onClick={handleSave}
                         disabled={!name.trim()}
@@ -152,6 +163,41 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ player, roomCode, 
                     >
                         Save Changes
                     </button>
+
+                    {/* Danger Zone */}
+                    {(onLeaveGame || (isHost && onEndGame)) && (
+                        <div className="pt-4 border-t border-gray-100">
+                            <div className="space-y-3">
+                                {onLeaveGame && (
+                                    <button
+                                        onClick={() => {
+                                            if (confirm('Are you sure you want to leave the game?')) {
+                                                onLeaveGame();
+                                                onClose();
+                                            }
+                                        }}
+                                        className="w-full py-3 rounded-xl font-bold text-red-600 bg-red-50 hover:bg-red-100 border-2 border-transparent hover:border-red-200 transition-all"
+                                    >
+                                        Leave Game 🏃‍♂️
+                                    </button>
+                                )}
+
+                                {isHost && onEndGame && (
+                                    <button
+                                        onClick={() => {
+                                            if (confirm('Are you sure you want to end the game for everyone?')) {
+                                                onEndGame();
+                                                onClose();
+                                            }
+                                        }}
+                                        className="w-full py-3 rounded-xl font-bold text-white bg-red-500 hover:bg-red-600 shadow-lg transition-all"
+                                    >
+                                        End Game 🛑
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
         </div>

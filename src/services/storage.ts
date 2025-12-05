@@ -15,6 +15,9 @@ export const StorageService = {
         if (!data.players) data.players = [];
         else if (!Array.isArray(data.players)) data.players = Object.values(data.players);
 
+        if (!data.waitingPlayers) data.waitingPlayers = [];
+        else if (!Array.isArray(data.waitingPlayers)) data.waitingPlayers = Object.values(data.waitingPlayers);
+
         if (!data.playerStates) data.playerStates = {};
         if (!data.votes) data.votes = {};
         if (!data.scores) data.scores = {};
@@ -79,6 +82,8 @@ export const StorageService = {
             roomCode: roomCode,
             hostId: hostPlayer.id,
             players: [hostPlayer],
+            waitingPlayers: [],
+            currentUploaderId: hostPlayer.id,
             status: 'lobby',
             createdAt: Date.now(),
             settings: {
@@ -155,33 +160,102 @@ export const StorageService = {
     generateRoomCode: (): string => {
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         let code = '';
-        for (let i = 0; i < 6; i++) {
+        for (let i = 0; i < 4; i++) {
             code += chars.charAt(Math.floor(Math.random() * chars.length));
         }
         return code;
+    },
+
+    // Initialize a new round (pick uploader)
+    initiateRound: async (roomCode: string): Promise<GameRoom | null> => {
+        return StorageService.updateRoom(roomCode, (r) => {
+            // Merge waiting players
+            const waiting = r.waitingPlayers || [];
+            const allPlayers = [...r.players, ...waiting];
+
+            // Initialize scores/states for new players
+            waiting.forEach(p => {
+                if (!r.scores[p.id]) r.scores[p.id] = 0;
+                if (!r.playerStates[p.id]) r.playerStates[p.id] = { status: 'waiting' };
+            });
+
+            const randomPlayer = allPlayers[Math.floor(Math.random() * allPlayers.length)];
+            return {
+                ...r,
+                players: allPlayers,
+                waitingPlayers: [],
+                status: 'uploading',
+                currentUploaderId: randomPlayer.id,
+                currentImage: null,
+                block: null,
+                playerStates: {},
+                votes: {}
+            };
+        });
     },
 
     joinRoom: async (roomCode: string, player: Player): Promise<GameRoom | null> => {
         const room = await StorageService.getRoom(roomCode);
         if (!room) return null;
 
+        // Check if already in players
         const existingPlayerIndex = room.players.findIndex(p => p.id === player.id);
         if (existingPlayerIndex >= 0) {
             room.players[existingPlayerIndex] = { ...player, lastSeen: Date.now() };
-        } else {
-            room.players.push({ ...player, lastSeen: Date.now() });
+            await StorageService.saveRoom(room);
+            return room;
         }
 
-        // Initialize player state and score
-        if (!room.playerStates[player.id]) {
-            room.playerStates[player.id] = { status: 'waiting' };
+        // Check if already in waitingPlayers
+        const existingWaitingIndex = room.waitingPlayers?.findIndex(p => p.id === player.id) ?? -1;
+        if (existingWaitingIndex >= 0 && room.waitingPlayers) {
+            room.waitingPlayers[existingWaitingIndex] = { ...player, lastSeen: Date.now() };
+            await StorageService.saveRoom(room);
+            return room;
         }
-        if (room.scores[player.id] === undefined) {
-            room.scores[player.id] = 0;
+
+        // New player
+        if (room.status === 'lobby') {
+            room.players.push({ ...player, lastSeen: Date.now() });
+            // Init state/score
+            if (!room.playerStates[player.id]) {
+                room.playerStates[player.id] = { status: 'waiting' };
+            }
+            if (room.scores[player.id] === undefined) {
+                room.scores[player.id] = 0;
+            }
+        } else {
+            // Game in progress -> Waiting Room
+            if (!room.waitingPlayers) room.waitingPlayers = [];
+            room.waitingPlayers.push({ ...player, lastSeen: Date.now() });
         }
 
         await StorageService.saveRoom(room);
         return room;
+    },
+
+    removePlayerFromRoom: async (roomCode: string, playerId: string): Promise<void> => {
+        await StorageService.updateRoom(roomCode, (r) => {
+            const newPlayers = r.players.filter(p => p.id !== playerId);
+            const newWaiting = r.waitingPlayers?.filter(p => p.id !== playerId) || [];
+
+            let newHostId = r.hostId;
+            if (playerId === r.hostId) {
+                // Host left, assign new host
+                if (newPlayers.length > 0) {
+                    newHostId = newPlayers[0].id;
+                } else if (newWaiting.length > 0) {
+                    newHostId = newWaiting[0].id;
+                }
+            }
+
+            return {
+                ...r,
+                players: newPlayers,
+                waitingPlayers: newWaiting,
+                hostId: newHostId
+            };
+        });
     },
 
     // Game Settings
@@ -321,28 +395,60 @@ export const StorageService = {
 
     // Continue to next round (from results screen)
     nextRound: async (roomCode: string): Promise<GameRoom | null> => {
-        return StorageService.updateRoom(roomCode, (r) => ({
-            ...r,
-            status: 'lobby',
-            currentImage: null,
-            block: null, // Firebase doesn't accept undefined
-            playerStates: {},
-            votes: {}
-        }));
+        return StorageService.updateRoom(roomCode, (r) => {
+            // Merge waiting players
+            const waiting = r.waitingPlayers || [];
+            const allPlayers = [...r.players, ...waiting];
+
+            // Initialize scores/states for new players
+            waiting.forEach(p => {
+                if (!r.scores[p.id]) r.scores[p.id] = 0;
+                if (!r.playerStates[p.id]) r.playerStates[p.id] = { status: 'waiting' };
+            });
+
+            const randomPlayer = allPlayers[Math.floor(Math.random() * allPlayers.length)];
+            return {
+                ...r,
+                players: allPlayers,
+                waitingPlayers: [],
+                status: 'uploading',
+                currentUploaderId: randomPlayer.id,
+                currentImage: null,
+                block: null, // Firebase doesn't accept undefined
+                playerStates: {},
+                votes: {}
+            };
+        });
     },
 
     // Reset game for new game
     resetGame: async (roomCode: string): Promise<GameRoom | null> => {
-        return StorageService.updateRoom(roomCode, (r) => ({
-            ...r,
-            status: 'lobby',
-            roundNumber: 0,
-            currentImage: null,
-            block: null, // Firebase doesn't accept undefined
-            playerStates: {},
-            votes: {},
-            scores: {},
-            roundResults: []
-        }));
+        return StorageService.updateRoom(roomCode, (r) => {
+            // Merge waiting players
+            const waiting = r.waitingPlayers || [];
+            const allPlayers = [...r.players, ...waiting];
+
+            // Initialize scores/states for new players
+            waiting.forEach(p => {
+                if (!r.scores[p.id]) r.scores[p.id] = 0;
+                if (!r.playerStates[p.id]) r.playerStates[p.id] = { status: 'waiting' };
+            });
+
+            const randomPlayer = allPlayers[Math.floor(Math.random() * allPlayers.length)];
+            return {
+                ...r,
+                players: allPlayers,
+                waitingPlayers: [],
+                status: 'lobby',
+                currentUploaderId: randomPlayer.id,
+                roundNumber: 0,
+                currentImage: null,
+                block: null, // Firebase doesn't accept undefined
+                playerStates: {},
+                votes: {},
+                scores: {},
+                roundResults: []
+            };
+        });
     }
 };

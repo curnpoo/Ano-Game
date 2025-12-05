@@ -127,11 +127,10 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                                         p ? `${j === 0 ? 'M' : 'L'} ${p.x} ${p.y}` : ''
                                     ).join(' ')}
                                     stroke={stroke.color}
-                                    strokeWidth={stroke.size / 10}
+                                    strokeWidth={stroke.size / 3}
                                     fill="none"
                                     strokeLinecap="round"
                                     strokeLinejoin="round"
-                                    vectorEffect="non-scaling-stroke"
                                 />
                             );
                         })}

@@ -1,0 +1,85 @@
+import React, { useState, useEffect } from 'react';
+import type { GameRoom } from '../../types';
+import { AvatarDisplay } from '../common/AvatarDisplay';
+
+interface WaitingRoomScreenProps {
+    room: GameRoom;
+    currentPlayerId: string;
+}
+
+export const WaitingRoomScreen: React.FC<WaitingRoomScreenProps> = ({
+    room,
+    currentPlayerId
+}) => {
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const currentRound = room.roundNumber + 1;
+    const totalRounds = room.settings.totalRounds;
+    const me = room.waitingPlayers?.find(p => p.id === currentPlayerId) || room.players.find(p => p.id === currentPlayerId);
+
+    return (
+        <div className="min-h-screen bg-90s-animated flex flex-col items-center justify-center p-4 relative overflow-hidden">
+            {/* Decorative elements */}
+            <div className="absolute top-10 left-10 text-6xl animate-bounce">⏳</div>
+            <div className="absolute bottom-10 right-10 text-6xl animate-pulse">🎮</div>
+
+            <div className={`bg-white rounded-[2rem] p-8 max-w-md w-full text-center relative z-10 ${mounted ? 'pop-in' : 'opacity-0'}`}
+                style={{
+                    boxShadow: '0 10px 0 rgba(0, 0, 0, 0.2), 0 20px 40px rgba(0, 0, 0, 0.15)',
+                    border: '4px solid #FF69B4'
+                }}>
+
+                <h1 className="text-3xl font-bold mb-4"
+                    style={{
+                        background: 'linear-gradient(135deg, #FF69B4, #9B59B6)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                    }}>
+                    Waiting Room
+                </h1>
+
+                <div className="mb-6 flex justify-center">
+                    <AvatarDisplay
+                        strokes={me?.avatarStrokes}
+                        avatar={me?.avatar}
+                        frame={me?.frame}
+                        color={me?.color}
+                        size={80}
+                        className="shadow-lg"
+                    />
+                </div>
+
+                <div className="bg-gray-100 rounded-xl p-6 mb-6">
+                    <p className="text-gray-600 font-medium mb-2">
+                        The game is currently in progress.
+                    </p>
+                    <p className="text-xl font-bold text-purple-600 animate-pulse">
+                        You'll join in Round {currentRound} of {totalRounds}!
+                    </p>
+                </div>
+
+                <div className="space-y-4">
+                    <div className="text-sm text-gray-500 font-bold uppercase tracking-wider">
+                        Current Status
+                    </div>
+                    <div className="inline-block bg-yellow-100 text-yellow-700 px-4 py-2 rounded-full font-bold">
+                        {room.status === 'uploading' ? '📸 Uploading Image' :
+                            room.status === 'drawing' ? '🎨 Drawing Phase' :
+                                room.status === 'voting' ? '🗳️ Voting Phase' :
+                                    room.status === 'results' ? '🏆 Viewing Results' : 'Game in Progress'}
+                    </div>
+                </div>
+
+                <div className="mt-8 pt-6 border-t-2 border-gray-100">
+                    <p className="text-gray-400 text-sm">
+                        Sit tight! You've been added to the queue.
+                    </p>
+                </div>
+            </div>
+        </div>
+    );
+};

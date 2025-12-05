@@ -3,6 +3,8 @@ import { WelcomeScreen } from './components/screens/WelcomeScreen';
 import { ProfileSetupScreen } from './components/screens/ProfileSetupScreen';
 import { RoomSelectionScreen } from './components/screens/RoomSelectionScreen';
 import { LobbyScreen } from './components/screens/LobbyScreen';
+import { UploadScreen } from './components/screens/UploadScreen';
+import { WaitingRoomScreen } from './components/screens/WaitingRoomScreen';
 import { SettingsModal } from './components/common/SettingsModal';
 import { VotingScreen } from './components/screens/VotingScreen';
 import { ResultsScreen } from './components/screens/ResultsScreen';
@@ -17,7 +19,7 @@ import { HowToPlayModal } from './components/game/HowToPlayModal';
 import { Toast } from './components/common/Toast';
 import type { Player, DrawingStroke, GameSettings, PlayerDrawing } from './types';
 
-type Screen = 'welcome' | 'name-entry' | 'room-selection' | 'lobby' | 'drawing' | 'voting' | 'results' | 'final';
+type Screen = 'welcome' | 'name-entry' | 'room-selection' | 'lobby' | 'waiting' | 'uploading' | 'drawing' | 'voting' | 'results' | 'final';
 
 interface ToastState {
   message: string;
@@ -66,8 +68,6 @@ function App() {
       const lastRoomCode = StorageService.getRoomCode();
       if (lastRoomCode) {
         setRoomCode(lastRoomCode);
-        // Note: The useRoom hook will trigger and if the room exists, 
-        // the screen sync effect will take us to the right place.
       } else {
         setCurrentScreen('room-selection');
       }
@@ -77,6 +77,13 @@ function App() {
   // Sync screen with room status
   useEffect(() => {
     if (!room) return;
+
+    // Check if I am waiting
+    const isWaiting = room.waitingPlayers?.some(p => p.id === player?.id);
+    if (isWaiting) {
+      if (currentScreen !== 'waiting') setCurrentScreen('waiting');
+      return;
+    }
 
     switch (room.status) {
       case 'lobby':
@@ -88,8 +95,18 @@ function App() {
           setIsMyTimerRunning(false);
         }
         break;
+      case 'uploading':
+        if (currentScreen !== 'uploading' && currentScreen !== 'waiting') {
+          // Show loading for 2 seconds before switching
+          setIsLoading(true);
+          setTimeout(() => {
+            setIsLoading(false);
+            setCurrentScreen('uploading');
+          }, 2000);
+        }
+        break;
       case 'drawing':
-        if (currentScreen === 'lobby') {
+        if (currentScreen === 'lobby' || currentScreen === 'uploading' || currentScreen === 'waiting') {
           setCurrentScreen('drawing');
           setStrokes([]);
           setIsMyTimerRunning(false);
@@ -105,7 +122,7 @@ function App() {
         setCurrentScreen('final');
         break;
     }
-  }, [room?.status, currentScreen]);
+  }, [room?.status, currentScreen, room?.waitingPlayers, player?.id]);
 
   const handlePlayNow = () => {
     if (player) {
@@ -123,7 +140,6 @@ function App() {
       lastSeen: Date.now()
     };
     StorageService.saveSession(newPlayer);
-    setPlayer(newPlayer);
     setPlayer(newPlayer);
     setCurrentScreen('room-selection');
   };
@@ -181,6 +197,16 @@ function App() {
     } catch (err) {
       console.error('Failed to update settings:', err);
       showToast('Failed to update settings', 'error');
+    }
+  };
+
+  const handleStartGame = async () => {
+    if (!roomCode) return;
+    try {
+      await StorageService.initiateRound(roomCode);
+    } catch (err) {
+      console.error('Failed to start game:', err);
+      showToast('Failed to start game 😅', 'error');
     }
   };
 
@@ -278,6 +304,31 @@ function App() {
     setIsEraser(prev => !prev);
   };
 
+  const handleLeaveGame = async () => {
+    if (!roomCode || !player) return;
+    try {
+      await StorageService.removePlayerFromRoom(roomCode, player.id);
+      StorageService.leaveRoom(); // Clears local storage
+      setRoomCode(null);
+      setCurrentScreen('room-selection');
+      showToast('Left game 👋', 'info');
+    } catch (err) {
+      console.error('Failed to leave game:', err);
+      showToast('Failed to leave game', 'error');
+    }
+  };
+
+  const handleEndGame = async () => {
+    if (!roomCode) return;
+    try {
+      await StorageService.resetGame(roomCode);
+      showToast('Game ended 🛑', 'info');
+    } catch (err) {
+      console.error('Failed to end game:', err);
+      showToast('Failed to end game', 'error');
+    }
+  };
+
   // Get my player state
   const myPlayerState = room?.playerStates?.[player?.id || ''];
   const hasSubmitted = myPlayerState?.status === 'submitted';
@@ -316,8 +367,11 @@ function App() {
         <SettingsModal
           player={player}
           roomCode={roomCode}
+          isHost={room?.hostId === player.id}
           onClose={() => setShowSettings(false)}
           onUpdateProfile={handleUpdateProfile}
+          onLeaveGame={roomCode ? handleLeaveGame : undefined}
+          onEndGame={roomCode ? handleEndGame : undefined}
         />
       )}
 
@@ -356,7 +410,7 @@ function App() {
           <LobbyScreen
             room={room}
             currentPlayerId={player.id}
-            onUploadImage={handleUploadImage}
+            onStartGame={handleStartGame}
             onSettingsChange={handleSettingsChange}
           />
         ) : (
@@ -367,6 +421,21 @@ function App() {
             </div>
           </div>
         )
+      )}
+
+      {currentScreen === 'waiting' && room && player && (
+        <WaitingRoomScreen
+          room={room}
+          currentPlayerId={player.id}
+        />
+      )}
+
+      {currentScreen === 'uploading' && room && player && (
+        <UploadScreen
+          room={room}
+          currentPlayerId={player.id}
+          onUploadImage={handleUploadImage}
+        />
       )}
 
       {/* Drawing Screen */}

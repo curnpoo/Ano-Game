@@ -61,7 +61,7 @@ export interface RoundResult {
     }[];
 }
 
-export type GameStatus = 'lobby' | 'drawing' | 'voting' | 'results' | 'final';
+export type GameStatus = 'lobby' | 'uploading' | 'drawing' | 'voting' | 'results' | 'final';
 
 export interface GameRoom {
     roomCode: string;
@@ -71,6 +71,7 @@ export interface GameRoom {
 
     // Current round info
     roundNumber: number;
+    currentUploaderId?: string; // ID of player whose turn it is to upload
     currentImage?: {
         url: string;
         uploadedBy: string;
@@ -80,6 +81,7 @@ export interface GameRoom {
 
     // Player data
     players: Player[];
+    waitingPlayers?: Player[]; // Players waiting for next round
     playerStates: { [playerId: string]: PlayerState };
 
     // Voting
