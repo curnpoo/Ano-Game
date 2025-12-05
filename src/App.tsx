@@ -263,7 +263,7 @@ function App() {
   const totalPlayers = room?.players?.length || 0;
 
   return (
-    <div className="font-fredoka">
+    <div>
       {/* Toast */}
       {toast && (
         <Toast
