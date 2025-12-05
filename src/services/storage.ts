@@ -1,6 +1,6 @@
-import { ref, set, get, onValue, off, runTransaction } from 'firebase/database';
+import { ref, set, get, onValue, runTransaction } from 'firebase/database';
 import { database } from '../firebase';
-import type { GameRoom, Player, GameSettings, BlockInfo, PlayerState, Vote, PlayerDrawing, RoundResult } from '../types';
+import type { GameRoom, Player, GameSettings, BlockInfo, PlayerState, PlayerDrawing, RoundResult } from '../types';
 
 const ROOMS_PATH = 'rooms';
 
