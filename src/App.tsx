@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { WelcomeScreen } from './components/screens/WelcomeScreen';
 import { NameEntryScreen } from './components/screens/NameEntryScreen';
 import { RoomSelectionScreen } from './components/screens/RoomSelectionScreen';
@@ -32,8 +32,14 @@ function App() {
   const [brushColor, setBrushColor] = useState('#FF69B4');
   const [brushSize, setBrushSize] = useState(8);
   const [strokes, setStrokes] = useState<DrawingStroke[]>([]);
+  const strokesRef = useRef<DrawingStroke[]>([]);
   const [isDrawing, setIsDrawing] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
+
+  // Keep ref in sync with state
+  useEffect(() => {
+    strokesRef.current = strokes;
+  }, [strokes]);
 
   const { room } = useRoom(roomCode, player?.id || null);
 
@@ -148,26 +154,41 @@ function App() {
     // Only the current player should trigger the end turn
     const isMyTurn = room.turnOrder[room.currentTurnIndex] === player.id;
     if (isMyTurn && room.turnStatus === 'drawing') {
-      console.log('Time up! Ending turn...');
+      console.log('Time up! Preparing to end turn...');
       setIsDrawing(false);
+
+      // Use ref to get latest strokes (avoids stale closure)
+      const currentStrokes = strokesRef.current;
+
+      // Sanitize strokes to ensure no invalid data is sent to Firebase
+      const validStrokes = currentStrokes.filter(s => s && Array.isArray(s.points) && s.points.length > 0);
+
+      console.log(`Submitting ${validStrokes.length} strokes (filtered from ${currentStrokes.length})`);
 
       const newAnnotation = {
         playerId: player.id,
         playerName: player.name,
         playerColor: player.color,
         roundNumber: room.roundNumber || 0,
-        drawingData: strokes,
+        drawingData: validStrokes,
         submittedAt: Date.now()
       };
 
       try {
+        console.log('Calling StorageService.endTurn with:', JSON.stringify(newAnnotation, null, 2));
         await StorageService.endTurn(roomCode, newAnnotation);
+        console.log('Turn submitted successfully!');
       } catch (err) {
-        console.error('Failed to end turn:', err);
-        showToast('Failed to submit turn. Try again!', 'error');
+        console.error('Failed to end turn. Error details:', err);
+        // @ts-ignore
+        if (err.message) console.error('Error message:', err.message);
+        // @ts-ignore
+        if (err.stack) console.error('Error stack:', err.stack);
+
+        showToast('Failed to submit turn. Check console for details.', 'error');
       }
     }
-  }, [room, player, roomCode, strokes, showToast]);
+  }, [room, player, roomCode, showToast]); // Removed strokes dependency since we use ref
 
   const handleReady = async () => {
     if (roomCode) {
@@ -296,26 +317,48 @@ function App() {
       )}
 
       {currentScreen === 'game' && room && room.currentImage && (
-        <div className="fixed inset-0 bg-90s-animated flex flex-col">
+        <div className="fixed inset-0 bg-90s-animated flex flex-row md:flex-col">
           {/* Main Game Area */}
           <div className="flex-1 relative flex flex-col items-center justify-center p-4 overflow-hidden">
 
-            {/* Top Bar with Turn Info and Timer */}
-            <div className="w-full max-w-4xl flex justify-between items-center mb-4 px-4 z-20">
-              <div className="bg-white/95 backdrop-blur-sm px-5 py-3 rounded-2xl pop-in"
+            {/* Top Bar with Turn Info, Timer, and Ready Button */}
+            <div className="w-full max-w-4xl flex justify-between items-center mb-4 px-4 z-20 gap-4">
+              {/* Turn Info / Ready Status */}
+              <div className="bg-white/95 backdrop-blur-sm px-5 py-3 rounded-2xl pop-in flex items-center gap-4"
                 style={{
                   boxShadow: '0 6px 0 rgba(155, 89, 182, 0.3), 0 12px 24px rgba(0, 0, 0, 0.15)',
                   border: '3px solid #FF69B4'
                 }}>
-                <div className="text-sm text-pink-400 font-bold">🎮 Current Turn</div>
-                <div className="font-bold text-xl"
-                  style={{
-                    background: 'linear-gradient(135deg, #FF69B4, #9B59B6)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent'
-                  }}>
-                  {isMyTurn ? "✨ It's your turn! ✨" : `${currentPlayerName}'s turn`}
-                </div>
+
+                {isMyTurn && room.turnStatus === 'waiting' ? (
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl animate-bounce">🎨</span>
+                    <div className="flex flex-col">
+                      <span className="text-sm text-pink-400 font-bold">Your Turn!</span>
+                      <span className="font-bold text-lg bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-500">
+                        Ready to Draw?
+                      </span>
+                    </div>
+                    <button
+                      onClick={handleReady}
+                      className="ml-2 btn-90s bg-gradient-to-r from-lime-400 to-emerald-500 text-white font-bold px-4 py-2 rounded-xl text-sm jelly-hover"
+                    >
+                      I'm Ready! 🚀
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-sm text-pink-400 font-bold">🎮 Current Turn</div>
+                    <div className="font-bold text-xl ml-2"
+                      style={{
+                        background: 'linear-gradient(135deg, #FF69B4, #9B59B6)',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent'
+                      }}>
+                      {isMyTurn ? "✨ It's your turn! ✨" : `${currentPlayerName}'s turn`}
+                    </div>
+                  </>
+                )}
               </div>
 
               {isMyTurn && room.turnStatus === 'drawing' && (
@@ -347,38 +390,10 @@ function App() {
                 onStrokesChange={setStrokes}
               />
             </div>
-
-            {/* Ready Button Overlay - Now outside image but centered over it */}
-            {isMyTurn && room.turnStatus === 'waiting' && (
-              <div className="absolute inset-0 flex items-center justify-center z-30 pointer-events-none">
-                <div className="bg-white/90 backdrop-blur-md p-8 rounded-[2rem] text-center space-y-4 max-w-xs mx-4 pop-in pointer-events-auto scale-90"
-                  style={{
-                    boxShadow: '0 15px 0 rgba(155, 89, 182, 0.4), 0 30px 60px rgba(0, 0, 0, 0.3)',
-                    border: '4px solid transparent',
-                    backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #32CD32, #00D9FF, #9B59B6)',
-                    backgroundOrigin: 'border-box',
-                    backgroundClip: 'padding-box, border-box'
-                  }}>
-                  <div className="text-5xl animate-bounce">🎨</div>
-                  <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-500 to-blue-500">
-                    Ready to Draw?
-                  </h3>
-                  <p className="text-gray-500 font-medium text-sm">
-                    You have 10 seconds to add your masterpiece!
-                  </p>
-                  <button
-                    onClick={handleReady}
-                    className="w-full btn-90s bg-gradient-to-r from-lime-400 to-emerald-500 text-white font-bold text-lg py-3 jelly-hover"
-                  >
-                    I'm Ready! 🚀
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Toolbar Area */}
-          <div className="p-4 safe-area-bottom">
+          {/* Toolbar Area - Side on mobile, Bottom on desktop */}
+          <div className="p-4 safe-area-bottom md:w-full w-auto flex-shrink-0 flex items-center justify-center z-30">
             <Toolbar
               brushColor={brushColor}
               brushSize={brushSize}

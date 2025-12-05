@@ -5,6 +5,20 @@ import type { GameRoom, Player, Annotation } from '../types';
 const ROOMS_PATH = 'rooms';
 
 export const StorageService = {
+    // Helpers
+    normalizeRoom: (data: any): GameRoom => {
+        if (!data.players) data.players = [];
+        else if (!Array.isArray(data.players)) data.players = Object.values(data.players);
+
+        if (!data.annotations) data.annotations = [];
+        else if (!Array.isArray(data.annotations)) data.annotations = Object.values(data.annotations);
+
+        if (!data.turnOrder) data.turnOrder = [];
+        else if (!Array.isArray(data.turnOrder)) data.turnOrder = Object.values(data.turnOrder);
+
+        return data as GameRoom;
+    },
+
     // Room Management
     createRoom: async (roomCode: string, hostPlayer: Player): Promise<GameRoom> => {
         const room: GameRoom = {
@@ -27,7 +41,10 @@ export const StorageService = {
     getRoom: async (roomCode: string): Promise<GameRoom | null> => {
         const roomRef = ref(database, `${ROOMS_PATH}/${roomCode}`);
         const snapshot = await get(roomRef);
-        return snapshot.exists() ? snapshot.val() as GameRoom : null;
+        if (snapshot.exists()) {
+            return StorageService.normalizeRoom(snapshot.val());
+        }
+        return null;
     },
 
     saveRoom: async (room: GameRoom): Promise<void> => {
@@ -36,13 +53,18 @@ export const StorageService = {
     },
 
     updateRoom: async (roomCode: string, updateFn: (room: GameRoom) => GameRoom): Promise<GameRoom | null> => {
-        const room = await StorageService.getRoom(roomCode);
-        if (room) {
-            const updatedRoom = updateFn(room);
-            await StorageService.saveRoom(updatedRoom);
-            return updatedRoom;
+        try {
+            const room = await StorageService.getRoom(roomCode);
+            if (room) {
+                const updatedRoom = updateFn(room);
+                await StorageService.saveRoom(updatedRoom);
+                return updatedRoom;
+            }
+            return null;
+        } catch (error) {
+            console.error('Error updating room:', error);
+            throw error;
         }
-        return null;
     },
 
     // Subscribe to room changes (real-time)
@@ -52,18 +74,8 @@ export const StorageService = {
 
         const listener = onValue(roomRef, (snapshot) => {
             if (snapshot.exists()) {
-                const data = snapshot.val();
-                // Normalize arrays from Firebase (which can be objects or missing)
-                if (!data.players) data.players = [];
-                else if (!Array.isArray(data.players)) data.players = Object.values(data.players);
-
-                if (!data.annotations) data.annotations = [];
-                else if (!Array.isArray(data.annotations)) data.annotations = Object.values(data.annotations);
-
-                if (!data.turnOrder) data.turnOrder = [];
-                else if (!Array.isArray(data.turnOrder)) data.turnOrder = Object.values(data.turnOrder);
-
-                callback(data as GameRoom);
+                const data = StorageService.normalizeRoom(snapshot.val());
+                callback(data);
             } else {
                 callback(null);
             }
@@ -123,9 +135,19 @@ export const StorageService = {
     },
 
     endTurn: async (roomCode: string, annotation: Annotation): Promise<GameRoom | null> => {
+        console.log('Ending turn for room:', roomCode);
         return StorageService.updateRoom(roomCode, (r) => {
+            // Ensure turnOrder exists (it should due to normalizeRoom, but being safe)
+            const turnOrder = r.turnOrder || [];
             const nextIndex = r.currentTurnIndex + 1;
-            const isRoundOver = nextIndex >= r.turnOrder.length;
+            const isRoundOver = nextIndex >= turnOrder.length;
+
+            console.log('Turn update:', {
+                currentIndex: r.currentTurnIndex,
+                nextIndex,
+                totalPlayers: turnOrder.length,
+                isRoundOver
+            });
 
             return {
                 ...r,

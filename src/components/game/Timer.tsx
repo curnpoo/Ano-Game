@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 
 interface TimerProps {
     endsAt: number;
@@ -7,22 +7,34 @@ interface TimerProps {
 
 export const Timer: React.FC<TimerProps> = ({ endsAt, onTimeUp }) => {
     const [timeLeft, setTimeLeft] = useState(5.0);
+    const onTimeUpRef = useRef(onTimeUp);
+    const hasCalledRef = useRef(false);
+
+    // Keep ref updated with latest callback
+    useEffect(() => {
+        onTimeUpRef.current = onTimeUp;
+    }, [onTimeUp]);
 
     useEffect(() => {
+        // Reset the called flag when endsAt changes (new turn)
+        hasCalledRef.current = false;
+
         const interval = setInterval(() => {
             const now = Date.now();
             const remaining = Math.max(0, (endsAt - now) / 1000);
 
             setTimeLeft(remaining);
 
-            if (remaining <= 0) {
+            if (remaining <= 0 && !hasCalledRef.current) {
+                hasCalledRef.current = true;
                 clearInterval(interval);
-                onTimeUp();
+                // Use ref to call the latest callback
+                onTimeUpRef.current();
             }
         }, 50); // Update frequently for smooth display
 
         return () => clearInterval(interval);
-    }, [endsAt, onTimeUp]);
+    }, [endsAt]); // Only depend on endsAt, not onTimeUp
 
     // Color and urgency logic
     const getColorClasses = () => {
