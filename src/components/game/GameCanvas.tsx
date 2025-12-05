@@ -164,7 +164,16 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     };
 
     return (
-        <div ref={containerRef} className="absolute inset-0 touch-none select-none overflow-hidden">
+        <div
+            ref={containerRef}
+            className="absolute inset-0 touch-none select-none overflow-hidden"
+            style={{
+                WebkitUserSelect: 'none',
+                WebkitTouchCallout: 'none',
+                WebkitTapHighlightColor: 'transparent',
+                userSelect: 'none'
+            }}
+        >
             {/* Drawing Layer - transparent canvas on top */}
             <canvas
                 ref={canvasRef}

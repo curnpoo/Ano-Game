@@ -132,7 +132,11 @@ function App() {
         setIsLoadingTransition(false);
         if (status === 'lobby') setCurrentScreen('lobby');
         else if (status === 'uploading') setCurrentScreen('uploading');
-        else if (status === 'drawing') setCurrentScreen('drawing');
+        else if (status === 'drawing') {
+          setCurrentScreen('drawing');
+          setStrokes([]);
+          setIsMyTimerRunning(false);
+        }
         else if (status === 'voting') setCurrentScreen('voting');
         else if (status === 'results') setCurrentScreen('results');
         else if (status === 'final') setCurrentScreen('final');
