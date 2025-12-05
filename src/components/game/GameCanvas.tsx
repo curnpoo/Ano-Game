@@ -8,6 +8,7 @@ interface GameCanvasProps {
     isDrawingEnabled: boolean;
     strokes: DrawingStroke[];
     onStrokesChange: (strokes: DrawingStroke[]) => void;
+    isEraser?: boolean;
 }
 
 export const GameCanvas: React.FC<GameCanvasProps> = ({
@@ -17,6 +18,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     isDrawingEnabled,
     strokes,
     onStrokesChange,
+    isEraser = false,
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -61,6 +63,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             ctx.beginPath();
             ctx.strokeStyle = stroke.color;
             ctx.lineWidth = stroke.size;
+            ctx.globalCompositeOperation = stroke.isEraser ? 'destination-out' : 'source-over';
             ctx.moveTo(stroke.points[0].x / 100 * width, stroke.points[0].y / 100 * height);
             for (let i = 1; i < stroke.points.length; i++) {
                 ctx.lineTo(stroke.points[i].x / 100 * width, stroke.points[i].y / 100 * height);
@@ -73,12 +76,16 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             ctx.beginPath();
             ctx.strokeStyle = currentStroke.color;
             ctx.lineWidth = currentStroke.size;
+            ctx.globalCompositeOperation = currentStroke.isEraser ? 'destination-out' : 'source-over';
             ctx.moveTo(currentStroke.points[0].x / 100 * width, currentStroke.points[0].y / 100 * height);
             for (let i = 1; i < currentStroke.points.length; i++) {
                 ctx.lineTo(currentStroke.points[i].x / 100 * width, currentStroke.points[i].y / 100 * height);
             }
             ctx.stroke();
         }
+
+        // Reset composite operation
+        ctx.globalCompositeOperation = 'source-over';
     }, [strokes, currentStroke]);
 
     useEffect(() => {
@@ -109,7 +116,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         setCurrentStroke({
             color: brushColor,
             size: brushSize,
-            points: [point]
+            points: [point],
+            isEraser
         });
     };
 

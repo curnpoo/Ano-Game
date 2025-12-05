@@ -2,6 +2,9 @@ export interface Player {
     id: string;
     name: string;
     color: string;
+    avatar?: string; // Emoji (legacy/fallback)
+    avatarStrokes?: DrawingStroke[]; // Drawn avatar
+    frame: string; // CSS class for frame effect
     joinedAt: number;
     lastSeen: number;
 }
@@ -10,6 +13,7 @@ export interface DrawingStroke {
     points: { x: number; y: number }[];
     color: string;
     size: number;
+    isEraser?: boolean;
 }
 
 export interface PlayerDrawing {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { GameRoom } from '../../types';
+import { AvatarDisplay } from '../common/AvatarDisplay';
 
 interface VotingScreenProps {
     room: GameRoom;
@@ -20,13 +21,14 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
         setMounted(true);
     }, []);
 
-    // Get all drawings
+    // Get all completed drawings and sort by join time for stability
     const drawings = room.players
         .filter(p => room.playerStates[p.id]?.drawing)
         .map(p => ({
             player: p,
             drawing: room.playerStates[p.id].drawing!
-        }));
+        }))
+        .sort((a, b) => a.player.joinedAt - b.player.joinedAt);
 
     const votedCount = Object.keys(room.votes).length;
     const totalPlayers = room.players.length;
@@ -68,11 +70,18 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
             {/* Drawing Display */}
             <div className="flex-1 flex flex-col items-center justify-center">
                 {/* Player Name */}
-                <div className="bg-white rounded-2xl px-6 py-3 mb-4 pop-in"
+                <div className="bg-white rounded-2xl px-6 py-3 mb-4 pop-in flex items-center gap-3"
                     style={{
                         boxShadow: '0 4px 0 rgba(155, 89, 182, 0.3)',
                         border: `3px solid ${currentDrawing.player.color}`
                     }}>
+                    <AvatarDisplay
+                        strokes={currentDrawing.player.avatarStrokes}
+                        avatar={currentDrawing.player.avatar}
+                        frame={currentDrawing.player.frame}
+                        color={currentDrawing.player.color}
+                        size={40}
+                    />
                     <span className="text-xl font-bold" style={{ color: currentDrawing.player.color }}>
                         {currentDrawing.player.name}
                         {isOwnDrawing && <span className="ml-2 text-gray-400">(You)</span>}
@@ -101,7 +110,8 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                                 top: `${room.block.y}%`,
                                 width: `${room.block.size}%`,
                                 height: `${room.block.size}%`,
-                                borderRadius: room.block.type === 'circle' ? '50%' : '8px'
+                                borderRadius: room.block.type === 'circle' ? '50%' : '0',
+                                boxShadow: 'inset 0 0 20px rgba(0,0,0,0.1)'
                             }}
                         />
                     )}

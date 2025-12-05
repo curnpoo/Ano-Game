@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { GameRoom } from '../../types';
+import { AvatarDisplay } from '../common/AvatarDisplay';
 
 interface ResultsScreenProps {
     room: GameRoom;
@@ -34,9 +35,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
     // Get top 3
     const [first, second, third] = latestResult.rankings;
 
-    const getPlayerColor = (playerId: string) => {
-        return room.players.find(p => p.id === playerId)?.color || '#FF69B4';
-    };
+    const getPlayer = (playerId: string) => room.players.find(p => p.id === playerId);
 
     return (
         <div className={`min-h-screen bg-90s-animated flex flex-col items-center justify-center p-4 ${mounted ? 'pop-in' : 'opacity-0'}`}>
@@ -53,73 +52,85 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
             {/* Podium */}
             <div className={`flex items-end justify-center gap-4 mb-8 transition-all duration-700 ${showPodium ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
                 {/* 2nd Place */}
-                {second && (
-                    <div className="flex flex-col items-center pop-in" style={{ animationDelay: '0.3s' }}>
-                        <div className="text-4xl mb-2">🥈</div>
-                        <div
-                            className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold text-white mb-2"
-                            style={{
-                                backgroundColor: getPlayerColor(second.playerId),
-                                boxShadow: '0 4px 0 rgba(0,0,0,0.2)'
-                            }}
-                        >
-                            {second.playerName.charAt(0).toUpperCase()}
+                {second && (() => {
+                    const p = getPlayer(second.playerId);
+                    return (
+                        <div className="flex flex-col items-center pop-in" style={{ animationDelay: '0.3s' }}>
+                            <div className="text-4xl mb-2">🥈</div>
+                            <div className="mb-2">
+                                <AvatarDisplay
+                                    strokes={p?.avatarStrokes}
+                                    avatar={p?.avatar}
+                                    frame={p?.frame}
+                                    color={p?.color}
+                                    size={80}
+                                    className="shadow-md"
+                                />
+                            </div>
+                            <div className="bg-gradient-to-b from-gray-300 to-gray-400 w-24 h-24 rounded-t-lg flex flex-col items-center justify-center"
+                                style={{ boxShadow: '0 4px 0 rgba(0,0,0,0.2)' }}>
+                                <span className="text-2xl font-bold text-gray-700">2nd</span>
+                                <span className="text-sm text-gray-600">{second.votes} votes</span>
+                                <span className="text-xs text-gray-500">+{second.points} pts</span>
+                            </div>
+                            <p className="mt-2 font-bold text-white text-sm">{second.playerName}</p>
                         </div>
-                        <div className="bg-gradient-to-b from-gray-300 to-gray-400 w-24 h-24 rounded-t-lg flex flex-col items-center justify-center"
-                            style={{ boxShadow: '0 4px 0 rgba(0,0,0,0.2)' }}>
-                            <span className="text-2xl font-bold text-gray-700">2nd</span>
-                            <span className="text-sm text-gray-600">{second.votes} votes</span>
-                            <span className="text-xs text-gray-500">+{second.points} pts</span>
-                        </div>
-                        <p className="mt-2 font-bold text-white text-sm">{second.playerName}</p>
-                    </div>
-                )}
+                    );
+                })()}
 
                 {/* 1st Place */}
-                {first && (
-                    <div className="flex flex-col items-center pop-in" style={{ animationDelay: '0.1s' }}>
-                        <div className="text-5xl mb-2 animate-bounce">🥇</div>
-                        <div
-                            className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-white mb-2"
-                            style={{
-                                backgroundColor: getPlayerColor(first.playerId),
-                                boxShadow: '0 6px 0 rgba(0,0,0,0.2)'
-                            }}
-                        >
-                            {first.playerName.charAt(0).toUpperCase()}
+                {first && (() => {
+                    const p = getPlayer(first.playerId);
+                    return (
+                        <div className="flex flex-col items-center pop-in" style={{ animationDelay: '0.1s' }}>
+                            <div className="text-5xl mb-2 animate-bounce">🥇</div>
+                            <div className="mb-2 relative">
+                                <AvatarDisplay
+                                    strokes={p?.avatarStrokes}
+                                    avatar={p?.avatar}
+                                    frame={p?.frame}
+                                    color={p?.color}
+                                    size={96}
+                                    className="shadow-lg border-4 border-yellow-400"
+                                />
+                            </div>
+                            <div className="bg-gradient-to-b from-yellow-400 to-yellow-500 w-28 h-32 rounded-t-lg flex flex-col items-center justify-center"
+                                style={{ boxShadow: '0 4px 0 rgba(0,0,0,0.2)' }}>
+                                <span className="text-3xl font-bold text-yellow-800">1st</span>
+                                <span className="text-sm text-yellow-700">{first.votes} votes</span>
+                                <span className="text-xs text-yellow-600">+{first.points} pts</span>
+                            </div>
+                            <p className="mt-2 font-bold text-white">{first.playerName}</p>
                         </div>
-                        <div className="bg-gradient-to-b from-yellow-400 to-yellow-500 w-28 h-32 rounded-t-lg flex flex-col items-center justify-center"
-                            style={{ boxShadow: '0 4px 0 rgba(0,0,0,0.2)' }}>
-                            <span className="text-3xl font-bold text-yellow-800">1st</span>
-                            <span className="text-sm text-yellow-700">{first.votes} votes</span>
-                            <span className="text-xs text-yellow-600">+{first.points} pts</span>
-                        </div>
-                        <p className="mt-2 font-bold text-white">{first.playerName}</p>
-                    </div>
-                )}
+                    );
+                })()}
 
                 {/* 3rd Place */}
-                {third && (
-                    <div className="flex flex-col items-center pop-in" style={{ animationDelay: '0.5s' }}>
-                        <div className="text-3xl mb-2">🥉</div>
-                        <div
-                            className="w-16 h-16 rounded-full flex items-center justify-center text-xl font-bold text-white mb-2"
-                            style={{
-                                backgroundColor: getPlayerColor(third.playerId),
-                                boxShadow: '0 3px 0 rgba(0,0,0,0.2)'
-                            }}
-                        >
-                            {third.playerName.charAt(0).toUpperCase()}
+                {third && (() => {
+                    const p = getPlayer(third.playerId);
+                    return (
+                        <div className="flex flex-col items-center pop-in" style={{ animationDelay: '0.5s' }}>
+                            <div className="text-3xl mb-2">🥉</div>
+                            <div className="mb-2">
+                                <AvatarDisplay
+                                    strokes={p?.avatarStrokes}
+                                    avatar={p?.avatar}
+                                    frame={p?.frame}
+                                    color={p?.color}
+                                    size={64}
+                                    className="shadow-md"
+                                />
+                            </div>
+                            <div className="bg-gradient-to-b from-orange-300 to-orange-400 w-20 h-16 rounded-t-lg flex flex-col items-center justify-center"
+                                style={{ boxShadow: '0 4px 0 rgba(0,0,0,0.2)' }}>
+                                <span className="text-xl font-bold text-orange-800">3rd</span>
+                                <span className="text-xs text-orange-700">{third.votes} votes</span>
+                                <span className="text-xs text-orange-600">+{third.points} pts</span>
+                            </div>
+                            <p className="mt-2 font-bold text-white text-sm">{third.playerName}</p>
                         </div>
-                        <div className="bg-gradient-to-b from-orange-300 to-orange-400 w-20 h-16 rounded-t-lg flex flex-col items-center justify-center"
-                            style={{ boxShadow: '0 4px 0 rgba(0,0,0,0.2)' }}>
-                            <span className="text-xl font-bold text-orange-800">3rd</span>
-                            <span className="text-xs text-orange-700">{third.votes} votes</span>
-                            <span className="text-xs text-orange-600">+{third.points} pts</span>
-                        </div>
-                        <p className="mt-2 font-bold text-white text-sm">{third.playerName}</p>
-                    </div>
-                )}
+                    );
+                })()}
             </div>
 
             {/* Current Scores */}
@@ -133,9 +144,12 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
                             <div key={player.id} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50">
                                 <div className="flex items-center gap-2">
                                     <span className="font-bold text-gray-400">#{i + 1}</span>
-                                    <div
-                                        className="w-6 h-6 rounded-full"
-                                        style={{ backgroundColor: player.color }}
+                                    <AvatarDisplay
+                                        strokes={player.avatarStrokes}
+                                        avatar={player.avatar}
+                                        frame={player.frame}
+                                        color={player.color}
+                                        size={32}
                                     />
                                     <span className="font-medium">{player.name}</span>
                                 </div>

@@ -38,7 +38,7 @@ export const HowToPlayModal: React.FC<HowToPlayModalProps> = ({ isOpen, onClose 
                             1
                         </div>
                         <p className="text-gray-600 font-medium text-lg pt-1">
-                            Wait for your turn. Take your time to get ready! ⏳
+                            Create your profile and <span className="font-bold text-purple-500">draw your avatar!</span> 🎨
                         </p>
                     </div>
 
@@ -48,7 +48,7 @@ export const HowToPlayModal: React.FC<HowToPlayModalProps> = ({ isOpen, onClose 
                             2
                         </div>
                         <p className="text-gray-600 font-medium text-lg pt-1">
-                            When ready, tap the <span className="font-bold text-pink-500 bg-pink-100 px-2 py-0.5 rounded-lg">READY</span> button! 🎯
+                            Fill in the <span className="font-bold text-gray-500 bg-gray-100 px-2 py-0.5 rounded-lg">white blank</span> to complete the image! Use the eraser if you make a mistake. ✏️
                         </p>
                     </div>
 
@@ -58,7 +58,7 @@ export const HowToPlayModal: React.FC<HowToPlayModalProps> = ({ isOpen, onClose 
                             3
                         </div>
                         <p className="text-gray-600 font-medium text-lg pt-1">
-                            The timer starts immediately! You have <span className="font-bold text-red-500 bg-red-100 px-2 py-0.5 rounded-lg">10 seconds</span> to draw! ⚡
+                            Vote for the funniest or most creative drawing to win points! 🏆
                         </p>
                     </div>
                 </div>

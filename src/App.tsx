@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { WelcomeScreen } from './components/screens/WelcomeScreen';
-import { NameEntryScreen } from './components/screens/NameEntryScreen';
+import { ProfileSetupScreen } from './components/screens/ProfileSetupScreen';
 import { RoomSelectionScreen } from './components/screens/RoomSelectionScreen';
 import { LobbyScreen } from './components/screens/LobbyScreen';
+import { SettingsModal } from './components/common/SettingsModal';
 import { VotingScreen } from './components/screens/VotingScreen';
 import { ResultsScreen } from './components/screens/ResultsScreen';
 import { FinalResultsScreen } from './components/screens/FinalResultsScreen';
@@ -38,6 +39,7 @@ function App() {
   const [isMyTimerRunning, setIsMyTimerRunning] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isEraser, setIsEraser] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -54,12 +56,21 @@ function App() {
     setToast(null);
   }, []);
 
-  // Restore session
+  // Restore session and room
   useEffect(() => {
     const session = StorageService.getSession();
     if (session) {
       setPlayer(session);
-      setCurrentScreen('room-selection');
+
+      // Check for active room
+      const lastRoomCode = StorageService.getRoomCode();
+      if (lastRoomCode) {
+        setRoomCode(lastRoomCode);
+        // Note: The useRoom hook will trigger and if the room exists, 
+        // the screen sync effect will take us to the right place.
+      } else {
+        setCurrentScreen('room-selection');
+      }
     }
   }, []);
 
@@ -104,25 +115,36 @@ function App() {
     }
   };
 
-  const handleNameSubmit = (name: string) => {
+  const handleProfileComplete = (profileData: Omit<Player, 'id' | 'joinedAt' | 'lastSeen'>) => {
     const newPlayer: Player = {
       id: crypto.randomUUID(),
-      name,
-      color: '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0'),
+      ...profileData,
       joinedAt: Date.now(),
-      lastSeen: Date.now(),
+      lastSeen: Date.now()
     };
-    setPlayer(newPlayer);
     StorageService.saveSession(newPlayer);
+    setPlayer(newPlayer);
+    setPlayer(newPlayer);
     setCurrentScreen('room-selection');
+  };
+
+  const handleUpdateProfile = (profileData: Partial<Player>) => {
+    if (!player) return;
+    const updatedPlayer = { ...player, ...profileData };
+    setPlayer(updatedPlayer);
+    StorageService.saveSession(updatedPlayer);
+
+    // If in a room, update player info in room
+    if (roomCode) {
+      StorageService.joinRoom(roomCode, updatedPlayer);
+    }
   };
 
   const handleCreateRoom = async () => {
     if (!player) return;
     setIsLoading(true);
     try {
-      const code = StorageService.generateRoomCode();
-      await StorageService.createRoom(code, player);
+      const code = await StorageService.createRoom(player);
       setRoomCode(code);
       setCurrentScreen('lobby');
       showToast('Room created! Share the code! 🎉', 'success');
@@ -278,6 +300,27 @@ function App() {
         />
       )}
 
+      {/* Settings Button - Show on all screens except welcome/name-entry */}
+      {player && currentScreen !== 'welcome' && currentScreen !== 'name-entry' && (
+        <button
+          onClick={() => setShowSettings(true)}
+          className="fixed top-4 left-4 z-50 bg-white/90 backdrop-blur-sm p-3 rounded-xl shadow-lg border-2 border-purple-200 hover:border-purple-500 transition-all hover:scale-110"
+          title="Settings"
+        >
+          ⚙️
+        </button>
+      )}
+
+      {/* Settings Modal */}
+      {showSettings && player && (
+        <SettingsModal
+          player={player}
+          roomCode={roomCode}
+          onClose={() => setShowSettings(false)}
+          onUpdateProfile={handleUpdateProfile}
+        />
+      )}
+
       {/* How To Play Modal */}
       <HowToPlayModal isOpen={showHowToPlay} onClose={() => setShowHowToPlay(false)} />
 
@@ -294,7 +337,9 @@ function App() {
       )}
 
       {currentScreen === 'name-entry' && (
-        <NameEntryScreen onContinue={handleNameSubmit} />
+        <ProfileSetupScreen
+          onComplete={handleProfileComplete}
+        />
       )}
 
       {currentScreen === 'room-selection' && player && (
@@ -392,6 +437,7 @@ function App() {
                     isDrawingEnabled={true}
                     strokes={strokes}
                     onStrokesChange={setStrokes}
+                    isEraser={isEraser}
                   />
                 )}
 

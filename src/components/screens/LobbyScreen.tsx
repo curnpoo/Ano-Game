@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { GameRoom, GameSettings } from '../../types';
 import { GameSettingsPanel } from '../game/GameSettingsPanel';
+import { AvatarDisplay } from '../common/AvatarDisplay';
 
 interface LobbyScreenProps {
     room: GameRoom;
@@ -116,41 +117,36 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                         </span>
                     </h3>
                     <div className="space-y-2 stagger-children">
-                        {Array.isArray(room.players) && room.players.map((player, index) => {
-                            if (!player) return null;
-                            const isPlayerHost = player.id === room.hostId;
+                        {Array.isArray(room.players) && room.players.map((p, index) => {
+                            if (!p) return null;
                             return (
                                 <div
-                                    key={player.id || index}
-                                    className="flex items-center justify-between p-3 rounded-xl bg-gradient-to-r from-pink-50 to-purple-50 pop-in"
+                                    key={p.id}
+                                    className="bg-white/50 backdrop-blur-sm p-4 rounded-xl flex items-center justify-between animate-slide-in"
                                     style={{ animationDelay: `${index * 0.1}s` }}
                                 >
-                                    <div className="flex items-center space-x-3">
-                                        <div
-                                            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
-                                            style={{
-                                                backgroundColor: player.color || '#ccc',
-                                                boxShadow: `0 2px 0 rgba(0,0,0,0.2)`
-                                            }}
-                                        >
-                                            {player.name.charAt(0).toUpperCase()}
-                                        </div>
-                                        <span className={`font-bold ${player.id === currentPlayerId ? 'text-pink-600' : 'text-gray-700'}`}>
-                                            {player.name}
-                                            {player.id === currentPlayerId && (
-                                                <span className="ml-2 text-xs bg-pink-100 text-pink-500 px-2 py-0.5 rounded-full">
-                                                    You
-                                                </span>
+                                    <div className="flex items-center gap-4">
+                                        <AvatarDisplay
+                                            strokes={p.avatarStrokes}
+                                            avatar={p.avatar}
+                                            frame={p.frame}
+                                            color={p.color}
+                                            size={48}
+                                        />
+                                        <div>
+                                            <div className="font-bold text-lg" style={{ color: p.color }}>
+                                                {p.name} {p.id === room.hostId && '👑'}
+                                            </div>
+                                            {p.id === currentPlayerId && (
+                                                <div className="text-xs text-gray-500 font-bold">YOU</div>
                                             )}
-                                        </span>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        {room.scores[player.id] > 0 && (
-                                            <span className="text-sm font-bold text-purple-500">
-                                                {room.scores[player.id]} pts
-                                            </span>
-                                        )}
-                                        <span className="text-xl">{isPlayerHost ? '👑' : '🎮'}</span>
+                                    <div className={`px-3 py-1 rounded-full text-sm font-bold ${room.playerStates && room.playerStates[p.id]?.status === 'ready'
+                                        ? 'bg-green-100 text-green-600'
+                                        : 'bg-yellow-100 text-yellow-600'
+                                        }`}>
+                                        {room.playerStates && room.playerStates[p.id]?.status === 'ready' ? 'READY!' : 'WAITING...'}
                                     </div>
                                 </div>
                             );

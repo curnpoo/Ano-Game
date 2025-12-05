@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import logo from '../../assets/logo_icon.png';
+import { HowToPlayModal } from '../game/HowToPlayModal';
+import { AboutModal } from '../common/AboutModal';
 
 interface WelcomeScreenProps {
     onPlay: () => void;
@@ -23,6 +26,8 @@ const FloatingBubble: React.FC<{ delay: number; size: number; color: string; lef
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onPlay }) => {
     const [mounted, setMounted] = useState(false);
+    const [showHowToPlay, setShowHowToPlay] = useState(false);
+    const [showAbout, setShowAbout] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -47,18 +52,26 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onPlay }) => {
             </div>
 
             <div className={`text-center space-y-8 max-w-md w-full relative z-10 ${mounted ? 'pop-in' : 'opacity-0'}`}>
-                <div className="space-y-4">
-                    <div className="text-7xl bubble-float">🎨</div>
+                <div className="space-y-4 flex flex-col items-center">
+                    {/* Logo with rounded corners to hide white background corners */}
+                    <img
+                        src={logo}
+                        alt="Fill the Blank"
+                        className="w-40 h-40 object-cover rounded-[2rem] shadow-xl bubble-float border-4 border-white/50"
+                        style={{ animationDelay: '0.5s' }}
+                    />
+
                     <h1 className="text-5xl font-bold tracking-tight drop-shadow-lg"
                         style={{
                             textShadow: '4px 4px 0 #9B59B6, 8px 8px 0 rgba(0,0,0,0.2)'
                         }}>
-                        <span className="rainbow-text">Annotated</span>
+                        <span className="rainbow-text">Fill the</span>
                         <br />
-                        <span className="text-white">Image Chain</span>
+                        <span className="text-white">Blank</span>
                     </h1>
-                    <p className="text-2xl text-yellow-200 font-bold bubble-float" style={{ animationDelay: '0.5s' }}>
-                        ✨ Draw together in 10 seconds! ✨
+
+                    <p className="text-xl text-yellow-200 font-bold bubble-float" style={{ animationDelay: '0.5s' }}>
+                        ✨ A drawing game to see who has the best guess! ✨
                     </p>
                 </div>
 
@@ -69,15 +82,25 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onPlay }) => {
                     🚀 Play Now! 🚀
                 </button>
 
-                <div className="flex justify-center space-x-8 text-lg">
-                    <button className="hover:scale-110 transition-transform wiggle-hover bg-white/20 backdrop-blur-sm px-6 py-2 rounded-full font-bold">
+                <div className="flex justify-center space-x-4 text-lg">
+                    <button
+                        onClick={() => setShowHowToPlay(true)}
+                        className="hover:scale-110 transition-transform wiggle-hover bg-white/20 backdrop-blur-sm px-6 py-2 rounded-full font-bold"
+                    >
                         ❓ How to Play
                     </button>
-                    <button className="hover:scale-110 transition-transform wiggle-hover bg-white/20 backdrop-blur-sm px-6 py-2 rounded-full font-bold">
+                    <button
+                        onClick={() => setShowAbout(true)}
+                        className="hover:scale-110 transition-transform wiggle-hover bg-white/20 backdrop-blur-sm px-6 py-2 rounded-full font-bold"
+                    >
                         ℹ️ About
                     </button>
                 </div>
             </div>
+
+            {/* Modals */}
+            <HowToPlayModal isOpen={showHowToPlay} onClose={() => setShowHowToPlay(false)} />
+            <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
 
             {/* Decorative Stars */}
             <div className="absolute top-10 left-10 text-4xl animate-pulse">⭐</div>

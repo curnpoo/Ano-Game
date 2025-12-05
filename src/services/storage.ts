@@ -1,6 +1,6 @@
-import { ref, set, get, onValue, off } from 'firebase/database';
+import { ref, set, get, onValue, off, runTransaction } from 'firebase/database';
 import { database } from '../firebase';
-import type { GameRoom, Player, PlayerDrawing, GameSettings, BlockInfo, PlayerState, RoundResult } from '../types';
+import type { GameRoom, Player, GameSettings, BlockInfo, PlayerState, Vote, PlayerDrawing, RoundResult } from '../types';
 
 const ROOMS_PATH = 'rooms';
 
@@ -26,26 +26,26 @@ export const StorageService = {
         return data as GameRoom;
     },
 
-    // Generate random block for the image (25% of image size)
+    // Generate random block for the image (50% of image size = 1/4 area)
     generateBlock: (): BlockInfo => {
         const isCircle = Math.random() > 0.75; // 25% chance of circle (75% square)
-        const size = 25; // Fixed 25% of image
+        const size = 50; // Fixed 50% of image
 
         if (isCircle) {
             // Circle somewhere in the middle area
             return {
                 type: 'circle',
-                x: 25 + Math.random() * 30, // 25-55% (centered area)
-                y: 25 + Math.random() * 30,
+                x: Math.random() * 50, // 0-50%
+                y: Math.random() * 50,
                 size
             };
         } else {
             // Square in one of the corners
             const corners = [
-                { x: 5, y: 5 },    // top-left
-                { x: 60, y: 5 },   // top-right
-                { x: 5, y: 60 },   // bottom-left
-                { x: 60, y: 60 }   // bottom-right
+                { x: 0, y: 0 },    // top-left
+                { x: 50, y: 0 },   // top-right
+                { x: 0, y: 50 },   // bottom-left
+                { x: 50, y: 50 }   // bottom-right
             ];
             const corner = corners[Math.floor(Math.random() * corners.length)];
             return {
@@ -57,34 +57,51 @@ export const StorageService = {
         }
     },
 
-    // Room Management
-    createRoom: async (roomCode: string, hostPlayer: Player): Promise<GameRoom> => {
-        const room: GameRoom = {
-            roomCode,
+    // --- Persistence ---
+    saveRoomCode: (code: string) => {
+        localStorage.setItem('lastRoomCode', code);
+    },
+
+    getRoomCode: (): string | null => {
+        return localStorage.getItem('lastRoomCode');
+    },
+
+    leaveRoom: () => {
+        localStorage.removeItem('lastRoomCode');
+    },
+
+    // --- Room Management ---
+    createRoom: async (hostPlayer: Player): Promise<string> => {
+        const roomCode = StorageService.generateRoomCode();
+        const roomRef = ref(database, `rooms / ${roomCode} `);
+
+        const newRoom: GameRoom = {
+            roomCode: roomCode,
             hostId: hostPlayer.id,
-            status: 'lobby',
-            settings: DEFAULT_SETTINGS,
-            roundNumber: 0,
             players: [hostPlayer],
+            status: 'lobby',
+            createdAt: Date.now(),
+            settings: {
+                timerDuration: 15,
+                totalRounds: 5
+            },
+            roundNumber: 0,
             playerStates: {},
             votes: {},
             scores: {},
-            roundResults: [],
-            createdAt: Date.now(),
+            roundResults: []
         };
 
-        const roomRef = ref(database, `${ROOMS_PATH}/${roomCode}`);
-        await set(roomRef, room);
-        return room;
+        await set(roomRef, newRoom);
+        StorageService.saveRoomCode(roomCode); // Save for persistence
+        return roomCode;
     },
 
     getRoom: async (roomCode: string): Promise<GameRoom | null> => {
         const roomRef = ref(database, `${ROOMS_PATH}/${roomCode}`);
         const snapshot = await get(roomRef);
-        if (snapshot.exists()) {
-            return StorageService.normalizeRoom(snapshot.val());
-        }
-        return null;
+        if (!snapshot.exists()) return null;
+        return StorageService.normalizeRoom(snapshot.val());
     },
 
     saveRoom: async (room: GameRoom): Promise<void> => {
@@ -93,18 +110,17 @@ export const StorageService = {
     },
 
     updateRoom: async (roomCode: string, updateFn: (room: GameRoom) => GameRoom): Promise<GameRoom | null> => {
-        try {
-            const room = await StorageService.getRoom(roomCode);
-            if (room) {
-                const updatedRoom = updateFn(room);
-                await StorageService.saveRoom(updatedRoom);
-                return updatedRoom;
-            }
-            return null;
-        } catch (error) {
-            console.error('Error updating room:', error);
-            throw error;
+        const roomRef = ref(database, `${ROOMS_PATH}/${roomCode}`);
+        const result = await runTransaction(roomRef, (currentData) => {
+            if (!currentData) return null; // Room doesn't exist
+            const room = StorageService.normalizeRoom(currentData);
+            return updateFn(room);
+        });
+
+        if (result.committed && result.snapshot.exists()) {
+            return StorageService.normalizeRoom(result.snapshot.val());
         }
+        return null;
     },
 
     // Subscribe to room changes (real-time)
@@ -112,7 +128,7 @@ export const StorageService = {
         console.log('Subscribing to room:', roomCode);
         const roomRef = ref(database, `${ROOMS_PATH}/${roomCode}`);
 
-        const listener = onValue(roomRef, (snapshot) => {
+        const unsubscribe = onValue(roomRef, (snapshot) => {
             if (snapshot.exists()) {
                 const data = StorageService.normalizeRoom(snapshot.val());
                 callback(data);
@@ -123,9 +139,7 @@ export const StorageService = {
             console.error('Firebase subscription error:', error);
         });
 
-        return () => {
-            off(roomRef, 'value', listener);
-        };
+        return unsubscribe;
     },
 
     // Player Session (localStorage for individual session)
