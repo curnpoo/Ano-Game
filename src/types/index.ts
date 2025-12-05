@@ -84,6 +84,9 @@ export interface GameRoom {
     waitingPlayers?: Player[]; // Players waiting for next round
     playerStates: { [playerId: string]: PlayerState };
 
+    // Chat
+    chatEvents?: ChatMessage[];
+
     // Voting
     votes: { [oderId: string]: string }; // oderId -> votedForId
 
@@ -94,6 +97,15 @@ export interface GameRoom {
     roundResults: RoundResult[];
 
     createdAt: number;
+}
+
+export interface ChatMessage {
+    id: string;
+    playerId: string;
+    playerName: string;
+    playerAvatar?: string;
+    text: string;
+    timestamp: number;
 }
 
 export interface PlayerSession {

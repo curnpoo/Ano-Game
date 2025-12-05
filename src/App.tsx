@@ -18,6 +18,7 @@ import { Timer } from './components/game/Timer';
 import { HowToPlayModal } from './components/game/HowToPlayModal';
 import { Toast } from './components/common/Toast';
 import { LoadingScreen } from './components/common/LoadingScreen';
+import { FloatingChat } from './components/game/FloatingChat';
 import type { Player, DrawingStroke, GameSettings, PlayerDrawing } from './types';
 
 type Screen = 'welcome' | 'name-entry' | 'room-selection' | 'lobby' | 'waiting' | 'uploading' | 'drawing' | 'voting' | 'results' | 'final';
@@ -438,6 +439,11 @@ function App() {
     return <LoadingScreen onGoHome={handleSafeReset} />;
   }
 
+  // Feature: Find players who haven't finished
+  const unfinishedPlayers = room?.players.filter(p =>
+    room.playerStates[p.id]?.status !== 'submitted'
+  ) || [];
+
   return (
     <div>
       {/* Toast */}
@@ -631,16 +637,38 @@ function App() {
 
                 {/* Show "submitted" overlay */}
                 {hasSubmitted && (
-                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                    <div className="bg-white rounded-2xl p-6 text-center">
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-30">
+                    <div className="bg-white rounded-2xl p-6 text-center max-w-sm mx-4 shadow-xl animate-bounce-gentle">
                       <div className="text-4xl mb-2">✅</div>
-                      <p className="font-bold text-green-600">Drawing submitted!</p>
-                      <p className="text-gray-500 text-sm mt-1">Waiting for others...</p>
+                      <h3 className="font-bold text-green-600 text-xl mb-2">Drawing Submitted!</h3>
+                      <p className="text-gray-500 text-sm mb-4">Waiting for others...</p>
+
+                      {/* List unfinished players */}
+                      {unfinishedPlayers.length > 0 && (
+                        <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                          <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Still Drawing</p>
+                          <div className="flex flex-wrap justify-center gap-2">
+                            {unfinishedPlayers.map(p => (
+                              <div key={p.id} className="flex items-center gap-1 bg-white border border-gray-200 px-2 py-1 rounded-lg shadow-sm">
+                                <span className="text-xs">{p.avatar || '👤'}</span>
+                                <span className="text-xs font-semibold text-gray-600 truncate max-w-[80px]">{p.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
               </div>
             </div>
+
+            {/* Chat Overlay for Drawing Screen */}
+            <FloatingChat
+              roomCode={roomCode || ''}
+              player={player}
+              messages={room.chatEvents || []}
+            />
 
             {/* Toolbar - Only when timer running */}
             {isMyTimerRunning && !hasSubmitted && (

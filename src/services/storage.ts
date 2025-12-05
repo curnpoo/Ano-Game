@@ -1,6 +1,6 @@
 import { ref, set, get, onValue, runTransaction, remove } from 'firebase/database';
 import { database } from '../firebase';
-import type { GameRoom, Player, GameSettings, BlockInfo, PlayerState, PlayerDrawing, RoundResult, RoomHistoryEntry } from '../types';
+import type { GameRoom, Player, GameSettings, BlockInfo, PlayerState, PlayerDrawing, RoundResult, RoomHistoryEntry, ChatMessage } from '../types';
 
 const ROOMS_PATH = 'rooms';
 
@@ -23,6 +23,9 @@ export const StorageService = {
         if (!data.scores) data.scores = {};
         if (!data.roundResults) data.roundResults = [];
         else if (!Array.isArray(data.roundResults)) data.roundResults = Object.values(data.roundResults);
+
+        if (!data.chatEvents) data.chatEvents = [];
+        else if (!Array.isArray(data.chatEvents)) data.chatEvents = Object.values(data.chatEvents);
 
         if (!data.settings) data.settings = DEFAULT_SETTINGS;
 
@@ -550,6 +553,30 @@ export const StorageService = {
                 scores: {},
                 roundResults: []
             };
+        });
+    },
+
+    // --- Chat ---
+    sendChatMessage: async (roomCode: string, player: Player, text: string): Promise<void> => {
+        const message: ChatMessage = {
+            id: crypto.randomUUID(),
+            playerId: player.id,
+            playerName: player.name,
+            playerAvatar: player.avatar,
+            text: text.trim().slice(0, 100), // Limit length
+            timestamp: Date.now()
+        };
+
+        const roomRef = ref(database, `${ROOMS_PATH}/${roomCode}`);
+        await runTransaction(roomRef, (room) => {
+            if (!room) return null;
+
+            const chatEvents = room.chatEvents || [];
+            // Keep last 20 messages
+            const newEvents = [...chatEvents, message].slice(-20);
+
+            room.chatEvents = newEvents;
+            return room;
         });
     }
 };
