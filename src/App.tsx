@@ -338,18 +338,21 @@ function App() {
 
   const handleLeaveGame = async () => {
     if (!roomCode || !player) return;
+
+    // Attempt to remove from server, but don't block local exit
     try {
       await StorageService.removePlayerFromRoom(roomCode, player.id);
-      StorageService.leaveRoom(); // Clears local storage
-      setRoomCode(null);
-      setCurrentScreen('room-selection');
-      setIsLoading(false);
-      setIsLoadingTransition(false);
-      showToast('Left game 👋', 'info');
     } catch (err) {
       console.error('Failed to leave game:', err);
-      showToast('Failed to leave game', 'error');
     }
+
+    // Always exit locally
+    StorageService.leaveRoom();
+    setRoomCode(null);
+    setCurrentScreen('room-selection');
+    setIsLoading(false);
+    setIsLoadingTransition(false);
+    showToast('Left game 👋', 'info');
   };
 
   const handleEndGame = async () => {
@@ -415,6 +418,12 @@ function App() {
   }
 
   if (isLoadingTransition) {
+    return <LoadingScreen onGoHome={handleSafeReset} />;
+  }
+
+  // Prevent white screen if in game but room/player missing
+  const isGameScreen = ['lobby', 'waiting', 'uploading', 'drawing', 'voting', 'results', 'final'].includes(currentScreen);
+  if (isGameScreen && (!room || !player)) {
     return <LoadingScreen onGoHome={handleSafeReset} />;
   }
 
@@ -486,23 +495,14 @@ function App() {
         />
       )}
 
-      {currentScreen === 'lobby' && (
-        room && player ? (
-          <LobbyScreen
-            room={room}
-            currentPlayerId={player.id}
-            onStartGame={handleStartGame}
-            onSettingsChange={handleSettingsChange}
-            onLeave={handleLeaveGame}
-          />
-        ) : (
-          <div className="fixed inset-0 bg-90s-animated flex items-center justify-center">
-            <div className="text-center space-y-4">
-              <div className="text-6xl animate-bounce">⏳</div>
-              <div className="text-2xl font-bold text-white drop-shadow-md">Loading Room...</div>
-            </div>
-          </div>
-        )
+      {currentScreen === 'lobby' && room && player && (
+        <LobbyScreen
+          room={room}
+          currentPlayerId={player.id}
+          onStartGame={handleStartGame}
+          onSettingsChange={handleSettingsChange}
+          onLeave={handleLeaveGame}
+        />
       )}
 
       {currentScreen === 'waiting' && room && player && (

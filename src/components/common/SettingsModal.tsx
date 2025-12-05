@@ -206,6 +206,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             </div>
                         </div>
                     )}
+
+                    {/* Emergency Reset - Always visible */}
+                    <div className="pt-2 text-center">
+                        <button
+                            onClick={() => {
+                                if (confirm('This will clear all data and reload the app. Use this if the game is broken. Continue?')) {
+                                    localStorage.clear();
+                                    sessionStorage.clear();
+                                    window.location.reload();
+                                }
+                            }}
+                            className="text-xs font-bold text-gray-400 hover:text-red-500 transition-colors p-2"
+                        >
+                            Emergency Reset 🔄
+                        </button>
+                    </div>
                 </div>
 
                 {/* Custom Confirmations */}
