@@ -176,7 +176,7 @@ function App() {
 
   const handleProfileComplete = (profileData: Omit<Player, 'id' | 'joinedAt' | 'lastSeen'>) => {
     const newPlayer: Player = {
-      id: crypto.randomUUID(),
+      id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(), // fallback just in case
       ...profileData,
       joinedAt: Date.now(),
       lastSeen: Date.now()

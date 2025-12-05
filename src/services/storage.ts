@@ -1,6 +1,7 @@
 import { ref, set, get, onValue, runTransaction, remove } from 'firebase/database';
 import { database } from '../firebase';
 import type { GameRoom, Player, GameSettings, BlockInfo, PlayerState, PlayerDrawing, RoundResult, RoomHistoryEntry, ChatMessage } from '../types';
+import { generateId } from '../utils/id';
 
 const ROOMS_PATH = 'rooms';
 
@@ -559,7 +560,7 @@ export const StorageService = {
     // --- Chat ---
     sendChatMessage: async (roomCode: string, player: Player, text: string): Promise<void> => {
         const message: ChatMessage = {
-            id: crypto.randomUUID(),
+            id: generateId(),
             playerId: player.id,
             playerName: player.name,
             playerAvatar: player.avatar,
@@ -568,6 +569,7 @@ export const StorageService = {
         };
 
         const roomRef = ref(database, `${ROOMS_PATH}/${roomCode}`);
+        // ...
         await runTransaction(roomRef, (room) => {
             if (!room) return null;
 

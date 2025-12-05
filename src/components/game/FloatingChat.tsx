@@ -88,7 +88,7 @@ export const FloatingChat = ({ roomCode, player, messages }: FloatingChatProps) 
         }
 
         return {
-            id: crypto.randomUUID(), // Local bubble ID
+            id: generateId(), // Local bubble ID
             message: msg,
             x,
             y,
@@ -109,7 +109,8 @@ export const FloatingChat = ({ roomCode, player, messages }: FloatingChatProps) 
     };
 
     return (
-        <div className="absolute inset-0 pointer-events-none z-50 overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none z-50">
+            {/* Removed overflow-hidden to prevent clipping issues with input/keyboard */}
             {/* Bubbles */}
             {bubbles.map(b => (
                 <div
