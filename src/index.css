@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 /* 90s Bubbly Fun Design System */
 :root {
@@ -23,14 +23,14 @@
   --gradient-candy: linear-gradient(135deg, #FF69B4 0%, #FFE135 50%, #00D9FF 100%);
 
   /* Typography */
-  font-family: 'Fredoka', 'Comic Sans MS', 'Chalkboard', 'Comic Neue', cursive, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  font-family: 'Fredoka', 'Comic Sans MS', cursive, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
