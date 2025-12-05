@@ -26,10 +26,10 @@ export const StorageService = {
         return data as GameRoom;
     },
 
-    // Generate random block for the image (25-35% of image size)
+    // Generate random block for the image (25% of image size)
     generateBlock: (): BlockInfo => {
-        const isCircle = Math.random() > 0.5;
-        const size = 25 + Math.random() * 10; // 25-35% of image
+        const isCircle = Math.random() > 0.75; // 25% chance of circle (75% square)
+        const size = 25; // Fixed 25% of image
 
         if (isCircle) {
             // Circle somewhere in the middle area

@@ -6,7 +6,7 @@ interface TimerProps {
 }
 
 export const Timer: React.FC<TimerProps> = ({ endsAt, onTimeUp }) => {
-    const [timeLeft, setTimeLeft] = useState(5.0);
+    const [timeLeft, setTimeLeft] = useState(() => Math.max(0, (endsAt - Date.now()) / 1000));
     const onTimeUpRef = useRef(onTimeUp);
     const hasCalledRef = useRef(false);
 

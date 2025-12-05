@@ -6,6 +6,7 @@ interface GameCanvasProps {
     brushColor: string;
     brushSize: number;
     isDrawingEnabled: boolean;
+    strokes: DrawingStroke[];
     onStrokesChange: (strokes: DrawingStroke[]) => void;
 }
 
@@ -14,12 +15,12 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     brushColor,
     brushSize,
     isDrawingEnabled,
+    strokes,
     onStrokesChange,
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [isDrawing, setIsDrawing] = useState(false);
-    const [strokes, setStrokes] = useState<DrawingStroke[]>([]);
     const [currentStroke, setCurrentStroke] = useState<DrawingStroke | null>(null);
 
     // Initialize canvas size and image
@@ -100,7 +101,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
     const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
         if (!isDrawingEnabled) return;
-        e.preventDefault(); // Prevent scroll on touch
+        // Only prevent default on touch to allow mouse interactions elsewhere if needed
+        if ('touches' in e) e.preventDefault();
+
         setIsDrawing(true);
         const point = getPoint(e);
         setCurrentStroke({
@@ -125,7 +128,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         setIsDrawing(false);
         if (currentStroke) {
             const newStrokes = [...strokes, currentStroke];
-            setStrokes(newStrokes);
             onStrokesChange(newStrokes);
             setCurrentStroke(null);
         }

@@ -390,6 +390,7 @@ function App() {
                     brushColor={isEraser ? '#FFFFFF' : brushColor}
                     brushSize={isEraser ? brushSize * 2 : brushSize}
                     isDrawingEnabled={true}
+                    strokes={strokes}
                     onStrokesChange={setStrokes}
                   />
                 )}
