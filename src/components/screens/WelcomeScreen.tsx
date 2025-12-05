@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import logo from '../../assets/logo_icon.png';
 import { HowToPlayModal } from '../game/HowToPlayModal';
 import { AboutModal } from '../common/AboutModal';
+import { InstallPromptModal } from '../common/InstallPromptModal';
 
 interface WelcomeScreenProps {
     onPlay: () => void;
@@ -101,6 +102,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onPlay }) => {
             {/* Modals */}
             <HowToPlayModal isOpen={showHowToPlay} onClose={() => setShowHowToPlay(false)} />
             <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
+            <InstallPromptModal />
 
             {/* Decorative Stars */}
             <div className="absolute top-10 left-10 text-4xl animate-pulse">⭐</div>
