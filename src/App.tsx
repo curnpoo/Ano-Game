@@ -47,6 +47,7 @@ function App() {
   const [isInitialLoading, setIsInitialLoading] = useState(true);
   const [isBrowsing, setIsBrowsing] = useState(false);
   const lastStatusRef = useRef<string | null>(null);
+  const lastRoundRef = useRef<number | null>(null);
 
   // Initial 3s loading
   useEffect(() => {
@@ -108,10 +109,15 @@ function App() {
   useEffect(() => {
     if (room && !isLoading && !isBrowsing) {
       const status = room.status;
+      const round = room.roundNumber;
 
-      // Initial load or same status - no transition
-      if (!lastStatusRef.current || lastStatusRef.current === status) {
+      const statusChanged = status !== lastStatusRef.current;
+      const roundChanged = round !== lastRoundRef.current;
+
+      // Initial load or no change - no transition
+      if (!lastStatusRef.current || (!statusChanged && !roundChanged)) {
         lastStatusRef.current = status;
+        lastRoundRef.current = round;
         // Update screen immediately if needed (e.g. initial load)
         if (currentScreen === 'room-selection' || currentScreen === 'welcome' || currentScreen === 'name-entry') {
           if (status === 'lobby') setCurrentScreen('lobby');
@@ -124,8 +130,9 @@ function App() {
         return;
       }
 
-      // Status changed - trigger transition
+      // Status or Round changed - trigger transition
       lastStatusRef.current = status;
+      lastRoundRef.current = round;
       setIsLoadingTransition(true);
 
       const timer = setTimeout(() => {
@@ -144,7 +151,7 @@ function App() {
 
       return () => clearTimeout(timer);
     }
-  }, [room?.status, isLoading, currentScreen, isBrowsing]);
+  }, [room?.status, room?.roundNumber, isLoading, currentScreen, isBrowsing]);
 
 
   // Heartbeat
@@ -527,7 +534,13 @@ function App() {
       {/* Drawing Screen */}
       {currentScreen === 'drawing' && room && room.currentImage && player && (
         <div className="fixed inset-0 bg-90s-animated overflow-hidden">
-          <div className="h-full w-full flex flex-col p-4 pb-0">
+          <div
+            className="h-full w-full flex flex-col p-4 pb-0"
+            style={{
+              paddingTop: 'max(1rem, env(safe-area-inset-top) + 1rem)',
+              paddingBottom: 'max(0rem, env(safe-area-inset-bottom))'
+            }}
+          >
 
             {/* Top Bar */}
             <div className="flex-shrink-0 flex items-center justify-between gap-2 mb-4 z-20">
@@ -588,6 +601,7 @@ function App() {
                 {/* Drawing Canvas - Only when timer running */}
                 {isMyTimerRunning && !hasSubmitted && (
                   <GameCanvas
+                    key={room.roundNumber}
                     imageUrl={room.currentImage.url}
                     brushColor={isEraser ? '#FFFFFF' : brushColor}
                     brushSize={isEraser ? brushSize * 2 : brushSize}

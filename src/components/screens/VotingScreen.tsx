@@ -56,7 +56,13 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
     }
 
     return (
-        <div className={`min-h-screen bg-90s-animated flex flex-col p-4 ${mounted ? 'pop-in' : 'opacity-0'}`}>
+        <div
+            className={`fixed inset-0 bg-90s-animated flex flex-col p-4 ${mounted ? 'pop-in' : 'opacity-0'} overflow-hidden touch-none`}
+            style={{
+                paddingTop: 'max(1rem, env(safe-area-inset-top) + 1rem)',
+                paddingBottom: 'max(1rem, env(safe-area-inset-bottom) + 1rem)'
+            }}
+        >
             {/* Header */}
             <div className="text-center mb-4">
                 <h1 className="text-3xl font-bold text-white drop-shadow-lg mb-2">
