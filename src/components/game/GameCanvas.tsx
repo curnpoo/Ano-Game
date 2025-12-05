@@ -47,19 +47,22 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const width = canvas.width;
+        const height = canvas.height;
+
+        ctx.clearRect(0, 0, width, height);
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        // Draw all completed strokes
+        // Draw all completed strokes (convert from percentage to pixels)
         strokes.forEach(stroke => {
             if (stroke.points.length < 2) return;
             ctx.beginPath();
             ctx.strokeStyle = stroke.color;
             ctx.lineWidth = stroke.size;
-            ctx.moveTo(stroke.points[0].x, stroke.points[0].y);
+            ctx.moveTo(stroke.points[0].x / 100 * width, stroke.points[0].y / 100 * height);
             for (let i = 1; i < stroke.points.length; i++) {
-                ctx.lineTo(stroke.points[i].x, stroke.points[i].y);
+                ctx.lineTo(stroke.points[i].x / 100 * width, stroke.points[i].y / 100 * height);
             }
             ctx.stroke();
         });
@@ -69,9 +72,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             ctx.beginPath();
             ctx.strokeStyle = currentStroke.color;
             ctx.lineWidth = currentStroke.size;
-            ctx.moveTo(currentStroke.points[0].x, currentStroke.points[0].y);
+            ctx.moveTo(currentStroke.points[0].x / 100 * width, currentStroke.points[0].y / 100 * height);
             for (let i = 1; i < currentStroke.points.length; i++) {
-                ctx.lineTo(currentStroke.points[i].x, currentStroke.points[i].y);
+                ctx.lineTo(currentStroke.points[i].x / 100 * width, currentStroke.points[i].y / 100 * height);
             }
             ctx.stroke();
         }
@@ -81,15 +84,17 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         drawAll();
     }, [drawAll]);
 
+    // Get point as percentage of canvas
     const getPoint = (e: React.MouseEvent | React.TouchEvent) => {
         const canvas = canvasRef.current;
         if (!canvas) return { x: 0, y: 0 };
         const rect = canvas.getBoundingClientRect();
         const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
         const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
+        // Store as percentage (0-100)
         return {
-            x: clientX - rect.left,
-            y: clientY - rect.top
+            x: ((clientX - rect.left) / rect.width) * 100,
+            y: ((clientY - rect.top) / rect.height) * 100
         };
     };
 
@@ -127,15 +132,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     };
 
     return (
-        <div ref={containerRef} className="relative w-full h-full touch-none select-none overflow-hidden rounded-xl shadow-inner bg-gray-100">
-            {/* Background Image */}
-            <img
-                src={imageUrl}
-                alt="Canvas Background"
-                className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
-            />
-
-            {/* Drawing Layer */}
+        <div ref={containerRef} className="absolute inset-0 touch-none select-none overflow-hidden">
+            {/* Drawing Layer - transparent canvas on top */}
             <canvas
                 ref={canvasRef}
                 className="absolute inset-0 w-full h-full cursor-crosshair touch-none"

@@ -106,8 +106,8 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                         />
                     )}
 
-                    {/* Drawing overlay */}
-                    <svg className="absolute inset-0 w-full h-full">
+                    {/* Drawing overlay - use viewBox for percentage coordinates */}
+                    <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                         {currentDrawing.drawing.strokes.map((stroke, i) => (
                             <path
                                 key={i}
@@ -115,10 +115,11 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                                     `${j === 0 ? 'M' : 'L'} ${p.x} ${p.y}`
                                 ).join(' ')}
                                 stroke={stroke.color}
-                                strokeWidth={stroke.size}
+                                strokeWidth={stroke.size / 10}
                                 fill="none"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
+                                vectorEffect="non-scaling-stroke"
                             />
                         ))}
                     </svg>
@@ -131,8 +132,8 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                             key={i}
                             onClick={() => setSelectedIndex(i)}
                             className={`w-3 h-3 rounded-full transition-all ${i === selectedIndex
-                                    ? 'bg-white scale-125'
-                                    : 'bg-white/40 hover:bg-white/60'
+                                ? 'bg-white scale-125'
+                                : 'bg-white/40 hover:bg-white/60'
                                 }`}
                         />
                     ))}
@@ -147,8 +148,8 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                         onClick={() => setSelectedIndex(Math.max(0, selectedIndex - 1))}
                         disabled={selectedIndex === 0}
                         className={`w-12 h-12 rounded-full text-2xl transition-all ${selectedIndex === 0
-                                ? 'bg-gray-200 text-gray-400'
-                                : 'bg-white hover:scale-110 jelly-hover'
+                            ? 'bg-gray-200 text-gray-400'
+                            : 'bg-white hover:scale-110 jelly-hover'
                             }`}
                         style={{ boxShadow: selectedIndex !== 0 ? '0 3px 0 rgba(0,0,0,0.2)' : 'none' }}
                     >
@@ -177,8 +178,8 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                         onClick={() => setSelectedIndex(Math.min(drawings.length - 1, selectedIndex + 1))}
                         disabled={selectedIndex === drawings.length - 1}
                         className={`w-12 h-12 rounded-full text-2xl transition-all ${selectedIndex === drawings.length - 1
-                                ? 'bg-gray-200 text-gray-400'
-                                : 'bg-white hover:scale-110 jelly-hover'
+                            ? 'bg-gray-200 text-gray-400'
+                            : 'bg-white hover:scale-110 jelly-hover'
                             }`}
                         style={{ boxShadow: selectedIndex !== drawings.length - 1 ? '0 3px 0 rgba(0,0,0,0.2)' : 'none' }}
                     >
