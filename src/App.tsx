@@ -420,7 +420,8 @@ function App() {
       {player && currentScreen !== 'welcome' && currentScreen !== 'name-entry' && (
         <button
           onClick={() => setShowSettings(true)}
-          className="fixed top-4 left-4 z-50 bg-white/90 backdrop-blur-sm p-3 rounded-xl shadow-lg border-2 border-purple-200 hover:border-purple-500 transition-all hover:scale-110"
+          className="fixed left-4 z-50 bg-white/90 backdrop-blur-sm p-3 rounded-xl shadow-lg border-2 border-purple-200 hover:border-purple-500 transition-all hover:scale-110"
+          style={{ top: 'max(1rem, env(safe-area-inset-top) + 1rem)' }}
           title="Settings"
         >
           ⚙️
