@@ -31,7 +31,7 @@ export const InstallPromptModal: React.FC = () => {
                 </p>
 
                 {isIOS ? (
-                    <div className="bg-gray-100 rounded-xl p-4 mb-6 text-left text-sm space-y-3">
+                    <div className="bg-gray-100 rounded-xl p-4 mb-6 text-left text-sm space-y-3 text-gray-800">
                         <div className="flex items-center gap-3">
                             <span className="text-2xl">1️⃣</span>
                             <span>Tap the <strong>Share</strong> button <span className="text-blue-500 text-xl">⎋</span> below</span>
@@ -42,7 +42,7 @@ export const InstallPromptModal: React.FC = () => {
                         </div>
                     </div>
                 ) : (
-                    <div className="bg-gray-100 rounded-xl p-4 mb-6 text-sm">
+                    <div className="bg-gray-100 rounded-xl p-4 mb-6 text-sm text-gray-800">
                         Tap your browser menu (⋮) and select <strong>Install App</strong> or <strong>Add to Home Screen</strong>.
                     </div>
                 )}
