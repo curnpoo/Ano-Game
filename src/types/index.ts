@@ -28,7 +28,7 @@ export interface GameRoom {
         url: string;
         uploadedBy: string;
         uploadedAt: number;
-    };
+    } | null;
     roundNumber: number;
     // Turn-based fields
     turnOrder: string[]; // Array of player IDs

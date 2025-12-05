@@ -214,7 +214,7 @@ function App() {
         await StorageService.updateRoom(roomCode, (r) => ({
           ...r,
           status: 'lobby',
-          currentImage: undefined,
+          currentImage: null, // Firebase doesn't accept undefined
           roundNumber: r.roundNumber + 1,
           annotations: [],
         }));
