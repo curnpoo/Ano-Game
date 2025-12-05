@@ -73,7 +73,7 @@ export const StorageService = {
     // --- Room Management ---
     createRoom: async (hostPlayer: Player): Promise<string> => {
         const roomCode = StorageService.generateRoomCode();
-        const roomRef = ref(database, `rooms / ${roomCode} `);
+        const roomRef = ref(database, `rooms/${roomCode}`);
 
         const newRoom: GameRoom = {
             roomCode: roomCode,
