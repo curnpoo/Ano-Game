@@ -10,6 +10,7 @@ interface SettingsModalProps {
     onUpdateProfile: (profileData: Partial<Player>) => void;
     onLeaveGame?: () => void;
     onEndGame?: () => void;
+    onGoHome?: () => void;
 }
 
 const COLORS = ['#FF69B4', '#9B59B6', '#3498DB', '#1ABC9C', '#F1C40F', '#E67E22', '#E74C3C', '#34495E', '#000000'];
@@ -31,12 +32,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     onClose,
     onUpdateProfile,
     onLeaveGame,
-    onEndGame
+    onEndGame,
+    onGoHome
 }) => {
     const [name, setName] = useState(player.name);
     const [strokes, setStrokes] = useState<DrawingStroke[]>(player.avatarStrokes || []);
     const [color, setColor] = useState(player.color);
     const [frame, setFrame] = useState(FRAMES.find(f => f.class === player.frame)?.id || 'none');
+    const [showHomeConfirm, setShowHomeConfirm] = useState(false);
+    const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
 
     const handleSave = () => {
         if (name.trim()) {
@@ -62,23 +66,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border-4 border-purple-500 pop-in flex flex-col">
                 <div className="p-6 border-b border-gray-100 flex justify-between items-center sticky top-0 bg-white z-10">
-                    <div className="flex items-center gap-2">
-                        {onLeaveGame && (
-                            <button
-                                onClick={() => {
-                                    if (confirm('Go back to home? This will leave the current game.')) {
-                                        onLeaveGame();
-                                        onClose();
-                                    }
-                                }}
-                                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 flex items-center justify-center text-lg transition-colors"
-                                title="Back to Home"
-                            >
-                                🏠
-                            </button>
-                        )}
-                        <h2 className="text-2xl font-bold text-purple-600">Settings ⚙️</h2>
-                    </div>
+                    <h2 className="text-2xl font-bold text-purple-600">Settings ⚙️</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">✕</button>
                 </div>
 
@@ -184,14 +172,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     {(onLeaveGame || (isHost && onEndGame)) && (
                         <div className="pt-4 border-t border-gray-100">
                             <div className="space-y-3">
+                                {onGoHome && (
+                                    <button
+                                        onClick={() => setShowHomeConfirm(true)}
+                                        className="w-full py-3 rounded-xl font-bold text-gray-700 bg-gray-100 hover:bg-gray-200 border-2 border-transparent transition-all"
+                                    >
+                                        🏠 Go Home
+                                    </button>
+                                )}
+
                                 {onLeaveGame && (
                                     <button
-                                        onClick={() => {
-                                            if (confirm('Are you sure you want to leave the game?')) {
-                                                onLeaveGame();
-                                                onClose();
-                                            }
-                                        }}
+                                        onClick={() => setShowLeaveConfirm(true)}
                                         className="w-full py-3 rounded-xl font-bold text-red-600 bg-red-50 hover:bg-red-100 border-2 border-transparent hover:border-red-200 transition-all"
                                     >
                                         Leave Game 🏃‍♂️
@@ -215,6 +207,65 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         </div>
                     )}
                 </div>
+
+                {/* Custom Confirmations */}
+                {showHomeConfirm && (
+                    <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex items-center justify-center p-6 z-20 rounded-3xl">
+                        <div className="text-center space-y-4 animate-pop-in">
+                            <div className="text-4xl">🏠</div>
+                            <h3 className="text-xl font-bold text-gray-800">Go back to Home?</h3>
+                            <p className="text-gray-600 text-sm">
+                                You're not leaving the game! You can rejoin anytime from the home screen.
+                            </p>
+                            <div className="flex gap-2 justify-center">
+                                <button
+                                    onClick={() => setShowHomeConfirm(false)}
+                                    className="px-4 py-2 rounded-xl bg-gray-100 font-bold text-gray-600 hover:bg-gray-200"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        onGoHome?.();
+                                        onClose();
+                                    }}
+                                    className="px-4 py-2 rounded-xl bg-purple-500 text-white font-bold hover:bg-purple-600"
+                                >
+                                    Go Home
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {showLeaveConfirm && (
+                    <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex items-center justify-center p-6 z-20 rounded-3xl">
+                        <div className="text-center space-y-4 animate-pop-in">
+                            <div className="text-4xl">⚠️</div>
+                            <h3 className="text-xl font-bold text-red-600">Leave Game?</h3>
+                            <p className="text-gray-600 text-sm">
+                                This will remove you from the game. You'll need the room code to rejoin.
+                            </p>
+                            <div className="flex gap-2 justify-center">
+                                <button
+                                    onClick={() => setShowLeaveConfirm(false)}
+                                    className="px-4 py-2 rounded-xl bg-gray-100 font-bold text-gray-600 hover:bg-gray-200"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        onLeaveGame?.();
+                                        onClose();
+                                    }}
+                                    className="px-4 py-2 rounded-xl bg-red-500 text-white font-bold hover:bg-red-600"
+                                >
+                                    Leave Game
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

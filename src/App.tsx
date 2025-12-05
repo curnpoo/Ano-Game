@@ -17,6 +17,7 @@ import { Toolbar } from './components/game/Toolbar';
 import { Timer } from './components/game/Timer';
 import { HowToPlayModal } from './components/game/HowToPlayModal';
 import { Toast } from './components/common/Toast';
+import { LoadingScreen } from './components/common/LoadingScreen';
 import type { Player, DrawingStroke, GameSettings, PlayerDrawing } from './types';
 
 type Screen = 'welcome' | 'name-entry' | 'room-selection' | 'lobby' | 'waiting' | 'uploading' | 'drawing' | 'voting' | 'results' | 'final';
@@ -42,6 +43,8 @@ function App() {
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isEraser, setIsEraser] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [isLoadingTransition, setIsLoadingTransition] = useState(false);
+  const lastStatusRef = useRef<string | null>(null);
 
   // Keep ref in sync with state
   useEffect(() => {
@@ -75,11 +78,9 @@ function App() {
         StorageService.joinRoom(lastRoomCode, session).then(room => {
           if (room) {
             // Determine screen based on room status
-            if (room.status === 'lobby') setCurrentScreen('lobby');
-            else if (room.status === 'drawing') setCurrentScreen('drawing');
-            else if (room.status === 'voting') setCurrentScreen('voting');
-            else if (room.status === 'results') setCurrentScreen('results');
-            else if (room.status === 'final') setCurrentScreen('final');
+            // The screen will be set by the room status useEffect below
+            // For now, we can set a temporary loading state or let the useEffect handle it.
+            // If the room is valid, the useEffect reacting to `room` will take over.
           } else {
             // Room invalid/closed
             StorageService.leaveRoom();
@@ -95,61 +96,40 @@ function App() {
 
   // Sync screen with room status
   useEffect(() => {
-    if (!room) return;
+    if (room && !isLoading) {
+      const status = room.status;
 
-    // Check if I am waiting
-    const isWaiting = room.waitingPlayers?.some(p => p.id === player?.id);
-    if (isWaiting) {
-      if (currentScreen !== 'waiting') setCurrentScreen('waiting');
-      return;
-    }
+      // Initial load or same status - no transition
+      if (!lastStatusRef.current || lastStatusRef.current === status) {
+        lastStatusRef.current = status;
+        // Update screen immediately if needed (e.g. initial load)
+        if (currentScreen === 'room-selection' || currentScreen === 'welcome' || currentScreen === 'name-entry') {
+          if (status === 'lobby') setCurrentScreen('lobby');
+          else if (status === 'drawing') setCurrentScreen('drawing');
+          else if (status === 'voting') setCurrentScreen('voting');
+          else if (status === 'results') setCurrentScreen('results');
+          else if (status === 'final') setCurrentScreen('final');
+        }
+        return;
+      }
 
-    switch (room.status) {
-      case 'lobby':
-        if (currentScreen !== 'lobby' && currentScreen !== 'welcome' &&
-          currentScreen !== 'name-entry' && currentScreen !== 'room-selection') {
-          setCurrentScreen('lobby');
-          // Reset drawing state for new round
-          setStrokes([]);
-          setIsMyTimerRunning(false);
-        }
-        break;
-      case 'uploading':
-        if (currentScreen !== 'uploading' && currentScreen !== 'waiting') {
-          // Show loading for 2 seconds before switching
-          setIsLoading(true);
-          setTimeout(() => {
-            setIsLoading(false);
-            setCurrentScreen('uploading');
-          }, 2000);
-        }
-        break;
-      case 'drawing':
-        if (currentScreen === 'lobby' || currentScreen === 'uploading' || currentScreen === 'waiting') {
-          setCurrentScreen('drawing');
-          setStrokes([]);
-          setIsMyTimerRunning(false);
-        }
-        break;
-      case 'voting':
-        setCurrentScreen('voting');
-        break;
-      case 'results':
-        setCurrentScreen('results');
-        break;
-      case 'final':
-        setCurrentScreen('final');
-        // Update history with winner
-        if (room.scores) {
-          const winnerId = Object.entries(room.scores).sort(([, a], [, b]) => b - a)[0]?.[0];
-          const winner = room.players.find(p => p.id === winnerId);
-          if (winner) {
-            StorageService.updateHistoryWinner(room.roomCode, winner.name);
-          }
-        }
-        break;
+      // Status changed - trigger transition
+      lastStatusRef.current = status;
+      setIsLoadingTransition(true);
+
+      const timer = setTimeout(() => {
+        setIsLoadingTransition(false);
+        if (status === 'lobby') setCurrentScreen('lobby');
+        else if (status === 'drawing') setCurrentScreen('drawing');
+        else if (status === 'voting') setCurrentScreen('voting');
+        else if (status === 'results') setCurrentScreen('results');
+        else if (status === 'final') setCurrentScreen('final');
+      }, 1500);
+
+      return () => clearTimeout(timer);
     }
-  }, [room?.status, currentScreen, room?.waitingPlayers, player?.id]);
+  }, [room?.status, isLoading, currentScreen]);
+
 
   // Heartbeat
   useEffect(() => {
@@ -392,6 +372,11 @@ function App() {
     }
   };
 
+  const handleGoHome = () => {
+    setCurrentScreen('room-selection');
+    setShowSettings(false);
+  };
+
   // Get my player state
   const myPlayerState = room?.playerStates?.[player?.id || ''];
   const hasSubmitted = myPlayerState?.status === 'submitted';
@@ -402,6 +387,18 @@ function App() {
   // Count submitted players
   const submittedCount = room ? Object.values(room.playerStates || {}).filter(s => s.status === 'submitted').length : 0;
   const totalPlayers = room?.players?.length || 0;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-90s-animated flex items-center justify-center">
+        <div className="text-4xl animate-bounce">⏳ Loading...</div>
+      </div>
+    );
+  }
+
+  if (isLoadingTransition) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div>
@@ -434,7 +431,8 @@ function App() {
           onClose={() => setShowSettings(false)}
           onUpdateProfile={handleUpdateProfile}
           onLeaveGame={roomCode ? handleLeaveGame : undefined}
-          onEndGame={roomCode ? handleEndGame : undefined}
+          onEndGame={room?.hostId === player.id ? handleEndGame : undefined}
+          onGoHome={handleGoHome}
         />
       )}
 
@@ -442,11 +440,12 @@ function App() {
       <HowToPlayModal isOpen={showHowToPlay} onClose={() => setShowHowToPlay(false)} />
 
       {/* Loading Overlay */}
-      {isLoading && (
+      {/* This block is now handled by the top-level conditional rendering for isLoading and isLoadingTransition */}
+      {/* {isLoading && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="text-6xl animate-bounce">🎨</div>
         </div>
-      )}
+      )} */}
 
       {/* Screens */}
       {currentScreen === 'welcome' && (
