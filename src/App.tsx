@@ -49,6 +49,7 @@ function App() {
   const [isBrowsing, setIsBrowsing] = useState(false);
   const lastStatusRef = useRef<string | null>(null);
   const lastRoundRef = useRef<number | null>(null);
+  const lastWaitingRef = useRef<boolean>(false);
 
   // Initial 3s loading
   useEffect(() => {
@@ -111,20 +112,43 @@ function App() {
     if (room && !isLoading && !isBrowsing) {
       const status = room.status;
       const round = room.roundNumber;
+      const amWaiting = room.waitingPlayers?.some(p => p.id === player?.id) || false;
 
       const statusChanged = status !== lastStatusRef.current;
       const roundChanged = round !== lastRoundRef.current;
+      const waitingChanged = amWaiting !== lastWaitingRef.current;
 
       // Initial load or no change - no transition
-      if (!lastStatusRef.current || (!statusChanged && !roundChanged)) {
+      if (!lastStatusRef.current || (!statusChanged && !roundChanged && !waitingChanged)) {
         lastStatusRef.current = status;
         lastRoundRef.current = round;
-        // Update screen immediately if needed (e.g. initial load)
+        lastWaitingRef.current = amWaiting;
+
+        // Update screen immediately if needed (e.g. initial load or waiting change without transition)
+        // If waiting status changed (e.g. joined game), update screen immediately without 1.5s delay
+        if (waitingChanged) {
+          if (status === 'lobby') setCurrentScreen('lobby');
+          else if (status === 'uploading') setCurrentScreen(amWaiting ? 'waiting' : 'uploading');
+          else if (status === 'drawing') {
+            if (amWaiting) {
+              setCurrentScreen('waiting');
+            } else {
+              setCurrentScreen('drawing');
+              setStrokes([]);
+              setIsMyTimerRunning(false);
+            }
+          }
+          else if (status === 'voting') setCurrentScreen(amWaiting ? 'waiting' : 'voting');
+          else if (status === 'results') setCurrentScreen('results');
+          else if (status === 'final') setCurrentScreen('final');
+          return;
+        }
+
         if (currentScreen === 'room-selection' || currentScreen === 'welcome' || currentScreen === 'name-entry') {
           if (status === 'lobby') setCurrentScreen('lobby');
-          else if (status === 'uploading') setCurrentScreen('uploading');
-          else if (status === 'drawing') setCurrentScreen('drawing');
-          else if (status === 'voting') setCurrentScreen('voting');
+          else if (status === 'uploading') setCurrentScreen(amWaiting ? 'waiting' : 'uploading');
+          else if (status === 'drawing') setCurrentScreen(amWaiting ? 'waiting' : 'drawing');
+          else if (status === 'voting') setCurrentScreen(amWaiting ? 'waiting' : 'voting');
           else if (status === 'results') setCurrentScreen('results');
           else if (status === 'final') setCurrentScreen('final');
         }
@@ -134,14 +158,14 @@ function App() {
       // Status or Round changed - trigger transition
       lastStatusRef.current = status;
       lastRoundRef.current = round;
+      lastWaitingRef.current = amWaiting;
+
       setIsLoadingTransition(true);
 
       const timer = setTimeout(() => {
         setIsLoadingTransition(false);
 
         // Routing Logic
-        const amWaiting = room.waitingPlayers?.some(p => p.id === player?.id);
-
         if (status === 'lobby') setCurrentScreen('lobby');
         else if (status === 'uploading') setCurrentScreen(amWaiting ? 'waiting' : 'uploading');
         else if (status === 'drawing') {
