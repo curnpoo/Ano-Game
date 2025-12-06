@@ -52,6 +52,8 @@ function App() {
   const lastWaitingRef = useRef<boolean>(false);
 
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
+  const [showGameEnded, setShowGameEnded] = useState(false);
+  const [endGameCountdown, setEndGameCountdown] = useState(3);
 
   // Initial 3s loading
   useEffect(() => {
@@ -66,7 +68,7 @@ function App() {
     strokesRef.current = strokes;
   }, [strokes]);
 
-  const { room } = useRoom(roomCode, player?.id || null);
+  const { room, error: roomError } = useRoom(roomCode, player?.id || null);
 
   const showToast = useCallback((message: string, type: 'error' | 'success' | 'info' = 'error') => {
     setToast({ message, type });
@@ -206,6 +208,33 @@ function App() {
       }
     }
   }, [room, player, roomCode]);
+
+  // Effect: Host Ended Game (Room Deleted)
+  useEffect(() => {
+    if (roomCode && roomError === 'Room not found' && !isLoading && !isInitialLoading) {
+      // Host closed the room
+      setShowGameEnded(true);
+      setEndGameCountdown(3);
+    }
+  }, [roomError, roomCode]);
+
+  // Effect: Game Ended Countdown
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (showGameEnded) {
+      if (endGameCountdown > 0) {
+        timer = setTimeout(() => setEndGameCountdown(prev => prev - 1), 1000);
+      } else {
+        // Countdown finished
+        setShowGameEnded(false);
+        setRoomCode(null);
+        StorageService.leaveRoom();
+        setCurrentScreen('room-selection');
+        showToast('Host ended the game', 'info');
+      }
+    }
+    return () => clearTimeout(timer);
+  }, [showGameEnded, endGameCountdown, showToast]);
 
 
   // Notification Effect & Prompt
@@ -554,6 +583,21 @@ function App() {
           sessionStorage.setItem('seenNotificationPrompt', 'true');
         }}
       />
+
+      {/* Game Ended Modal */}
+      {showGameEnded && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center animate-fade-in">
+          <div className="bg-white rounded-3xl p-8 text-center max-w-sm mx-4 shadow-2xl pop-in border-4 border-red-500">
+            <div className="text-6xl mb-4 animate-bounce">🛑</div>
+            <h3 className="text-2xl font-bold text-red-600 mb-2">Game Ended</h3>
+            <p className="text-gray-600 font-medium">The host has closed the room.</p>
+            <p className="text-gray-400 text-sm mt-4">Returning to lobby in {endGameCountdown}...</p>
+            <div className="mt-6 flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Settings Button - Show on all screens except welcome/name-entry */}
       {player && currentScreen !== 'welcome' && currentScreen !== 'name-entry' && (
