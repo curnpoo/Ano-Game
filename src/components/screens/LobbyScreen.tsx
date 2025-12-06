@@ -24,7 +24,8 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     // onSettingsChange, // Currently unused, but kept in interface for future use
     onKick,
     onJoinGame,
-    onBack
+    onBack,
+    onLeave
 }) => {
     const [showSettings, setShowSettings] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -75,9 +76,29 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
 
     return (
         <div className="min-h-screen bg-90s-animated flex flex-col pb-safe overflow-y-auto"
-            style={{ paddingTop: 'max(2rem, env(safe-area-inset-top) + 1rem)' }}>
+            style={{ paddingTop: 'max(1.5rem, env(safe-area-inset-top) + 1rem)' }}>
+
+            <button
+                onClick={() => setShowSettings(true)}
+                className="absolute top-4 right-4 z-20 bg-white p-3 rounded-2xl shadow-lg border-2 border-purple-100 hover:scale-105 active:scale-95 transition-all w-12 h-12 flex items-center justify-center text-xl"
+            >
+                ⚙️
+            </button>
 
             <div className="w-full max-w-md mx-auto space-y-4 px-4 pb-8">
+                {/* Home Button Card */}
+                <button
+                    onClick={onBack}
+                    className="w-full bg-white/10 backdrop-blur-sm rounded-2xl p-4 border-2 border-white/20 flex items-center gap-4 hover:bg-white/20 active:scale-95 transition-all"
+                >
+                    <div className="text-3xl">🏠</div>
+                    <div className="flex-1 text-left">
+                        <div className="text-lg font-bold text-white">Return to Home</div>
+                        <div className="text-white/60 text-sm">Keep room open</div>
+                    </div>
+                    <div className="text-2xl text-white/60">←</div>
+                </button>
+
                 {/* Room Code Card */}
                 <div className="bg-white rounded-3xl p-5 flex justify-between items-center shadow-xl"
                     style={{
@@ -190,7 +211,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
 
                     {/* Leave Room Button */}
                     <button
-                        onClick={onBack}
+                        onClick={onLeave}
                         className="w-full mt-4 bg-red-100 text-red-600 font-bold py-3 rounded-xl hover:bg-red-200 transition-all flex items-center justify-center gap-2"
                     >
                         <span>🚪</span> Leave Room
@@ -256,7 +277,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                     isHost={isHost}
                     onClose={() => setShowSettings(false)}
                     onUpdateProfile={() => { /* Profile updates handled internally */ }}
-                    onLeaveGame={onBack}
+                    onLeaveGame={onLeave}
                     onGoHome={onBack}
                     onEndGame={isHost ? () => StorageService.closeRoom(room.roomCode) : undefined}
                     onKick={isHost ? (playerId: string) => StorageService.kickPlayer(room.roomCode, playerId) : undefined}

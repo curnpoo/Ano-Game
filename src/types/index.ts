@@ -23,6 +23,11 @@ export interface UserAccount {
     xp: number;
     purchasedItems: string[];
     cosmetics: PlayerCosmetics;
+    // Profile Data
+    avatarStrokes?: DrawingStroke[];
+    color?: string;
+    frame?: string;
+    avatar?: string; // fallback emoji
 }
 
 export interface PlayerCosmetics {

@@ -13,8 +13,14 @@ import { CasinoScreen } from './components/screens/CasinoScreen';
 import { HomeScreen } from './components/screens/HomeScreen';
 import { StoreScreen } from './components/screens/StoreScreen';
 import { ProfileScreen } from './components/screens/ProfileScreen';
+
+import { LoginScreen } from './components/screens/LoginScreen';
+import { AuthService } from './services/auth';
 import { StorageService } from './services/storage';
 import { ImageService } from './services/image';
+import { XPService } from './services/xp';
+import { StatsService } from './services/stats';
+import { vibrate } from './utils/haptics';
 import { useRoom } from './hooks/useRoom';
 import { GameCanvas } from './components/game/GameCanvas';
 import { Toolbar } from './components/game/Toolbar';
@@ -34,9 +40,9 @@ import {
 } from './utils/notifications';
 import { requestPushPermission, storePushToken, isPushSupported } from './services/pushNotifications';
 
-import type { Player, DrawingStroke, GameSettings, PlayerDrawing } from './types';
+import type { Player, DrawingStroke, GameSettings, PlayerDrawing, GameRoom } from './types';
 
-type Screen = 'welcome' | 'name-entry' | 'home' | 'room-selection' | 'store' | 'profile' | 'lobby' | 'waiting' | 'uploading' | 'drawing' | 'voting' | 'results' | 'final';
+type Screen = 'welcome' | 'login' | 'name-entry' | 'home' | 'room-selection' | 'store' | 'profile' | 'lobby' | 'waiting' | 'uploading' | 'drawing' | 'voting' | 'results' | 'final';
 
 interface ToastState {
   message: string;
@@ -101,37 +107,61 @@ function App() {
     setToast(null);
   }, []);
 
-  // Restore session and room
+  // Restore session (Auth or Local)
   useEffect(() => {
-    const session = StorageService.getSession();
-    if (session) {
-      setPlayer(session);
+    const initSession = async () => {
+      // 1. Check Auth (Firebase Login)
+      const authUser = AuthService.getCurrentUser();
+      let session = StorageService.getSession();
 
-      // Check for auto-rejoin
-      const lastRoomCode = StorageService.getRoomCode();
-      const lastActive = StorageService.getLastLocalActivity();
-      const isRecent = Date.now() - lastActive < 10 * 60 * 1000; // 10 minutes
-
-      if (lastRoomCode && isRecent) {
-        // Auto-join if recent
-        setRoomCode(lastRoomCode);
-        StorageService.joinRoom(lastRoomCode, session).then(room => {
-          if (room) {
-            // Determine screen based on room status
-            // The screen will be set by the room status useEffect below
-            // For now, we can set a temporary loading state or let the useEffect handle it.
-            // If the room is valid, the useEffect reacting to `room` will take over.
+      if (authUser) {
+        // We have a logged in user, ensure session matches
+        if (!session || session.id !== authUser.id) {
+          // Create session from auth user
+          if (authUser.avatarStrokes && authUser.color) {
+            session = {
+              id: authUser.id,
+              name: authUser.username,
+              color: authUser.color,
+              frame: authUser.frame || 'none',
+              avatarStrokes: authUser.avatarStrokes,
+              joinedAt: authUser.createdAt,
+              lastSeen: Date.now(),
+              cosmetics: authUser.cosmetics
+            };
+            StorageService.saveSession(session);
+            setPlayer(session);
           } else {
-            // Room invalid/closed
+            // Auth user exists but no profile text/avatar -> needs setup
+            // (This might happen if we add partial registration later)
+            // For now, assume if they have an account they went through setup?
+            // Actually, we need to handle "New Account" flow where they haven't set avatar yet.
+          }
+        }
+      }
+
+      if (session) {
+        setPlayer(session);
+
+        // Check for auto-rejoin
+        const lastRoomCode = StorageService.getRoomCode();
+        const lastActive = StorageService.getLastLocalActivity();
+        const isRecent = Date.now() - lastActive < 10 * 60 * 1000; // 10 minutes
+
+        if (lastRoomCode && isRecent) {
+          setRoomCode(lastRoomCode);
+          const room = await StorageService.joinRoom(lastRoomCode, session);
+          if (!room) {
             StorageService.leaveRoom();
             setCurrentScreen('home');
           }
-        });
-      } else {
-        // Too old or no room -> Home Screen
-        setCurrentScreen('home');
+          // If room exists, useEffect will handle routing
+        } else {
+          setCurrentScreen('home');
+        }
       }
-    }
+    };
+    initSession();
   }, []);
 
   // Calculated state for dependencies
@@ -238,8 +268,10 @@ function App() {
             notifyVotingStarted();
           } else if (status === 'results') {
             notifyResultsReady();
+            handleRoundEndRewards(room);
           } else if (status === 'final') {
             notifyFinalResults();
+            handleGameEndRewards(room);
           }
         }
 
@@ -377,24 +409,153 @@ function App() {
     return () => clearInterval(interval);
   }, [roomCode, player?.id]);
 
-  const handlePlayNow = () => {
-    if (player) {
-      setCurrentScreen('room-selection');
+  // --- XP & Stats Helpers ---
+  const handleRoundEndRewards = async (currentRoom: GameRoom) => {
+    if (!player) return;
+
+    // Find results for the PREVIOUS round (since status just changed to 'results', the round number might be same)
+    // Wait, storage service updates roundResults THEN changes status.
+    const results = currentRoom.roundResults.find(r => r.roundNumber === currentRoom.roundNumber);
+    if (!results) return;
+
+    // 1. Participation Reward (XP only, stats tracked via wins/losses)
+    const xpResult = XPService.addXP(XPService.rewards.PARTICIPATE);
+    await StatsService.recordXPEarned(XPService.rewards.PARTICIPATE);
+
+    // 2. Win/Loss
+    const myRankIndex = results.rankings.findIndex(r => r.playerId === player.id);
+    if (myRankIndex === 0) {
+      const winXP = XPService.addXP(XPService.rewards.WIN_ROUND);
+      xpResult.newLevel = winXP.newLevel; // Update if double level up
+      xpResult.leveledUp = xpResult.leveledUp || winXP.leveledUp;
+
+      await StatsService.recordXPEarned(XPService.rewards.WIN_ROUND);
+      await StatsService.incrementStat('roundsWon');
+      showToast(`Round Won! +${XPService.rewards.WIN_ROUND} XP 🏆`, 'success');
     } else {
+      await StatsService.incrementStat('roundsLost');
+    }
+
+    // 3. Level Up Check
+    if (xpResult.leveledUp) {
+      showToast(`Level Up! You are now level ${xpResult.newLevel}! 🎉`, 'success');
+      vibrate([100, 50, 100, 50, 200]);
+      await StatsService.updateHighestLevel(xpResult.newLevel);
+    }
+
+    // 4. Auth Sync
+    if (AuthService.isLoggedIn()) {
+      await AuthService.updateUser(player.id, { xp: XPService.getXP() });
+    }
+  };
+
+  const handleGameEndRewards = async (currentRoom: GameRoom) => {
+    if (!player) return;
+
+    // Game Completion
+    const xpResult = XPService.addXP(XPService.rewards.COMPLETE_GAME);
+    await StatsService.recordXPEarned(XPService.rewards.COMPLETE_GAME);
+
+    // Determine Winner
+    if (currentRoom.scores) {
+      // Sort scores
+      const sorted = (Object.entries(currentRoom.scores) as [string, number][]).sort(([, a], [, b]) => b - a);
+      if (sorted[0][0] === player.id) {
+        const winXP = XPService.addXP(XPService.rewards.COMPLETE_GAME); // Bonus for winning? Use COMPLETE_GAME for now or add new reward
+        xpResult.leveledUp = xpResult.leveledUp || winXP.leveledUp;
+        await StatsService.incrementStat('gamesWon');
+        showToast('You Won the Game! 🏆', 'success');
+      }
+    }
+    await StatsService.incrementStat('gamesPlayed');
+
+    if (xpResult.leveledUp) {
+      showToast(`Level Up! You are now level ${xpResult.newLevel}! 🎉`, 'success');
+      await StatsService.updateHighestLevel(xpResult.newLevel);
+    }
+
+    if (AuthService.isLoggedIn()) {
+      await AuthService.updateUser(player.id, { xp: XPService.getXP() });
+    }
+  };
+
+  const handlePlayNow = () => {
+    // If we have a session, go to home (should cover edge cases)
+    if (player) {
+      setCurrentScreen('home');
+    } else {
+      // Go to Login Screen instead of name-entry
+      setCurrentScreen('login');
+    }
+  };
+
+  const handleLoginComplete = async () => {
+    const authUser = AuthService.getCurrentUser();
+    if (authUser) {
+      // Check if profile is set up
+      if (authUser.avatarStrokes && authUser.color) {
+        // Profile ready, go home
+        const session: Player = {
+          id: authUser.id,
+          name: authUser.username,
+          color: authUser.color,
+          frame: authUser.frame || 'none',
+          avatarStrokes: authUser.avatarStrokes,
+          joinedAt: authUser.createdAt,
+          lastSeen: Date.now(),
+          cosmetics: authUser.cosmetics
+        };
+        StorageService.saveSession(session);
+        setPlayer(session);
+        setCurrentScreen('home');
+      } else {
+        // Need to setup profile (Avatar/Color)
+        setCurrentScreen('name-entry');
+      }
+    } else {
+      // Guest mode selected
       setCurrentScreen('name-entry');
     }
   };
 
   const handleProfileComplete = (profileData: Omit<Player, 'id' | 'joinedAt' | 'lastSeen'>) => {
-    const newPlayer: Player = {
-      id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(), // fallback just in case
-      ...profileData,
-      joinedAt: Date.now(),
-      lastSeen: Date.now()
-    };
-    StorageService.saveSession(newPlayer);
-    setPlayer(newPlayer);
-    setCurrentScreen('home');
+    const authUser = AuthService.getCurrentUser();
+
+    // If logged in, update the Auth User with this profile data
+    if (authUser) {
+      const updates = {
+        avatarStrokes: profileData.avatarStrokes,
+        color: profileData.color,
+        frame: profileData.frame,
+        // We usually keep the username from auth, but if they changed it here?
+        // ProfileSetup allows changing name. Let's update it.
+        username: profileData.name
+      };
+      AuthService.updateUser(authUser.id, updates);
+
+      // Use Auth ID
+      const newPlayer: Player = {
+        id: authUser.id,
+        ...profileData,
+        joinedAt: authUser.createdAt,
+        lastSeen: Date.now(),
+        cosmetics: authUser.cosmetics
+      };
+      StorageService.saveSession(newPlayer);
+      setPlayer(newPlayer);
+      setCurrentScreen('home');
+    } else {
+      // Guest Flow
+      const newPlayer: Player = {
+        id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
+        ...profileData,
+        joinedAt: Date.now(),
+        lastSeen: Date.now()
+      };
+      StorageService.saveSession(newPlayer);
+      setPlayer(newPlayer);
+      setCurrentScreen('home');
+    }
   };
 
   const handleUpdateProfile = (profileData: Partial<Player>) => {
@@ -800,13 +961,17 @@ function App() {
         <WelcomeScreen onPlay={handlePlayNow} />
       )}
 
+      {currentScreen === 'login' && (
+        <LoginScreen onLogin={handleLoginComplete} />
+      )}
+
       {currentScreen === 'name-entry' && (
         <ProfileSetupScreen
           onComplete={handleProfileComplete}
+          initialName={AuthService.getCurrentUser()?.username || ''}
         />
       )}
 
-      {/* Home Screen - Main Navigation Hub */}
       {currentScreen === 'home' && player && (
         <HomeScreen
           player={player}
