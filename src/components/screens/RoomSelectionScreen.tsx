@@ -204,9 +204,18 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
                                                         </span>
                                                     )}
                                                 </div>
-                                                <div className="text-sm text-gray-500 mt-1">
-                                                    {game.hostName && <span className="font-medium text-purple-600 mr-2">Host: {game.hostName} •</span>}
-                                                    {game.playerCount} Players • Round {game.roundNumber}
+                                                <div className="flex flex-wrap gap-2 mt-2">
+                                                    {game.hostName && (
+                                                        <span className="inline-flex items-center gap-1 bg-purple-50 text-purple-700 px-2 py-1 rounded-md text-xs font-bold border border-purple-100">
+                                                            👤 <span className="truncate max-w-[80px]">{game.hostName}</span>
+                                                        </span>
+                                                    )}
+                                                    <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-xs font-bold border border-blue-100">
+                                                        👥 {game.playerCount}
+                                                    </span>
+                                                    <span className="inline-flex items-center gap-1 bg-orange-50 text-orange-700 px-2 py-1 rounded-md text-xs font-bold border border-orange-100">
+                                                        🔄 Rd {game.roundNumber}
+                                                    </span>
                                                 </div>
 
                                                 {/* Status/Result Message */}
