@@ -6,8 +6,8 @@ import { generateId } from '../utils/id';
 const ROOMS_PATH = 'rooms';
 
 const DEFAULT_SETTINGS: GameSettings = {
-    timerDuration: 15,
-    totalRounds: 5
+    timerDuration: 20,
+    totalRounds: 3
 };
 
 export const StorageService = {
@@ -240,8 +240,8 @@ export const StorageService = {
             status: 'lobby',
             createdAt: Date.now(),
             settings: {
-                timerDuration: 15,
-                totalRounds: 5
+                timerDuration: 20,
+                totalRounds: 3
             },
             roundNumber: 0,
             playerStates: {},
