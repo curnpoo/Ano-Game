@@ -54,6 +54,7 @@ function App() {
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
   const [showGameEnded, setShowGameEnded] = useState(false);
   const [endGameCountdown, setEndGameCountdown] = useState(3);
+  const [isReadying, setIsReadying] = useState(false);
 
   // Initial 3s loading
   useEffect(() => {
@@ -384,12 +385,14 @@ function App() {
   const handleReady = async () => {
     if (!roomCode || !player) return;
     try {
+      setIsReadying(true); // Immediate feedback
       await StorageService.playerReady(roomCode, player.id);
       setIsMyTimerRunning(true);
       setShowHowToPlay(false);
     } catch (err) {
       console.error('Failed to mark ready:', err);
       showToast('Failed to start drawing 😅', 'error');
+      setIsReadying(false); // Revert on error
     }
   };
 
@@ -826,9 +829,17 @@ function App() {
                       <p className="text-gray-500 mb-6">You have {room.settings.timerDuration} seconds to draw.</p>
                       <button
                         onClick={handleReady}
-                        className="w-full btn-90s bg-gradient-to-r from-lime-400 to-emerald-500 text-white px-8 py-4 rounded-xl font-bold text-xl jelly-hover shadow-lg"
+                        disabled={isReadying}
+                        className="w-full btn-90s bg-gradient-to-r from-lime-400 to-emerald-500 text-white px-8 py-4 rounded-xl font-bold text-xl jelly-hover shadow-lg disabled:opacity-70 disabled:grayscale"
                       >
-                        I'M READY! 🚀
+                        {isReadying ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                            STARTING...
+                          </span>
+                        ) : (
+                          "I'M READY! 🚀"
+                        )}
                       </button>
                     </div>
                   </div>
