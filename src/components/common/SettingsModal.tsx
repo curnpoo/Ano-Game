@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import type { Player, DrawingStroke } from '../../types';
 import { GameCanvas } from '../game/GameCanvas';
+import { AvatarDisplay } from './AvatarDisplay';
 
 interface SettingsModalProps {
     player: Player;
+    players?: Player[];
     roomCode: string | null;
     isHost?: boolean;
     onClose: () => void;
@@ -11,6 +13,7 @@ interface SettingsModalProps {
     onLeaveGame?: () => void;
     onEndGame?: () => void;
     onGoHome?: () => void;
+    onKick?: (playerId: string) => void;
 }
 
 const COLORS = ['#FF69B4', '#9B59B6', '#3498DB', '#1ABC9C', '#F1C40F', '#E67E22', '#E74C3C', '#34495E', '#000000'];
@@ -27,13 +30,15 @@ const TRANSPARENT_PIXEL = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAE
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
     player,
+    players = [],
     roomCode,
     isHost,
     onClose,
     onUpdateProfile,
     onLeaveGame,
     onEndGame,
-    onGoHome
+    onGoHome,
+    onKick
 }) => {
     const [name, setName] = useState(player.name);
     const [strokes, setStrokes] = useState<DrawingStroke[]>(player.avatarStrokes || []);
@@ -41,6 +46,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     const [frame, setFrame] = useState(FRAMES.find(f => f.class === player.frame)?.id || 'none');
     const [showHomeConfirm, setShowHomeConfirm] = useState(false);
     const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+    const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+
+    useEffect(() => {
+        if ('Notification' in window) {
+            setNotificationsEnabled(Notification.permission === 'granted');
+        }
+    }, []);
 
     const handleSave = () => {
         if (name.trim()) {
@@ -62,6 +74,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         setStrokes(prev => prev.slice(0, -1));
     };
 
+    const requestNotifications = async () => {
+        if (!('Notification' in window)) return;
+        const permission = await Notification.requestPermission();
+        setNotificationsEnabled(permission === 'granted');
+    };
+
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto border-4 border-purple-500 pop-in flex flex-col">
@@ -76,6 +94,63 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         <div className="bg-purple-50 p-4 rounded-xl text-center">
                             <p className="text-sm text-purple-600 font-bold mb-1">ROOM CODE</p>
                             <p className="text-3xl font-black tracking-widest text-purple-800 select-all">{roomCode}</p>
+                        </div>
+                    )}
+
+                    {/* Notifications Toggle */}
+                    {('Notification' in window) && (
+                        <div className="flex items-center justify-between bg-gray-50 p-4 rounded-xl">
+                            <div>
+                                <div className="font-bold text-gray-700">Notifications</div>
+                                <div className="text-xs text-gray-500">Get alerted when it's your turn</div>
+                            </div>
+                            <button
+                                onClick={requestNotifications}
+                                disabled={notificationsEnabled}
+                                className={`px-4 py-2 rounded-lg font-bold text-sm transition-all ${notificationsEnabled
+                                    ? 'bg-green-100 text-green-600'
+                                    : 'bg-purple-500 text-white hover:bg-purple-600 shadow-md'
+                                    }`}
+                            >
+                                {notificationsEnabled ? '✓ Enabled' : 'Enable'}
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Manage Players (Host Only or View Only) */}
+                    {players.length > 0 && (
+                        <div>
+                            <label className="block text-sm font-bold text-gray-700 mb-2">PLAYERS ({players.length})</label>
+                            <div className="bg-gray-50 rounded-xl p-2 max-h-40 overflow-y-auto custom-scrollbar space-y-2">
+                                {players.map(p => (
+                                    <div key={p.id} className="flex items-center justify-between bg-white p-2 rounded-lg border border-gray-100 shadow-sm">
+                                        <div className="flex items-center gap-2 overflow-hidden">
+                                            <AvatarDisplay
+                                                strokes={p.avatarStrokes}
+                                                avatar={p.avatar}
+                                                frame={p.frame}
+                                                color={p.color}
+                                                size={32}
+                                            />
+                                            <span className="font-bold text-sm truncate" style={{ color: p.color }}>
+                                                {p.name} {p.id === player.id && '(You)'}
+                                            </span>
+                                        </div>
+                                        {isHost && p.id !== player.id && onKick && (
+                                            <button
+                                                onClick={() => {
+                                                    if (window.confirm(`Kick ${p.name}?`)) {
+                                                        onKick(p.id);
+                                                    }
+                                                }}
+                                                className="bg-red-100 text-red-500 hover:bg-red-500 hover:text-white p-1 rounded-lg transition-colors text-xs font-bold px-2"
+                                            >
+                                                Kick
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
 

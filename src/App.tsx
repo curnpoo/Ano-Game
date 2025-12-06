@@ -18,7 +18,7 @@ import { Timer } from './components/game/Timer';
 import { HowToPlayModal } from './components/game/HowToPlayModal';
 import { Toast } from './components/common/Toast';
 import { LoadingScreen } from './components/common/LoadingScreen';
-import { FloatingChat } from './components/game/FloatingChat';
+// import { FloatingChat } from './components/game/FloatingChat';
 import type { Player, DrawingStroke, GameSettings, PlayerDrawing } from './types';
 
 type Screen = 'welcome' | 'name-entry' | 'room-selection' | 'lobby' | 'waiting' | 'uploading' | 'drawing' | 'voting' | 'results' | 'final';
@@ -204,6 +204,20 @@ function App() {
       }
     }
   }, [room, player, roomCode]);
+
+
+  // Notification Effect
+  useEffect(() => {
+    if (room && room.roundNumber !== lastRoundRef.current && room.status === 'drawing') {
+      // New round started
+      if (document.visibilityState === 'hidden' && Notification.permission === 'granted') {
+        new Notification("It's Drawing Time! 🎨", {
+          body: `Round ${room.roundNumber + 1} has started!`,
+          icon: '/pwa-icon.png'
+        });
+      }
+    }
+  }, [room?.roundNumber, room?.status]);
 
 
   // Heartbeat
@@ -522,6 +536,7 @@ function App() {
       {showSettings && player && (
         <SettingsModal
           player={player}
+          players={room?.players}
           roomCode={roomCode}
           isHost={room?.hostId === player.id}
           onClose={() => setShowSettings(false)}
@@ -529,6 +544,16 @@ function App() {
           onLeaveGame={roomCode ? handleLeaveGame : undefined}
           onEndGame={room?.hostId === player.id ? handleEndGame : undefined}
           onGoHome={handleGoHome}
+          onKick={async (playerId) => {
+            if (!roomCode) return;
+            try {
+              await StorageService.kickPlayer(roomCode, playerId);
+              showToast('Player kicked 👢', 'info');
+            } catch (err) {
+              console.error(err);
+              showToast('Failed to kick player', 'error');
+            }
+          }}
         />
       )}
 
@@ -758,12 +783,12 @@ function App() {
               </div>
             </div>
 
-            {/* Chat Overlay for Drawing Screen */}
-            <FloatingChat
+            {/* Chat - Removed */}
+            {/* <FloatingChat
               roomCode={roomCode || ''}
               player={player}
               messages={room.chatEvents || []}
-            />
+            /> */}
 
             {/* Toolbar - Only when timer running */}
             {isMyTimerRunning && !hasSubmitted && (

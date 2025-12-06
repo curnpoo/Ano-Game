@@ -7,7 +7,7 @@ interface GameSettingsPanelProps {
     isHost: boolean;
 }
 
-const TIMER_OPTIONS = [10, 15, 20, 30];
+const TIMER_OPTIONS = [10, 20, 30, 60];
 const ROUND_OPTIONS = [3, 5, 7, 10];
 
 export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
@@ -37,10 +37,10 @@ export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
                             onClick={() => isHost && onSettingsChange({ timerDuration: seconds })}
                             disabled={!isHost}
                             className={`flex-1 py-2 px-3 rounded-xl font-bold text-sm transition-all ${settings.timerDuration === seconds
-                                    ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white scale-105'
-                                    : isHost
-                                        ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white scale-105'
+                                : isHost
+                                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 }`}
                             style={{
                                 boxShadow: settings.timerDuration === seconds
@@ -66,10 +66,10 @@ export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
                             onClick={() => isHost && onSettingsChange({ totalRounds: rounds })}
                             disabled={!isHost}
                             className={`flex-1 py-2 px-3 rounded-xl font-bold text-sm transition-all ${settings.totalRounds === rounds
-                                    ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white scale-105'
-                                    : isHost
-                                        ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white scale-105'
+                                : isHost
+                                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                 }`}
                             style={{
                                 boxShadow: settings.totalRounds === rounds

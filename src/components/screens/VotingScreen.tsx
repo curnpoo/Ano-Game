@@ -73,6 +73,13 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                 <div className="inline-block bg-white/90 rounded-full px-4 py-2 font-bold text-purple-600">
                     {votedCount}/{totalPlayers} voted
                 </div>
+
+                {/* Show missing voters if few remain */}
+                {(totalPlayers - votedCount) <= 2 && (totalPlayers - votedCount) > 0 && (
+                    <div className="mt-2 text-sm text-white/90 font-medium animate-pulse">
+                        Waiting for: {room.players.filter(p => !room.votes[p.id]).map(p => p.name).join(', ')}
+                    </div>
+                )}
             </div>
 
             {/* Drawing Display */}
