@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import type { Player } from '../../types';
 import { AvatarDisplay } from '../common/AvatarDisplay';
 import { CurrencyService, formatCurrency } from '../../services/currency';
-import { CurrencyService, formatCurrency } from '../../services/currency';
 import { StatsModal } from '../common/StatsModal';
 
 interface ProfileScreenProps {
@@ -20,7 +19,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 }) => {
     const [name, setName] = useState(player.name);
     const [showStats, setShowStats] = useState(false);
-    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
     const balance = CurrencyService.getCurrency();
 
