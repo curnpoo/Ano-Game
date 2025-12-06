@@ -109,7 +109,9 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                     style={cardStyle}>
                     <div>
                         <div className="text-xs uppercase tracking-wider font-bold mb-1 opacity-70">Room Code</div>
-                        <div className="text-4xl font-mono font-black tracking-widest">{room.roomCode}</div>
+                        <div className="text-5xl font-mono font-black tracking-widest bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-transparent bg-clip-text animate-pulse-slow drop-shadow-sm select-all">
+                            {room.roomCode}
+                        </div>
                     </div>
                     <button
                         onClick={copyRoomCode}

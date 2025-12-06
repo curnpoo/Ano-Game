@@ -849,7 +849,7 @@ function App() {
     showToast('Color picked! 🎨', 'success');
   };
 
-  const handleLeaveGame = async () => {
+  const handleLeaveGame = async (targetScreen: Screen = 'room-selection') => {
     if (!roomCode || !player) return;
 
     // Attempt to remove from server, but don't block local exit
@@ -862,7 +862,7 @@ function App() {
     // Always exit locally
     StorageService.leaveRoom();
     setRoomCode(null);
-    setCurrentScreen('room-selection');
+    setCurrentScreen(targetScreen);
     setIsLoading(false);
     setIsLoadingTransition(false);
     showToast('Left game 👋', 'info');
@@ -953,9 +953,9 @@ function App() {
           isHost={room?.hostId === player.id}
           onClose={() => setShowSettings(false)}
           onUpdateProfile={handleUpdateProfile}
-          onLeaveGame={roomCode ? handleLeaveGame : undefined}
+          onLeaveGame={roomCode ? () => handleLeaveGame('room-selection') : undefined}
           onEndGame={room?.hostId === player.id ? handleEndGame : undefined}
-          onGoHome={roomCode ? handleGoHome : undefined}
+          onGoHome={roomCode ? () => handleLeaveGame('home') : undefined}
           onKick={async (playerId) => {
             if (!roomCode) return;
             try {
@@ -1125,7 +1125,7 @@ function App() {
           currentPlayerId={player.id}
           onStartGame={handleStartGame}
           onSettingsChange={handleSettingsChange}
-          onLeave={handleLeaveGame}
+          onLeave={() => handleLeaveGame('room-selection')}
           onKick={async (playerId) => {
             if (!roomCode) return;
             try {
@@ -1153,7 +1153,7 @@ function App() {
               showToast('Failed to join round', 'error');
             }
           }}
-          onBack={handleLeaveGame}
+          onBack={() => handleLeaveGame('home')}
         />
       )}
 
