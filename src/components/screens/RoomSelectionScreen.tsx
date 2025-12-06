@@ -85,13 +85,24 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
     };
 
     return (
-        <div className="min-h-screen bg-90s-animated flex flex-col items-center justify-start pt-32 pb-safe p-4 relative overflow-y-auto overflow-x-hidden">
-            {/* Decorative elements */}
-            <div className="absolute top-10 right-10 text-5xl bubble-float pointer-events-none">🏠</div>
-            <div className="absolute bottom-20 left-10 text-4xl bubble-float pointer-events-none" style={{ animationDelay: '0.5s' }}>🚪</div>
-            <div className="absolute top-32 left-16 text-3xl bubble-float pointer-events-none" style={{ animationDelay: '1s' }}>🔑</div>
+        <div
+            className="min-h-screen bg-90s-animated flex flex-col items-center justify-start p-4 relative overflow-y-auto overflow-x-hidden"
+            style={{ paddingTop: 'max(2rem, env(safe-area-inset-top) + 1rem)' }}
+        >
+            <div className={`w-full max-w-md relative z-10 flex flex-col gap-4 ${mounted ? 'slide-up' : 'opacity-0'}`}>
+                {/* Home Button Card */}
+                <button
+                    onClick={onBack}
+                    className="w-full bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl p-4 shadow-lg border-2 border-gray-300 flex items-center gap-4 hover:scale-[1.02] active:scale-95 transition-all"
+                >
+                    <div className="text-3xl">🏠</div>
+                    <div className="flex-1 text-left">
+                        <div className="text-lg font-bold text-gray-800">Back to Home</div>
+                        <div className="text-gray-500 text-sm">Return to main menu</div>
+                    </div>
+                    <div className="text-2xl text-gray-400">←</div>
+                </button>
 
-            <div className={`w-full max-w-md relative z-10 flex flex-col gap-6 my-auto ${mounted ? 'slide-up' : 'opacity-0'}`}>
                 <div className="bg-white rounded-[2rem] p-8 space-y-8"
                     style={{
                         boxShadow: '0 15px 0 rgba(155, 89, 182, 0.3), 0 30px 60px rgba(0, 0, 0, 0.2)',
@@ -111,12 +122,6 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
                             }}>
                             Hi, {playerName}!
                         </h2>
-                        <button
-                            onClick={onBack}
-                            className="text-sm text-pink-500 hover:text-pink-600 font-bold hover:scale-110 transition-transform"
-                        >
-                            ← Not you? Change name
-                        </button>
                     </div>
 
                     <div className="space-y-6">

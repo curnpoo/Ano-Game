@@ -98,7 +98,8 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
             {/* Close Button */}
             <button
                 onClick={onClose}
-                className="absolute top-4 right-4 text-white/70 hover:text-white text-3xl"
+                className="absolute bg-white/20 hover:bg-white/30 backdrop-blur-sm rounded-2xl w-12 h-12 flex items-center justify-center text-white text-2xl font-bold transition-all hover:scale-105 active:scale-95"
+                style={{ top: 'max(1rem, env(safe-area-inset-top) + 0.5rem)', right: '1rem' }}
             >
                 ✕
             </button>

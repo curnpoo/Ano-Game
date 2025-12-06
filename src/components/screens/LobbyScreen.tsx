@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { GameRoom, GameSettings } from '../../types';
 import { SettingsModal } from '../common/SettingsModal';
-import { PlayerCosmeticsPanel } from '../common/PlayerCosmeticsPanel';
 import { GameSettingsPanel } from '../game/GameSettingsPanel';
 import { AvatarDisplay } from '../common/AvatarDisplay';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
@@ -28,7 +27,6 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     onBack
 }) => {
     const [showSettings, setShowSettings] = useState(false);
-    const [showCosmetics, setShowCosmetics] = useState(false);
     const [copied, setCopied] = useState(false);
     const [, setTick] = useState(0); // Force update for idle timer
 
@@ -57,12 +55,6 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
         return Date.now() - lastSeen > 10000; // 10 seconds
     };
 
-    const handleUpdateCosmetics = async (type: 'brush' | 'color', id: string) => {
-        if (!currentPlayer) return;
-        const updates = type === 'brush' ? { activeBrush: id } : { activeColor: id };
-        await StorageService.updatePlayerCosmetics(room.roomCode, currentPlayer.id, updates);
-    };
-
     // If somehow we are in LobbyScreen but the game is active, show Rejoin
     if (room.status !== 'lobby') {
         return (
@@ -83,25 +75,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
 
     return (
         <div className="min-h-screen bg-90s-animated flex flex-col pb-safe overflow-y-auto"
-            style={{ paddingTop: 'max(6rem, env(safe-area-inset-top) + 4rem)' }}>
-            {/* Top Bar - Fixed with safe area */}
-            <div className="fixed top-0 left-0 w-full flex justify-end items-center z-20 pointer-events-none px-4"
-                style={{ paddingTop: 'max(1rem, env(safe-area-inset-top) + 0.5rem)' }}>
-                <div className="flex gap-2">
-                    <button
-                        onClick={() => setShowCosmetics(true)}
-                        className="bg-white p-3 rounded-2xl shadow-lg border-2 border-purple-100 hover:scale-105 active:scale-95 transition-all w-12 h-12 flex items-center justify-center pointer-events-auto text-xl"
-                    >
-                        🎨
-                    </button>
-                    <button
-                        onClick={onBack}
-                        className="bg-white p-3 rounded-2xl shadow-lg border-2 border-red-100 hover:scale-105 active:scale-95 transition-all w-12 h-12 flex items-center justify-center pointer-events-auto text-xl"
-                    >
-                        🚪
-                    </button>
-                </div>
-            </div>
+            style={{ paddingTop: 'max(2rem, env(safe-area-inset-top) + 1rem)' }}>
 
             <div className="w-full max-w-md mx-auto space-y-4 px-4 pb-8">
                 {/* Room Code Card */}
@@ -213,6 +187,14 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                             );
                         })}
                     </div>
+
+                    {/* Leave Room Button */}
+                    <button
+                        onClick={onBack}
+                        className="w-full mt-4 bg-red-100 text-red-600 font-bold py-3 rounded-xl hover:bg-red-200 transition-all flex items-center justify-center gap-2"
+                    >
+                        <span>🚪</span> Leave Room
+                    </button>
                 </div>
 
                 {/* Start Game Area - Only host can start */}
@@ -278,14 +260,6 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                     onGoHome={onBack}
                     onEndGame={isHost ? () => StorageService.closeRoom(room.roomCode) : undefined}
                     onKick={isHost ? (playerId: string) => StorageService.kickPlayer(room.roomCode, playerId) : undefined}
-                />
-            )}
-
-            {showCosmetics && currentPlayer && (
-                <PlayerCosmeticsPanel
-                    player={currentPlayer}
-                    onUpdateCosmetics={handleUpdateCosmetics}
-                    onClose={() => setShowCosmetics(false)}
                 />
             )}
         </div>

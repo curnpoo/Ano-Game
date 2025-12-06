@@ -37,18 +37,25 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         <div
             className="min-h-screen bg-gradient-to-b from-blue-500 via-blue-600 to-blue-800 flex flex-col"
             style={{
-                paddingTop: 'max(1rem, env(safe-area-inset-top) + 0.5rem)',
+                paddingTop: 'max(1.5rem, env(safe-area-inset-top) + 1rem)',
                 paddingBottom: 'max(1rem, env(safe-area-inset-bottom))'
             }}
         >
+            {/* Home Button Card */}
+            <button
+                onClick={onBack}
+                className="mx-4 mb-4 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border-2 border-white/20 flex items-center gap-4 hover:bg-white/20 active:scale-95 transition-all"
+            >
+                <div className="text-3xl">🏠</div>
+                <div className="flex-1 text-left">
+                    <div className="text-lg font-bold text-white">Back to Home</div>
+                    <div className="text-white/60 text-sm">Return to main menu</div>
+                </div>
+                <div className="text-2xl text-white/60">←</div>
+            </button>
+
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3">
-                <button
-                    onClick={onBack}
-                    className="bg-white/20 text-white px-4 py-2 rounded-xl font-bold hover:bg-white/30 transition-all"
-                >
-                    ← Home
-                </button>
+            <div className="flex items-center justify-between px-4 py-2 mb-2">
                 <h1 className="text-2xl font-black text-white drop-shadow-lg">👤 PROFILE</h1>
                 <div className="bg-green-500 text-white px-4 py-2 rounded-xl font-bold">
                     {formatCurrency(balance)}
