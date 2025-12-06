@@ -10,6 +10,8 @@ interface GameCanvasProps {
     strokes: DrawingStroke[];
     onStrokesChange: (strokes: DrawingStroke[]) => void;
     isEraser?: boolean;
+    isEyedropper?: boolean;
+    onColorPick?: (color: string) => void;
 }
 
 export const GameCanvas: React.FC<GameCanvasProps> = ({
@@ -18,13 +20,35 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     brushSize,
     isDrawingEnabled,
     strokes,
+    strokes,
     onStrokesChange,
     isEraser = false,
+    isEyedropper = false,
+    onColorPick
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const imageCanvasRef = useRef<HTMLCanvasElement | null>(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [currentStroke, setCurrentStroke] = useState<DrawingStroke | null>(null);
+
+    // Initialize hidden image canvas
+    useEffect(() => {
+        if (!imageUrl) return;
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = imageUrl;
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                ctx.drawImage(img, 0, 0);
+                imageCanvasRef.current = canvas;
+            }
+        };
+    }, [imageUrl]);
 
     // Initialize canvas size and image
     useEffect(() => {
@@ -130,15 +154,54 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     };
 
     const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
-        if (!isDrawingEnabled) return;
+        if (!isDrawingEnabled && !isEyedropper) return;
         // Only prevent default on touch to allow mouse interactions elsewhere if needed
         if ('touches' in e) e.preventDefault();
 
         // Haptic feedback
         vibrate(HapticPatterns.soft);
 
-        setIsDrawing(true);
         const point = getPoint(e);
+
+        if (isEyedropper && onColorPick) {
+            const canvas = canvasRef.current;
+            const imgCanvas = imageCanvasRef.current;
+            if (!canvas) return;
+
+            // 1. Try picking from strokes (current canvas)
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                // Point is in percentage, convert to px
+                const x = (point.x / 100) * canvas.width;
+                const y = (point.y / 100) * canvas.height;
+                const p = ctx.getImageData(x, y, 1, 1).data;
+
+                if (p[3] > 0) {
+                    // Found color in strokes
+                    // RGB to Hex
+                    const hex = "#" + [p[0], p[1], p[2]].map(x => x.toString(16).padStart(2, '0')).join('');
+                    onColorPick(hex);
+                    return;
+                }
+            }
+
+            // 2. Try picking from image
+            if (imgCanvas) {
+                const ctx = imgCanvas.getContext('2d');
+                if (ctx) {
+                    const x = (point.x / 100) * imgCanvas.width;
+                    const y = (point.y / 100) * imgCanvas.height;
+                    const p = ctx.getImageData(x, y, 1, 1).data;
+
+                    const hex = "#" + [p[0], p[1], p[2]].map(x => x.toString(16).padStart(2, '0')).join('');
+                    onColorPick(hex);
+                    return;
+                }
+            }
+            return;
+        }
+
+        setIsDrawing(true);
         setCurrentStroke({
             color: brushColor,
             size: brushSize,
@@ -181,7 +244,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             {/* Drawing Layer - transparent canvas on top */}
             <canvas
                 ref={canvasRef}
-                className="absolute inset-0 w-full h-full cursor-crosshair touch-none"
+                className={`absolute inset-0 w-full h-full touch-none ${isEyedropper ? 'cursor-cell' : 'cursor-crosshair'}`}
                 onMouseDown={startDrawing}
                 onMouseMove={draw}
                 onMouseUp={stopDrawing}

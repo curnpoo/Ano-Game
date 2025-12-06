@@ -10,6 +10,8 @@ interface ToolbarProps {
     onEraserToggle: () => void;
     onUndo: () => void;
     onClear: () => void;
+    isEyedropper: boolean;
+    onEyedropperToggle: () => void;
 }
 
 const COLORS = [
@@ -40,6 +42,8 @@ export const Toolbar: React.FC<ToolbarProps> = ({
     onEraserToggle,
     onUndo,
     onClear,
+    isEyedropper,
+    onEyedropperToggle
 }) => {
     return (
         <div className="flex flex-col items-center gap-3 w-full max-w-md mx-auto">
@@ -92,45 +96,62 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     ))}
                 </div>
 
-                {/* Eraser */}
-                <button
-                    onClick={() => {
-                        vibrate();
-                        onEraserToggle();
-                    }}
-                    className={`flex-1 h-10 rounded-xl font-bold flex items-center justify-center gap-2 transition-all ${isEraser
-                        ? 'bg-gradient-to-r from-pink-400 to-red-400 text-white shadow-md scale-105'
-                        : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
-                        }`}
-                >
-                    <span className="text-xl">🧽</span>
-                    <span className="text-xs uppercase tracking-wider">Erase</span>
-                </button>
+                {/* Tools */}
+                <div className="flex justify-between items-center bg-white/10 p-2 rounded-xl backdrop-blur-sm">
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => {
+                                vibrate();
+                                onUndo();
+                            }}
+                            className="w-12 h-12 bg-white rounded-xl shadow-lg flex items-center justify-center text-xl active:scale-95 transition-transform"
+                            title="Undo"
+                        >
+                            ↩️
+                        </button>
+                        <button
+                            onClick={() => {
+                                vibrate();
+                                onClear();
+                            }}
+                            className="w-12 h-12 bg-red-100 text-red-600 rounded-xl shadow-lg flex items-center justify-center text-xl active:scale-95 transition-transform"
+                            title="Clear All"
+                        >
+                            🗑️
+                        </button>
+                    </div>
 
-                {/* Actions */}
-                <div className="flex gap-1 pl-2 border-l-2 border-gray-100">
-                    <button
-                        onClick={() => {
-                            vibrate();
-                            onUndo();
-                        }}
-                        className="w-10 h-10 rounded-xl bg-yellow-100 text-lg flex items-center justify-center transition-all hover:bg-yellow-200 hover:scale-110"
-                        title="Undo"
-                    >
-                        ↩️
-                    </button>
-                    <button
-                        onClick={() => {
-                            vibrate();
-                            onClear();
-                        }}
-                        className="w-10 h-10 rounded-xl bg-red-100 text-lg flex items-center justify-center transition-all hover:bg-red-200 hover:scale-110"
-                        title="Clear All"
-                    >
-                        🗑️
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => {
+                                vibrate();
+                                onEyedropperToggle();
+                            }}
+                            className={`w-12 h-12 rounded-xl shadow-lg flex items-center justify-center text-xl active:scale-95 transition-all border-2 ${isEyedropper
+                                ? 'bg-cyan-100 border-cyan-500 scale-110'
+                                : 'bg-white border-transparent'
+                                }`}
+                            title="Eyedropper"
+                        >
+                            👁️
+                        </button>
+                        <button
+                            onClick={() => {
+                                vibrate();
+                                onEraserToggle();
+                            }}
+                            className={`w-12 h-12 rounded-xl shadow-lg flex items-center justify-center text-xl active:scale-95 transition-all border-2 ${isEraser
+                                ? 'bg-pink-100 border-pink-500 scale-110'
+                                : 'bg-white border-transparent'
+                                }`}
+                            title="Eraser"
+                        >
+                            🧼
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     );
 };
+```

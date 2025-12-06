@@ -19,6 +19,7 @@ import { HowToPlayModal } from './components/game/HowToPlayModal';
 import { Toast } from './components/common/Toast';
 import { LoadingScreen } from './components/common/LoadingScreen';
 import { NotificationPromptModal } from './components/common/NotificationPromptModal';
+import { DrawingTutorial } from './components/game/DrawingTutorial';
 import type { Player, DrawingStroke, GameSettings, PlayerDrawing } from './types';
 
 type Screen = 'welcome' | 'name-entry' | 'room-selection' | 'lobby' | 'waiting' | 'uploading' | 'drawing' | 'voting' | 'results' | 'final';
@@ -42,7 +43,9 @@ function App() {
   const strokesRef = useRef<DrawingStroke[]>([]);
   const [isMyTimerRunning, setIsMyTimerRunning] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
   const [isEraser, setIsEraser] = useState(false);
+  const [isEyedropper, setIsEyedropper] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [isLoadingTransition, setIsLoadingTransition] = useState(false);
   const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -55,8 +58,10 @@ function App() {
   const [showGameEnded, setShowGameEnded] = useState(false);
   const [showKicked, setShowKicked] = useState(false);
   const [endGameCountdown, setEndGameCountdown] = useState(3);
+  const [endGameCountdown, setEndGameCountdown] = useState(3);
   const [kickCountdown, setKickCountdown] = useState(3);
   const [isReadying, setIsReadying] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   // Initial 3s loading
   useEffect(() => {
@@ -406,6 +411,13 @@ function App() {
       await StorageService.playerReady(roomCode, player.id);
       setIsMyTimerRunning(true);
       setShowHowToPlay(false);
+
+      // Check tutorial (only if it's the first time ever)
+      const hasSeenTutorial = localStorage.getItem('seenDrawingTutorial');
+      if (!hasSeenTutorial) {
+        setShowTutorial(true);
+      }
+
     } catch (err) {
       console.error('Failed to mark ready:', err);
       showToast('Failed to start drawing 😅', 'error');
@@ -479,6 +491,19 @@ function App() {
 
   const handleEraserToggle = () => {
     setIsEraser(prev => !prev);
+    setIsEyedropper(false);
+  };
+
+  const handleEyedropperToggle = () => {
+    setIsEyedropper(prev => !prev);
+    setIsEraser(false);
+  };
+
+  const handleColorPick = (color: string) => {
+    setBrushColor(color);
+    setIsEyedropper(false);
+    setIsEraser(false);
+    showToast('Color picked! 🎨', 'success');
   };
 
   const handleLeaveGame = async () => {
@@ -807,6 +832,13 @@ function App() {
               ) : null}
             </div>
 
+            {showTutorial && (
+              <DrawingTutorial onClose={() => {
+                setShowTutorial(false);
+                localStorage.setItem('seenDrawingTutorial', 'true');
+              }} />
+            )}
+
             {/* Image Container */}
             <div className="flex-1 min-h-0 flex items-center justify-center p-2">
               <div className="relative aspect-square w-full max-w-[min(100%,calc(100vh-200px))]"
@@ -885,6 +917,55 @@ function App() {
                       <h3 className="font-bold text-green-600 text-xl mb-2">Drawing Submitted!</h3>
                       <p className="text-gray-500 text-sm mb-4">Waiting for others...</p>
 
+
+                      {/* Game Canvas */}
+                      <GameCanvas
+                        imageUrl={room.currentImage?.url || ''}
+                        brushColor={brushColor}
+                        brushSize={brushSize}
+                        isDrawingEnabled={isMyTimerRunning && !hasSubmitted}
+                        strokes={strokes}
+                        onStrokesChange={setStrokes}
+                        isEraser={isEraser}
+                        isEyedropper={isEyedropper}
+                        onColorPick={handleColorPick}
+                      />
+                    </div>
+                  </div>
+
+            {/* Show "waiting" overlay if not ready */}
+                {!isMyTimerRunning && !hasSubmitted && (
+                  <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-30">
+                    <div className="bg-white rounded-3xl p-8 text-center max-w-sm mx-4 shadow-2xl pop-in border-4 border-purple-500">
+                      <div className="text-6xl mb-4 animate-bounce">🎨</div>
+                      <h3 className="text-2xl font-bold text-purple-600 mb-2">It's Drawing Time!</h3>
+                      <p className="text-gray-500 mb-6">You have {room.settings.timerDuration} seconds to draw.</p>
+                      <button
+                        onClick={handleReady}
+                        disabled={isReadying}
+                        className="w-full btn-90s bg-gradient-to-r from-lime-400 to-emerald-500 text-white px-8 py-4 rounded-xl font-bold text-xl jelly-hover shadow-lg disabled:opacity-70 disabled:grayscale"
+                      >
+                        {isReadying ? (
+                          <span className="flex items-center justify-center gap-2">
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                            STARTING...
+                          </span>
+                        ) : (
+                          "I'M READY! 🚀"
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Show "submitted" overlay */}
+                {hasSubmitted && (
+                  <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-30">
+                    <div className="bg-white rounded-2xl p-6 text-center max-w-sm mx-4 shadow-xl animate-bounce-gentle">
+                      <div className="text-4xl mb-2">✅</div>
+                      <h3 className="font-bold text-green-600 text-xl mb-2">Drawing Submitted!</h3>
+                      <p className="text-gray-500 text-sm mb-4">Waiting for others...</p>
+
                       {/* List unfinished players */}
                       {unfinishedPlayers.length > 0 && (
                         <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
@@ -903,60 +984,61 @@ function App() {
                   </div>
                 )}
               </div>
+
+              {/* Chat - Removed */}
+
+              {/* Toolbar - Only show when drawing is enabled */}
+              {isMyTimerRunning && !hasSubmitted && (
+                <div className="flex-shrink-0 z-30 pb-4 pop-in">
+                  <Toolbar
+                    brushColor={brushColor}
+                    brushSize={brushSize}
+                    isEraser={isEraser}
+                    onColorChange={(color) => {
+                      setBrushColor(color);
+                      setIsEraser(false);
+                      setIsEyedropper(false);
+                    }}
+                    onSizeChange={setBrushSize}
+                    onEraserToggle={handleEraserToggle}
+                    onUndo={handleUndo}
+                    onClear={handleClear}
+                    isEyedropper={isEyedropper}
+                    onEyedropperToggle={handleEyedropperToggle}
+                  />
+                </div>
+              )}
             </div>
+      )}
 
-            {/* Chat - Removed */}
+            {/* Voting Screen */}
+            {currentScreen === 'voting' && room && player && (
+              <VotingScreen
+                room={room}
+                currentPlayerId={player.id}
+                onVote={handleVote}
+              />
+            )}
 
-            {/* Toolbar - Only when timer running */}
-            {isMyTimerRunning && !hasSubmitted && (
-              <div className="flex-shrink-0 py-3 safe-area-bottom flex justify-center">
-                <Toolbar
-                  brushColor={brushColor}
-                  brushSize={brushSize}
-                  isEraser={isEraser}
-                  onColorChange={(color) => {
-                    setBrushColor(color);
-                    setIsEraser(false);
-                  }}
-                  onSizeChange={setBrushSize}
-                  onEraserToggle={handleEraserToggle}
-                  onUndo={handleUndo}
-                  onClear={handleClear}
-                />
-              </div>
+            {/* Results Screen */}
+            {currentScreen === 'results' && room && player && (
+              <ResultsScreen
+                room={room}
+                currentPlayerId={player.id}
+                onNextRound={handleNextRound}
+              />
+            )}
+
+            {/* Final Results Screen */}
+            {currentScreen === 'final' && room && player && (
+              <FinalResultsScreen
+                room={room}
+                currentPlayerId={player.id}
+                onPlayAgain={handlePlayAgain}
+              />
             )}
           </div>
-        </div>
-      )}
-
-      {/* Voting Screen */}
-      {currentScreen === 'voting' && room && player && (
-        <VotingScreen
-          room={room}
-          currentPlayerId={player.id}
-          onVote={handleVote}
-        />
-      )}
-
-      {/* Results Screen */}
-      {currentScreen === 'results' && room && player && (
-        <ResultsScreen
-          room={room}
-          currentPlayerId={player.id}
-          onNextRound={handleNextRound}
-        />
-      )}
-
-      {/* Final Results Screen */}
-      {currentScreen === 'final' && room && player && (
-        <FinalResultsScreen
-          room={room}
-          currentPlayerId={player.id}
-          onPlayAgain={handlePlayAgain}
-        />
-      )}
-    </div>
-  );
+          );
 }
 
-export default App;
+          export default App;
