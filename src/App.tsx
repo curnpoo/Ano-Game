@@ -879,6 +879,35 @@ function App() {
         />
       )}
 
+      {/* Casino Screen */}
+      {showCasino && (
+        <CasinoScreen onClose={() => setShowCasino(false)} />
+      )}
+
+      <SettingsModal
+        player={player}
+        players={room?.players}
+        roomCode={roomCode}
+        isHost={room?.hostId === player.id}
+        onClose={() => setShowSettings(false)}
+        onUpdateProfile={handleUpdateProfile}
+        onLeaveGame={roomCode ? handleLeaveGame : undefined}
+        onEndGame={room?.hostId === player.id ? handleEndGame : undefined}
+        onGoHome={roomCode ? handleGoHome : undefined}
+        onKick={async (playerId) => {
+          if (!roomCode) return;
+          try {
+            await StorageService.kickPlayer(roomCode, playerId);
+            showToast('Player kicked 🥾', 'success');
+          } catch (err) {
+            showToast('Failed to kick player', 'error');
+          }
+        }}
+      />
+      )}
+
+      <HowToPlayModal isOpen={showHowToPlay} onClose={() => setShowHowToPlay(false)} />
+
       {/* Notification Prompt */}
       <NotificationPromptModal
         isOpen={showNotificationPrompt}
@@ -950,41 +979,6 @@ function App() {
         </div>
       )}
 
-      {/* Casino Screen */}
-      {showCasino && (
-        <CasinoScreen onClose={() => setShowCasino(false)} />
-      )}
-
-      {/* Settings Modal */}
-      {showSettings && player && (
-        <SettingsModal
-          player={player}
-          players={room?.players}
-          roomCode={roomCode}
-          isHost={room?.hostId === player.id}
-          onClose={() => setShowSettings(false)}
-          onUpdateProfile={handleUpdateProfile}
-          onLeaveGame={roomCode ? handleLeaveGame : undefined}
-          onEndGame={room?.hostId === player.id ? handleEndGame : undefined}
-          onGoHome={roomCode ? handleGoHome : undefined} // Only show if in a game
-          onKick={async (playerId) => {
-            if (!roomCode) return;
-            try {
-              await StorageService.kickPlayer(roomCode, playerId);
-              showToast('Player kicked 👢', 'info');
-            } catch (err) {
-              console.error(err);
-              showToast('Failed to kick player', 'error');
-            }
-          }}
-        />
-      )}
-
-      {/* How To Play Modal */}
-      <HowToPlayModal isOpen={showHowToPlay} onClose={() => setShowHowToPlay(false)} />
-
-      {/* Loading Overlay */}
-      {/* This block is now handled by the top-level conditional rendering for isLoading and isLoadingTransition */}
 
 
       {/* Screens */}
