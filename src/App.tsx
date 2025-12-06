@@ -936,6 +936,10 @@ function App() {
           onUpdateProfile={handleUpdateProfile}
           onLeaveGame={roomCode ? handleLeaveGame : undefined}
           onEndGame={room?.hostId === player.id ? handleEndGame : undefined}
+          onGoHome={() => {
+            setCurrentScreen('home');
+            setShowSettings(false);
+          }}
 
           onKick={async (playerId) => {
             if (!roomCode) return;

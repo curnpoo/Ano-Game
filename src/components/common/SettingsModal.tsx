@@ -13,6 +13,7 @@ interface SettingsModalProps {
     onUpdateProfile: (profileData: Partial<Player>) => void;
     onLeaveGame?: () => void;
     onEndGame?: () => void;
+    onGoHome?: () => void;
     onKick?: (playerId: string) => void;
 }
 
@@ -25,6 +26,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     onUpdateProfile,
     onLeaveGame,
     onEndGame,
+    onGoHome,
     onKick
 }) => {
     const [name, setName] = useState(player.name);
@@ -240,13 +242,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     {/* Game Actions */}
                     {roomCode && (
                         <div className="space-y-3">
-                            {/* Host Controls */}
+                            {/* Go Home - Available to everyone */}
+                            <button
+                                onClick={() => {
+                                    if (onGoHome) onGoHome();
+                                    onClose();
+                                }}
+                                className="w-full py-3 px-4 bg-blue-50 text-blue-600 font-bold rounded-xl border-2 border-blue-100 hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
+                            >
+                                🏠 Go Home (Keep Game Running)
+                            </button>
+
+                            {/* Host: End Game / Player: Leave Game */}
                             {isHost ? (
                                 <button
                                     onClick={() => setShowEndGameConfirm(true)}
                                     className="w-full py-3 px-4 bg-red-50 text-red-600 font-bold rounded-xl border-2 border-red-100 hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
                                 >
-                                    🏠 End Game & Return Home
+                                    🛑 End Game & Kick Everyone
                                 </button>
                             ) : (
                                 <button
