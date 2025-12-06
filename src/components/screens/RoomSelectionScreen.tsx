@@ -103,13 +103,11 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
                     <div className="text-2xl text-gray-400">←</div>
                 </button>
 
-                <div className="bg-white rounded-[2rem] p-8 space-y-8"
+                <div className="rounded-[2rem] p-8 space-y-8"
                     style={{
-                        boxShadow: '0 15px 0 rgba(155, 89, 182, 0.3), 0 30px 60px rgba(0, 0, 0, 0.2)',
-                        border: '5px solid transparent',
-                        backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #00D9FF, #9B59B6, #FF69B4)',
-                        backgroundOrigin: 'border-box',
-                        backgroundClip: 'padding-box, border-box'
+                        backgroundColor: 'var(--card-bg)',
+                        border: '4px solid var(--theme-accent)',
+                        boxShadow: '0 15px 30px rgba(0,0,0,0.1)'
                     }}>
 
                     <div className="text-center space-y-2">

@@ -109,6 +109,17 @@ function App() {
     checkLastGame();
   }, [currentScreen]);
 
+  // Auth Redirect: If no player and not in auth flow, go to welcome
+  useEffect(() => {
+    if (!player && !isLoading && !isInitialLoading) {
+      // Allow browsing store as guest? No, store requires player usually.
+      // If we are deep in the app but have no player, kick out.
+      if (!['welcome', 'login', 'name-entry'].includes(currentScreen)) {
+        setCurrentScreen('welcome');
+      }
+    }
+  }, [player, currentScreen, isLoading, isInitialLoading]);
+
   const handleGoHome = async () => {
     setRoomCode(null); // Stop listening in React
     setCurrentScreen('home');

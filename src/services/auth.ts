@@ -63,6 +63,12 @@ export const AuthService = {
                 return { success: false, error: 'PIN must be 4 digits' };
             }
 
+            // CRITICAL: Ensure no stale data leaks into new account
+            localStorage.removeItem('player_purchased_items');
+            localStorage.removeItem('player_currency');
+            localStorage.removeItem('player_xp');
+            localStorage.removeItem('player_level');
+
             // Check username availability
             if (await this.usernameExists(username)) {
                 return { success: false, error: 'Username already taken' };
@@ -95,6 +101,8 @@ export const AuthService = {
 
             // Sync Currency
             CurrencyService.setCurrency(newUser.currency || 0);
+            // reset purchased items key just in case
+            localStorage.setItem('player_purchased_items', '[]');
 
             // Sync XP (Initialize for new user)
             localStorage.setItem('player_xp', '0');

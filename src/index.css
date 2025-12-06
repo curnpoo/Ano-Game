@@ -47,13 +47,15 @@ body {
   --button-bg: var(--theme-button-bg, #9B59B6);
   --button-text: var(--theme-button-text, #ffffff);
   --card-bg: var(--theme-card-bg, rgba(255, 255, 255, 0.9));
+  --font-main: var(--theme-font, 'Inter', sans-serif);
+  --radius-main: var(--theme-radius, 1.5rem);
 }
 
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: var(--font-main);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -61,7 +63,7 @@ body {
   /* Apply Theme Variables */
   background: var(--bg-primary);
   color: var(--text-primary);
-  transition: background 0.5s ease, color 0.5s ease;
+  transition: background 0.5s ease, color 0.5s ease, font-family 0.3s ease;
 }
 
 /* Base Card Style Override */
@@ -69,11 +71,22 @@ body {
   background-color: var(--card-bg) !important;
   color: var(--text-primary);
   border-color: var(--border-color);
+  border-radius: var(--radius-main);
 }
 
 /* Button Override */
-button {
+button,
+.btn-90s {
   border-color: var(--border-color);
+  border-radius: var(--radius-main);
+  font-family: var(--font-main);
+}
+
+/* Input Override */
+input,
+.input-90s {
+  border-radius: var(--radius-main);
+  font-family: var(--font-main);
 }
 
 

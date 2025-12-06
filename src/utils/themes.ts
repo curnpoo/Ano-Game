@@ -13,7 +13,9 @@ export const getThemeVariables = (themeId: string = 'default') => {
                 '--theme-border': '#334155',
                 '--theme-button-bg': '#e94560',
                 '--theme-button-text': '#ffffff',
-                '--theme-card-bg': 'rgba(30, 41, 59, 0.8)',
+                '--theme-card-bg': 'rgba(30, 41, 59, 0.95)',
+                '--theme-font': "'Inter', sans-serif",
+                '--theme-radius': '0.75rem',
             };
         case 'cardboard':
             return {
@@ -26,11 +28,13 @@ export const getThemeVariables = (themeId: string = 'default') => {
                 '--theme-button-bg': '#8b4513',
                 '--theme-button-text': '#d2b48c',
                 '--theme-card-bg': '#faeedd',
+                '--theme-font': "'Chalkboard SE', 'Comic Sans MS', sans-serif",
+                '--theme-radius': '255px 15px 225px 15px/15px 225px 15px 255px', // Organic/Rough
             };
         case 'neon':
             return {
                 '--theme-bg': '#000000',
-                '--theme-bg-secondary': '#111111',
+                '--theme-bg-secondary': '#0a0a0a',
                 '--theme-text': '#00ff00',
                 '--theme-text-secondary': '#00cc00',
                 '--theme-accent': '#00ff00',
@@ -38,31 +42,37 @@ export const getThemeVariables = (themeId: string = 'default') => {
                 '--theme-button-bg': '#000000',
                 '--theme-button-text': '#00ff00',
                 '--theme-card-bg': 'rgba(0, 0, 0, 0.9)',
+                '--theme-font': "'Courier New', monospace",
+                '--theme-radius': '0px', // Sharp
             };
         case 'retro':
             return {
-                '--theme-bg': '#ff00ff',
-                '--theme-bg-secondary': '#00ffff',
-                '--theme-text': '#ffff00',
-                '--theme-text-secondary': '#00ff00',
-                '--theme-accent': '#ffff00',
-                '--theme-border': '#000000',
-                '--theme-button-bg': '#ffffff',
-                '--theme-button-text': '#000000',
+                '--theme-bg': '#E0E7FF', // Light Indigo
+                '--theme-bg-secondary': '#C7D2FE',
+                '--theme-text': '#4338ca', // Indigo 700
+                '--theme-text-secondary': '#6366f1',
+                '--theme-accent': '#4f46e5',
+                '--theme-border': '#312e81',
+                '--theme-button-bg': '#4f46e5',
+                '--theme-button-text': '#ffffff',
                 '--theme-card-bg': '#ffffff',
+                '--theme-font': "'Courier New', monospace",
+                '--theme-radius': '0px',
             };
         case 'default':
         default:
             return {
-                '--theme-bg': 'linear-gradient(-45deg, #FF69B4, #9B59B6, #00D9FF, #32CD32, #FFE135, #FF8C00)',
+                '--theme-bg': 'linear-gradient(135deg, #e0f2fe 0%, #f3e8ff 100%)', // Subtle Sky to Purple fade
                 '--theme-bg-secondary': '#ffffff',
-                '--theme-text': '#1f2937',
-                '--theme-text-secondary': '#6b7280',
-                '--theme-accent': '#9B59B6',
-                '--theme-border': 'transparent',
-                '--theme-button-bg': 'linear-gradient(to right, #00D9FF, #9B59B6)',
+                '--theme-text': '#1e293b',
+                '--theme-text-secondary': '#64748b',
+                '--theme-accent': '#8b5cf6', // Violet
+                '--theme-border': 'rgba(139, 92, 246, 0.2)',
+                '--theme-button-bg': 'linear-gradient(to right, #38bdf8, #8b5cf6)',
                 '--theme-button-text': '#ffffff',
-                '--theme-card-bg': 'rgba(255, 255, 255, 0.9)',
+                '--theme-card-bg': 'rgba(255, 255, 255, 0.8)', // More transparent
+                '--theme-font': "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
+                '--theme-radius': '1.5rem',
             };
     }
 };
@@ -81,8 +91,11 @@ export const getThemeContainerStyle = (themeId: string = 'default') => {
     // Default fallback for layout
     return {
         padding: '1.25rem', // p-5
-        borderRadius: '1.5rem', // rounded-3xl
+        borderRadius: 'var(--theme-radius)', // Dynamic Radius
         boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', // shadow-xl
+        backgroundColor: 'var(--card-bg)',
+        border: '4px solid var(--theme-border)',
+        color: 'var(--theme-text)',
         ...styles
     };
 };
