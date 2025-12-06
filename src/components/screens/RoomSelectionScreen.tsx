@@ -85,11 +85,11 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
     };
 
     return (
-        <div className="min-h-screen bg-90s-animated flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        <div className="min-h-screen bg-90s-animated flex flex-col items-center justify-start pt-12 pb-safe p-4 relative overflow-y-auto overflow-x-hidden">
             {/* Decorative elements */}
-            <div className="absolute top-10 right-10 text-5xl bubble-float">🏠</div>
-            <div className="absolute bottom-20 left-10 text-4xl bubble-float" style={{ animationDelay: '0.5s' }}>🚪</div>
-            <div className="absolute top-32 left-16 text-3xl bubble-float" style={{ animationDelay: '1s' }}>🔑</div>
+            <div className="absolute top-10 right-10 text-5xl bubble-float pointer-events-none">🏠</div>
+            <div className="absolute bottom-20 left-10 text-4xl bubble-float pointer-events-none" style={{ animationDelay: '0.5s' }}>🚪</div>
+            <div className="absolute top-32 left-16 text-3xl bubble-float pointer-events-none" style={{ animationDelay: '1s' }}>🔑</div>
 
             <div className={`w-full max-w-md relative z-10 ${mounted ? 'slide-up' : 'opacity-0'}`}>
                 <div className="bg-white rounded-[2rem] p-8 space-y-8"
