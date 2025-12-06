@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { WelcomeScreen } from './components/screens/WelcomeScreen';
 import { ProfileSetupScreen } from './components/screens/ProfileSetupScreen';
 import { RoomSelectionScreen } from './components/screens/RoomSelectionScreen';
@@ -123,14 +123,35 @@ function App() {
   const amWaiting = room?.waitingPlayers?.some(p => p.id === player?.id) || false;
 
   // Derived State
-  const myPlayerState = room?.playerStates?.[player?.id || ''];
-  const hasSubmitted = myPlayerState?.status === 'submitted';
-  const timerEndsAt = myPlayerState?.timerStartedAt
-    ? myPlayerState.timerStartedAt + (room?.settings?.timerDuration || 15) * 1000
-    : null;
-  const submittedCount = room ? Object.values(room.playerStates || {}).filter(s => s.status === 'submitted').length : 0;
-  const totalPlayers = room?.players?.length || 0;
-  const unfinishedPlayers = room?.players.filter(p => room.playerStates?.[p.id]?.status !== 'submitted') || [];
+  // Derived State (Memoized)
+  const stats = useMemo(() => {
+    const myState = room?.playerStates?.[player?.id || ''];
+    const submitted = myState?.status === 'submitted';
+    const endsAt = myState?.timerStartedAt
+      ? myState.timerStartedAt + (room?.settings?.timerDuration || 15) * 1000
+      : null;
+
+    // Safety check for room existence
+    if (!room) return {
+      myPlayerState: myState,
+      hasSubmitted: submitted,
+      timerEndsAt: endsAt,
+      submittedCount: 0,
+      totalPlayers: 0,
+      unfinishedPlayers: []
+    };
+
+    return {
+      myPlayerState: myState,
+      hasSubmitted: submitted,
+      timerEndsAt: endsAt,
+      submittedCount: Object.values(room.playerStates || {}).filter(s => s.status === 'submitted').length,
+      totalPlayers: room.players.length,
+      unfinishedPlayers: room.players.filter(p => room.playerStates?.[p.id]?.status !== 'submitted')
+    };
+  }, [room, player?.id]);
+
+  const { myPlayerState, hasSubmitted, timerEndsAt, submittedCount, totalPlayers, unfinishedPlayers } = stats;
 
   // Sync screen with room status
   useEffect(() => {
