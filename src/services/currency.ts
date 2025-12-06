@@ -1,7 +1,11 @@
 // Currency Service - Handles player currency persistence and transactions
+import { ref, update } from 'firebase/database';
+import { database } from '../firebase';
+import type { UserAccount } from '../types';
 
 const CURRENCY_KEY = 'player_currency';
 const PURCHASED_ITEMS_KEY = 'player_purchased_items';
+const LOCAL_USER_KEY = 'logged_in_user';
 
 // Format currency with $ and commas (e.g., $1,999)
 export const formatCurrency = (amount: number): string => {
@@ -17,8 +21,28 @@ export const CurrencyService = {
 
     // Set player's currency balance
     setCurrency(amount: number): void {
-        localStorage.setItem(CURRENCY_KEY, Math.max(0, amount).toString());
+        const value = Math.max(0, amount);
+        localStorage.setItem(CURRENCY_KEY, value.toString());
         window.dispatchEvent(new Event('currency-updated'));
+
+        // Sync to Firebase if logged in
+        try {
+            const storedUser = localStorage.getItem(LOCAL_USER_KEY);
+            if (storedUser) {
+                const user = JSON.parse(storedUser) as UserAccount;
+                // Update local cached user object too so it stays in sync
+                user.currency = value;
+                localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(user));
+
+                // Fire and forget update to Firebase
+                const userRef = ref(database, `users/${user.id}`);
+                update(userRef, { currency: value }).catch(err =>
+                    console.error('Failed to sync currency to server:', err)
+                );
+            }
+        } catch (e) {
+            console.error('Error syncing currency:', e);
+        }
     },
 
     // Add currency (returns new balance)
@@ -49,6 +73,27 @@ export const CurrencyService = {
         if (!items.includes(itemId)) {
             items.push(itemId);
             localStorage.setItem(PURCHASED_ITEMS_KEY, JSON.stringify(items));
+
+            // Sync to Firebase if logged in
+            try {
+                const storedUser = localStorage.getItem(LOCAL_USER_KEY);
+                if (storedUser) {
+                    const user = JSON.parse(storedUser) as UserAccount;
+                    // Update local cached user
+                    user.purchasedItems = [...(user.purchasedItems || []), itemId];
+                    // Dedupe just in case
+                    user.purchasedItems = [...new Set(user.purchasedItems)];
+                    localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(user));
+
+                    // Fire and forget update
+                    const userRef = ref(database, `users/${user.id}`);
+                    update(userRef, { purchasedItems: user.purchasedItems }).catch(err =>
+                        console.error('Failed to sync purchased item to server:', err)
+                    );
+                }
+            } catch (e) {
+                console.error('Error syncing purchased item:', e);
+            }
         }
     },
 
