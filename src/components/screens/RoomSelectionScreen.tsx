@@ -106,6 +106,7 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
                 <div className="rounded-[2rem] p-8 space-y-8"
                     style={{
                         backgroundColor: 'var(--card-bg)',
+                        color: 'var(--card-text)',
                         border: '4px solid var(--theme-accent)',
                         boxShadow: '0 15px 30px rgba(0,0,0,0.1)'
                     }}>

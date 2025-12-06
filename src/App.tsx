@@ -237,6 +237,13 @@ function App() {
 
   const handleEquipTheme = () => {
     setIsTransitionActive(true);
+    // Explicitly refresh player state to pick up new theme immediately
+    setTimeout(() => {
+      const freshUser = AuthService.getCurrentUser();
+      if (freshUser) {
+        setPlayer(prev => prev ? { ...prev, cosmetics: freshUser.cosmetics } : prev);
+      }
+    }, 100); // Small delay to ensure DB update (though it should be local first)
   };
 
   // Derived State

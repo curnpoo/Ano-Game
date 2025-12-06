@@ -27,6 +27,7 @@ export const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
                     color: color,
                     width: size,
                     height: size,
+                    backgroundColor: 'white', // Explicit override
                     fontSize: size * 0.6
                 }}
             >
@@ -42,7 +43,8 @@ export const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
                 width: size,
                 height: size,
                 borderColor: color,
-                color: color // checks out: allows currentColor to work in classes
+                color: color, // checks out: allows currentColor to work in classes
+                backgroundColor: 'white' // Explicit override for all themes
             }}
         >
             <svg

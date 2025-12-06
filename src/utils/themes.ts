@@ -46,7 +46,7 @@ export const getThemeVariables = (themeId: string = 'default') => {
                 '--theme-card-bg': 'rgba(0, 0, 0, 0.9)',
                 '--theme-font': "'Courier New', monospace",
                 '--theme-radius': '0px', // Sharp
-                '--theme-card-text': '#00ff00', // Green on black card
+                '--theme-card-text': '#e0ffe0', // Very light green on black card
             };
         case 'retro':
             return {
