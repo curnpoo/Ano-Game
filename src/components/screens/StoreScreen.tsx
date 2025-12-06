@@ -29,7 +29,13 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
             if (currentUser) {
                 const newCosmetics = { ...currentUser.cosmetics, activeTheme: item.id };
                 AuthService.updateUser(currentUser.id, { cosmetics: newCosmetics });
-                vibrate(HapticPatterns.light);
+
+                try {
+                    vibrate(HapticPatterns.light);
+                } catch (err) {
+                    console.error('Haptic feedback failed:', err);
+                }
+
                 setPurchaseMessage(`🎨 Equipped ${item.name}!`);
                 setTimeout(() => setPurchaseMessage(null), 1500);
 
