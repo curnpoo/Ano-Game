@@ -60,7 +60,8 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
     return (
         <div className="fixed inset-0 bg-gray-900 z-50 flex flex-col safe-area-inset-top">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 bg-gray-800/80 backdrop-blur">
+            <div className="flex items-center justify-between px-4 pb-4 bg-gray-800/80 backdrop-blur"
+                style={{ paddingTop: 'max(1rem, env(safe-area-inset-top) + 1rem)' }}>
                 <button
                     onClick={onCancel}
                     className="px-4 py-2 text-white font-bold bg-white/10 rounded-xl hover:bg-white/20 transition-all"

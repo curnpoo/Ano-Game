@@ -996,7 +996,7 @@ function App() {
       {currentScreen === 'profile' && player && (
         <ProfileScreen
           player={player}
-          onBack={handleGoHome}
+          onBack={() => setCurrentScreen('home')}
           onUpdateProfile={handleUpdateProfile}
           onEditAvatar={() => setCurrentScreen('avatar-editor')}
         />
