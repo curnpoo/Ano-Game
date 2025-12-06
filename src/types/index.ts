@@ -16,6 +16,8 @@ export interface Player {
     frame: string; // frame id
     score?: number;
     currency?: number; // $ earned from games
+    xp?: number; // Experience points
+    level?: number; // Player level
     isHost?: boolean;
     joinedAt: number;
     lastSeen: number; // timestamp for heartbeat

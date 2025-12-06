@@ -734,8 +734,8 @@ function App() {
         </div>
       )}
 
-      {/* Settings Button - Show on all screens except welcome/name-entry */}
-      {player && currentScreen !== 'welcome' && currentScreen !== 'name-entry' && (
+      {/* Settings Button - Show on all screens except welcome/name-entry/home */}
+      {player && currentScreen !== 'welcome' && currentScreen !== 'name-entry' && currentScreen !== 'home' && currentScreen !== 'store' && currentScreen !== 'profile' && (
         <div className="fixed left-4 z-50 flex items-center gap-2" style={{ top: 'max(1rem, env(safe-area-inset-top) + 1rem)' }}>
           <button
             onClick={() => setShowSettings(true)}

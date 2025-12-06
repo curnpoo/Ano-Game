@@ -78,27 +78,39 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom) + 1rem)'
             }}
         >
-            {/* Header with player info */}
-            <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-3 bg-white/90 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-lg border-2 border-purple-200">
-                    <div className="w-12 h-12">
+            {/* Header with player info - Profile Card */}
+            <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg border-2 border-purple-200 mb-6">
+                <div className="flex items-center gap-4">
+                    <div className="w-16 h-16">
                         <AvatarDisplay
                             strokes={player.avatarStrokes}
                             avatar={player.avatar}
                             frame={player.frame}
                             color={player.color}
-                            size={48}
+                            size={64}
                         />
                     </div>
-                    <div>
-                        <div className="font-bold text-gray-800">{player.name}</div>
-                        <div className="text-sm text-green-600 font-bold">{formatCurrency(balance)}</div>
+                    <div className="flex-1">
+                        <div className="flex items-center justify-between mb-1">
+                            <h2 className="text-xl font-black text-gray-800">{player.name}</h2>
+                            <div className="text-green-600 font-bold">{formatCurrency(balance)}</div>
+                        </div>
+                        {/* Level & XP */}
+                        <div className="flex items-center gap-2">
+                            <span className="bg-purple-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                                LVL {player.level || 1}
+                            </span>
+                            <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+                                <div
+                                    className="bg-gradient-to-r from-purple-400 to-purple-600 h-full transition-all duration-300"
+                                    style={{ width: `${((player.xp || 0) % 100)}%` }}
+                                />
+                            </div>
+                            <span className="text-xs text-gray-500 font-medium">
+                                {(player.xp || 0) % 100}/100 XP
+                            </span>
+                        </div>
                     </div>
-                </div>
-
-                {/* App Logo/Title */}
-                <div className="text-right">
-                    <h1 className="text-2xl font-black text-white drop-shadow-lg">📸 AnnoGame</h1>
                 </div>
             </div>
 
