@@ -1,0 +1,141 @@
+import React from 'react';
+import { CurrencyService, formatCurrency } from '../../services/currency';
+import { AvatarDisplay } from '../common/AvatarDisplay';
+import type { Player } from '../../types';
+
+interface HomeScreenProps {
+    player: Player;
+    onPlay: () => void;
+    onProfile: () => void;
+    onSettings: () => void;
+    onStore: () => void;
+    onCasino: () => void;
+}
+
+export const HomeScreen: React.FC<HomeScreenProps> = ({
+    player,
+    onPlay,
+    onProfile,
+    onSettings,
+    onStore,
+    onCasino
+}) => {
+    const balance = CurrencyService.getCurrency();
+
+    const cards = [
+        {
+            id: 'play',
+            label: 'PLAY',
+            emoji: '🎮',
+            color: 'from-green-400 to-emerald-600',
+            border: 'border-green-500',
+            onClick: onPlay,
+            description: 'Start a game'
+        },
+        {
+            id: 'casino',
+            label: 'CASINO',
+            emoji: '🎰',
+            color: 'from-yellow-400 to-orange-500',
+            border: 'border-yellow-500',
+            onClick: onCasino,
+            description: 'Try your luck'
+        },
+        {
+            id: 'store',
+            label: 'STORE',
+            emoji: '🛒',
+            color: 'from-purple-400 to-purple-600',
+            border: 'border-purple-500',
+            onClick: onStore,
+            description: 'Buy cosmetics'
+        },
+        {
+            id: 'profile',
+            label: 'PROFILE',
+            emoji: '👤',
+            color: 'from-blue-400 to-blue-600',
+            border: 'border-blue-500',
+            onClick: onProfile,
+            description: 'Customize avatar'
+        },
+        {
+            id: 'settings',
+            label: 'SETTINGS',
+            emoji: '⚙️',
+            color: 'from-gray-400 to-gray-600',
+            border: 'border-gray-500',
+            onClick: onSettings,
+            description: 'App settings'
+        }
+    ];
+
+    return (
+        <div
+            className="min-h-screen bg-90s-animated flex flex-col p-4"
+            style={{
+                paddingTop: 'max(1.5rem, env(safe-area-inset-top) + 1rem)',
+                paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom) + 1rem)'
+            }}
+        >
+            {/* Header with player info */}
+            <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3 bg-white/90 backdrop-blur-sm rounded-2xl px-4 py-3 shadow-lg border-2 border-purple-200">
+                    <div className="w-12 h-12">
+                        <AvatarDisplay
+                            strokes={player.avatarStrokes}
+                            avatar={player.avatar}
+                            frame={player.frame}
+                            color={player.color}
+                            size={48}
+                        />
+                    </div>
+                    <div>
+                        <div className="font-bold text-gray-800">{player.name}</div>
+                        <div className="text-sm text-green-600 font-bold">{formatCurrency(balance)}</div>
+                    </div>
+                </div>
+
+                {/* App Logo/Title */}
+                <div className="text-right">
+                    <h1 className="text-2xl font-black text-white drop-shadow-lg">📸 AnnoGame</h1>
+                </div>
+            </div>
+
+            {/* Main Navigation Cards */}
+            <div className="flex-1 flex flex-col justify-center">
+                <div className="grid grid-cols-2 gap-4 max-w-md mx-auto w-full">
+                    {/* Large Play Button - spans 2 columns */}
+                    <button
+                        onClick={cards[0].onClick}
+                        className={`col-span-2 bg-gradient-to-br ${cards[0].color} rounded-3xl p-6 shadow-xl border-4 ${cards[0].border} 
+                            transform transition-all duration-200 hover:scale-[1.02] active:scale-95 jelly-hover`}
+                    >
+                        <div className="text-5xl mb-2">{cards[0].emoji}</div>
+                        <div className="text-3xl font-black text-white drop-shadow-lg">{cards[0].label}</div>
+                        <div className="text-white/80 text-sm font-medium">{cards[0].description}</div>
+                    </button>
+
+                    {/* Other cards - 2x2 grid */}
+                    {cards.slice(1).map(card => (
+                        <button
+                            key={card.id}
+                            onClick={card.onClick}
+                            className={`bg-gradient-to-br ${card.color} rounded-2xl p-4 shadow-xl border-3 ${card.border}
+                                transform transition-all duration-200 hover:scale-[1.03] active:scale-95 jelly-hover`}
+                        >
+                            <div className="text-3xl mb-1">{card.emoji}</div>
+                            <div className="text-lg font-bold text-white drop-shadow">{card.label}</div>
+                            <div className="text-white/70 text-xs">{card.description}</div>
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Footer */}
+            <div className="text-center text-white/60 text-xs mt-4">
+                Draw. Vote. Win! 🎨
+            </div>
+        </div>
+    );
+};

@@ -10,6 +10,9 @@ import { VotingScreen } from './components/screens/VotingScreen';
 import { ResultsScreen } from './components/screens/ResultsScreen';
 import { FinalResultsScreen } from './components/screens/FinalResultsScreen';
 import { CasinoScreen } from './components/screens/CasinoScreen';
+import { HomeScreen } from './components/screens/HomeScreen';
+import { StoreScreen } from './components/screens/StoreScreen';
+import { ProfileScreen } from './components/screens/ProfileScreen';
 import { StorageService } from './services/storage';
 import { ImageService } from './services/image';
 import { useRoom } from './hooks/useRoom';
@@ -33,7 +36,7 @@ import { requestPushPermission, storePushToken, isPushSupported } from './servic
 
 import type { Player, DrawingStroke, GameSettings, PlayerDrawing } from './types';
 
-type Screen = 'welcome' | 'name-entry' | 'room-selection' | 'lobby' | 'waiting' | 'uploading' | 'drawing' | 'voting' | 'results' | 'final';
+type Screen = 'welcome' | 'name-entry' | 'home' | 'room-selection' | 'store' | 'profile' | 'lobby' | 'waiting' | 'uploading' | 'drawing' | 'voting' | 'results' | 'final';
 
 interface ToastState {
   message: string;
@@ -391,7 +394,7 @@ function App() {
     };
     StorageService.saveSession(newPlayer);
     setPlayer(newPlayer);
-    setCurrentScreen('room-selection');
+    setCurrentScreen('home');
   };
 
   const handleUpdateProfile = (profileData: Partial<Player>) => {
@@ -803,12 +806,42 @@ function App() {
         />
       )}
 
+      {/* Home Screen - Main Navigation Hub */}
+      {currentScreen === 'home' && player && (
+        <HomeScreen
+          player={player}
+          onPlay={() => setCurrentScreen('room-selection')}
+          onCasino={() => setShowCasino(true)}
+          onStore={() => setCurrentScreen('store')}
+          onProfile={() => setCurrentScreen('profile')}
+          onSettings={() => setShowSettings(true)}
+        />
+      )}
+
+      {/* Store Screen */}
+      {currentScreen === 'store' && player && (
+        <StoreScreen onBack={() => setCurrentScreen('home')} />
+      )}
+
+      {/* Profile Screen */}
+      {currentScreen === 'profile' && player && (
+        <ProfileScreen
+          player={player}
+          onBack={() => setCurrentScreen('home')}
+          onUpdateProfile={(updates) => {
+            const updatedPlayer = { ...player, ...updates };
+            setPlayer(updatedPlayer);
+            StorageService.saveSession(updatedPlayer);
+          }}
+        />
+      )}
+
       {currentScreen === 'room-selection' && player && (
         <RoomSelectionScreen
           playerName={player.name}
           onCreateRoom={handleCreateRoom}
           onJoinRoom={handleJoinRoom}
-          onBack={() => setCurrentScreen('name-entry')}
+          onBack={() => setCurrentScreen('home')}
         />
       )}
 
