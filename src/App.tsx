@@ -448,18 +448,26 @@ function App() {
 
   const handleReady = async () => {
     if (!roomCode || !player) return;
+
+    // Check tutorial first (only if it's the first time ever)
+    const hasSeenTutorial = localStorage.getItem('seenDrawingTutorial');
+    if (!hasSeenTutorial) {
+      setShowTutorial(true);
+      // Wait for user to dismiss tutorial -> that will trigger actual ready
+      return;
+    }
+
+    // Actual ready logic
+    executeReady();
+  };
+
+  const executeReady = async () => {
+    if (!roomCode || !player) return;
     try {
       setIsReadying(true); // Immediate feedback
       await StorageService.playerReady(roomCode, player.id);
       setIsMyTimerRunning(true);
       setShowHowToPlay(false);
-
-      // Check tutorial (only if it's the first time ever)
-      const hasSeenTutorial = localStorage.getItem('seenDrawingTutorial');
-      if (!hasSeenTutorial) {
-        setShowTutorial(true);
-      }
-
     } catch (err) {
       console.error('Failed to mark ready:', err);
       showToast('Failed to start drawing 😅', 'error');
@@ -836,37 +844,51 @@ function App() {
               paddingBottom: 'max(0rem, env(safe-area-inset-bottom))'
             }}
           >
+            {/* Top Info Bar - Compact Mobile Layout */}
+            <div className="absolute top-2 left-0 w-full flex justify-between items-start px-2 z-20 pointer-events-none">
+              <div className="flex items-center gap-2">
+                {/* Settings Button */}
+                <button
+                  onClick={() => setShowSettings(true)}
+                  className="bg-white p-2 rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-all w-10 h-10 flex items-center justify-center pointer-events-auto border-2 border-gray-100"
+                >
+                  ⚙️
+                </button>
 
-            {/* Top Bar */}
-            <div className="flex-shrink-0 flex items-center justify-between gap-2 mb-4 z-20">
-              {/* Progress */}
-              <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-xl pop-in ml-16"
-                style={{ boxShadow: '0 4px 0 rgba(155, 89, 182, 0.3)', border: '3px solid #9B59B6' }}>
-                <span className="font-bold text-purple-600">
-                  Round {room.roundNumber}/{room.settings.totalRounds}
-                </span>
-                <span className="ml-3 text-gray-500">
-                  {submittedCount}/{totalPlayers} drawn
-                </span>
+                {/* Progress - Compact */}
+                <div className="bg-white/95 backdrop-blur-sm px-3 py-1.5 rounded-xl pop-in flex flex-col text-xs shadow-md border-2 border-purple-400"
+                >
+                  <span className="font-bold text-purple-600 leading-tight">
+                    Rd {room.roundNumber}/{room.settings.totalRounds}
+                  </span>
+                  <span className="text-gray-500 leading-tight text-[10px]">
+                    {submittedCount}/{totalPlayers} done
+                  </span>
+                </div>
               </div>
 
               {/* Timer or Status */}
-              {hasSubmitted ? (
-                <div className="bg-green-500 text-white px-4 py-2 rounded-xl font-bold">
-                  ✓ Submitted!
-                </div>
-              ) : isMyTimerRunning && timerEndsAt ? (
-                <div className="scale-75 origin-right">
-                  <Timer endsAt={timerEndsAt} onTimeUp={handleTimeUp} />
-                </div>
-              ) : null}
+              <div className="pointer-events-auto">
+                {hasSubmitted ? (
+                  <div className="bg-green-500 text-white px-3 py-1.5 rounded-xl font-bold text-sm shadow-lg animate-bounce">
+                    ✓ Done!
+                  </div>
+                ) : isMyTimerRunning && timerEndsAt ? (
+                  <div className="scale-75 origin-top-right shadow-lg rounded-full">
+                    <Timer endsAt={timerEndsAt} onTimeUp={handleTimeUp} />
+                  </div>
+                ) : null}
+              </div>
             </div>
 
             {showTutorial && (
-              <DrawingTutorial onClose={() => {
-                setShowTutorial(false);
-                localStorage.setItem('seenDrawingTutorial', 'true');
-              }} />
+              <DrawingTutorial
+                onClose={() => {
+                  setShowTutorial(false);
+                  localStorage.setItem('seenDrawingTutorial', 'true');
+                  executeReady();
+                }}
+              />
             )}
 
             {/* Image Container */}

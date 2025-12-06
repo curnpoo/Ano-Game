@@ -167,14 +167,15 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
             {/* Bottom Actions */}
             <div className="mt-4 flex flex-col items-center gap-3">
                 {/* Navigation Arrows */}
-                <div className="flex items-center gap-4">
+                {/* Navigation Arrows & Vote Button */}
+                <div className="flex items-center justify-between w-full max-w-sm px-2 gap-2">
                     <button
                         onClick={() => {
                             vibrate();
                             setSelectedIndex(Math.max(0, selectedIndex - 1));
                         }}
                         disabled={selectedIndex === 0}
-                        className={`w-12 h-12 rounded-full text-2xl transition-all ${selectedIndex === 0
+                        className={`w-12 h-12 flex-shrink-0 rounded-full text-2xl transition-all ${selectedIndex === 0
                             ? 'bg-gray-200 text-gray-400'
                             : 'bg-white hover:scale-110 jelly-hover'
                             }`}
@@ -183,23 +184,25 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                         ←
                     </button>
 
-                    {/* Vote Button */}
-                    {hasVoted ? (
-                        <div className="bg-green-500 text-white px-8 py-4 rounded-2xl font-bold text-xl">
-                            ✓ Voted!
-                        </div>
-                    ) : isOwnDrawing ? (
-                        <div className="bg-gray-300 text-gray-500 px-8 py-4 rounded-2xl font-bold text-lg">
-                            Can't vote for yourself
-                        </div>
-                    ) : (
-                        <button
-                            onClick={handleVote}
-                            className="btn-90s bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 text-white px-8 py-4 rounded-2xl font-bold text-xl jelly-hover"
-                        >
-                            🗳️ VOTE
-                        </button>
-                    )}
+                    {/* Vote Button Area - Centered & Flexible */}
+                    <div className="flex-1 flex justify-center min-w-0">
+                        {hasVoted ? (
+                            <div className="bg-green-500 text-white px-6 py-3 rounded-2xl font-bold text-lg shadow-lg whitespace-nowrap animate-bounce">
+                                ✓ Voted!
+                            </div>
+                        ) : isOwnDrawing ? (
+                            <div className="bg-gray-300 text-gray-500 px-4 py-3 rounded-2xl font-bold text-sm text-center shadow-inner leading-tight">
+                                Your Drawing
+                            </div>
+                        ) : (
+                            <button
+                                onClick={handleVote}
+                                className="w-full max-w-[160px] btn-90s bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 text-white py-3 rounded-2xl font-bold text-lg jelly-hover shadow-lg truncate px-2"
+                            >
+                                🗳️ VOTE
+                            </button>
+                        )}
+                    </div>
 
                     <button
                         onClick={() => {
@@ -207,7 +210,7 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                             setSelectedIndex(Math.min(drawings.length - 1, selectedIndex + 1));
                         }}
                         disabled={selectedIndex === drawings.length - 1}
-                        className={`w-12 h-12 rounded-full text-2xl transition-all ${selectedIndex === drawings.length - 1
+                        className={`w-12 h-12 flex-shrink-0 rounded-full text-2xl transition-all ${selectedIndex === drawings.length - 1
                             ? 'bg-gray-200 text-gray-400'
                             : 'bg-white hover:scale-110 jelly-hover'
                             }`}

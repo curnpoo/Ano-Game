@@ -41,7 +41,8 @@ export const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
             style={{
                 width: size,
                 height: size,
-                borderColor: color
+                borderColor: color,
+                color: color // checks out: allows currentColor to work in classes
             }}
         >
             <svg

@@ -256,7 +256,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                     </button>
                                 )}
 
-                                {onLeaveGame && (
+                                {onLeaveGame && !isHost && (
                                     <button
                                         onClick={() => setShowLeaveConfirm(true)}
                                         className="w-full py-3 rounded-xl font-bold text-red-600 bg-red-50 hover:bg-red-100 border-2 border-transparent hover:border-red-200 transition-all"

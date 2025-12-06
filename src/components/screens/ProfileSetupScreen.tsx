@@ -9,7 +9,7 @@ interface ProfileSetupScreenProps {
 
 const COLORS = ['#FF69B4', '#9B59B6', '#3498DB', '#1ABC9C', '#F1C40F', '#E67E22', '#E74C3C', '#34495E', '#000000'];
 const FRAMES = [
-    { id: 'none', name: 'Simple', class: '' },
+    { id: 'none', name: 'Simple', class: 'border-2 border-current' },
     { id: 'glow', name: 'Glow', class: 'shadow-[0_0_15px_currentColor]' },
     { id: 'border', name: 'Bold', class: 'border-4 border-current' },
     { id: 'dash', name: 'Dash', class: 'border-4 border-dashed border-current' },
@@ -123,16 +123,43 @@ export const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ onComple
 
                     {/* Frame Grid */}
                     <div>
-                        <label className="block text-sm font-bold text-gray-700 mb-2">FRAME</label>
-                        <div className="grid grid-cols-3 gap-2">
+                        <label className="block text-sm font-bold text-gray-700 mb-2">FRAME STYLE</label>
+                        <div className="grid grid-cols-3 gap-3">
                             {FRAMES.map(f => (
                                 <button
                                     key={f.id}
                                     type="button"
                                     onClick={() => setFrame(f.id)}
-                                    className={`px-2 py-1 rounded-lg text-sm font-bold transition-colors ${frame === f.id ? 'bg-purple-500 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`}
+                                    className={`
+                                        aspect-square rounded-full flex flex-col items-center justify-center gap-1 transition-transform relative
+                                        ${frame === f.id ? 'scale-110' : 'hover:scale-105 opacity-70 hover:opacity-100'}
+                                    `}
                                 >
-                                    {f.name}
+                                    {/* Visual Preview */}
+                                    <div
+                                        className={`w-12 h-12 rounded-full bg-white flex items-center justify-center ${f.class}`} // Use f.class directly
+                                        style={{ color: color }} // Apply current color to preview
+                                        title={f.name}
+                                    >
+                                        <span className="text-xs">
+                                            {f.id === 'none' ? '😐' :
+                                                f.id === 'glow' ? '✨' :
+                                                    f.id === 'border' ? '🟣' :
+                                                        f.id === 'dash' ? '〰️' :
+                                                            f.id === 'double' ? '⭕' :
+                                                                '💍'}
+                                        </span>
+                                    </div>
+                                    <span className={`text-xs font-bold ${frame === f.id ? 'text-purple-600' : 'text-gray-500'}`}>
+                                        {f.name}
+                                    </span>
+
+                                    {/* Selection Indicator */}
+                                    {frame === f.id && (
+                                        <div className="absolute -top-1 -right-1 bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-md">
+                                            ✓
+                                        </div>
+                                    )}
                                 </button>
                             ))}
                         </div>
