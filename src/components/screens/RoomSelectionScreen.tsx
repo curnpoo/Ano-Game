@@ -85,7 +85,7 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
     };
 
     return (
-        <div className="min-h-screen bg-90s-animated flex flex-col items-center justify-start pt-24 pb-safe p-4 relative overflow-y-auto overflow-x-hidden">
+        <div className="min-h-screen bg-90s-animated flex flex-col items-center justify-start pt-32 pb-safe p-4 relative overflow-y-auto overflow-x-hidden">
             {/* Decorative elements */}
             <div className="absolute top-10 right-10 text-5xl bubble-float pointer-events-none">🏠</div>
             <div className="absolute bottom-20 left-10 text-4xl bubble-float pointer-events-none" style={{ animationDelay: '0.5s' }}>🚪</div>
