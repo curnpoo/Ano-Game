@@ -223,37 +223,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 <div className="space-y-6">
                     {/* Game Actions (Only if in a game) */}
-                    {roomCode && (
-                        <div className="bg-gray-50 rounded-2xl p-4 border-2 border-gray-100">
-                            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3">Game Actions</h3>
-                            <div className="grid gap-3">
-                                {onGoHome && (
-                                    <button
-                                        onClick={() => {
-                                            if (confirm('Leave this game and return home? You can rejoin later.')) {
-                                                onGoHome();
-                                                onClose();
-                                            }
-                                        }}
-                                        className="w-full bg-orange-100 hover:bg-orange-200 text-orange-700 font-bold py-3 rounded-xl border-2 border-orange-200 active:scale-95 transition-all"
-                                    >
-                                        🏠 Go Home
-                                    </button>
-                                )}
-                                <button
-                                    onClick={() => {
-                                        if (confirm('Are you sure you want to completely leave this game?')) {
-                                            if (onLeaveGame) onLeaveGame();
-                                            onClose();
-                                        }
-                                    }}
-                                    className="w-full bg-red-100 hover:bg-red-200 text-red-600 font-bold py-3 rounded-xl border-2 border-red-200 active:scale-95 transition-all"
-                                >
-                                    👋 Leave Game Completely
-                                </button>
-                            </div>
-                        </div>
-                    )}
+
                     {/* Name Edit */}
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">Your Name</label>

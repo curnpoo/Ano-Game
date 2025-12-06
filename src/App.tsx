@@ -84,6 +84,40 @@ function App() {
   const [kickCountdown, setKickCountdown] = useState(3);
   const [isReadying, setIsReadying] = useState(false);
 
+  const [lastGameDetails, setLastGameDetails] = useState<{
+    roomCode: string;
+    hostName: string;
+    playerCount: number;
+  } | null>(null);
+
+  // Fetch last game details when on home screen
+  useEffect(() => {
+    const checkLastGame = async () => {
+      const code = StorageService.getRoomCode();
+      if (code && currentScreen === 'home') {
+        const details = await StorageService.getRoomPreview(code);
+        if (details) {
+          setLastGameDetails({ ...details, roomCode: code });
+        } else {
+          setLastGameDetails(null);
+        }
+      } else {
+        setLastGameDetails(null);
+      }
+    };
+
+    checkLastGame();
+  }, [currentScreen]);
+
+  const handleGoHome = async () => {
+    setRoomCode(null); // Stop listening in React
+    setCurrentScreen('home');
+  };
+
+  const handleRejoin = async (code: string) => {
+    if (!player) return;
+    handleJoinRoom(code);
+  };
 
   // Initial 2s loading
   useEffect(() => {
@@ -809,11 +843,7 @@ function App() {
     }
   };
 
-  const handleGoHome = () => {
-    setIsBrowsing(true);
-    setCurrentScreen('room-selection');
-    setShowSettings(false);
-  };
+
 
   const handleSafeReset = () => {
     StorageService.leaveRoom(); // Clear local session to prevent auto-rejoin
@@ -955,11 +985,7 @@ function App() {
 
       {/* Loading Overlay */}
       {/* This block is now handled by the top-level conditional rendering for isLoading and isLoadingTransition */}
-      {/* {isLoading && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center">
-          <div className="text-6xl animate-bounce">🎨</div>
-        </div>
-      )} */}
+
 
       {/* Screens */}
       {currentScreen === 'welcome' && (
@@ -985,17 +1011,8 @@ function App() {
           onStore={() => setCurrentScreen('store')}
           onProfile={() => setCurrentScreen('profile')}
           onSettings={() => setShowSettings(true)}
-          lastRoomCode={StorageService.getRoomCode()}
-          onQuickJoin={async (code) => {
-            setRoomCode(code);
-            const room = await StorageService.joinRoom(code, player);
-            if (room) {
-              // Let the room status useEffect handle screen navigation
-            } else {
-              StorageService.leaveRoom();
-              showToast('Game no longer available', 'error');
-            }
-          }}
+          lastGameDetails={lastGameDetails}
+          onRejoin={handleRejoin}
         />
       )}
 
