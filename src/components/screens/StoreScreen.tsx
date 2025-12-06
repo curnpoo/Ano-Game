@@ -142,11 +142,11 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
                                 </div>
 
                                 <div className="text-center w-full mb-3">
-                                    <div className="font-bold text-gray-800 text-lg leading-tight mb-1">
+                                    <div className="font-bold text-black text-lg leading-tight mb-1">
                                         {item.name}
                                     </div>
                                     {item.description && (
-                                        <div className="text-xs text-gray-500 line-clamp-2 min-h-[2.5em]">
+                                        <div className="text-xs text-gray-700 line-clamp-2 min-h-[2.5em]">
                                             {item.description}
                                         </div>
                                     )}

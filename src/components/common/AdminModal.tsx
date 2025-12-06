@@ -81,7 +81,7 @@ export const AdminModal: React.FC<AdminModalProps> = ({ onClose }) => {
                         <h2 className="text-2xl font-black text-gray-800">GOD MODE ⚡️</h2>
                         <p className="text-gray-500 text-sm font-bold">Manage the economy</p>
                     </div>
-                    <button onClick={onClose} className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
+                    <button onClick={onClose} className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors text-gray-600">
                         ✕
                     </button>
                 </div>

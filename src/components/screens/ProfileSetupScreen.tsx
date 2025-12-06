@@ -61,7 +61,7 @@ export const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ onComple
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             placeholder="Enter your name..."
-                            className="w-full px-4 py-3 rounded-xl border-2 border-purple-200 focus:border-purple-500 focus:outline-none text-lg font-bold text-center"
+                            className="w-full px-4 py-3 rounded-xl border-2 border-purple-200 focus:border-purple-500 focus:outline-none text-lg font-bold text-center text-black"
                             maxLength={12}
                             autoFocus
                         />

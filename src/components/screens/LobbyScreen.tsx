@@ -157,7 +157,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                                             avatar={p.avatar}
                                             frame={p.frame}
                                             color={p.color}
-                                            size={40}
+                                            size={48}
                                         />
                                         <div>
                                             <div className="font-bold text-gray-800">

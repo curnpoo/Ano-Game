@@ -22,7 +22,7 @@ export const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
     if (!strokes || strokes.length === 0) {
         return (
             <div
-                className={`rounded-full bg-white flex items-center justify-center shadow-sm ${frame || ''} ${className}`}
+                className={`rounded-2xl bg-white flex items-center justify-center shadow-sm ${frame || ''} ${className}`}
                 style={{
                     color: color,
                     width: size,
@@ -38,7 +38,7 @@ export const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
 
     return (
         <div
-            className={`rounded-full bg-white overflow-hidden relative shadow-sm flex items-center justify-center ${frame || ''} ${className}`}
+            className={`rounded-2xl bg-white overflow-hidden relative shadow-sm flex items-center justify-center ${frame || ''} ${className}`}
             style={{
                 width: size,
                 height: size,
@@ -53,7 +53,7 @@ export const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
                 style={{ color: color }}
             >
                 {/* Persistent White Background */}
-                <circle cx="50" cy="50" r="50" fill="white" />
+                <rect x="0" y="0" width="100" height="100" fill="white" />
 
                 {strokes.map((stroke, i) => {
                     if (!stroke || !stroke.points || stroke.points.length === 0) return null;
