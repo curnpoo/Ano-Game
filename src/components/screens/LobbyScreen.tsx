@@ -4,7 +4,8 @@ import { SettingsModal } from '../common/SettingsModal';
 import { GameSettingsPanel } from '../game/GameSettingsPanel';
 import { AvatarDisplay } from '../common/AvatarDisplay';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
-import { StorageService } from '../../services/storage';
+import { AuthService } from '../../services/auth';
+import { getThemeContainerStyle } from '../../utils/themes';
 
 interface LobbyScreenProps {
     room: GameRoom;
@@ -30,6 +31,11 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     const [showSettings, setShowSettings] = useState(false);
     const [copied, setCopied] = useState(false);
     const [, setTick] = useState(0); // Force update for idle timer
+
+    // Theme Support
+    const currentUser = AuthService.getCurrentUser();
+    const activeTheme = currentUser?.cosmetics?.activeTheme || 'default';
+    const cardStyle = getThemeContainerStyle(activeTheme);
 
     useEffect(() => {
         // Force update every second to check idle status
@@ -98,24 +104,18 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                 </div>
 
                 {/* Room Code Card */}
-                <div className="bg-white rounded-3xl p-5 flex justify-between items-center shadow-xl"
-                    style={{
-                        border: '4px solid transparent',
-                        backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #00D9FF, #32CD32)',
-                        backgroundOrigin: 'border-box',
-                        backgroundClip: 'padding-box, border-box'
-                    }}>
+                <div className="flex justify-between items-center shadow-xl transition-all duration-300"
+                    style={cardStyle}>
                     <div>
-                        <div className="text-xs text-cyan-500 uppercase tracking-wider font-bold mb-1">Room Code</div>
-                        <div className="text-4xl font-mono font-black rainbow-text tracking-widest">{room.roomCode}</div>
+                        <div className="text-xs uppercase tracking-wider font-bold mb-1 opacity-70">Room Code</div>
+                        <div className="text-4xl font-mono font-black tracking-widest">{room.roomCode}</div>
                     </div>
                     <button
                         onClick={copyRoomCode}
                         className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${copied
                             ? 'bg-green-400 text-white'
-                            : 'bg-gradient-to-r from-cyan-400 to-emerald-400 text-white hover:scale-105'
+                            : 'bg-black/10 hover:bg-black/20 text-current'
                             }`}
-                        style={{ boxShadow: '0 4px 0 rgba(0, 0, 0, 0.2)' }}
                     >
                         {copied ? '✓ Copied!' : '📋 Copy'}
                     </button>
@@ -131,21 +131,11 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                 )}
 
                 {/* Players List */}
-                <div className="bg-white rounded-3xl p-5 shadow-xl"
-                    style={{
-                        border: '4px solid transparent',
-                        backgroundImage: 'linear-gradient(white, white), linear-gradient(135deg, #FF69B4, #9B59B6)',
-                        backgroundOrigin: 'border-box',
-                        backgroundClip: 'padding-box, border-box'
-                    }}>
-                    <h3 className="text-lg font-bold flex items-center gap-2 mb-4"
-                        style={{
-                            background: 'linear-gradient(135deg, #FF69B4, #9B59B6)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent'
-                        }}>
+                <div className="shadow-xl transition-all duration-300"
+                    style={cardStyle}>
+                    <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
                         👥 Players
-                        <span className="bg-gradient-to-r from-pink-400 to-purple-500 text-white px-3 py-1 rounded-full text-sm">
+                        <span className="bg-black/10 px-3 py-1 rounded-full text-sm">
                             {room.players.length}
                         </span>
                     </h3>

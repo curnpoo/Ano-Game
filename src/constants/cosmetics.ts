@@ -45,6 +45,7 @@ export const POWERUPS = [
 // Player card themes (permanent unlocks)
 export const CARD_THEMES = [
     { id: 'default', name: 'Classic', preview: '⬜', description: 'Standard white card', price: 0 },
+    { id: 'cardboard', name: 'Cardboard', preview: '📦', description: 'Recycled chic', price: 5 },
     { id: 'dark', name: 'Dark Mode', preview: '⬛', description: 'Sleek dark background', price: 15 },
     { id: 'gradient', name: 'Sunset', preview: '🌅', description: 'Orange to purple gradient', price: 25 },
     { id: 'neon', name: 'Neon Glow', preview: '💜', description: 'Glowing neon border', price: 35 },

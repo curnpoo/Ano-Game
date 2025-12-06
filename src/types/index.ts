@@ -36,6 +36,7 @@ export interface PlayerCosmetics {
     badges: string[];
     activeBrush?: string;
     activeColor?: string;
+    activeTheme?: string;
     purchasedItems?: string[]; // Items bought with currency
 }
 

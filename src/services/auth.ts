@@ -77,10 +77,13 @@ export const AuthService = {
                 createdAt: now,
                 lastLoginAt: now,
                 stats: defaultStats,
-                currency: 100, // Starting currency
+                currency: 5, // Starting currency ($5)
                 xp: 0,
                 purchasedItems: [],
-                cosmetics: defaultCosmetics
+                cosmetics: {
+                    ...defaultCosmetics,
+                    activeTheme: 'default'
+                }
             };
 
             // Save to Firebase
