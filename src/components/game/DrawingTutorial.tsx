@@ -5,7 +5,6 @@ interface DrawingTutorialProps {
 }
 
 export const DrawingTutorial: React.FC<DrawingTutorialProps> = ({ onClose }) => {
-    const [step, setStep] = useState(0); // 0: Intro, 1: Controls
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {

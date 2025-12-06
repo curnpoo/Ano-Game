@@ -20,7 +20,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     brushSize,
     isDrawingEnabled,
     strokes,
-    strokes,
     onStrokesChange,
     isEraser = false,
     isEyedropper = false,
