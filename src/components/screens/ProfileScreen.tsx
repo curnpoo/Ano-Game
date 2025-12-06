@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { Player } from '../../types';
 import { AvatarDisplay } from '../common/AvatarDisplay';
 import { CurrencyService, formatCurrency } from '../../services/currency';
+import { AuthService } from '../../services/auth';
 import { StatsModal } from '../common/StatsModal';
 
 interface ProfileScreenProps {
@@ -19,6 +20,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 }) => {
     const [name, setName] = useState(player.name);
     const [showStats, setShowStats] = useState(false);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
     const balance = CurrencyService.getCurrency();
 
@@ -29,6 +31,11 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
             });
             onBack();
         }
+    };
+
+    const handleLogout = () => {
+        AuthService.logout();
+        window.location.reload();
     };
 
     return (
@@ -112,7 +119,48 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 >
                     Save Changes
                 </button>
+                <button
+                    onClick={handleSave}
+                    className="w-full py-4 bg-black text-white font-bold text-xl rounded-2xl shadow-lg hover:bg-gray-800 active:scale-95 transition-all"
+                >
+                    Save Changes
+                </button>
+
+                {/* Logout Option */}
+                {AuthService.isLoggedIn() && (
+                    <button
+                        onClick={() => setShowLogoutConfirm(true)}
+                        className="w-full mt-4 py-3 text-red-300 font-bold text-sm hover:text-white transition-colors"
+                    >
+                        Log Out of Account
+                    </button>
+                )}
             </div>
+
+            {/* Logout Confirm Modal */}
+            {showLogoutConfirm && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <div className="bg-white rounded-3xl p-6 shadow-2xl w-full max-w-sm text-center pop-in">
+                        <div className="text-4xl mb-4">👋</div>
+                        <h3 className="text-2xl font-black text-gray-800 mb-2">Log Out?</h3>
+                        <p className="text-gray-600 mb-6 font-medium">You will return to the welcome screen.</p>
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowLogoutConfirm(false)}
+                                className="flex-1 py-3 px-6 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                className="flex-1 py-3 px-6 bg-red-500 text-white font-bold rounded-xl shadow-lg hover:bg-red-600 active:scale-95 transition-all"
+                            >
+                                Log Out
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Stats Modal */}
             {showStats && <StatsModal onClose={() => setShowStats(false)} />}

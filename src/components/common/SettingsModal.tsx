@@ -301,16 +301,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 </button>
                             )}
 
-                            {/* Log Out Button - Only if logged in */}
-                            {AuthService.isLoggedIn() && (
-                                <button
-                                    onClick={() => setShowLogoutConfirm(true)}
-                                    className="w-full py-3 px-4 bg-gray-100 text-gray-500 font-bold rounded-xl hover:bg-gray-200 transition-colors text-sm"
-                                >
-                                    Log Out
-                                </button>
-                            )}
                         </div>
+                    )}
+
+                    {/* Log Out Button - Only if logged in (Universal) */}
+                    {AuthService.isLoggedIn() && (
+                        <button
+                            onClick={() => setShowLogoutConfirm(true)}
+                            className="w-full py-3 px-4 bg-gray-100 text-gray-500 font-bold rounded-xl hover:bg-gray-200 transition-colors text-sm"
+                        >
+                            Log Out
+                        </button>
                     )}
 
 
