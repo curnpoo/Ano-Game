@@ -111,8 +111,8 @@ function App() {
   // Restore session (Auth or Local)
   useEffect(() => {
     const initSession = async () => {
-      // 1. Check Auth (Firebase Login)
-      const authUser = AuthService.getCurrentUser();
+      // 1. Check Auth (Firebase Login) - Sync with server to ensure fresh data
+      const authUser = await AuthService.syncUser();
       let session = StorageService.getSession();
 
       if (authUser) {

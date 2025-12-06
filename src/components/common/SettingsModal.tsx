@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { Player } from '../../types';
 import { requestPushPermission, storePushToken, isPushSupported } from '../../services/pushNotifications';
+import { AuthService } from '../../services/auth';
 
 interface SettingsModalProps {
     player: Player;
@@ -32,6 +33,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     const [showEndGameConfirm, setShowEndGameConfirm] = useState(false);
     const [kickTarget, setKickTarget] = useState<string | null>(null);
     const [notificationsEnabled, setNotificationsEnabled] = useState(false);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
     useEffect(() => {
         if ('Notification' in window) {
@@ -47,6 +49,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             });
             onClose();
         }
+    };
+
+    const handleLogout = () => {
+        AuthService.logout();
+        window.location.reload();
     };
 
     const requestNotifications = async () => {
@@ -123,6 +130,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             className="flex-1 py-3 px-6 bg-red-500 text-white font-bold rounded-xl shadow-lg hover:bg-red-600 active:scale-95 transition-all"
                         >
                             End Game
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    if (showLogoutConfirm) {
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                <div className="bg-white rounded-3xl p-6 shadow-2xl w-full max-w-sm text-center pop-in">
+                    <div className="text-4xl mb-4">👋</div>
+                    <h3 className="text-2xl font-black text-gray-800 mb-2">Log Out?</h3>
+                    <p className="text-gray-600 mb-6 font-medium">You will return to the welcome screen.</p>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={() => setShowLogoutConfirm(false)}
+                            className="flex-1 py-3 px-6 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleLogout}
+                            className="flex-1 py-3 px-6 bg-red-500 text-white font-bold rounded-xl shadow-lg hover:bg-red-600 active:scale-95 transition-all"
+                        >
+                            Log Out
                         </button>
                     </div>
                 </div>
@@ -265,6 +298,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                     className="w-full py-3 px-4 bg-gray-100 text-gray-600 font-bold rounded-xl hover:bg-gray-200 transition-colors"
                                 >
                                     👋 Leave Game
+                                </button>
+                            )}
+
+                            {/* Log Out Button - Only if logged in */}
+                            {AuthService.isLoggedIn() && (
+                                <button
+                                    onClick={() => setShowLogoutConfirm(true)}
+                                    className="w-full py-3 px-4 bg-gray-100 text-gray-500 font-bold rounded-xl hover:bg-gray-200 transition-colors text-sm"
+                                >
+                                    Log Out
                                 </button>
                             )}
                         </div>
