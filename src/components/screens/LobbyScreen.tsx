@@ -95,10 +95,10 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                         🎨
                     </button>
                     <button
-                        onClick={() => setShowSettings(true)}
-                        className="bg-white p-3 rounded-2xl shadow-lg border-2 border-purple-100 hover:scale-105 active:scale-95 transition-all w-12 h-12 flex items-center justify-center pointer-events-auto text-xl"
+                        onClick={onBack}
+                        className="bg-white p-3 rounded-2xl shadow-lg border-2 border-red-100 hover:scale-105 active:scale-95 transition-all w-12 h-12 flex items-center justify-center pointer-events-auto text-xl"
                     >
-                        ⚙️
+                        🚪
                     </button>
                 </div>
             </div>
