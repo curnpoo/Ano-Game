@@ -53,7 +53,9 @@ function App() {
 
   const [showNotificationPrompt, setShowNotificationPrompt] = useState(false);
   const [showGameEnded, setShowGameEnded] = useState(false);
+  const [showKicked, setShowKicked] = useState(false);
   const [endGameCountdown, setEndGameCountdown] = useState(3);
+  const [kickCountdown, setKickCountdown] = useState(3);
   const [isReadying, setIsReadying] = useState(false);
 
   // Initial 3s loading
@@ -200,15 +202,30 @@ function App() {
       const amInWaiting = room.waitingPlayers?.some(p => p.id === player.id);
 
       if (!amInPlayers && !amInWaiting) {
-        // I was kicked or room data glitch
-        // Add simple debounce or check if room just fully closed
-        showToast('You were removed from the room 👢', 'info');
-        setRoomCode(null);
-        StorageService.leaveRoom();
-        setCurrentScreen('room-selection');
+        // I was kicked
+        setShowKicked(true);
+        setKickCountdown(3);
       }
     }
   }, [room, player, roomCode]);
+
+  // Effect: Kicked Countdown
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout>;
+    if (showKicked) {
+      if (kickCountdown > 0) {
+        timer = setTimeout(() => setKickCountdown(prev => prev - 1), 1000);
+      } else {
+        // Countdown finished
+        setShowKicked(false);
+        setRoomCode(null);
+        StorageService.leaveRoom();
+        setCurrentScreen('room-selection');
+        showToast('You were removed from the room 👢', 'info');
+      }
+    }
+    return () => clearTimeout(timer);
+  }, [showKicked, kickCountdown, showToast]);
 
   // Effect: Host Ended Game (Room Deleted)
   useEffect(() => {
@@ -597,6 +614,21 @@ function App() {
             <p className="text-gray-400 text-sm mt-4">Returning to lobby in {endGameCountdown}...</p>
             <div className="mt-6 flex justify-center">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Kicked Modal */}
+      {showKicked && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center animate-fade-in">
+          <div className="bg-white rounded-3xl p-8 text-center max-w-sm mx-4 shadow-2xl pop-in border-4 border-orange-500">
+            <div className="text-6xl mb-4 animate-bounce">👢</div>
+            <h3 className="text-2xl font-bold text-orange-600 mb-2">You were Kicked</h3>
+            <p className="text-gray-600 font-medium">You have been removed from the room.</p>
+            <p className="text-gray-400 text-sm mt-4">Returning to lobby in {kickCountdown}...</p>
+            <div className="mt-6 flex justify-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
             </div>
           </div>
         </div>
