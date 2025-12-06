@@ -16,6 +16,8 @@ import { GameCanvas } from './components/game/GameCanvas';
 import { Toolbar } from './components/game/Toolbar';
 import { Timer } from './components/game/Timer';
 import { HowToPlayModal } from './components/game/HowToPlayModal';
+import { SaboteurPanel } from './components/game/SaboteurPanel';
+import { SabotageOverlay } from './components/game/SabotageOverlay';
 import { Toast } from './components/common/Toast';
 import { LoadingScreen } from './components/common/LoadingScreen';
 import { NotificationPromptModal } from './components/common/NotificationPromptModal';
@@ -135,8 +137,11 @@ function App() {
   const stats = useMemo(() => {
     const myState = room?.playerStates?.[player?.id || ''];
     const submitted = myState?.status === 'submitted';
+    // Add +5 seconds if player has time bonus
+    const hasTimeBonus = room?.timeBonusPlayerId === player?.id;
+    const bonusTime = hasTimeBonus ? 5 : 0;
     const endsAt = myState?.timerStartedAt
-      ? myState.timerStartedAt + (room?.settings?.timerDuration || 15) * 1000
+      ? myState.timerStartedAt + ((room?.settings?.timerDuration || 15) + bonusTime) * 1000
       : null;
 
     // Safety check for room existence
@@ -474,6 +479,12 @@ function App() {
     try {
       setIsReadying(true); // Immediate feedback
       await StorageService.playerReady(roomCode, player.id);
+
+      // Trigger sabotage if this player is the target
+      if (room?.sabotageTargetId === player.id && !room?.sabotageTriggered) {
+        await StorageService.triggerSabotage(roomCode);
+      }
+
       setIsMyTimerRunning(true);
       setShowHowToPlay(false);
     } catch (err) {
@@ -878,12 +889,22 @@ function App() {
                 </button>
 
                 {/* Progress */}
-                <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-xl pop-in ml-16"
+                <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-xl pop-in ml-16 flex items-center gap-2"
                   style={{ boxShadow: '0 4px 0 rgba(155, 89, 182, 0.3)', border: '3px solid #9B59B6' }}>
                   <span className="font-bold text-purple-600">
                     Round {room.roundNumber}/{room.settings.totalRounds}
                   </span>
-                  <span className="ml-3 text-gray-500">
+                  {room.isDoublePoints && (
+                    <span className="bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full text-xs font-bold animate-pulse">
+                      2X POINTS!
+                    </span>
+                  )}
+                  {room.timeBonusPlayerId === player?.id && (
+                    <span className="bg-green-400 text-green-900 px-2 py-0.5 rounded-full text-xs font-bold">
+                      +5s ⚡
+                    </span>
+                  )}
+                  <span className="ml-2 text-gray-500">
                     {submittedCount}/{totalPlayers} drawn
                   </span>
                 </div>
@@ -1029,6 +1050,30 @@ function App() {
               </div>
             )}
           </div>
+
+          {/* Saboteur Panel - shown when player is the saboteur and hasn't selected target */}
+          {room.saboteurId === player.id && !room.sabotageTargetId && (
+            <SaboteurPanel
+              players={room.players}
+              currentPlayerId={player.id}
+              uploaderId={room.currentUploaderId || room.hostId}
+              onSelectTarget={async (targetId) => {
+                if (roomCode) {
+                  await StorageService.setSabotageTarget(roomCode, targetId);
+                }
+              }}
+              selectedTargetId={room.sabotageTargetId}
+            />
+          )}
+
+          {/* Sabotage Overlay - shown when player is being sabotaged and has started drawing */}
+          <SabotageOverlay
+            isActive={
+              room.sabotageTargetId === player.id &&
+              room.sabotageTriggered === true &&
+              isMyTimerRunning
+            }
+          />
         </div>
       )}
 

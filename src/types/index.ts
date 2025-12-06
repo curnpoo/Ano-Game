@@ -107,6 +107,20 @@ export interface GameRoom {
     // Round history
     roundResults: RoundResult[];
 
+    // === Phase 2: Fun Features ===
+
+    // Sabotage Mode (one random round per game)
+    sabotageRound?: number; // Which round has sabotage (1-indexed)
+    saboteurId?: string; // Player doing the sabotaging
+    sabotageTargetId?: string; // Player being sabotaged
+    sabotageTriggered?: boolean; // Has the effect started?
+
+    // Double Points (random chance per round)
+    isDoublePoints?: boolean; // This round has 2x points
+
+    // Time Bonus (random player gets extra time)
+    timeBonusPlayerId?: string; // Player with extra time this round
+
     createdAt: number;
 }
 

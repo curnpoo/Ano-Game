@@ -239,6 +239,10 @@ export const StorageService = {
         const roomCode = StorageService.generateRoomCode();
         const roomRef = ref(database, `rooms/${roomCode}`);
 
+        // Pick a random sabotage round (1 to totalRounds)
+        const totalRounds = 3; // Default rounds
+        const sabotageRound = Math.floor(Math.random() * totalRounds) + 1;
+
         const newRoom: GameRoom = {
             roomCode: roomCode,
             hostId: hostPlayer.id,
@@ -255,7 +259,8 @@ export const StorageService = {
             playerStates: {},
             votes: {},
             scores: {},
-            roundResults: []
+            roundResults: [],
+            sabotageRound // Store which round has sabotage
         };
 
         await set(roomRef, newRoom);
@@ -491,10 +496,29 @@ export const StorageService = {
                 playerStates[p.id] = { status: 'waiting' };
             });
 
+            // 20% chance for double points round
+            const isDoublePoints = Math.random() < 0.2;
+
+            // Random player gets time bonus (not the uploader)
+            const eligibleForBonus = r.players.filter(p => p.id !== uploadedBy);
+            const timeBonusPlayerId = eligibleForBonus.length > 0
+                ? eligibleForBonus[Math.floor(Math.random() * eligibleForBonus.length)].id
+                : undefined;
+
+            // Check if this is the sabotage round
+            const nextRoundNumber = r.roundNumber + 1;
+            const isSabotageRound = r.sabotageRound === nextRoundNumber;
+
+            // Pick a random saboteur (not the uploader) for sabotage round
+            const eligibleSaboteurs = r.players.filter(p => p.id !== uploadedBy);
+            const saboteurId = isSabotageRound && eligibleSaboteurs.length > 0
+                ? eligibleSaboteurs[Math.floor(Math.random() * eligibleSaboteurs.length)].id
+                : undefined;
+
             return {
                 ...r,
                 status: 'drawing',
-                roundNumber: r.roundNumber + 1,
+                roundNumber: nextRoundNumber,
                 currentImage: {
                     url: imageUrl,
                     uploadedBy,
@@ -502,7 +526,13 @@ export const StorageService = {
                 },
                 block,
                 playerStates,
-                votes: {}
+                votes: {},
+                isDoublePoints,
+                timeBonusPlayerId,
+                // Sabotage state
+                saboteurId: isSabotageRound ? saboteurId : undefined,
+                sabotageTargetId: undefined, // Saboteur picks this
+                sabotageTriggered: false
             };
         });
     },
@@ -519,6 +549,22 @@ export const StorageService = {
                     timerStartedAt: Date.now()
                 }
             }
+        }));
+    },
+
+    // Saboteur sets their target
+    setSabotageTarget: async (roomCode: string, targetId: string): Promise<GameRoom | null> => {
+        return StorageService.updateRoom(roomCode, (r) => ({
+            ...r,
+            sabotageTargetId: targetId
+        }));
+    },
+
+    // Trigger sabotage effect when target starts drawing
+    triggerSabotage: async (roomCode: string): Promise<GameRoom | null> => {
+        return StorageService.updateRoom(roomCode, (r) => ({
+            ...r,
+            sabotageTriggered: true
         }));
     },
 
@@ -596,10 +642,11 @@ export const StorageService = {
                     }))
                     .sort((a, b) => b.votes - a.votes);
 
-                // Award points (3, 2, 1 for top 3)
-                if (rankings[0]) rankings[0].points = 3;
-                if (rankings[1]) rankings[1].points = 2;
-                if (rankings[2]) rankings[2].points = 1;
+                // Award points (3, 2, 1 for top 3) - double if it's a double points round
+                const multiplier = r.isDoublePoints ? 2 : 1;
+                if (rankings[0]) rankings[0].points = 3 * multiplier;
+                if (rankings[1]) rankings[1].points = 2 * multiplier;
+                if (rankings[2]) rankings[2].points = 1 * multiplier;
 
                 // Update scores
                 const newScores = { ...r.scores };
