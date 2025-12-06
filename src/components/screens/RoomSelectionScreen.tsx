@@ -192,7 +192,7 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-2xl font-black text-gray-800">{game.roomCode}</span>
+                                                    <span className="text-2xl font-black" style={{ color: 'var(--card-text)' }}>{game.roomCode}</span>
                                                     {game.isActive ? (
                                                         <span className="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full font-bold">
                                                             ● Active

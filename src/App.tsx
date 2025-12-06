@@ -235,15 +235,43 @@ function App() {
   // Calculated state for dependencies
   const amWaiting = room?.playerStates?.[player?.id || '']?.status === 'waiting' || false;
 
-  const handleEquipTheme = () => {
+  const handleEquipTheme = (themeId?: string) => {
     setIsTransitionActive(true);
-    // Explicitly refresh player state to pick up new theme immediately
+
+    // Immediate local update for visual responsiveness
+    if (themeId && player) {
+      setPlayer(prev => {
+        if (!prev) return prev;
+
+        // Ensure defaults for required fields if cosmetics is undefined or partial
+        const currentCosmetics = prev.cosmetics || {
+          brushesUnlocked: [],
+          colorsUnlocked: [],
+          badges: [],
+          purchasedItems: []
+        };
+
+        return {
+          ...prev,
+          cosmetics: {
+            ...currentCosmetics,
+            activeTheme: themeId,
+            // Fallbacks for safety during partial updates
+            brushesUnlocked: currentCosmetics.brushesUnlocked || [],
+            colorsUnlocked: currentCosmetics.colorsUnlocked || [],
+            badges: currentCosmetics.badges || []
+          }
+        };
+      });
+    }
+
+    // Explicitly refresh player state to ensure full sync (DB source of truth)
     setTimeout(() => {
       const freshUser = AuthService.getCurrentUser();
       if (freshUser) {
         setPlayer(prev => prev ? { ...prev, cosmetics: freshUser.cosmetics } : prev);
       }
-    }, 100); // Small delay to ensure DB update (though it should be local first)
+    }, 100);
   };
 
   // Derived State

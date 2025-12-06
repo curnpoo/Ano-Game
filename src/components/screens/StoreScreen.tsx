@@ -6,7 +6,7 @@ import { vibrate, HapticPatterns } from '../../utils/haptics';
 
 interface StoreScreenProps {
     onBack: () => void;
-    onEquip?: () => void;
+    onEquip?: (themeId: string) => void;
 }
 
 type Tab = 'brushes' | 'powerups' | 'themes';
@@ -33,8 +33,8 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
                 setPurchaseMessage(`🎨 Equipped ${item.name}!`);
                 setTimeout(() => setPurchaseMessage(null), 1500);
 
-                // Trigger transition if handler provided
-                onEquip?.();
+                // Trigger transition if handler provided, passing the new theme ID
+                onEquip?.(item.id);
             }
             return;
         }
