@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import type { Player } from '../../types';
 import { requestPushPermission, storePushToken, isPushSupported } from '../../services/pushNotifications';
-import { AuthService } from '../../services/auth';
-import { CurrencyService } from '../../services/currency';
 
 interface SettingsModalProps {
     player: Player;
