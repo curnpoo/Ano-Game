@@ -325,6 +325,10 @@ export const StorageService = {
         return data ? JSON.parse(data) : null;
     },
 
+    clearSession: (): void => {
+        localStorage.removeItem('aic_game_session');
+    },
+
     generateRoomCode: (): string => {
         const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
         let code = '';
