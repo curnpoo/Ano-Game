@@ -1,5 +1,6 @@
 import React from 'react';
 import { CurrencyService, formatCurrency } from '../../services/currency';
+import { XPService } from '../../services/xp';
 import { AvatarDisplay } from '../common/AvatarDisplay';
 import type { Player } from '../../types';
 
@@ -102,16 +103,16 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         {/* Level & XP */}
                         <div className="flex items-center gap-2">
                             <span className="bg-purple-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
-                                LVL {player.level || 1}
+                                LVL {XPService.getLevel()}
                             </span>
                             <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
                                 <div
                                     className="bg-gradient-to-r from-purple-400 to-purple-600 h-full transition-all duration-300"
-                                    style={{ width: `${((player.xp || 0) % 100)}%` }}
+                                    style={{ width: `${XPService.getLevelProgress()}%` }}
                                 />
                             </div>
                             <span className="text-xs text-gray-500 font-medium">
-                                {(player.xp || 0) % 100}/100 XP
+                                {XPService.getLevelProgress()}/100 XP
                             </span>
                         </div>
                     </div>
