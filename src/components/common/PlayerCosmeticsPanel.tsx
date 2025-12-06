@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import type { Player } from '../../types';
-import { UNLOCKABLE_BRUSHES, UNLOCKABLE_COLORS, BADGES } from '../../constants/cosmetics';
+import { UNLOCKABLE_BRUSHES, BADGES } from '../../constants/cosmetics';
 
 interface PlayerCosmeticsPanelProps {
     player: Player;
-    onUpdateCosmetics: (type: 'brush' | 'color', id: string) => void;
+    onUpdateCosmetics: (type: 'brush', id: string) => void;
     onClose: () => void;
 }
 
@@ -13,14 +13,12 @@ export const PlayerCosmeticsPanel: React.FC<PlayerCosmeticsPanelProps> = ({
     onUpdateCosmetics,
     onClose
 }) => {
-    const [activeTab, setActiveTab] = useState<'brushes' | 'colors' | 'badges'>('brushes');
+    const [activeTab, setActiveTab] = useState<'brushes' | 'badges'>('brushes');
 
     const unlockedBrushes = player.cosmetics?.brushesUnlocked || ['default'];
-    const unlockedColors = player.cosmetics?.colorsUnlocked || ['#000000', '#ffffff'];
     const playerBadges = player.cosmetics?.badges || [];
 
     const activeBrush = player.cosmetics?.activeBrush || 'default';
-    const activeColor = player.cosmetics?.activeColor || '#000000';
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -40,16 +38,16 @@ export const PlayerCosmeticsPanel: React.FC<PlayerCosmeticsPanelProps> = ({
 
                 {/* Tabs */}
                 <div className="flex p-2 bg-purple-50 gap-2">
-                    {(['brushes', 'colors', 'badges'] as const).map(tab => (
+                    {(['brushes', 'badges'] as const).map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`flex-1 py-2 rounded-xl font-bold text-sm capitalize transition-all ${activeTab === tab
-                                    ? 'bg-purple-500 text-white shadow-md'
-                                    : 'bg-white text-purple-400 hover:bg-purple-100'
+                                ? 'bg-purple-500 text-white shadow-md'
+                                : 'bg-white text-purple-400 hover:bg-purple-100'
                                 }`}
                         >
-                            {tab}
+                            {tab === 'brushes' ? '🖌️ Brushes' : '🏅 Badges'}
                         </button>
                     ))}
                 </div>
@@ -68,43 +66,16 @@ export const PlayerCosmeticsPanel: React.FC<PlayerCosmeticsPanelProps> = ({
                                         disabled={!isUnlocked}
                                         onClick={() => onUpdateCosmetics('brush', brush.id)}
                                         className={`p-4 rounded-2xl border-2 flex flex-col items-center gap-2 transition-all ${isActive
-                                                ? 'border-purple-500 bg-purple-50 ring-2 ring-purple-200'
-                                                : isUnlocked
-                                                    ? 'border-gray-100 hover:border-purple-200 hover:bg-gray-50'
-                                                    : 'border-gray-100 bg-gray-50 opacity-60 grayscale'
+                                            ? 'border-purple-500 bg-purple-50 ring-2 ring-purple-200'
+                                            : isUnlocked
+                                                ? 'border-gray-100 hover:border-purple-200 hover:bg-gray-50'
+                                                : 'border-gray-100 bg-gray-50 opacity-60 grayscale'
                                             }`}
                                     >
                                         <div className="text-4xl mb-1">{brush.emoji}</div>
                                         <div className="font-bold text-sm text-gray-700">{brush.name}</div>
                                         {!isUnlocked && <div className="text-xs text-gray-400">🔒 Locked</div>}
                                         {isActive && <div className="text-xs text-purple-600 font-bold">Selected</div>}
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    )}
-
-                    {activeTab === 'colors' && (
-                        <div className="grid grid-cols-4 gap-4">
-                            {UNLOCKABLE_COLORS.map(color => {
-                                const isUnlocked = unlockedColors.includes(color.id);
-                                const isActive = activeColor === color.id;
-
-                                return (
-                                    <button
-                                        key={color.id}
-                                        disabled={!isUnlocked}
-                                        onClick={() => onUpdateCosmetics('color', color.id)}
-                                        className={`aspect-square rounded-full border-4 shadow-sm relative transition-all ${isActive ? 'scale-110 border-purple-500 ring-2 ring-purple-200 ring-offset-2' : 'border-white hover:scale-105'
-                                            }`}
-                                        style={{ backgroundColor: color.id }}
-                                        title={color.name}
-                                    >
-                                        {!isUnlocked && (
-                                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full">
-                                                🔒
-                                            </div>
-                                        )}
                                     </button>
                                 );
                             })}
@@ -120,8 +91,8 @@ export const PlayerCosmeticsPanel: React.FC<PlayerCosmeticsPanelProps> = ({
                                     <div
                                         key={badge.id}
                                         className={`flex items-center gap-4 p-3 rounded-2xl border-2 ${hasBadge
-                                                ? 'border-purple-100 bg-purple-50'
-                                                : 'border-gray-100 bg-gray-50 opacity-50'
+                                            ? 'border-purple-100 bg-purple-50'
+                                            : 'border-gray-100 bg-gray-50 opacity-50'
                                             }`}
                                     >
                                         <div className="text-4xl w-12 text-center">{badge.emoji}</div>

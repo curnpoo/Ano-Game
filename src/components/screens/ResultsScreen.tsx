@@ -1,12 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { GameRoom } from '../../types';
 import { AvatarDisplay } from '../common/AvatarDisplay';
+import { Confetti } from '../common/Confetti';
+import { vibrate, HapticPatterns } from '../../utils/haptics';
 
 interface ResultsScreenProps {
     room: GameRoom;
     currentPlayerId: string;
     onNextRound: () => void;
 }
+
+// Fun award definitions
+const AWARDS = [
+    { id: 'most-strokes', emoji: '🖌️', label: 'Brush Master', desc: 'Most strokes used' },
+    { id: 'minimal', emoji: '✨', label: 'Minimalist', desc: 'Fewest strokes' },
+    { id: 'big-brush', emoji: '🎨', label: 'Big Painter', desc: 'Largest avg brush size' },
+    { id: 'fine-artist', emoji: '🔬', label: 'Fine Artist', desc: 'Smallest avg brush size' },
+    { id: 'colorful', emoji: '🌈', label: 'Rainbow', desc: 'Most colors used' },
+];
 
 export const ResultsScreen: React.FC<ResultsScreenProps> = ({
     room,
@@ -15,14 +26,62 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
 }) => {
     const [mounted, setMounted] = useState(false);
     const [showPodium, setShowPodium] = useState(false);
+    const [showConfetti, setShowConfetti] = useState(false);
 
     useEffect(() => {
         setMounted(true);
-        setTimeout(() => setShowPodium(true), 500);
+        setTimeout(() => {
+            setShowPodium(true);
+            setShowConfetti(true);
+            vibrate(HapticPatterns.success);
+        }, 500);
     }, []);
 
     const latestResult = room.roundResults[room.roundResults.length - 1];
     const isHost = room.hostId === currentPlayerId;
+
+    // Compute fun awards based on stroke data
+    const awards = useMemo(() => {
+        const playerAwards: { playerId: string; playerName: string; award: typeof AWARDS[0] }[] = [];
+
+        const playerStats = room.players.map(p => {
+            const drawing = room.playerStates[p.id]?.drawing;
+            const strokes = drawing?.strokes || [];
+            const strokeCount = strokes.length;
+            const avgBrushSize = strokes.length > 0
+                ? strokes.reduce((sum, s) => sum + (s.size || 4), 0) / strokes.length
+                : 4;
+            const uniqueColors = new Set(strokes.map(s => s.color)).size;
+
+            return { player: p, strokeCount, avgBrushSize, uniqueColors };
+        }).filter(s => s.strokeCount > 0);
+
+        if (playerStats.length >= 2) {
+            // Most Strokes
+            const mostStrokes = playerStats.reduce((a, b) => a.strokeCount > b.strokeCount ? a : b);
+            playerAwards.push({ playerId: mostStrokes.player.id, playerName: mostStrokes.player.name, award: AWARDS[0] });
+
+            // Fewest Strokes (Minimalist)
+            const fewestStrokes = playerStats.reduce((a, b) => a.strokeCount < b.strokeCount ? a : b);
+            if (fewestStrokes.player.id !== mostStrokes.player.id) {
+                playerAwards.push({ playerId: fewestStrokes.player.id, playerName: fewestStrokes.player.name, award: AWARDS[1] });
+            }
+
+            // Biggest Brush
+            const bigBrush = playerStats.reduce((a, b) => a.avgBrushSize > b.avgBrushSize ? a : b);
+            if (!playerAwards.find(a => a.playerId === bigBrush.player.id)) {
+                playerAwards.push({ playerId: bigBrush.player.id, playerName: bigBrush.player.name, award: AWARDS[2] });
+            }
+
+            // Most Colorful
+            const colorful = playerStats.reduce((a, b) => a.uniqueColors > b.uniqueColors ? a : b);
+            if (colorful.uniqueColors > 1 && !playerAwards.find(a => a.playerId === colorful.player.id)) {
+                playerAwards.push({ playerId: colorful.player.id, playerName: colorful.player.name, award: AWARDS[4] });
+            }
+        }
+
+        return playerAwards;
+    }, [room.players, room.playerStates]);
 
     if (!latestResult) {
         return (
@@ -39,8 +98,11 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
 
     return (
         <div className={`min-h-screen bg-90s-animated flex flex-col items-center justify-center p-4 ${mounted ? 'pop-in' : 'opacity-0'}`}>
+            {/* Confetti! */}
+            {showConfetti && <Confetti />}
+
             {/* Header */}
-            <div className="text-center mb-8">
+            <div className="text-center mb-6">
                 <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-2">
                     🏆 Round {room.roundNumber} Results!
                 </h1>
@@ -158,6 +220,24 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
                         ))}
                 </div>
             </div>
+
+            {/* Fun Awards */}
+            {awards.length > 0 && (
+                <div className="bg-white/90 rounded-2xl p-4 mb-6 w-full max-w-sm"
+                    style={{ boxShadow: '0 4px 0 rgba(255, 140, 0, 0.3)' }}>
+                    <h3 className="text-lg font-bold text-orange-500 mb-3 text-center">🏅 Fun Awards</h3>
+                    <div className="flex flex-wrap justify-center gap-2">
+                        {awards.map((a, i) => (
+                            <div key={i} className="bg-gradient-to-br from-yellow-50 to-orange-50 px-3 py-2 rounded-xl border-2 border-orange-200 text-center pop-in"
+                                style={{ animationDelay: `${i * 0.1}s` }}>
+                                <div className="text-2xl">{a.award.emoji}</div>
+                                <div className="text-xs font-bold text-orange-600">{a.award.label}</div>
+                                <div className="text-xs text-gray-500">{a.playerName}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Next Round Button */}
             {isHost ? (

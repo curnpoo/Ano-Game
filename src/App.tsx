@@ -19,6 +19,14 @@ import { HowToPlayModal } from './components/game/HowToPlayModal';
 import { Toast } from './components/common/Toast';
 import { LoadingScreen } from './components/common/LoadingScreen';
 import { NotificationPromptModal } from './components/common/NotificationPromptModal';
+import {
+  notifyYourTurnToUpload,
+  notifyDrawingPhaseStarted,
+  notifyVotingStarted,
+  notifyResultsReady,
+  notifyFinalResults
+} from './utils/notifications';
+import { requestPushPermission, storePushToken, isPushSupported } from './services/pushNotifications';
 
 import type { Player, DrawingStroke, GameSettings, PlayerDrawing } from './types';
 
@@ -209,6 +217,21 @@ function App() {
 
       const timer = setTimeout(() => {
         setIsLoadingTransition(false);
+
+        // Send notifications (only when status actually changed)
+        if (statusChanged) {
+          if (status === 'uploading' && room?.currentUploaderId === player?.id) {
+            notifyYourTurnToUpload();
+          } else if (status === 'drawing' && !amWaiting) {
+            notifyDrawingPhaseStarted();
+          } else if (status === 'voting' && !amWaiting) {
+            notifyVotingStarted();
+          } else if (status === 'results') {
+            notifyResultsReady();
+          } else if (status === 'final') {
+            notifyFinalResults();
+          }
+        }
 
         // Routing Logic
         if (status === 'lobby') setCurrentScreen('lobby');
@@ -641,8 +664,20 @@ function App() {
       <NotificationPromptModal
         isOpen={showNotificationPrompt}
         onEnable={async () => {
-          if ('Notification' in window) {
-            await Notification.requestPermission();
+          try {
+            // Check if FCM is supported
+            if (isPushSupported()) {
+              const token = await requestPushPermission();
+              if (token && player) {
+                await storePushToken(player.id, token);
+                showToast('Push notifications enabled! 🔔', 'success');
+              }
+            } else if ('Notification' in window) {
+              // Fallback to basic notifications
+              await Notification.requestPermission();
+            }
+          } catch (error) {
+            console.error('Failed to enable push notifications:', error);
           }
           setShowNotificationPrompt(false);
           sessionStorage.setItem('seenNotificationPrompt', 'true');
