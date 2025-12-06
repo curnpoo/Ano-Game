@@ -51,44 +51,6 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         };
     }, [imageUrl]);
 
-    // Initialize canvas size and image
-    useEffect(() => {
-        const canvas = canvasRef.current;
-        const container = containerRef.current;
-        if (!canvas || !container) return; // wrapperRef not needed for calculation
-
-        const resizeCanvas = () => {
-            // Force square aspect ratio based on width, but max out at height
-            const width = container.clientWidth;
-            const height = container.clientHeight;
-
-            // Subtract padding/safe area
-            const safeHeight = height - 100; // Buffer for UI elements
-            const size = Math.min(width - 32, safeHeight); // -32 for horizontal padding
-
-            // Update State (triggers re-render with correct style)
-            setCanvasSize(size);
-
-            // Set Canvas Resolution (needs to match display size for 1:1 strokes)
-            // We set this imperatively because it clears the canvas if we rely on props only? 
-            // Actually, setting width/height on canvas clears it. 
-            // We should only do this if size CHANGED significantly.
-            if (canvas.width !== size || canvas.height !== size) {
-                canvas.width = size;
-                canvas.height = size;
-                // We need to request a redraw after this update propagates
-                // But the drawAll effect depends on 'strokes' or implicit mounting.
-                // We can call drawAll() immediately, but if width changed, it clears.
-                requestAnimationFrame(drawAll);
-            }
-        };
-
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
-
-        return () => window.removeEventListener('resize', resizeCanvas);
-    }, [imageUrl, drawAll]); // added drawAll to dep array for safety
-
     const drawAll = useCallback(() => {
         const canvas = canvasRef.current;
         if (!canvas) return;
@@ -154,6 +116,44 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         // Reset composite operation
         ctx.globalCompositeOperation = 'source-over';
     }, [strokes, currentStroke]);
+
+    // Initialize canvas size and image
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        const container = containerRef.current;
+        if (!canvas || !container) return; // wrapperRef not needed for calculation
+
+        const resizeCanvas = () => {
+            // Force square aspect ratio based on width, but max out at height
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            // Subtract padding/safe area
+            const safeHeight = height - 100; // Buffer for UI elements
+            const size = Math.min(width - 32, safeHeight); // -32 for horizontal padding
+
+            // Update State (triggers re-render with correct style)
+            setCanvasSize(size);
+
+            // Set Canvas Resolution (needs to match display size for 1:1 strokes)
+            // We set this imperatively because it clears the canvas if we rely on props only? 
+            // Actually, setting width/height on canvas clears it. 
+            // We should only do this if size CHANGED significantly.
+            if (canvas.width !== size || canvas.height !== size) {
+                canvas.width = size;
+                canvas.height = size;
+                // We need to request a redraw after this update propagates
+                // But the drawAll effect depends on 'strokes' or implicit mounting.
+                // We can call drawAll() immediately, but if width changed, it clears.
+                requestAnimationFrame(drawAll);
+            }
+        };
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        return () => window.removeEventListener('resize', resizeCanvas);
+    }, [imageUrl, drawAll]); // added drawAll to dep array for safety
 
     useEffect(() => {
         drawAll();
