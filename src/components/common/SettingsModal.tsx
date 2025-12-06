@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { Player, DrawingStroke } from '../../types';
 import { GameCanvas } from '../game/GameCanvas';
 import { AvatarDisplay } from './AvatarDisplay';
+import { requestPushPermission, storePushToken, isPushSupported } from '../../services/pushNotifications';
 
 interface SettingsModalProps {
     player: Player;
@@ -78,9 +79,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     };
 
     const requestNotifications = async () => {
-        if (!('Notification' in window)) return;
-        const permission = await Notification.requestPermission();
-        setNotificationsEnabled(permission === 'granted');
+        try {
+            if (isPushSupported()) {
+                const token = await requestPushPermission();
+                if (token) {
+                    await storePushToken(player.id, token);
+                    setNotificationsEnabled(true);
+                    console.log('FCM enabled successfully!');
+                }
+            } else if ('Notification' in window) {
+                // Fallback to basic notifications
+                const permission = await Notification.requestPermission();
+                setNotificationsEnabled(permission === 'granted');
+            }
+        } catch (error) {
+            console.error('Failed to enable notifications:', error);
+        }
     };
 
     return (
