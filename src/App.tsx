@@ -884,26 +884,27 @@ function App() {
         <CasinoScreen onClose={() => setShowCasino(false)} />
       )}
 
-      <SettingsModal
-        player={player}
-        players={room?.players}
-        roomCode={roomCode}
-        isHost={room?.hostId === player.id}
-        onClose={() => setShowSettings(false)}
-        onUpdateProfile={handleUpdateProfile}
-        onLeaveGame={roomCode ? handleLeaveGame : undefined}
-        onEndGame={room?.hostId === player.id ? handleEndGame : undefined}
-        onGoHome={roomCode ? handleGoHome : undefined}
-        onKick={async (playerId) => {
-          if (!roomCode) return;
-          try {
-            await StorageService.kickPlayer(roomCode, playerId);
-            showToast('Player kicked 🥾', 'success');
-          } catch (err) {
-            showToast('Failed to kick player', 'error');
-          }
-        }}
-      />
+      {showSettings && player && (
+        <SettingsModal
+          player={player}
+          players={room?.players}
+          roomCode={roomCode}
+          isHost={room?.hostId === player.id}
+          onClose={() => setShowSettings(false)}
+          onUpdateProfile={handleUpdateProfile}
+          onLeaveGame={roomCode ? handleLeaveGame : undefined}
+          onEndGame={room?.hostId === player.id ? handleEndGame : undefined}
+          onGoHome={roomCode ? handleGoHome : undefined}
+          onKick={async (playerId) => {
+            if (!roomCode) return;
+            try {
+              await StorageService.kickPlayer(roomCode, playerId);
+              showToast('Player kicked 🥾', 'success');
+            } catch (err) {
+              showToast('Failed to kick player', 'error');
+            }
+          }}
+        />
       )}
 
       <HowToPlayModal isOpen={showHowToPlay} onClose={() => setShowHowToPlay(false)} />
