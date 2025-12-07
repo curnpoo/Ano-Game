@@ -65,7 +65,7 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
 
     const unfinishedPlayers = useMemo(() => {
         return room.players.filter(p =>
-            room.playerStates[p.id]?.status === 'drawing'
+            room.playerStates[p.id]?.status !== 'submitted'
         );
     }, [room.players, room.playerStates]);
 
@@ -108,7 +108,7 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                 )}
 
                 {/* Canvas Area */}
-                <div className="absolute inset-0 z-0 bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-gray-100">
+                <div className="absolute inset-0 z-0 bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-gray-100 aspect-square">
 
                     {/* Base Image */}
                     {room.currentImage && (
@@ -175,21 +175,23 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
 
                     {/* Show "submitted" overlay */}
                     {hasSubmitted && (
-                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-30">
-                            <div className="bg-white rounded-2xl p-6 text-center max-w-sm mx-4 shadow-xl animate-bounce-gentle">
-                                <div className="text-4xl mb-2">✅</div>
-                                <h3 className="font-bold text-green-600 text-xl mb-2">Drawing Submitted!</h3>
-                                <p className="text-gray-500 text-sm mb-4">Waiting for others...</p>
+                        <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-30 animate-fade-in">
+                            <div className="bg-white/95 backdrop-blur-xl rounded-2xl p-6 text-center max-w-sm mx-4 shadow-2xl animate-bounce-gentle border border-white/50">
+                                <div className="text-5xl mb-3 animate-pulse-slow">✅</div>
+                                <h3 className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-emerald-600 text-2xl mb-2">Drawing Submitted!</h3>
+                                <p className="text-gray-500 text-sm mb-6 font-medium">Waiting for everyone else...</p>
 
                                 {/* List unfinished players */}
                                 {unfinishedPlayers.length > 0 && (
-                                    <div className="bg-gray-50 rounded-xl p-3 border border-gray-100">
-                                        <p className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Still Drawing</p>
+                                    <div className="bg-gray-50/50 rounded-2xl p-4 border border-gray-100">
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Still Drawing</p>
                                         <div className="flex flex-wrap justify-center gap-2">
                                             {unfinishedPlayers.map(p => (
-                                                <div key={p.id} className="flex items-center gap-1 bg-white border border-gray-200 px-2 py-1 rounded-lg shadow-sm">
-                                                    <span className="text-xs">{p.avatar || '👤'}</span>
-                                                    <span className="text-xs font-semibold text-gray-600 truncate max-w-[80px]">{p.name}</span>
+                                                <div key={p.id} className="flex items-center gap-2 bg-white border border-gray-100 pl-1 pr-3 py-1 rounded-full shadow-sm animate-pulse-slow">
+                                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-sm shadow-inner">
+                                                        {p.avatar || '👤'}
+                                                    </div>
+                                                    <span className="text-xs font-bold text-gray-700 truncate max-w-[100px]">{p.name}</span>
                                                 </div>
                                             ))}
                                         </div>

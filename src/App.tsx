@@ -1134,37 +1134,56 @@ function App() {
       {/* Universal Game Stats Modal (Host Restart) */}
       {pendingGameStats && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] pop-in">
-          <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 text-center border-4 border-yellow-400 shadow-2xl relative overflow-hidden">
+          <div className="rounded-3xl p-8 w-full max-w-sm mx-4 text-center border-4 shadow-2xl relative overflow-hidden"
+            style={{
+              backgroundColor: 'var(--theme-card-bg)',
+              borderColor: 'var(--theme-accent)'
+            }}
+          >
             {/* Shine effect */}
             <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none" />
 
             <div className="text-6xl mb-4 animate-bounce">🎁</div>
-            <h2 className="text-3xl font-black text-gray-800 mb-2">Round Rewards</h2>
-            <p className="text-gray-500 mb-6">Host started a new game! Here's what you earned:</p>
+            <h2 className="text-3xl font-black mb-2" style={{ color: 'var(--theme-text)' }}>Round Rewards</h2>
+            <p className="mb-6" style={{ color: 'var(--theme-text-secondary)' }}>Host started a new game! Here's what you earned:</p>
 
             <div className="space-y-4 mb-8">
               {/* Coins */}
-              <div className="bg-green-50 rounded-xl p-4 border-2 border-green-100 flex items-center justify-between">
+              <div className="rounded-xl p-4 border-2 flex items-center justify-between"
+                style={{
+                  backgroundColor: 'var(--theme-bg-secondary)',
+                  borderColor: 'var(--theme-border)'
+                }}
+              >
                 <div className="flex items-center gap-3">
                   <span className="text-3xl">🪙</span>
-                  <span className="font-bold text-green-700">Coins</span>
+                  <span className="font-bold" style={{ color: 'var(--theme-text)' }}>Coins</span>
                 </div>
-                <div className="text-2xl font-black text-green-600">+{pendingGameStats.coins}</div>
+                <div className="text-2xl font-black text-green-500">+{pendingGameStats.coins}</div>
               </div>
 
               {/* XP */}
-              <div className="bg-purple-50 rounded-xl p-4 border-2 border-purple-100 flex items-center justify-between">
+              <div className="rounded-xl p-4 border-2 flex items-center justify-between"
+                style={{
+                  backgroundColor: 'var(--theme-bg-secondary)',
+                  borderColor: 'var(--theme-border)'
+                }}
+              >
                 <div className="flex items-center gap-3">
                   <span className="text-3xl">✨</span>
-                  <span className="font-bold text-purple-700">XP</span>
+                  <span className="font-bold" style={{ color: 'var(--theme-text)' }}>XP</span>
                 </div>
-                <div className="text-2xl font-black text-purple-600">+{pendingGameStats.xp}</div>
+                <div className="text-2xl font-black text-purple-500">+{pendingGameStats.xp}</div>
               </div>
             </div>
 
             <button
               onClick={() => setPendingGameStats(null)}
-              className="w-full bg-black text-white py-4 rounded-xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl"
+              className="w-full py-4 rounded-xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl"
+              style={{
+                backgroundColor: 'var(--theme-accent)',
+                color: 'var(--theme-button-text)'
+              }}
             >
               Continue to Lobby
             </button>

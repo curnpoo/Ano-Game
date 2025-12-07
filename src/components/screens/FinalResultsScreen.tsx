@@ -298,7 +298,7 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                     onClick={handlePlayAgain}
                     className="z-10 w-full max-w-sm text-white px-10 py-5 rounded-[2rem] font-black text-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all"
                     style={{
-                        background: 'linear-gradient(135deg, var(--theme-accent) 0%, #FFD700 100%)'
+                        background: 'linear-gradient(135deg, var(--theme-accent) 0%, #FFA726 100%)'
                     }}
                 >
                     🎮 Play Again!
@@ -354,9 +354,10 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
 
                         <button
                             onClick={handleContinue}
-                            className="w-full text-white py-4 rounded-xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl"
+                            className="w-full py-4 rounded-xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl"
                             style={{
-                                backgroundColor: 'var(--theme-accent)'
+                                backgroundColor: 'var(--theme-accent)',
+                                color: 'var(--theme-button-text)'
                             }}
                         >
                             Continue

@@ -127,9 +127,9 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
                     <div className="space-y-6">
                         <button
                             onClick={onCreateRoom}
-                            className="w-full text-white font-black text-xl py-5 rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all"
+                            className="w-full text-black font-black text-xl py-5 rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all"
                             style={{
-                                background: 'linear-gradient(135deg, var(--theme-accent) 0%, #FFD700 100%)'
+                                background: 'linear-gradient(135deg, var(--theme-accent) 0%, #FFA726 100%)'
                             }}
                         >
                             🎨 Create New Room
@@ -174,7 +174,7 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
                                         className="px-6 py-3 rounded-2xl font-bold text-lg transition-all flex-shrink-0 shadow-md hover:scale-105 active:scale-95 disabled:opacity-50 disabled:grayscale disabled:pointer-events-none"
                                         style={{
                                             backgroundColor: 'var(--theme-accent)',
-                                            color: '#ffffff'
+                                            color: '#000000'
                                         }}
                                     >
                                         Go!
@@ -253,7 +253,7 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
                                             {game.isActive ? (
                                                 <button
                                                     onClick={() => onJoinRoom(game.roomCode)}
-                                                    className="px-4 py-2 rounded-xl font-bold text-white hover:scale-105 transition-all shadow-md"
+                                                    className="px-4 py-2 rounded-xl font-bold text-black hover:scale-105 transition-all shadow-md"
                                                     style={{ backgroundColor: 'var(--theme-accent)' }}
                                                 >
                                                     Join

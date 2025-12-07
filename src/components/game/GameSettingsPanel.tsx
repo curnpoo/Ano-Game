@@ -21,7 +21,7 @@ export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
                 backgroundColor: 'var(--theme-card-bg)',
                 border: '2px solid var(--theme-border)'
             }}>
-            <h3 className="text-base font-bold text-purple-400 flex items-center gap-2 mb-2">
+            <h3 className="text-base font-bold flex items-center gap-2 mb-2" style={{ color: '#F3E5AB' }}>
                 ⚙️ Game Settings
             </h3>
 
@@ -96,12 +96,18 @@ export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
                 <button
                     onClick={() => isHost && onSettingsChange({ enableSabotage: !settings.enableSabotage })}
                     disabled={!isHost}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${settings.enableSabotage ? 'bg-purple-500' : 'bg-gray-700'
-                        } ${!isHost ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${!isHost ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                        }`}
+                    style={{
+                        backgroundColor: settings.enableSabotage ? '#F3E5AB' : '#374151'
+                    }}
                 >
                     <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${settings.enableSabotage ? 'translate-x-6' : 'translate-x-1'
+                        className={`inline-block h-4 w-4 transform rounded-full transition-transform ${settings.enableSabotage ? 'translate-x-6' : 'translate-x-1'
                             }`}
+                        style={{
+                            backgroundColor: settings.enableSabotage ? '#4A3B2A' : '#FFFFFF'
+                        }}
                     />
                 </button>
             </div>

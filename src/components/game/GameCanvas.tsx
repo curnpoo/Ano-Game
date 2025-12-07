@@ -63,9 +63,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         const width = canvas.width;
         const height = canvas.height;
 
-        // Always fill with white background first
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(0, 0, width, height);
+        // Clear canvas to ensure transparency
+        ctx.clearRect(0, 0, width, height);
 
         const renderStroke = (stroke: DrawingStroke) => {
             if (stroke.points.length === 0) return;
