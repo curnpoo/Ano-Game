@@ -1297,12 +1297,8 @@ function App() {
 
             {/* Image Container */}
             <div className="flex-1 min-h-0 flex items-center justify-center p-2 relative">
-              <div className="relative mx-auto flex items-center justify-center"
+              <div className="relative mx-auto flex items-center justify-center aspect-square max-w-full max-h-full w-full h-auto landscape:h-full landscape:w-auto"
                 style={{
-                  aspectRatio: '1 / 1',
-                  height: '100%',
-                  width: 'auto',
-                  maxWidth: '100%',
                   borderRadius: '1.5rem',
                   overflow: 'hidden',
                   boxShadow: '0 10px 30px -10px rgba(0,0,0,0.2)',
