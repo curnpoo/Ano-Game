@@ -97,19 +97,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     if (showLeaveConfirm) {
         return (
             <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                <div className="relative z-10 bg-white rounded-3xl p-6 shadow-2xl w-full max-w-sm text-center pop-in">
+                <div className="relative z-10 rounded-3xl p-6 shadow-2xl w-full max-w-sm text-center pop-in" style={{ backgroundColor: 'var(--theme-card-bg)' }}>
                     <div className="text-4xl mb-4">😰</div>
-                    <h3 className="text-2xl font-black text-gray-800 mb-2">Leave Game?</h3>
-                    <p className="text-gray-600 mb-6 font-medium">You'll lose your current progress!</p>
+                    <h3 className="text-2xl font-black mb-2" style={{ color: 'var(--theme-text)' }}>Leave Game?</h3>
+                    <p className="mb-6 font-medium" style={{ color: 'var(--theme-text-secondary)' }}>You'll lose your current progress!</p>
                     <div className="flex gap-3">
                         <button
                             onClick={() => setShowLeaveConfirm(false)}
-                            className="flex-1 py-3 px-6 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                            className="flex-1 py-3 px-6 font-bold rounded-xl transition-colors"
+                            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text)' }}
                         >
                             Stay
                         </button>
                         <button
-                            onClick={onLeaveGame}
+                            onClick={() => {
+                                if (onLeaveGame) onLeaveGame();
+                                setShowLeaveConfirm(false);
+                                onClose();
+                            }}
                             className="flex-1 py-3 px-6 bg-red-500 text-white font-bold rounded-xl shadow-lg hover:bg-red-600 active:scale-95 transition-all"
                         >
                             Leave
@@ -123,19 +128,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     if (showEndGameConfirm) {
         return (
             <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                <div className="relative z-10 bg-white rounded-3xl p-6 shadow-2xl w-full max-w-sm text-center pop-in">
+                <div className="relative z-10 rounded-3xl p-6 shadow-2xl w-full max-w-sm text-center pop-in" style={{ backgroundColor: 'var(--theme-card-bg)' }}>
                     <div className="text-4xl mb-4">🛑</div>
-                    <h3 className="text-2xl font-black text-gray-800 mb-2">End Game?</h3>
-                    <p className="text-gray-600 mb-6 font-medium">This will kick everyone out and close the room.</p>
+                    <h3 className="text-2xl font-black mb-2" style={{ color: 'var(--theme-text)' }}>End Game?</h3>
+                    <p className="mb-6 font-medium" style={{ color: 'var(--theme-text-secondary)' }}>This will kick everyone out and close the room.</p>
                     <div className="flex gap-3">
                         <button
                             onClick={() => setShowEndGameConfirm(false)}
-                            className="flex-1 py-3 px-6 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                            className="flex-1 py-3 px-6 font-bold rounded-xl transition-colors"
+                            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text)' }}
                         >
                             Cancel
                         </button>
                         <button
-                            onClick={onEndGame}
+                            onClick={() => {
+                                if (onEndGame) onEndGame();
+                                setShowEndGameConfirm(false);
+                                onClose();
+                            }}
                             className="flex-1 py-3 px-6 bg-red-500 text-white font-bold rounded-xl shadow-lg hover:bg-red-600 active:scale-95 transition-all"
                         >
                             End Game
@@ -177,10 +187,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     if (showDeleteConfirm) {
         return (
             <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                <div className="relative z-10 bg-white rounded-3xl p-6 shadow-2xl w-full max-w-sm text-center pop-in">
+                <div className="relative z-10 rounded-3xl p-6 shadow-2xl w-full max-w-sm text-center pop-in" style={{ backgroundColor: 'var(--theme-card-bg)' }}>
                     <div className="text-4xl mb-4">🗑️</div>
-                    <h3 className="text-2xl font-black text-gray-800 mb-2">Delete Account?</h3>
-                    <p className="text-gray-600 mb-6 font-medium">
+                    <h3 className="text-2xl font-black mb-2" style={{ color: 'var(--theme-text)' }}>Delete Account?</h3>
+                    <p className="mb-6 font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
                         This will <span className="text-red-600 font-bold">permanently delete</span> all your stats, currency, and cosmetics.
                         <br /><br />
                         <span className="text-xs uppercase font-bold text-gray-400">This cannot be undone.</span>
@@ -188,7 +198,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <div className="flex gap-3">
                         <button
                             onClick={() => setShowDeleteConfirm(false)}
-                            className="flex-1 py-3 px-6 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                            className="flex-1 py-3 px-6 font-bold rounded-xl transition-colors"
+                            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text)' }}
                         >
                             Cancel
                         </button>
@@ -204,21 +215,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         );
     }
 
-    // Kick Confirm Modal
     if (kickTarget) {
         const targetPlayer = players.find(p => p.id === kickTarget);
         return (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                <div className="bg-white rounded-3xl p-6 shadow-2xl w-full max-w-sm text-center pop-in">
+                <div className="relative z-10 rounded-3xl p-6 shadow-2xl w-full max-w-sm text-center pop-in" style={{ backgroundColor: 'var(--theme-card-bg)' }}>
                     <div className="text-4xl mb-4">🥾</div>
-                    <h3 className="text-2xl font-black text-gray-800 mb-2">Kick Player?</h3>
-                    <p className="text-gray-600 mb-6 font-medium">
+                    <h3 className="text-2xl font-black mb-2" style={{ color: 'var(--theme-text)' }}>Kick Player?</h3>
+                    <p className="mb-6 font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
                         Are you sure you want to kick <span className="text-purple-600 font-bold">{targetPlayer?.name}</span>?
                     </p>
                     <div className="flex gap-3">
                         <button
                             onClick={() => setKickTarget(null)}
-                            className="flex-1 py-3 px-6 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                            className="flex-1 py-3 px-6 font-bold rounded-xl transition-colors"
+                            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text)' }}
                         >
                             Cancel
                         </button>

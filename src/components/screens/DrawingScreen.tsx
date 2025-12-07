@@ -103,10 +103,8 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
         }
 
         if (transitionState === 'go') {
-            const timer = setTimeout(() => {
-                onReady(); // Call the actual ready handler from App.tsx
-            }, 500);
-            return () => clearTimeout(timer);
+            // Immediately start
+            onReady();
         }
     }, [transitionState, countdownValue, onReady]);
 

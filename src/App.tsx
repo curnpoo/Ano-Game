@@ -93,6 +93,7 @@ function App() {
 
 
   const [pendingGameStats, setPendingGameStats] = useState<{ xp: number, coins: number, isWinner: boolean, action: 'home' | 'replay' } | null>(null);
+  const [optimisticTimerStart, setOptimisticTimerStart] = useState<number | null>(null);
 
   // Fetch last game details when on home screen
   useEffect(() => {
@@ -262,8 +263,10 @@ function App() {
     const penalty = Math.ceil(totalDuration * 0.20);
     const bonusTime = (hasTimeBonus ? 5 : 0) - (isTimeSabotaged ? penalty : 0);
 
-    const endsAt = myState?.timerStartedAt
-      ? myState.timerStartedAt + (totalDuration + bonusTime) * 1000
+    const effectiveStartedAt = myState?.timerStartedAt || optimisticTimerStart;
+
+    const endsAt = effectiveStartedAt
+      ? effectiveStartedAt + (totalDuration + bonusTime) * 1000
       : null;
 
     // Safety check for room existence
@@ -341,6 +344,11 @@ function App() {
       lastStatusRef.current = status;
       lastRoundRef.current = round;
       lastWaitingRef.current = amWaiting;
+
+      // Reset optimistic timer on round change
+      if (roundChanged) {
+        setOptimisticTimerStart(null);
+      }
 
       // Send notifications (only when status actually changed)
       if (statusChanged) {
@@ -752,19 +760,25 @@ function App() {
     if (!roomCode || !player) return;
     try {
       setIsReadying(true); // Immediate feedback
+      
+      // Optimistic Start
+      setOptimisticTimerStart(Date.now());
+      setIsMyTimerRunning(true);
+      setShowHowToPlay(false);
+
       await StorageService.playerReady(roomCode, player.id);
 
       // Trigger sabotage if this player is the target
       if (room?.sabotageTargetId === player.id && !room?.sabotageTriggered) {
         await StorageService.triggerSabotage(roomCode);
       }
-
-      setIsMyTimerRunning(true);
-      setShowHowToPlay(false);
     } catch (err) {
       console.error('Failed to mark ready:', err);
       showToast('Failed to start drawing 😅', 'error');
-      setIsReadying(false); // Revert on error
+      // Revert optimistic state
+      setIsReadying(false);
+      setIsMyTimerRunning(false);
+      setOptimisticTimerStart(null);
     }
   };
 

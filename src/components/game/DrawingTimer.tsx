@@ -30,9 +30,15 @@ export const DrawingTimer: React.FC<DrawingTimerProps> = ({
         onTimeUpRef.current = onTimeUp;
     }, [onTimeUp]);
 
+    // Track previous stableEndsAt to detect actual timer restarts
+    const prevEndsAtRef = useRef<number>(stableEndsAt);
+
     useEffect(() => {
-        // Only reset hasCalledRef if the timer was actually restarted (significantly different endsAt)
-        hasCalledRef.current = false;
+        // Only reset hasCalledRef if the timer was actually restarted (different endsAt)
+        if (Math.abs(stableEndsAt - prevEndsAtRef.current) > 500) {
+            hasCalledRef.current = false;
+            prevEndsAtRef.current = stableEndsAt;
+        }
 
         // Reset timeLeft when stableEndsAt changes
         setTimeLeft(Math.max(0, (stableEndsAt - Date.now()) / 1000));
