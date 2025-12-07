@@ -138,6 +138,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                             placeholder="Enter username"
                             maxLength={15}
                             className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none font-bold text-center text-lg"
+                            style={{ color: '#1f2937' }}
                             autoCapitalize="none"
                             autoCorrect="off"
                         />
@@ -155,6 +156,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                             placeholder="• • • •"
                             maxLength={4}
                             className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none font-bold text-center text-2xl tracking-[0.5em]"
+                            style={{ color: '#1f2937' }}
                             inputMode="numeric"
                         />
                     </div>

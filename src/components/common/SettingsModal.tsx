@@ -149,20 +149,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     if (showLogoutConfirm) {
         return (
             <div className="fixed inset-0 z-[110] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-                <div className="relative z-10 bg-white rounded-3xl p-6 shadow-2xl w-full max-w-sm text-center pop-in">
+                <div className="relative z-10 rounded-3xl p-6 shadow-2xl w-full max-w-sm text-center pop-in" style={{ backgroundColor: 'var(--theme-card-bg)' }}>
                     <div className="text-4xl mb-4">👋</div>
-                    <h3 className="text-2xl font-black text-gray-800 mb-2">Log Out?</h3>
-                    <p className="text-gray-600 mb-6 font-medium">You will return to the welcome screen.</p>
+                    <h3 className="text-2xl font-black mb-2" style={{ color: 'var(--theme-text)' }}>Log Out?</h3>
+                    <p className="mb-6 font-medium" style={{ color: 'var(--theme-text-secondary)' }}>You will return to the welcome screen.</p>
                     <div className="flex gap-3">
                         <button
                             onClick={() => setShowLogoutConfirm(false)}
-                            className="flex-1 py-3 px-6 bg-gray-100 text-gray-700 font-bold rounded-xl hover:bg-gray-200 transition-colors"
+                            className="flex-1 py-3 px-6 font-bold rounded-xl transition-colors"
+                            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text)' }}
                         >
                             Cancel
                         </button>
                         <button
                             onClick={handleLogout}
-                            className="flex-1 py-3 px-6 bg-red-500 text-white font-bold rounded-xl shadow-lg hover:bg-red-600 active:scale-95 transition-all"
+                            className="flex-1 py-3 px-6 bg-red-500 font-bold rounded-xl shadow-lg hover:bg-red-600 active:scale-95 transition-all"
+                            style={{ color: '#ffffff' }}
                         >
                             Log Out
                         </button>
