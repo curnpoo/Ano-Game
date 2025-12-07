@@ -261,6 +261,15 @@ function App() {
   }, [player?.cosmetics?.activeTheme]);
 
   // Calculated state for dependencies
+  // Check if I am an active player (in the current game)
+  const amInGame = room?.players.some(p => p.id === player?.id);
+  // Check if I am in the waiting queue
+  const amInQueue = room?.waitingPlayers?.some(p => p.id === player?.id);
+
+  // "Waiting" in the context of routing means "Spectator" or "Queued"
+  // It should NOT refer to an active player who is just waiting for their turn
+  const shouldShowWaitingRoom = !amInGame && (amInQueue || true); // If not in game, show waiting room (spectator)
+
   const amWaiting = room?.playerStates?.[player?.id || '']?.status === 'waiting' || false;
 
   const handleEquipTheme = (themeId?: string) => {
@@ -356,9 +365,9 @@ function App() {
         // If waiting status changed (e.g. joined game), update screen immediately without 1.5s delay
         if (waitingChanged) {
           if (status === 'lobby') setCurrentScreen('lobby');
-          else if (status === 'uploading') setCurrentScreen(amWaiting ? 'waiting' : 'uploading');
+          else if (status === 'uploading') setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'uploading');
           else if (status === 'drawing') {
-            if (amWaiting) {
+            if (shouldShowWaitingRoom) {
               setCurrentScreen('waiting');
             } else {
               setCurrentScreen('drawing');
@@ -366,17 +375,17 @@ function App() {
               setIsMyTimerRunning(false);
             }
           }
-          else if (status === 'voting') setCurrentScreen(amWaiting ? 'waiting' : 'voting');
-          else if (status === 'results') setCurrentScreen('results');
+          else if (status === 'voting') setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'voting');
+          else if (status === 'results') setCurrentScreen('results'); // Everyone sees results
           else if (status === 'final') setCurrentScreen('final');
           return;
         }
 
         if (currentScreen === 'room-selection' || currentScreen === 'welcome' || currentScreen === 'name-entry') {
           if (status === 'lobby') setCurrentScreen('lobby');
-          else if (status === 'uploading') setCurrentScreen(amWaiting ? 'waiting' : 'uploading');
-          else if (status === 'drawing') setCurrentScreen(amWaiting ? 'waiting' : 'drawing');
-          else if (status === 'voting') setCurrentScreen(amWaiting ? 'waiting' : 'voting');
+          else if (status === 'uploading') setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'uploading');
+          else if (status === 'drawing') setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'drawing');
+          else if (status === 'voting') setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'voting');
           else if (status === 'results') setCurrentScreen('results');
           else if (status === 'final') setCurrentScreen('final');
         }
@@ -412,9 +421,9 @@ function App() {
 
         // Routing Logic
         if (status === 'lobby') setCurrentScreen('lobby');
-        else if (status === 'uploading') setCurrentScreen(amWaiting ? 'waiting' : 'uploading');
+        else if (status === 'uploading') setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'uploading');
         else if (status === 'drawing') {
-          if (amWaiting) {
+          if (shouldShowWaitingRoom) {
             setCurrentScreen('waiting');
           } else {
             setCurrentScreen('drawing');
@@ -422,14 +431,14 @@ function App() {
             setIsMyTimerRunning(false);
           }
         }
-        else if (status === 'voting') setCurrentScreen(amWaiting ? 'waiting' : 'voting');
-        else if (status === 'results') setCurrentScreen('results');
+        else if (status === 'voting') setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'voting');
+        else if (status === 'results') setCurrentScreen('results'); // Spectators can see results too usually? Or waiting? Let's show results.
         else if (status === 'final') setCurrentScreen('final');
       }, 1500);
 
       return () => clearTimeout(timer);
     }
-  }, [room?.status, room?.roundNumber, isLoading, currentScreen, isBrowsing, amWaiting]);
+  }, [room?.status, room?.roundNumber, isLoading, currentScreen, isBrowsing, amWaiting, shouldShowWaitingRoom]);
 
   // Effect: Kicked / Removed check
   useEffect(() => {
