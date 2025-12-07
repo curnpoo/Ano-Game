@@ -95,6 +95,34 @@ export const ColorWheel: React.FC<ColorWheelProps> = ({
 
     return (
         <div className={`flex flex-col items-center gap-4 ${className}`}>
+            <style>{`
+                input[type=range] {
+                    -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
+                    background: transparent; /* Otherwise white in Chrome */
+                }
+
+                input[type=range]::-webkit-slider-thumb {
+                    -webkit-appearance: none;
+                    height: 32px;
+                    width: 32px;
+                    border-radius: 50%;
+                    background: #ffffff;
+                    cursor: pointer;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                    border: 1px solid #e5e7eb;
+                    margin-top: 0px; 
+                }
+
+                input[type=range]::-moz-range-thumb {
+                    height: 32px;
+                    width: 32px;
+                    border-radius: 50%;
+                    background: #ffffff;
+                    cursor: pointer;
+                    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                    border: 1px solid #e5e7eb;
+                }
+            `}</style>
             {/* Wheel */}
             <div
                 ref={wheelRef}

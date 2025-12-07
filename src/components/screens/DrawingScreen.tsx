@@ -138,7 +138,7 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
     return (
         <div className={containerClass}>
             {/* Blurrable Canvas Content */}
-            <div className={`flex-1 relative w-full max-w-lg mx-auto flex flex-col justify-center items-center min-h-0 ${canvasBlurClass}`}>
+            <div className={`flex-1 relative w-full max-w-lg mx-auto flex flex-col justify-start pt-4 items-center min-h-0 ${canvasBlurClass}`}>
 
                 {/* Canvas Area */}
                 <div className="relative w-full z-0 bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-gray-100 aspect-square">

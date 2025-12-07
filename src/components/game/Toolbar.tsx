@@ -80,7 +80,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
             {/* Colors - 2-Row Grid for Fast Access */}
             <div className="bg-white rounded-2xl px-3 py-2 shadow-xl border-2 border-purple-500 w-full animate-slide-up">
-                <div className="grid grid-cols-5 gap-3 justify-items-center">
+                <div className="grid grid-cols-[repeat(5,auto)] gap-y-3 justify-between">
                     {effectiveColors.map((color) => (
                         <button
                             key={color}
@@ -105,7 +105,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             </div>
 
             {/* Controls Bar */}
-            <div className="bg-white rounded-2xl p-2 flex items-center gap-1 w-full shadow-lg border-2 border-purple-200">
+            <div className="bg-white rounded-2xl p-2 flex items-center justify-between w-full shadow-lg border-2 border-purple-200">
                 {/* Sizes */}
                 <div className="flex gap-1">
                     {SIZES.map((s) => (
