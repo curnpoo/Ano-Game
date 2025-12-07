@@ -4,6 +4,7 @@ import { StatsService } from '../../services/stats';
 import { AuthService } from '../../services/auth';
 import { XPService } from '../../services/xp';
 import { CurrencyService, formatCurrency } from '../../services/currency';
+import { CasinoService } from '../../services/casino';
 
 interface StatsModalProps {
     onClose: () => void;
@@ -14,18 +15,8 @@ export const StatsModal: React.FC<StatsModalProps> = ({ onClose }) => {
     const stats: PlayerStats = StatsService.getStats();
     const level = XPService.getLevel();
     const currency = CurrencyService.getCurrency();
-
-    const handleDeleteAccount = async () => {
-        try {
-            await AuthService.deleteAccount();
-            StatsService.resetGuestStats();
-            // Force reload to reset app state
-            window.location.reload();
-        } catch (error) {
-            console.error('Failed to delete account:', error);
-            alert('Failed to delete account. Please try again.');
-        }
-    };
+    const casinoStats = CasinoService.getStats();
+    const winRate = CasinoService.getWinRate();
 
     const statItems = [
         { label: 'Games Played', value: stats.gamesPlayed, emoji: '🎮' },
@@ -38,6 +29,26 @@ export const StatsModal: React.FC<StatsModalProps> = ({ onClose }) => {
         { label: 'Total XP Earned', value: stats.totalXPEarned, emoji: '⭐' },
         { label: 'Highest Level', value: stats.highestLevel, emoji: '📈' },
     ];
+
+    const casinoStatItems = [
+        { label: 'Casino Spins', value: casinoStats.totalSpins, emoji: '🎰' },
+        { label: 'Win Rate', value: `${winRate}%`, emoji: '📊' },
+        { label: 'Jackpots', value: casinoStats.jackpotWins, emoji: '🎉' },
+        { label: 'Casino Profit', value: `${casinoStats.netProfit >= 0 ? '+' : ''}${formatCurrency(casinoStats.netProfit)}`, emoji: casinoStats.netProfit >= 0 ? '📈' : '📉' },
+    ];
+
+    const handleDeleteAccount = async () => {
+        try {
+            await AuthService.deleteAccount();
+            StatsService.resetGuestStats();
+            await CasinoService.resetStats();
+            // Force reload to reset app state
+            window.location.reload();
+        } catch (error) {
+            console.error('Failed to delete account:', error);
+            alert('Failed to delete account. Please try again.');
+        }
+    };
 
     return (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
@@ -76,19 +87,46 @@ export const StatsModal: React.FC<StatsModalProps> = ({ onClose }) => {
                     </div>
                 </div>
 
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 gap-3">
-                    {statItems.map((item, i) => (
-                        <div
-                            key={i}
-                            className="bg-gray-50 rounded-xl p-3 text-center"
-                        >
-                            <div className="text-2xl mb-1">{item.emoji}</div>
-                            <div className="text-xl font-bold text-gray-800">{item.value}</div>
-                            <div className="text-xs text-gray-500">{item.label}</div>
-                        </div>
-                    ))}
+                {/* Game Stats Grid */}
+                <div className="mb-4">
+                    <div className="text-sm font-bold text-gray-500 mb-2">🎮 Game Stats</div>
+                    <div className="grid grid-cols-2 gap-3">
+                        {statItems.map((item, i) => (
+                            <div
+                                key={i}
+                                className="bg-gray-50 rounded-xl p-3 text-center"
+                            >
+                                <div className="text-2xl mb-1">{item.emoji}</div>
+                                <div className="text-xl font-bold text-gray-800">{item.value}</div>
+                                <div className="text-xs text-gray-500">{item.label}</div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
+
+                {/* Casino Stats Grid */}
+                {casinoStats.totalSpins > 0 && (
+                    <div className="mb-4">
+                        <div className="text-sm font-bold text-gray-500 mb-2">🎰 Casino Stats</div>
+                        <div className="grid grid-cols-2 gap-3">
+                            {casinoStatItems.map((item, i) => (
+                                <div
+                                    key={i}
+                                    className="rounded-xl p-3 text-center"
+                                    style={{
+                                        background: 'linear-gradient(135deg, #fef3c7, #fde68a)',
+                                        border: '2px solid #fbbf24'
+                                    }}
+                                >
+                                    <div className="text-2xl mb-1">{item.emoji}</div>
+                                    <div className="text-xl font-bold text-amber-900">{item.value}</div>
+                                    <div className="text-xs text-amber-700">{item.label}</div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
 
                 {/* Close Button */}
                 {!showDeleteConfirm ? (

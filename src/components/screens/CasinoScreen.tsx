@@ -1,8 +1,10 @@
 import React, { useState, useCallback } from 'react';
 import { CurrencyService, formatCurrency } from '../../services/currency';
-import { CasinoService, SpinResult } from '../../services/casino';
+import { CasinoService } from '../../services/casino';
+import type { SpinResult } from '../../services/casino';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
 import { HorizontalPicker } from '../common/HorizontalPicker';
+
 
 interface CasinoScreenProps {
     onClose: () => void;
@@ -172,18 +174,30 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
 
             {/* Title & Balance */}
             <div className="text-center mb-4 relative z-10">
-                <h1
-                    className="text-3xl font-black mb-1"
-                    style={{
-                        background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        textShadow: '0 0 30px rgba(255,215,0,0.3)',
-                        filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
-                    }}
-                >
-                    🎰 CASINO 🎰
-                </h1>
+                <div className="flex items-center justify-center gap-3 mb-1">
+                    <h1
+                        className="text-3xl font-black"
+                        style={{
+                            background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+                        }}
+                    >
+                        🎰 CASINO 🎰
+                    </h1>
+                    <button
+                        onClick={() => setShowStats(true)}
+                        className="p-2 rounded-lg transition-all hover:scale-110 active:scale-95"
+                        style={{
+                            background: 'rgba(255,215,0,0.2)',
+                            border: '1px solid rgba(255,215,0,0.3)'
+                        }}
+                        title="View Stats"
+                    >
+                        📊
+                    </button>
+                </div>
                 <div
                     className="text-2xl font-bold"
                     style={{
@@ -316,6 +330,128 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
                 <div className="mt-4 text-gray-600 text-[10px] uppercase tracking-widest">
                     Antigravity Games
                 </div>
+            </div>
+
+            {/* Stats Modal */}
+            {showStats && (
+                <CasinoStatsModal onClose={() => setShowStats(false)} />
+            )}
+        </div>
+    );
+};
+
+// Casino Stats Modal Component
+const CasinoStatsModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+    const stats = CasinoService.getStats();
+    const winRate = CasinoService.getWinRate();
+    const roi = CasinoService.getROI();
+
+    const statItems = [
+        { label: 'Total Spins', value: stats.totalSpins, emoji: '🎰' },
+        { label: 'Wins', value: stats.wins, emoji: '✅' },
+        { label: 'Losses', value: stats.losses, emoji: '❌' },
+        { label: 'Win Rate', value: `${winRate}%`, emoji: '📈' },
+        { label: 'Jackpots', value: stats.jackpotWins, emoji: '🎉' },
+        { label: '2 of a Kind', value: stats.twoOfAKindWins, emoji: '✨' },
+        { label: 'Total Wagered', value: formatCurrency(stats.totalBetAmount), emoji: '💰' },
+        { label: 'Total Won', value: formatCurrency(stats.totalWinnings), emoji: '💵' },
+        { label: 'Net Profit', value: `${stats.netProfit >= 0 ? '+' : ''}${formatCurrency(stats.netProfit)}`, emoji: stats.netProfit >= 0 ? '📈' : '📉', color: stats.netProfit >= 0 ? '#4ade80' : '#f87171' },
+        { label: 'ROI', value: `${roi >= 0 ? '+' : ''}${roi}%`, emoji: '💹', color: roi >= 0 ? '#4ade80' : '#f87171' },
+        { label: 'Biggest Win', value: formatCurrency(stats.biggestWin), emoji: '🏆' },
+        { label: 'Biggest Bet', value: formatCurrency(stats.biggestBet), emoji: '🎲' },
+        { label: 'Win Streak', value: stats.longestWinStreak, emoji: '🔥' },
+        { label: 'Lose Streak', value: stats.longestLoseStreak, emoji: '💀' },
+    ];
+
+    return (
+        <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
+            onClick={onClose}
+        >
+            <div
+                className="w-full max-w-md rounded-3xl p-6 max-h-[85vh] overflow-y-auto"
+                style={{
+                    background: 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%)',
+                    border: '2px solid rgba(255,215,0,0.3)',
+                    boxShadow: '0 0 40px rgba(255,215,0,0.2)'
+                }}
+                onClick={e => e.stopPropagation()}
+            >
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <h2
+                        className="text-2xl font-black"
+                        style={{
+                            background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent'
+                        }}
+                    >
+                        📊 Casino Stats
+                    </h2>
+                    <button
+                        onClick={onClose}
+                        className="w-10 h-10 rounded-full flex items-center justify-center text-white hover:bg-white/10 transition-all text-xl"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                {/* Current Streak */}
+                <div
+                    className="rounded-2xl p-4 mb-6 text-center"
+                    style={{
+                        background: stats.currentStreak >= 0
+                            ? 'linear-gradient(135deg, rgba(74,222,128,0.2), rgba(34,197,94,0.1))'
+                            : 'linear-gradient(135deg, rgba(248,113,113,0.2), rgba(239,68,68,0.1))',
+                        border: `1px solid ${stats.currentStreak >= 0 ? 'rgba(74,222,128,0.3)' : 'rgba(248,113,113,0.3)'}`
+                    }}
+                >
+                    <div className="text-sm text-gray-400 mb-1">Current Streak</div>
+                    <div
+                        className="text-3xl font-black"
+                        style={{ color: stats.currentStreak >= 0 ? '#4ade80' : '#f87171' }}
+                    >
+                        {stats.currentStreak > 0 ? `🔥 ${stats.currentStreak} Wins` :
+                            stats.currentStreak < 0 ? `💀 ${Math.abs(stats.currentStreak)} Losses` :
+                                '➖ No Streak'}
+                    </div>
+                </div>
+
+                {/* Stats Grid */}
+                <div className="grid grid-cols-2 gap-3">
+                    {statItems.map((item, i) => (
+                        <div
+                            key={i}
+                            className="rounded-xl p-3 text-center"
+                            style={{
+                                background: 'rgba(255,255,255,0.05)',
+                                border: '1px solid rgba(255,255,255,0.1)'
+                            }}
+                        >
+                            <div className="text-xl mb-1">{item.emoji}</div>
+                            <div
+                                className="text-lg font-bold"
+                                style={{ color: item.color || '#fff' }}
+                            >
+                                {item.value}
+                            </div>
+                            <div className="text-xs text-gray-500">{item.label}</div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Close Button */}
+                <button
+                    onClick={onClose}
+                    className="w-full mt-6 py-3 rounded-xl font-bold transition-all hover:scale-[1.02] active:scale-95"
+                    style={{
+                        background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+                        color: '#000'
+                    }}
+                >
+                    Close
+                </button>
             </div>
         </div>
     );

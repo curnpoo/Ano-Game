@@ -73,12 +73,15 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                 // Track currency earned in stats
                 await StatsService.recordCurrencyEarned(currencyEarned);
 
-                // Track sabotage stats if this was a sabotage round
-                if (room.saboteurId === currentPlayerId) {
-                    await StatsService.recordWasSaboteur();
-                }
-                if (room.sabotageTargetId === currentPlayerId && room.sabotageTriggered) {
-                    await StatsService.recordSabotaged();
+                // Track sabotage stats only if sabotage round was the final round
+                // (Earlier rounds' sabotage is tracked in ResultsScreen)
+                if (room.sabotageRound === room.roundNumber) {
+                    if (room.saboteurId === currentPlayerId) {
+                        await StatsService.recordWasSaboteur();
+                    }
+                    if (room.sabotageTargetId === currentPlayerId && room.sabotageTriggered) {
+                        await StatsService.recordSabotaged();
+                    }
                 }
 
                 AuthService.updateUser(currentPlayerId, { // Changed player.id to currentPlayerId
