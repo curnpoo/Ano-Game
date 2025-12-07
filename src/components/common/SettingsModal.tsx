@@ -472,6 +472,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <div className="pt-12 border-t border-red-100 mt-8">
                         <p className="text-xs text-gray-400 text-center mb-3 uppercase tracking-widest">Danger Zone</p>
                         <button
+                            onClick={() => window.location.reload()}
+                            className="w-full py-2 text-xs text-orange-400 hover:text-orange-600 font-bold transition-colors uppercase tracking-widest mb-2"
+                        >
+                            🔄 Refresh App
+                        </button>
+                        <button
                             onClick={() => setShowDeleteConfirm(true)}
                             className="w-full py-2 text-xs text-red-400 hover:text-red-600 font-bold transition-colors uppercase tracking-widest"
                         >

@@ -62,6 +62,35 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
     const playerState = room.playerStates[player.id];
     const hasSubmitted = playerState?.status === 'submitted';
 
+    // Effect: Lock scrolling and gestures
+    useEffect(() => {
+        const originalOverflow = document.body.style.overflow;
+        const originalOverscroll = document.body.style.overscrollBehavior;
+
+        // Lock body
+        document.body.style.overflow = 'hidden';
+        document.body.style.overscrollBehavior = 'none';
+
+        // Prevent native validation/scroll
+        const preventTouch = (e: TouchEvent) => {
+            const target = e.target as HTMLElement;
+            // Allow scrolling in specific marked containers
+            if (target.closest('.touch-scroll-allowed')) return;
+
+            // Otherwise, kill all scrolling/rubber-banding
+            if (e.touches.length > 1) return;
+            e.preventDefault();
+        };
+
+        document.addEventListener('touchmove', preventTouch, { passive: false });
+
+        return () => {
+            document.body.style.overflow = originalOverflow;
+            document.body.style.overscrollBehavior = originalOverscroll;
+            document.removeEventListener('touchmove', preventTouch);
+        };
+    }, []);
+
     // Transition State
     const [transitionState, setTransitionState] = useState<TransitionState>('idle');
     const [countdownValue, setCountdownValue] = useState(3);

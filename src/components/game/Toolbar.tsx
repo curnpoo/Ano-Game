@@ -57,7 +57,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
 
             {/* Brushes Row (if more than 1) - ABOVE colors */}
             {effectiveBrushes.length > 1 && onTypeChange && (
-                <div className="bg-white rounded-2xl p-2 shadow-xl border-2 border-purple-500 w-full animate-slide-up overflow-x-auto no-scrollbar">
+                <div className="bg-white rounded-2xl p-2 shadow-xl border-2 border-purple-500 w-full animate-slide-up overflow-x-auto no-scrollbar touch-scroll-allowed">
                     <div className="flex gap-2 justify-center min-w-min">
                         {effectiveBrushes.map(brush => (
                             <button
