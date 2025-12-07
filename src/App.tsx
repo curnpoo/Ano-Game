@@ -1300,10 +1300,9 @@ function App() {
               <div className="relative mx-auto flex items-center justify-center"
                 style={{
                   aspectRatio: '1 / 1',
+                  height: '100%',
                   width: 'auto',
-                  height: 'auto',
                   maxWidth: '100%',
-                  maxHeight: '100%',
                   borderRadius: '1.5rem',
                   overflow: 'hidden',
                   boxShadow: '0 10px 30px -10px rgba(0,0,0,0.2)',
