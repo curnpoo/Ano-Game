@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { vibrate } from '../../utils/haptics';
 
 interface ToolbarProps {

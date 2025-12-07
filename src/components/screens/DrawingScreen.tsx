@@ -67,9 +67,8 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
     const availableBrushes = CosmeticsService.getAvailableBrushes();
     const availableColors = CosmeticsService.getAvailableColors();
 
-    const currentRound = room.roundNumber;
-    const isSabotageMode = room.sabotageRound === currentRound;
-    const isDoublePoints = room.isDoublePoints;
+
+
 
     const unfinishedPlayers = useMemo(() => {
         return room.players.filter(p =>
