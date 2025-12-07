@@ -295,9 +295,84 @@ export const StorageService = {
         // Delete images from Firebase Storage first
         await ImageService.deleteRoomImages(roomCode);
 
+        // Delete associated data
+        const drawingsRef = ref(database, `drawings/${roomCode}`);
+        const presenceRef = ref(database, `presence/${roomCode}`);
+
+        await Promise.all([
+            remove(drawingsRef).catch(() => { }),
+            remove(presenceRef).catch(() => { })
+        ]);
+
         // Then delete the room from the database
         const roomRef = ref(database, `${ROOMS_PATH}/${roomCode}`);
         await remove(roomRef);
+    },
+
+    // Cleanup rooms older than 24 hours
+    cleanupOldRooms: async (): Promise<{ deleted: number; errors: number }> => {
+        const TWENTY_FOUR_HOURS = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+        const cutoffTime = Date.now() - TWENTY_FOUR_HOURS;
+
+        let deleted = 0;
+        let errors = 0;
+
+        try {
+            const roomsRef = ref(database, ROOMS_PATH);
+            const snapshot = await get(roomsRef);
+
+            if (!snapshot.exists()) {
+                console.log('[Cleanup] No rooms to clean up');
+                return { deleted: 0, errors: 0 };
+            }
+
+            const rooms = snapshot.val();
+            const deletePromises: Promise<void>[] = [];
+
+            for (const [roomCode, roomData] of Object.entries(rooms)) {
+                const room = roomData as any;
+                const createdAt = room.createdAt || 0;
+
+                if (createdAt < cutoffTime) {
+                    console.log(`[Cleanup] Room ${roomCode} is older than 24 hours (created: ${new Date(createdAt).toISOString()})`);
+
+                    deletePromises.push(
+                        (async () => {
+                            try {
+                                // Delete images
+                                await ImageService.deleteRoomImages(roomCode);
+
+                                // Delete associated data
+                                await Promise.all([
+                                    remove(ref(database, `drawings/${roomCode}`)).catch(() => { }),
+                                    remove(ref(database, `presence/${roomCode}`)).catch(() => { })
+                                ]);
+
+                                // Delete room
+                                await remove(ref(database, `${ROOMS_PATH}/${roomCode}`));
+
+                                console.log(`[Cleanup] Successfully deleted room ${roomCode}`);
+                                deleted++;
+                            } catch (error) {
+                                console.error(`[Cleanup] Failed to delete room ${roomCode}:`, error);
+                                errors++;
+                            }
+                        })()
+                    );
+                }
+            }
+
+            await Promise.all(deletePromises);
+
+            if (deleted > 0 || errors > 0) {
+                console.log(`[Cleanup] Complete. Deleted: ${deleted}, Errors: ${errors}`);
+            }
+
+            return { deleted, errors };
+        } catch (error) {
+            console.error('[Cleanup] Failed to query rooms:', error);
+            return { deleted: 0, errors: 1 };
+        }
     },
 
     // --- Room Management ---

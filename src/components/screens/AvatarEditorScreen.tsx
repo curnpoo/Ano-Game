@@ -4,10 +4,11 @@ import { Toolbar } from '../game/Toolbar';
 import type { Player, DrawingStroke } from '../../types';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
 import { CosmeticsService } from '../../services/cosmetics';
+import { AvatarService } from '../../services/avatarService';
 
 interface AvatarEditorScreenProps {
     player: Player;
-    onSave: (strokes: DrawingStroke[], color: string, frame: string) => void;
+    onSave: (strokes: DrawingStroke[], color: string, frame: string, avatarImageUrl?: string) => void;
     onCancel: () => void;
 }
 
@@ -33,6 +34,7 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
     const [isEraser, setIsEraser] = useState(false);
     const [isEyedropper, setIsEyedropper] = useState(false);
     const [history, setHistory] = useState<DrawingStroke[][]>([player.avatarStrokes || []]);
+
 
     // Data from Cosmetics
     const availableBrushes = CosmeticsService.getAllBrushes();
@@ -65,9 +67,19 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
 
     const handleSave = () => {
         const frameClass = FRAMES.find(f => f.id === selectedFrame)?.class || '';
-        onSave(strokes, brushColor, frameClass);
+
+        // Render avatar to image for display with proper brush effects
+        const avatarImageUrl = AvatarService.renderToDataUrl(
+            strokes,
+            player.backgroundColor || '#ffffff',
+            200
+        );
+
+        onSave(strokes, brushColor, frameClass, avatarImageUrl);
         vibrate(HapticPatterns.success);
     };
+
+
 
     return (
         <div className="fixed inset-0 bg-gray-900 z-50 flex flex-col safe-area-inset-top">

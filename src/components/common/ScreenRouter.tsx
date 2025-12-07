@@ -18,6 +18,8 @@ import { FinalResultsScreen } from '../screens/FinalResultsScreen';
 import { StatsScreen } from '../screens/StatsScreen';
 import { SabotageSelectionScreen } from '../screens/SabotageSelectionScreen';
 import { LevelProgressScreen } from '../screens/LevelProgressScreen';
+import { GalleryScreen } from '../screens/GalleryScreen';
+
 
 import type { SabotageEffect } from '../../types';
 
@@ -271,6 +273,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                 onProfile={() => onNavigate('profile')}
                 onSettings={onShowSettings}
                 onLevelProgress={() => onNavigate('level-progress')}
+                onGallery={() => onNavigate('gallery')}
                 lastGameDetails={lastGameDetails ? {
                     ...lastGameDetails,
                     hostName: lastGameDetails.hostName || 'Unknown',
@@ -279,11 +282,18 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                 onRejoin={onRejoin}
             />;
 
+        case 'gallery':
+            return <GalleryScreen
+                onBack={onBackToHome}
+                showToast={showToast}
+            />;
+
         case 'store':
             return <StoreScreen
                 onBack={onStoreBack}
                 onFontChange={onEquipTheme}
             />;
+
 
         case 'profile':
             if (!player) return null;
@@ -300,11 +310,12 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
             return <AvatarEditorScreen
                 player={player}
                 onCancel={() => onNavigate('profile')}
-                onSave={(strokes, color, frame) => {
-                    onUpdateProfile({ avatarStrokes: strokes, color, frame });
+                onSave={(strokes, color, frame, avatarImageUrl) => {
+                    onUpdateProfile({ avatarStrokes: strokes, color, frame, avatarImageUrl });
                     onNavigate('profile');
                 }}
             />;
+
 
         case 'room-selection':
             if (!player) return null;

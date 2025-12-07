@@ -11,6 +11,7 @@ interface HomeScreenProps {
     onStore: () => void;
     onCasino: () => void;
     onLevelProgress: () => void;
+    onGallery: () => void;
     lastGameDetails?: {
         roomCode: string;
         hostName: string;
@@ -28,6 +29,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     onStore,
     onCasino,
     onLevelProgress,
+    onGallery,
     lastGameDetails,
     onRejoin
 }) => {
@@ -62,6 +64,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             description: 'Buy cosmetics'
         },
         {
+            id: 'gallery',
+            label: 'GALLERY',
+            emoji: '🖼️',
+            color: 'from-pink-400 to-rose-600',
+            border: 'border-pink-500',
+            onClick: onGallery,
+            description: 'Past drawings'
+        },
+        {
             id: 'profile',
             label: 'PROFILE',
             emoji: '👤',
@@ -80,6 +91,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             description: 'App settings'
         }
     ];
+
 
     // Admin Card
     if (player.name.trim().toLowerCase() === 'curren') {
@@ -130,6 +142,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         { id: 'profile', label: 'PROFILE', emoji: '👤', onClick: onProfile },
                         { id: 'settings', label: 'SETTINGS', emoji: '⚙️', onClick: onSettings }
                     ].map(card => (
+
                         <button
                             key={card.id}
                             onClick={card.onClick}
@@ -145,11 +158,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         </button>
                     ))}
 
-                    {/* Rejoin Card (6th Card) */}
+                    {/* Rejoin Card */}
                     {lastGameDetails && onRejoin && (
                         <button
                             onClick={() => onRejoin(lastGameDetails.roomCode)}
-                            className="col-span-2 bg-white rounded-[1.5rem] p-4 shadow-lg border-2 border-orange-200 flex items-center justify-between group active:scale-95 transition-all mt-2"
+                            className="col-span-2 bg-white rounded-[1.5rem] p-4 shadow-lg border-2 flex items-center justify-between group active:scale-95 transition-all mt-2"
                             style={{
                                 backgroundColor: 'var(--theme-card-bg)',
                                 borderColor: 'var(--theme-accent)'
@@ -169,6 +182,28 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         </button>
                     )}
                 </div>
+
+                {/* Match History Card - Full Width */}
+                <button
+                    onClick={onGallery}
+                    className="w-full max-w-md mx-auto mt-4 rounded-[1.5rem] p-4 shadow-lg border-2 flex items-center justify-between group active:scale-95 transition-all"
+                    style={{
+                        backgroundColor: 'var(--theme-card-bg)',
+                        borderColor: 'var(--theme-border)'
+                    }}
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-pink-100/20 rounded-full flex items-center justify-center text-xl group-hover:scale-110 transition-transform">
+                            📊
+                        </div>
+                        <div className="text-left">
+                            <div className="text-[10px] font-bold text-pink-500 uppercase tracking-wider">Match History</div>
+                            <div className="text-[var(--theme-text)] font-bold">View Past Games</div>
+                            <div className="text-xs text-[var(--theme-text-secondary)]">Results, scores & drawings</div>
+                        </div>
+                    </div>
+                    <div className="text-[var(--theme-text-secondary)] font-bold text-sm">View →</div>
+                </button>
             </div>
 
             {/* Footer */}
@@ -183,3 +218,4 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
     );
 };
+

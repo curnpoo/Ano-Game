@@ -45,11 +45,13 @@ export interface UserAccount {
     cosmetics: PlayerCosmetics;
     // Profile Data
     avatarStrokes?: DrawingStroke[];
+    avatarImageUrl?: string; // Pre-rendered avatar image for display
     color?: string;
     backgroundColor?: string;
     frame?: string;
     avatar?: string; // fallback emoji
 }
+
 
 export interface PlayerCosmetics {
     brushesUnlocked: string[];
@@ -73,6 +75,7 @@ export interface Player {
     backgroundColor?: string; // Avatar background fill
     avatar?: string; // emoji
     avatarStrokes?: DrawingStroke[]; // Drawn avatar
+    avatarImageUrl?: string; // Pre-rendered avatar image URL for display
     frame: string; // frame id
     score?: number;
     currency?: number; // $ earned from games
@@ -84,6 +87,7 @@ export interface Player {
     stats?: PlayerStats; // Stats for display in lobby
     cosmetics?: PlayerCosmetics;
 }
+
 
 export interface DrawingStroke {
     points: { x: number; y: number }[];
@@ -239,7 +243,7 @@ export interface ToastState {
     type: 'error' | 'success' | 'info';
 }
 
-export type Screen = 'welcome' | 'login' | 'name-entry' | 'home' | 'room-selection' | 'store' | 'profile' | 'avatar-editor' | 'lobby' | 'waiting' | 'joining-game' | 'uploading' | 'sabotage-selection' | 'drawing' | 'voting' | 'results' | 'final' | 'stats' | 'level-progress';
+export type Screen = 'welcome' | 'login' | 'name-entry' | 'home' | 'room-selection' | 'store' | 'profile' | 'avatar-editor' | 'lobby' | 'waiting' | 'joining-game' | 'uploading' | 'sabotage-selection' | 'drawing' | 'voting' | 'results' | 'final' | 'stats' | 'level-progress' | 'gallery';
 
 // Stats history for graphs over time
 export interface StatsHistoryEntry {
@@ -252,4 +256,40 @@ export interface StatsHistoryEntry {
     totalXPEarned: number;
     level: number;
     currency: number; // Current balance at snapshot
+}
+
+// === Gallery Types ===
+
+// A drawing saved to gallery
+export interface GalleryDrawing {
+    playerId: string;
+    playerName: string;
+    playerColor: string;
+    strokes: DrawingStroke[];
+    renderedImageUrl?: string;  // Firebase Storage URL of combined image+strokes
+    votes: number;
+}
+
+// A complete snapshot of a round for gallery viewing
+export interface GalleryRound {
+    roundNumber: number;
+    imageUrl: string;           // The base image
+    drawings: GalleryDrawing[]; // All player drawings for this round
+    winner: {
+        playerId: string;
+        playerName: string;
+        votes: number;
+    };
+}
+
+// A completed game saved to gallery
+export interface GalleryGame {
+    gameId: string;             // Unique ID for this game
+    roomCode: string;           // Original room code
+    completedAt: number;        // Timestamp
+    playerIds: string[];        // Who participated (for access control)
+    players: { id: string; name: string; color: string }[];
+    rounds: GalleryRound[];
+    finalScores: { [playerId: string]: number };
+    winner: { playerId: string; playerName: string };
 }

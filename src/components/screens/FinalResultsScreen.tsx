@@ -3,9 +3,11 @@ import { XPService } from '../../services/xp';
 import { AuthService } from '../../services/auth';
 import { StatsService } from '../../services/stats';
 import { StatsHistoryService } from '../../services/statsHistory';
+import { GalleryService } from '../../services/galleryService';
 import type { GameRoom } from '../../types';
 import { Confetti } from '../common/Confetti';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
+
 
 interface FinalResultsScreenProps {
     room: GameRoom;
@@ -93,6 +95,13 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
 
                 // Record stats snapshot for history/trends
                 StatsHistoryService.recordSnapshot();
+
+                // Save game to gallery
+                try {
+                    await GalleryService.saveGameToGallery(room);
+                } catch (err) {
+                    console.error('Failed to save game to gallery:', err);
+                }
             }
         };
 

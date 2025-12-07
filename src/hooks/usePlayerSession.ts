@@ -25,6 +25,11 @@ export const usePlayerSession = ({ setCurrentScreen }: UsePlayerSessionProps) =>
     // Restore session
     useEffect(() => {
         const initSession = async () => {
+            // 0. Cleanup old rooms (>24 hours) - runs in background, doesn't block session init
+            StorageService.cleanupOldRooms().catch(err => {
+                console.error('Room cleanup failed:', err);
+            });
+
             // 1. Sync with Auth
             const authUser = await AuthService.syncUser();
             let session = StorageService.getSession();
@@ -92,10 +97,20 @@ export const usePlayerSession = ({ setCurrentScreen }: UsePlayerSessionProps) =>
         setPlayer(updatedPlayer);
         StorageService.saveSession(updatedPlayer);
 
+        // Sync profile changes to Firebase auth (for persistence across logins)
+        AuthService.updateUser(player.id, {
+            avatarStrokes: updatedPlayer.avatarStrokes,
+            avatarImageUrl: updatedPlayer.avatarImageUrl,
+            color: updatedPlayer.color,
+            backgroundColor: updatedPlayer.backgroundColor,
+            frame: updatedPlayer.frame
+        });
+
         if (roomCode) {
             StorageService.joinRoom(roomCode, updatedPlayer);
         }
     }, [player, roomCode]);
+
 
     return {
         player,
