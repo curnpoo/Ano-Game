@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getDatabase } from 'firebase/database';
 
 const firebaseConfig = {
-    apiKey: "AIzaSyBAsWPf3QS-9GNalh_JC2KDW_58IsX3S4U",
+    apiKey: ",
     authDomain: "image-annotation-game.firebaseapp.com",
     databaseURL: "https://image-annotation-game-default-rtdb.firebaseio.com",
     projectId: "image-annotation-game",
