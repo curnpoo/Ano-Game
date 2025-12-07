@@ -1117,7 +1117,6 @@ function App() {
           onSettings={() => setShowSettings(true)}
           lastGameDetails={lastGameDetails}
           onRejoin={handleRejoin}
-          isBrowsing={isBrowsing}
         />
       )}
 

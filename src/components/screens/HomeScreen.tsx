@@ -18,7 +18,6 @@ interface HomeScreenProps {
         playerCount: number;
     } | null;
     onRejoin?: (code: string) => void;
-    isBrowsing?: boolean;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -29,8 +28,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     onStore,
     onCasino,
     lastGameDetails,
-    onRejoin,
-    isBrowsing = false
+    onRejoin
 }) => {
     const balance = CurrencyService.getCurrency();
     const [showAdminModal, setShowAdminModal] = useState(false);
