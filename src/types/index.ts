@@ -231,7 +231,7 @@ export interface ToastState {
     type: 'error' | 'success' | 'info';
 }
 
-export type Screen = 'welcome' | 'login' | 'name-entry' | 'home' | 'room-selection' | 'store' | 'profile' | 'avatar-editor' | 'lobby' | 'waiting' | 'uploading' | 'sabotage-selection' | 'drawing' | 'voting' | 'results' | 'final' | 'stats';
+export type Screen = 'welcome' | 'login' | 'name-entry' | 'home' | 'room-selection' | 'store' | 'profile' | 'avatar-editor' | 'lobby' | 'waiting' | 'uploading' | 'sabotage-selection' | 'drawing' | 'voting' | 'results' | 'final' | 'stats' | 'level-progress';
 
 // Stats history for graphs over time
 export interface StatsHistoryEntry {

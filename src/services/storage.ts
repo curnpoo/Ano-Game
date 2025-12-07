@@ -131,6 +131,67 @@ export const StorageService = {
         return room;
     },
 
+    // Force advance the round (Host only - skip waiting players)
+    forceAdvanceRound: async (roomCode: string): Promise<GameRoom | null> => {
+        return StorageService.updateRoom(roomCode, (r) => {
+            if (r.status === 'drawing') {
+                // Force all players to 'submitted' status
+                const newPlayerStates = { ...r.playerStates };
+                r.players.forEach(p => {
+                    if (newPlayerStates[p.id]?.status !== 'submitted') {
+                        newPlayerStates[p.id] = { status: 'submitted' };
+                    }
+                });
+                return {
+                    ...r,
+                    playerStates: newPlayerStates,
+                    status: 'voting'
+                };
+            } else if (r.status === 'voting') {
+                // Calculate results with existing votes
+                const voteCounts: { [playerId: string]: number } = {};
+                r.players.forEach(p => { voteCounts[p.id] = 0; });
+                Object.values(r.votes).forEach(votedFor => {
+                    voteCounts[votedFor] = (voteCounts[votedFor] || 0) + 1;
+                });
+
+                const rankings = r.players
+                    .map(p => ({
+                        playerId: p.id,
+                        playerName: p.name,
+                        votes: voteCounts[p.id] || 0,
+                        points: 0
+                    }))
+                    .sort((a, b) => b.votes - a.votes);
+
+                const multiplier = r.isDoublePoints ? 2 : 1;
+                if (rankings[0]) rankings[0].points = 3 * multiplier;
+                if (rankings[1]) rankings[1].points = 2 * multiplier;
+                if (rankings[2]) rankings[2].points = 1 * multiplier;
+
+                const newScores = { ...r.scores };
+                rankings.forEach(rank => {
+                    newScores[rank.playerId] = (newScores[rank.playerId] || 0) + rank.points;
+                });
+
+                const roundResult: RoundResult = {
+                    roundNumber: r.roundNumber,
+                    rankings
+                };
+
+                const isFinalRound = r.roundNumber >= r.settings.totalRounds;
+
+                return {
+                    ...r,
+                    scores: newScores,
+                    roundResults: [...r.roundResults, roundResult],
+                    status: isFinalRound ? 'final' : 'results'
+                };
+            }
+            return r;
+        });
+    },
+
     // --- Persistence ---
     saveRoomCode: (code: string) => {
         localStorage.setItem('lastRoomCode', code);
@@ -612,14 +673,23 @@ export const StorageService = {
         });
     },
 
-    // Submit drawing
+    // Submit drawing (Optimized: writes drawing to separate path)
     submitDrawing: async (roomCode: string, drawing: PlayerDrawing): Promise<GameRoom | null> => {
+        // First, get the current round number
+        const room = await StorageService.getRoom(roomCode);
+        if (!room) return null;
+
+        // Write drawing to separate path for reduced room payload
+        const drawingRef = ref(database, `drawings/${roomCode}/${room.roundNumber}/${drawing.playerId}`);
+        await set(drawingRef, drawing);
+
+        // Then update room state (without the drawing data)
         return StorageService.updateRoom(roomCode, (r) => {
             const newPlayerStates = {
                 ...r.playerStates,
                 [drawing.playerId]: {
-                    status: 'submitted' as const,
-                    drawing
+                    status: 'submitted' as const
+                    // NOTE: drawing data is now stored separately
                 }
             };
 

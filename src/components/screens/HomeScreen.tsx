@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { CurrencyService, formatCurrency } from '../../services/currency';
-import { XPService } from '../../services/xp';
-import { AvatarDisplay } from '../common/AvatarDisplay';
+import { ProfileStatusCard } from '../common/ProfileStatusCard';
 import { AdminModal } from '../common/AdminModal';
 import type { Player } from '../../types';
 
@@ -12,6 +10,7 @@ interface HomeScreenProps {
     onSettings: () => void;
     onStore: () => void;
     onCasino: () => void;
+    onLevelProgress: () => void;
     lastGameDetails?: {
         roomCode: string;
         hostName: string;
@@ -27,10 +26,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     onSettings,
     onStore,
     onCasino,
+    onLevelProgress,
     lastGameDetails,
     onRejoin
 }) => {
-    const balance = CurrencyService.getCurrency();
     const [showAdminModal, setShowAdminModal] = useState(false);
 
     const cards = [
@@ -102,45 +101,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom) + 1rem)'
             }}
         >
-            {/* Header with player info - Profile Card */}
-            <div className="bg-white/95 backdrop-blur-sm rounded-[2rem] p-6 shadow-xl mb-8 relative overflow-hidden"
-                style={{
-                    backgroundColor: 'var(--theme-card-bg)',
-                    border: '2px solid var(--theme-border)',
-                    color: 'var(--theme-text)'
-                }}>
-                <div className="flex items-center gap-4 relative z-10">
-                    <div className="w-20 h-20">
-                        <AvatarDisplay
-                            strokes={player.avatarStrokes}
-                            avatar={player.avatar}
-                            frame={player.frame}
-                            color={player.color}
-                            size={80}
-                        />
-                    </div>
-                    <div className="flex-1">
-                        <div className="flex items-center justify-between mb-1">
-                            <h2 className="text-2xl font-black">{player.name}</h2>
-                            <div className="text-xl font-bold text-[#FFD700] drop-shadow-sm">{formatCurrency(balance)}</div>
-                        </div>
-                        {/* Level & XP */}
-                        <div className="flex items-center gap-3">
-                            <span className="bg-[#FFD700] text-black text-xs font-black px-2 py-1 rounded-lg">
-                                LVL {XPService.getLevel()}
-                            </span>
-                            <div className="flex-1 bg-black/20 rounded-full h-3 overflow-hidden border border-white/10">
-                                <div
-                                    className="bg-gradient-to-r from-[#FFD700] to-[#FFA500] h-full transition-all duration-300"
-                                    style={{ width: `${XPService.getLevelProgress()}%` }}
-                                    role="progressbar"
-                                    aria-valuenow={XPService.getLevelProgress()}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {/* Header with player info - Profile Status Card */}
+            <ProfileStatusCard player={player} onClick={onLevelProgress} />
 
             {/* Main Navigation Cards */}
             <div className="flex-1 flex flex-col justify-center">

@@ -6,6 +6,7 @@ import { StorageService } from './services/storage';
 import { ImageService } from './services/image';
 import { XPService } from './services/xp';
 import { StatsService } from './services/stats';
+import { BadgeService } from './services/badgeService';
 import { vibrate } from './utils/haptics';
 import { useDrawingState } from './hooks/useDrawingState';
 import { useGameFlow } from './hooks/useGameFlow';
@@ -535,6 +536,15 @@ function App() {
       showToast(`Level Up! You are now level ${xpResult.newLevel}! 🎉`, 'success');
       vibrate([100, 50, 100, 50, 200]);
       await StatsService.updateHighestLevel(xpResult.newLevel);
+
+      // Check for level-based badge unlocks
+      const newBadges = await BadgeService.checkAndAwardLevelBadges(xpResult.newLevel);
+      if (newBadges.length > 0) {
+        const badgeInfo = BadgeService.getBadgeInfo(newBadges[0]);
+        if (badgeInfo) {
+          showToast(`New Badge: ${badgeInfo.emoji} ${badgeInfo.name}!`, 'success');
+        }
+      }
     }
 
     // 4. Auth Sync
@@ -566,6 +576,15 @@ function App() {
     if (xpResult.leveledUp) {
       showToast(`Level Up! You are now level ${xpResult.newLevel}! 🎉`, 'success');
       await StatsService.updateHighestLevel(xpResult.newLevel);
+
+      // Check for level-based badge unlocks
+      const newBadges = await BadgeService.checkAndAwardLevelBadges(xpResult.newLevel);
+      if (newBadges.length > 0) {
+        const badgeInfo = BadgeService.getBadgeInfo(newBadges[0]);
+        if (badgeInfo) {
+          showToast(`New Badge: ${badgeInfo.emoji} ${badgeInfo.name}!`, 'success');
+        }
+      }
     }
 
     if (AuthService.isLoggedIn()) {

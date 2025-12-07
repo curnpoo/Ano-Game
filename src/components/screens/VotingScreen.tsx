@@ -5,6 +5,8 @@ import { XPService } from '../../services/xp';
 import { AvatarDisplay } from '../common/AvatarDisplay';
 import { GameCanvas } from '../game/GameCanvas';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
+import { useDrawings } from '../../hooks/useDrawings';
+import { ForceAdvanceButton } from '../common/ForceAdvanceButton';
 
 interface VotingScreenProps {
     room: GameRoom;
@@ -23,16 +25,19 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
     const [hasVoted, setHasVoted] = useState(false);
     const [mounted, setMounted] = useState(false);
 
+    // Fetch drawings from separate path (optimized)
+    const { drawings: drawingsMap, loading: drawingsLoading } = useDrawings(room.roomCode, room.roundNumber);
+
     useEffect(() => {
         setMounted(true);
     }, []);
 
     // Get all completed drawings and sort by join time for stability
     const drawings = room.players
-        .filter(p => room.playerStates[p.id]?.drawing)
+        .filter(p => drawingsMap[p.id]) // Use drawingsMap instead of playerStates
         .map(p => ({
             player: p,
-            drawing: room.playerStates[p.id].drawing!
+            drawing: drawingsMap[p.id]
         }))
         .sort((a, b) => a.player.joinedAt - b.player.joinedAt);
 
@@ -46,10 +51,15 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
         setHasVoted(alreadyVoted);
     }, [alreadyVoted]);
 
+
+    const isHost = room.hostId === currentPlayerId;
+    const waitingForVotes = room.players.filter(p => !room.votes[p.id]).map(p => p.name);
+
     const handleVote = async () => {
         if (!isOwnDrawing && currentDrawing && !hasVoted) {
-            vibrate(HapticPatterns.success); // Changed from selection to success as per original logic
-            onVote(currentDrawing.player.id); // This is the existing vote submission mechanism
+            // OPTIMISTIC: Show voted immediately
+            setHasVoted(true);
+            vibrate(HapticPatterns.success);
 
             // Award XP for voting
             const { leveledUp, newLevel } = XPService.addXP(10);
@@ -59,14 +69,32 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                 showToast(`Vote cast! +10 XP ✨`, 'success');
             }
 
-            // Assuming room.code and currentPlayerId are available for StorageService
-            // Note: The original snippet used `roomCode` and `player.id`, which are not directly available here.
-            // Using `room.code` and `currentPlayerId` as a plausible substitute.
-            await StorageService.submitVote(room.roomCode, currentPlayerId, currentDrawing.player.id);
+            // Fire and forget with error handling
+            try {
+                await StorageService.submitVote(room.roomCode, currentPlayerId, currentDrawing.player.id);
+            } catch (error) {
+                console.error('Vote submission failed:', error);
+                setHasVoted(false);
+                showToast('Vote failed. Tap to retry.', 'error');
+            }
 
-            setHasVoted(true);
+            onVote(currentDrawing.player.id);
         }
     };
+
+    // Show loading state while fetching drawings from separate path
+    if (drawingsLoading) {
+        return (
+            <div className="min-h-screen flex flex-col items-center justify-center"
+                style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
+                <div className="animate-spin rounded-full h-12 w-12 border-4 border-t-transparent mb-4"
+                    style={{ borderColor: 'var(--theme-accent)', borderTopColor: 'transparent' }} />
+                <div className="text-lg font-bold" style={{ color: 'var(--theme-text)' }}>
+                    Loading drawings...
+                </div>
+            </div>
+        );
+    }
 
     if (!currentDrawing) {
         return (
@@ -279,6 +307,15 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                         Waiting for others to vote...
                     </p>
                 )}
+
+                {/* Force Advance for Host */}
+                <ForceAdvanceButton
+                    isHost={isHost}
+                    onForceAdvance={() => StorageService.forceAdvanceRound(room.roomCode)}
+                    waitingForPlayers={waitingForVotes}
+                    phaseName="voting"
+                    timeoutSeconds={45}
+                />
             </div>
         </div>
     );

@@ -17,7 +17,8 @@ import { ResultsScreen } from '../screens/ResultsScreen';
 import { FinalResultsScreen } from '../screens/FinalResultsScreen';
 import { StatsScreen } from '../screens/StatsScreen';
 import { SabotageSelectionScreen } from '../screens/SabotageSelectionScreen';
-import { Timer } from '../game/Timer';
+import { LevelProgressScreen } from '../screens/LevelProgressScreen';
+import { DrawingTimer } from '../game/DrawingTimer';
 import type { SabotageEffect } from '../../types';
 
 interface ScreenRouterProps {
@@ -159,52 +160,34 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
     // Helper to render Drawing Layout (wrapper)
     const renderDrawingLayout = () => {
         if (!room || !player) return null;
+        const timerDuration = room?.settings?.timerDuration || 20;
+
         return (
             <div className="fixed inset-0 overflow-hidden">
                 <div
-                    className="h-full w-full flex flex-col p-4 pb-0"
+                    className="h-full w-full flex flex-col p-4"
                     style={{
                         paddingTop: 'max(1rem, env(safe-area-inset-top) + 0.5rem)',
-                        paddingBottom: 'max(0rem, env(safe-area-inset-bottom))'
+                        paddingBottom: 'max(1rem, env(safe-area-inset-bottom))'
                     }}
                 >
-                    {/* Top Info Bar - Relative Layout */}
-                    <div className="w-full flex justify-between items-start px-2 z-20 pointer-events-none mb-2 shrink-0">
-                        <div className="flex flex-col gap-2 w-full">
-                            <div className="flex justify-between w-full">
-                                {/* Settings Button - Handled in App.tsx overlay? Or duplicated here? */}
-                                {/* App.tsx has a global settings button, but Drawing phase layout has its own in structure? 
-                      In App.tsx line 1155 it renders a Settings button logic specific to drawing view?
-                      Yes, lines 1154-1160. So we replicate it here.
-                   */}
-                                <button
-                                    onClick={onShowSettings}
-                                    className="bg-white p-3 rounded-2xl shadow-lg hover:scale-105 active:scale-95 transition-all w-12 h-12 flex items-center justify-center pointer-events-auto border-2 border-gray-100"
-                                >
-                                    ⚙️
-                                </button>
+                    {/* Top Bar: Settings + Round Info */}
+                    <div className="w-full flex items-center justify-between px-2 z-20 mb-3 shrink-0">
+                        {/* Settings Button */}
+                        <button
+                            onClick={onShowSettings}
+                            className="bg-white p-3 rounded-2xl shadow-lg hover:scale-105 active:scale-95 transition-all w-12 h-12 flex items-center justify-center border-2 border-gray-100"
+                        >
+                            ⚙️
+                        </button>
 
-                                {/* Timer or Status */}
-                                <div className="pointer-events-auto">
-                                    {hasSubmitted ? (
-                                        <div className="bg-green-500 text-white px-4 py-2 rounded-xl font-bold">
-                                            ✓ Submitted!
-                                        </div>
-                                    ) : isMyTimerRunning ? (
-                                        /* Timer Import? Need to import Timer component */
-                                        /* We will import Timer at top */
-                                        <div className="scale-90 origin-right">
-                                            {/* Timer component logic needs to be verified. Does it exist? Yes in App.tsx imports */}
-                                            {/* We need to pass props to Router or import Timer here */}
-                                            <Timer endsAt={timerEndsAt || Date.now()} onTimeUp={onTimeUp} />
-                                        </div>
-                                    ) : null}
-                                </div>
+                        {/* Status Badge */}
+                        {hasSubmitted ? (
+                            <div className="bg-green-500 text-white px-4 py-2 rounded-xl font-bold shadow-lg">
+                                ✓ Submitted!
                             </div>
-
-                            {/* Progress Bar */}
-                            <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-xl flex items-center justify-between gap-2 shadow-sm border-2 border-purple-200 self-center"
-                                style={{ width: 'fit-content' }}>
+                        ) : (
+                            <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg border-2 border-purple-200">
                                 <span className="font-bold text-purple-600 text-sm whitespace-nowrap">
                                     Round {room.roundNumber}/{room.settings.totalRounds}
                                 </span>
@@ -218,34 +201,47 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                                     {submittedCount}/{totalPlayers} done
                                 </span>
                             </div>
-                        </div>
+                        )}
                     </div>
 
-                    {/* Drawing Screen Component */}
-                    <DrawingScreen
-                        room={room}
-                        player={player}
-                        isMyTimerRunning={isMyTimerRunning}
-                        isReadying={isReadying}
-                        onReady={onReady}
-                        brushColor={brushColor}
-                        brushSize={brushSize}
-                        brushType={brushType}
-                        isEraser={isEraser}
-                        isEyedropper={isEyedropper}
-                        setBrushColor={setBrushColor}
-                        setBrushSize={setBrushSize}
-                        setBrushType={setBrushType}
-                        setStrokes={setStrokes}
-                        setIsEraser={setIsEraser}
-                        setIsEyedropper={setIsEyedropper}
-                        handleUndo={handleUndo}
-                        handleClear={handleClear}
-                        handleEraserToggle={handleEraserToggle}
-                        handleEyedropperToggle={handleEyedropperToggle}
-                        handleColorPick={handleColorPick}
-                        strokes={strokes}
-                    />
+                    {/* Timer Bar - Full Width */}
+                    {isMyTimerRunning && !hasSubmitted && (
+                        <div className="w-full px-2 mb-3 shrink-0">
+                            <DrawingTimer
+                                endsAt={timerEndsAt || Date.now()}
+                                onTimeUp={onTimeUp}
+                                totalDuration={timerDuration}
+                            />
+                        </div>
+                    )}
+
+                    {/* Canvas Area - Centered */}
+                    <div className="flex-1 flex items-center justify-center min-h-0">
+                        <DrawingScreen
+                            room={room}
+                            player={player}
+                            isMyTimerRunning={isMyTimerRunning}
+                            isReadying={isReadying}
+                            onReady={onReady}
+                            brushColor={brushColor}
+                            brushSize={brushSize}
+                            brushType={brushType}
+                            isEraser={isEraser}
+                            isEyedropper={isEyedropper}
+                            setBrushColor={setBrushColor}
+                            setBrushSize={setBrushSize}
+                            setBrushType={setBrushType}
+                            setStrokes={setStrokes}
+                            setIsEraser={setIsEraser}
+                            setIsEyedropper={setIsEyedropper}
+                            handleUndo={handleUndo}
+                            handleClear={handleClear}
+                            handleEraserToggle={handleEraserToggle}
+                            handleEyedropperToggle={handleEyedropperToggle}
+                            handleColorPick={handleColorPick}
+                            strokes={strokes}
+                        />
+                    </div>
                 </div>
             </div>
         );
@@ -278,6 +274,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                 onStore={() => onNavigate('store')}
                 onProfile={() => onNavigate('profile')}
                 onSettings={onShowSettings}
+                onLevelProgress={() => onNavigate('level-progress')}
                 lastGameDetails={lastGameDetails ? {
                     ...lastGameDetails,
                     hostName: lastGameDetails.hostName || 'Unknown',
@@ -399,6 +396,13 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
 
         case 'stats':
             return <StatsScreen onBack={onBackToHome} />;
+
+        case 'level-progress':
+            if (!player) return null;
+            return <LevelProgressScreen
+                player={player}
+                onBack={onBackToHome}
+            />;
 
         default:
             return null;

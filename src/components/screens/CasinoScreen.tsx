@@ -183,30 +183,17 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
 
                 {/* Title & Balance */}
                 <div className="text-center mb-4 relative z-10">
-                    <div className="flex items-center justify-center gap-3 mb-1">
-                        <h1
-                            className="text-3xl font-black"
-                            style={{
-                                background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                                filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
-                            }}
-                        >
-                            🎰 CASINO 🎰
-                        </h1>
-                        <button
-                            onClick={() => setShowStats(true)}
-                            className="p-2 rounded-lg transition-all hover:scale-110 active:scale-95"
-                            style={{
-                                background: 'rgba(255,215,0,0.2)',
-                                border: '1px solid rgba(255,215,0,0.3)'
-                            }}
-                            title="View Stats"
-                        >
-                            📊
-                        </button>
-                    </div>
+                    <h1
+                        className="text-3xl font-black mb-1"
+                        style={{
+                            background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 50%, #FFD700 100%)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.5))'
+                        }}
+                    >
+                        🎰 CASINO 🎰
+                    </h1>
                     <div
                         className="text-2xl font-bold"
                         style={{
@@ -340,6 +327,24 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
                         Antigravity Games
                     </div>
                 </div>
+
+                {/* Full-Width Stats Card at Bottom */}
+                <button
+                    onClick={() => setShowStats(true)}
+                    className="w-full max-w-md mt-4 rounded-2xl p-4 flex items-center gap-4 transition-all hover:scale-[1.02] active:scale-95 relative z-10"
+                    style={{
+                        background: 'linear-gradient(135deg, rgba(255,215,0,0.15) 0%, rgba(255,165,0,0.1) 100%)',
+                        border: '2px solid rgba(255,215,0,0.3)',
+                        boxShadow: '0 4px 20px rgba(255,215,0,0.1)'
+                    }}
+                >
+                    <div className="text-3xl">📊</div>
+                    <div className="flex-1 text-left">
+                        <div className="text-base font-bold text-white">View Your Stats</div>
+                        <div className="text-xs text-gray-400">Wins, losses, profit & more</div>
+                    </div>
+                    <div className="text-xl text-gray-500">→</div>
+                </button>
 
                 {/* Stats Modal */}
                 {showStats && (

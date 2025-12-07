@@ -24,13 +24,21 @@ export const UNLOCKABLE_COLORS = [
 ];
 
 export const BADGES = [
+    // Achievement badges
     { id: 'first_win', name: 'First Win', emoji: '🏆', description: 'Won your first round!', price: 0 },
     { id: 'artist', name: 'True Artist', emoji: '🎨', description: 'Drew 100 strokes in one round', price: 0 },
     { id: 'speed', name: 'Speed Demon', emoji: '⚡', description: 'Submitted in under 5 seconds', price: 0 },
     { id: 'social', name: 'Chatty', emoji: '💭', description: 'Sent 50 messages', price: 0 },
     { id: 'saboteur', name: 'Chaos Agent', emoji: '😈', description: 'Successfully sabotaged a round', price: 0 },
     { id: 'high_roller', name: 'High Roller', emoji: '🎰', description: 'Win big at the casino', price: 0 },
-    { id: 'rich', name: 'Loaded', emoji: '💰', description: 'Have 100$ at once', price: 0 }
+    { id: 'rich', name: 'Loaded', emoji: '💰', description: 'Have 100$ at once', price: 0 },
+
+    // Drawing-themed level milestone badges
+    { id: 'level_5', name: 'Sketch Artist', emoji: '✏️', description: 'Drew your way to Level 5', price: 0, levelRequired: 5 },
+    { id: 'level_10', name: 'Ink Master', emoji: '🖊️', description: 'Mastered the pen at Level 10', price: 0, levelRequired: 10 },
+    { id: 'level_25', name: 'Canvas Virtuoso', emoji: '🖼️', description: 'A true artist at Level 25', price: 0, levelRequired: 25 },
+    { id: 'level_50', name: 'Masterpiece Maker', emoji: '🎨', description: 'Creating masterpieces at Level 50', price: 0, levelRequired: 50 },
+    { id: 'level_100', name: 'Legendary Illustrator', emoji: '👑', description: 'The ultimate artist at Level 100', price: 0, levelRequired: 100 }
 ];
 
 // Purchasable powerups (consumable items)
