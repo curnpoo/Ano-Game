@@ -48,12 +48,13 @@ export const ImageService = {
                         0, 0, outputSize, outputSize    // Dest: fill canvas
                     );
 
-                    // Convert to base64 with compression (0.7 quality for JPEG)
-                    const squareBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    // Convert to base64 with compression (0.6 quality for WebP)
+                    // WebP is generally smaller than JPEG for same quality
+                    const squareBase64 = canvas.toDataURL('image/webp', 0.6);
 
                     // Log size for verification
                     const sizeInBytes = Math.ceil((squareBase64.length * 3) / 4);
-                    console.log(`Image processed: ${outputSize}x${outputSize}, Quality: 0.7, Size: ${(sizeInBytes / 1024).toFixed(2)}KB`);
+                    console.log(`Image processed: ${outputSize}x${outputSize}, Format: WebP, Quality: 0.6, Size: ${(sizeInBytes / 1024).toFixed(2)}KB`);
 
                     resolve(squareBase64);
                 };

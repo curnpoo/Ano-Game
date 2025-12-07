@@ -5,6 +5,7 @@ import { GameSettingsPanel } from '../game/GameSettingsPanel';
 import { AvatarDisplay } from '../common/AvatarDisplay';
 import { ShareDropdown } from '../common/ShareDropdown';
 import { StorageService } from '../../services/storage';
+import { usePresence } from '../../hooks/usePresence';
 
 interface LobbyScreenProps {
     room: GameRoom;
@@ -34,6 +35,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     // const currentUser = AuthService.getCurrentUser();
     // const activeTheme = currentUser?.cosmetics?.activeTheme || 'default';
 
+    const { presence } = usePresence(room?.roomCode || null);
 
     useEffect(() => {
         // Force update every second to check idle status
@@ -48,7 +50,8 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     const isHost = room.hostId === currentPlayerId;
     const currentPlayer = room.players.find(p => p.id === currentPlayerId);
 
-    const isIdle = (lastSeen?: number) => {
+    const isIdle = (playerId: string) => {
+        const lastSeen = presence[playerId];
         if (!lastSeen) return true;
         return Date.now() - lastSeen > 10000; // 10 seconds
     };
@@ -171,12 +174,12 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <div className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest ${isIdle(p.lastSeen) ? 'opacity-50' : ''
+                                    <div className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest ${isIdle(p.id) ? 'opacity-50' : ''
                                         }`}
                                         style={{ backgroundColor: '#D97706', color: '#3E2723' }}>
                                         {room.playerStates && room.playerStates[p.id]?.status === 'ready'
                                             ? 'READY!'
-                                            : isIdle(p.lastSeen)
+                                            : isIdle(p.id)
                                                 ? 'AWAY...'
                                                 : 'WAITING...'}
                                     </div>

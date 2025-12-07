@@ -476,31 +476,15 @@ export const StorageService = {
         });
     },
 
-    // Heartbeat to update lastSeen
+    // Heartbeat to update lastSeen (Optimized: writes to presence path)
     heartbeat: async (roomCode: string, playerId: string): Promise<void> => {
         StorageService.updateLocalActivity(); // Keep local session alive
-        const roomRef = ref(database, `${ROOMS_PATH}/${roomCode}`);
-        await runTransaction(roomRef, (room) => {
-            if (!room) return null;
 
-            // Update in players list
-            if (room.players) {
-                const pIndex = room.players.findIndex((p: any) => p.id === playerId);
-                if (pIndex >= 0) {
-                    room.players[pIndex].lastSeen = Date.now();
-                }
-            }
-
-            // Update in waiting list
-            if (room.waitingPlayers) {
-                const wIndex = room.waitingPlayers.findIndex((p: any) => p.id === playerId);
-                if (wIndex >= 0) {
-                    room.waitingPlayers[wIndex].lastSeen = Date.now();
-                }
-            }
-
-            return room;
-        });
+        // Write to split presence path to avoid re-downloading entire room
+        const presenceRef = ref(database, `presence/${roomCode}/${playerId}`);
+        // We use set directly as it's a simple timestamp update
+        // No need for transaction overhead for this specific value
+        await set(presenceRef, Date.now());
     },
 
     // Local Activity Tracking

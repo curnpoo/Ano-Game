@@ -108,7 +108,7 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                 )}
 
                 {/* Canvas Area */}
-                <div className="absolute inset-0 z-0 bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-gray-100 aspect-square">
+                <div className="relative w-full z-0 bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-gray-100 aspect-square">
 
                     {/* Base Image */}
                     {room.currentImage && (
@@ -183,15 +183,15 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
 
                                 {/* List unfinished players */}
                                 {unfinishedPlayers.length > 0 && (
-                                    <div className="bg-gray-50/50 rounded-2xl p-4 border border-gray-100">
-                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">Still Drawing</p>
+                                    <div className="bg-amber-900/20 rounded-2xl p-4 border border-amber-800/30">
+                                        <p className="text-[10px] font-bold text-amber-700 uppercase tracking-widest mb-3">Still Drawing</p>
                                         <div className="flex flex-wrap justify-center gap-2">
                                             {unfinishedPlayers.map(p => (
-                                                <div key={p.id} className="flex items-center gap-2 bg-white border border-gray-100 pl-1 pr-3 py-1 rounded-full shadow-sm animate-pulse-slow">
-                                                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center text-sm shadow-inner">
+                                                <div key={p.id} className="flex items-center gap-2 bg-amber-800 pl-1 pr-3 py-1 rounded-full shadow-md animate-pulse-slow">
+                                                    <div className="w-6 h-6 rounded-full bg-amber-700 flex items-center justify-center text-sm shadow-inner">
                                                         {p.avatar || '👤'}
                                                     </div>
-                                                    <span className="text-xs font-bold text-gray-700 truncate max-w-[100px]">{p.name}</span>
+                                                    <span className="text-xs font-bold text-white truncate max-w-[100px]">{p.name}</span>
                                                 </div>
                                             ))}
                                         </div>
