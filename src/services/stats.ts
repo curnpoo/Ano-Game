@@ -30,19 +30,19 @@ export const StatsService = {
         return stored ? JSON.parse(stored) : { ...defaultStats };
     },
 
-    // Increment a specific stat
-    async incrementStat(stat: keyof PlayerStats, amount: number = 1): Promise<void> {
+    // Increment a specific stat (excludes casinoStats since it's an object, not a number)
+    async incrementStat(stat: Exclude<keyof PlayerStats, 'casinoStats'>, amount: number = 1): Promise<void> {
         const user = AuthService.getCurrentUser();
 
         if (user) {
             // Update Firebase user
             const newStats = { ...user.stats };
-            newStats[stat] = (newStats[stat] || 0) + amount;
+            (newStats[stat] as number) = ((newStats[stat] as number) || 0) + amount;
             await AuthService.updateUser(user.id, { stats: newStats });
         } else {
             // Update local storage for guests
             const stats = this.getStats();
-            stats[stat] = (stats[stat] || 0) + amount;
+            (stats[stat] as number) = ((stats[stat] as number) || 0) + amount;
             localStorage.setItem(LOCAL_STATS_KEY, JSON.stringify(stats));
         }
     },

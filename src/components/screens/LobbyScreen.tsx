@@ -4,7 +4,6 @@ import { SettingsModal } from '../common/SettingsModal';
 import { GameSettingsPanel } from '../game/GameSettingsPanel';
 import { AvatarDisplay } from '../common/AvatarDisplay';
 import { ShareDropdown } from '../common/ShareDropdown';
-import { vibrate, HapticPatterns } from '../../utils/haptics';
 import { StorageService } from '../../services/storage';
 
 interface LobbyScreenProps {
@@ -29,7 +28,6 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     onLeave
 }) => {
     const [showSettings, setShowSettings] = useState(false);
-    const [copied, setCopied] = useState(false);
     const [, setTick] = useState(0); // Force update for idle timer
 
     // Theme Support
@@ -49,13 +47,6 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
 
     const isHost = room.hostId === currentPlayerId;
     const currentPlayer = room.players.find(p => p.id === currentPlayerId);
-
-    const copyRoomCode = () => {
-        vibrate(HapticPatterns.success);
-        navigator.clipboard.writeText(room.roomCode);
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-    };
 
     const isIdle = (lastSeen?: number) => {
         if (!lastSeen) return true;
