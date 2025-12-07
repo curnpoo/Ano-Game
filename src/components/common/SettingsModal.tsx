@@ -238,12 +238,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     return (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center pointer-events-none">
             <div className="absolute inset-0 bg-black/40 backdrop-blur-sm pointer-events-auto" onClick={onClose} />
-            <div className="relative z-10 bg-white w-full sm:w-[500px] sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl pointer-events-auto max-h-[90vh] overflow-y-auto animate-slide-up">
+            <div className="relative z-10 w-full sm:w-[500px] sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl pointer-events-auto max-h-[90vh] overflow-y-auto animate-slide-up" style={{ backgroundColor: 'var(--theme-card-bg, #fff)' }}>
 
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h2 className="text-2xl font-black text-gray-800">SETTINGS</h2>
+                        <h2 className="text-2xl font-black" style={{ color: 'var(--theme-text)' }}>SETTINGS</h2>
                         {roomCode && (
                             <div className="flex items-center gap-2 mt-1">
                                 <span className="text-sm font-bold text-gray-400 uppercase tracking-wider">Room Code:</span>
@@ -263,18 +263,19 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                     {/* Name Edit */}
                     <div className="space-y-2">
-                        <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">Your Name</label>
+                        <label className="text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-secondary)' }}>Your Name</label>
                         <input
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
                             maxLength={15}
-                            className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-200 focus:border-purple-500 focus:outline-none font-bold text-lg"
+                            className="w-full px-4 py-3 rounded-xl border-2 focus:border-purple-500 focus:outline-none font-bold text-lg"
+                            style={{ backgroundColor: 'var(--theme-bg-secondary)', color: 'var(--theme-text)', borderColor: 'var(--theme-border)' }}
                             placeholder="Enter name"
                         />
                     </div>
 
-                    <hr className="border-gray-100" />
+                    <hr style={{ borderColor: 'var(--theme-border)' }} />
 
                     {/* Theme Toggle */}
                     <div className="space-y-2">
@@ -330,8 +331,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 🔔
                             </div>
                             <div>
-                                <div className="font-bold text-gray-800">Notifications</div>
-                                <div className="text-xs text-gray-500">Get alerted for turns</div>
+                                <div className="font-bold" style={{ color: 'var(--theme-text)' }}>Notifications</div>
+                                <div className="text-xs" style={{ color: 'var(--theme-text-secondary)' }}>Get alerted for turns</div>
                             </div>
                         </div>
                         <button
@@ -347,7 +348,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     {/* Host Controls - Kick Player */}
                     {isHost && roomCode && players.length > 1 && (
                         <div className="space-y-2">
-                            <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wider">Manage Players</h3>
+                            <h3 className="text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-secondary)' }}>Manage Players</h3>
                             <div className="bg-gray-50 rounded-xl p-2 space-y-2">
                                 {players.filter(p => p.id !== player.id).map(p => (
                                     <div key={p.id} className="flex items-center justify-between p-2 bg-white rounded-lg border border-gray-100">
