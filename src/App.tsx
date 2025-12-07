@@ -1193,23 +1193,6 @@ function App() {
               showToast('Failed to join round', 'error');
             }
           }}
-          onJoinGame={async () => {
-            if (!roomCode || !player) return;
-            try {
-              await StorageService.joinCurrentGame(roomCode, player.id);
-              showToast('Joined the round! 🚀', 'success');
-
-              // Force screen transition immediately
-              if (room.status === 'uploading') setCurrentScreen('uploading');
-              else if (room.status === 'drawing') setCurrentScreen('drawing');
-              else if (room.status === 'voting') setCurrentScreen('voting');
-              else if (room.status === 'results') setCurrentScreen('results');
-              else if (room.status === 'final') setCurrentScreen('final');
-            } catch (err) {
-              console.error(err);
-              showToast('Failed to join round', 'error');
-            }
-          }}
           onBack={handleMinimizeGame}
         />
       )}
