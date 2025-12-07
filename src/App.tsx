@@ -1297,10 +1297,13 @@ function App() {
 
             {/* Image Container */}
             <div className="flex-1 min-h-0 flex items-center justify-center p-2 relative">
-              <div className="relative w-full h-full max-w-lg mx-auto"
+              <div className="relative mx-auto flex items-center justify-center"
                 style={{
                   aspectRatio: '1 / 1',
-                  maxHeight: '100%', // Allow it to perform natural contain within flex item
+                  width: 'auto',
+                  height: 'auto',
+                  maxWidth: '100%',
+                  maxHeight: '100%',
                   borderRadius: '1.5rem',
                   overflow: 'hidden',
                   boxShadow: '0 10px 30px -10px rgba(0,0,0,0.2)',
