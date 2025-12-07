@@ -293,8 +293,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                     }
                                 })}
                                 className={`py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 border-2 transition-all ${player.cosmetics?.activeTheme === 'premium-light' || player.cosmetics?.activeTheme === 'light'
-                                        ? 'bg-orange-100 border-orange-400 text-orange-600'
-                                        : 'bg-gray-50 border-gray-100 text-gray-400 hover:bg-gray-100'
+                                    ? 'bg-orange-100 border-orange-400 text-orange-600'
+                                    : 'bg-gray-50 border-gray-100 text-gray-400 hover:bg-gray-100'
                                     }`}
                             >
                                 ☀️ Light
@@ -398,6 +398,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         </div>
                     )}
 
+                    {/* Main Save Button */}
+                    <button
+                        onClick={handleSave}
+                        className="w-full py-4 bg-black text-white font-bold text-xl rounded-2xl shadow-lg hover:bg-gray-800 active:scale-95 transition-all"
+                    >
+                        Save Settings
+                    </button>
+
+                    <hr className="border-gray-100" />
+
                     {/* Log Out Button - Universal */}
                     <button
                         onClick={() => setShowLogoutConfirm(true)}
@@ -406,25 +416,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         Log Out
                     </button>
 
-                    {/* Delete Account - Hidden at bottom */}
-                    <div className="pt-8 text-center">
+                    {/* Delete Account - Danger zone, well separated */}
+                    <div className="pt-12 border-t border-red-100 mt-8">
+                        <p className="text-xs text-gray-400 text-center mb-3 uppercase tracking-widest">Danger Zone</p>
                         <button
                             onClick={() => setShowDeleteConfirm(true)}
-                            className="text-xs text-red-300 hover:text-red-500 font-bold transition-colors uppercase tracking-widest"
+                            className="w-full py-2 text-xs text-red-400 hover:text-red-600 font-bold transition-colors uppercase tracking-widest"
                         >
-                            Delete Account
+                            🗑️ Delete Account Permanently
                         </button>
                     </div>
-
-
-
-                    {/* Main Save Button */}
-                    <button
-                        onClick={handleSave}
-                        className="w-full py-4 bg-black text-white font-bold text-xl rounded-2xl shadow-lg hover:bg-gray-800 active:scale-95 transition-all mt-4"
-                    >
-                        Save Settings
-                    </button>
                 </div>
             </div>
         </div>
