@@ -108,33 +108,38 @@ export const ProfileCardModal: React.FC<ProfileCardModalProps> = ({
         switch (friendButtonState) {
             case 'add':
                 return {
-                    bg: '#22c55e',
+                    bg: 'linear-gradient(135deg, #22c55e, #16a34a)',
                     text: 'white',
-                    label: '➕ Add Friend'
+                    label: '➕ Add Friend',
+                    shadow: '0 4px 12px rgba(34, 197, 94, 0.3)'
                 };
             case 'remove':
                 return {
-                    bg: '#ef4444',
+                    bg: 'linear-gradient(135deg, #ef4444, #dc2626)',
                     text: 'white',
-                    label: '✕ Remove Friend'
+                    label: '✕ Remove Friend',
+                    shadow: '0 4px 12px rgba(239, 68, 68, 0.3)'
                 };
             case 'confirm':
                 return {
-                    bg: '#dc2626',
+                    bg: 'linear-gradient(135deg, #dc2626, #b91c1c)',
                     text: 'white',
-                    label: 'Are you sure?'
+                    label: 'Are you sure?',
+                    shadow: '0 4px 12px rgba(220, 38, 38, 0.3)'
                 };
             case 'sent':
                 return {
-                    bg: '#94a3b8',
+                    bg: 'linear-gradient(135deg, #94a3b8, #64748b)',
                     text: 'white',
-                    label: '🕒 Request Sent'
+                    label: '🕒 Request Sent',
+                    shadow: 'none'
                 };
             case 'received':
                 return {
-                    bg: '#22c55e',
+                    bg: 'linear-gradient(135deg, #22c55e, #16a34a)',
                     text: 'white',
-                    label: '✅ Accept Request'
+                    label: '✅ Accept Request',
+                    shadow: '0 4px 12px rgba(34, 197, 94, 0.3)'
                 };
         }
     };
@@ -333,8 +338,10 @@ export const ProfileCardModal: React.FC<ProfileCardModalProps> = ({
                             className={`w-full py-3 px-4 rounded-xl font-bold transition-all ${isLoading || friendButtonState === 'sent' ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-95'
                                 }`}
                             style={{
-                                backgroundColor: btnStyle.bg,
-                                color: btnStyle.text
+                                backgroundColor: 'transparent', // Reset base bg so gradient works
+                                background: btnStyle.bg,
+                                color: btnStyle.text,
+                                boxShadow: btnStyle.shadow
                             }}
                         >
                             {isLoading ? '...' : btnStyle.label}

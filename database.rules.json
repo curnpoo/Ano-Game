@@ -41,6 +41,12 @@
                 "sentAt"
             ]
         },
+        "friendRequests": {
+            ".indexOn": [
+                "fromUserId",
+                "toUserId"
+            ]
+        },
         "pushTokens": {
             "$user_id": {
                 ".validate": "newData.hasChild('token')"

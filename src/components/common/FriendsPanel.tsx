@@ -264,13 +264,21 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, ope
                                                             <div className="flex gap-2">
                                                                 <button
                                                                     onClick={() => handleAcceptRequest(req.id)}
-                                                                    className="px-3 py-1 rounded-lg bg-green-500 text-white font-bold text-sm hover:scale-105 transition-transform"
+                                                                    className="px-4 py-1.5 rounded-xl text-white font-bold text-sm transition-all hover:scale-105 hover:shadow-lg active:scale-95 shadow-md flex items-center gap-1"
+                                                                    style={{
+                                                                        background: 'linear-gradient(135deg, #22c55e, #16a34a)',
+                                                                        boxShadow: '0 4px 12px rgba(34, 197, 94, 0.3)'
+                                                                    }}
                                                                 >
-                                                                    Accept
+                                                                    ✅ Accept
                                                                 </button>
                                                                 <button
                                                                     onClick={() => handleDeclineRequest(req.id)}
-                                                                    className="px-3 py-1 rounded-lg bg-red-500 text-white font-bold text-sm hover:scale-105 transition-transform"
+                                                                    className="px-3 py-1.5 rounded-xl text-white font-bold text-sm transition-all hover:scale-105 hover:shadow-lg active:scale-95 shadow-md"
+                                                                    style={{
+                                                                        background: 'linear-gradient(135deg, #ef4444, #dc2626)',
+                                                                        boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)'
+                                                                    }}
                                                                 >
                                                                     ✕
                                                                 </button>
