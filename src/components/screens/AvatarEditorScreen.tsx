@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { GameCanvas } from '../game/GameCanvas';
+import { Toolbar } from '../game/Toolbar';
 import type { Player, DrawingStroke } from '../../types';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
+import { CosmeticsService } from '../../services/cosmetics';
 
 interface AvatarEditorScreenProps {
     player: Player;
     onSave: (strokes: DrawingStroke[], color: string, frame: string) => void;
     onCancel: () => void;
 }
-
-const COLORS = ['#FF69B4', '#9B59B6', '#3498DB', '#1ABC9C', '#F1C40F', '#E67E22', '#E74C3C', '#34495E', '#000000'];
 
 const FRAMES = [
     { id: 'none', name: 'Simple', class: '' },
@@ -28,9 +28,15 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
     const [strokes, setStrokes] = useState<DrawingStroke[]>(player.avatarStrokes || []);
     const [brushColor, setBrushColor] = useState(player.color || '#FF69B4');
     const [selectedFrame, setSelectedFrame] = useState(FRAMES.find(f => f.class === player.frame)?.id || 'none');
-    const [brushSize] = useState(8);
+    const [brushSize, setBrushSize] = useState(8);
+    const [brushType, setBrushType] = useState('default');
     const [isEraser, setIsEraser] = useState(false);
+    const [isEyedropper, setIsEyedropper] = useState(false);
     const [history, setHistory] = useState<DrawingStroke[][]>([player.avatarStrokes || []]);
+
+    // Data from Cosmetics
+    const availableBrushes = CosmeticsService.getAvailableBrushes();
+    const availableColors = CosmeticsService.getAvailableColors();
 
     const handleStrokesChange = (newStrokes: DrawingStroke[]) => {
         setStrokes(newStrokes);
@@ -49,6 +55,12 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
             setStrokes(newHistory[newHistory.length - 1]);
             vibrate(HapticPatterns.light);
         }
+    };
+
+    const handleClear = () => {
+        setStrokes([]);
+        setHistory([[]]);
+        vibrate(HapticPatterns.light);
     };
 
     const handleSave = () => {
@@ -82,66 +94,30 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
                 <div className="relative aspect-square w-full max-w-sm rounded-[2rem] overflow-hidden bg-white shadow-2xl">
                     <div className={`absolute inset-0 pointer-events-none z-10 rounded-[2rem] ${FRAMES.find(f => f.id === selectedFrame)?.class}`} style={{ color: brushColor }}></div>
                     <GameCanvas
-                        imageUrl="" // No background image for avatar
+                        imageUrl=""
                         brushColor={brushColor}
                         brushSize={brushSize}
+                        brushType={brushType}
                         isDrawingEnabled={true}
                         strokes={strokes}
                         onStrokesChange={handleStrokesChange}
                         isEraser={isEraser}
+                        isEyedropper={isEyedropper}
+                        onColorPick={(c) => {
+                            setBrushColor(c);
+                            setIsEraser(false);
+                            setIsEyedropper(false);
+                        }}
                     />
                 </div>
             </div>
 
-            {/* Tools Area */}
-            <div className="bg-gray-800 p-4 space-y-4 pb-8 safe-area-inset-bottom">
+            {/* Tools Area using Toolbar */}
+            <div className="bg-gray-800 px-4 pb-8 safe-area-inset-bottom space-y-4">
 
-                {/* Tools Row */}
-                <div className="flex items-center justify-center gap-4">
-                    <button
-                        onClick={handleUndo}
-                        disabled={history.length <= 1}
-                        className={`p-3 rounded-xl transition-all ${history.length <= 1 ? 'bg-white/5 text-white/30' : 'bg-white/10 text-white hover:bg-white/20'}`}
-                    >
-                        ↩ Undo
-                    </button>
-
-                    <button
-                        onClick={() => setIsEraser(!isEraser)}
-                        className={`p-3 rounded-xl font-bold transition-all ${isEraser ? 'bg-red-500 text-white shadow-lg scale-105' : 'bg-white/10 text-white hover:bg-white/20'}`}
-                    >
-                        🧽 Eraser
-                    </button>
-
-                    <button
-                        onClick={() => {
-                            setStrokes([]);
-                            setHistory([[]]);
-                        }}
-                        className="p-3 bg-white/10 text-red-400 rounded-xl font-bold hover:bg-white/20 hover:text-red-300 transition-all"
-                    >
-                        🗑 Clear
-                    </button>
-                </div>
-
-                {/* Colors */}
-                <div className="flex justify-center gap-2 overflow-x-auto py-2">
-                    {COLORS.map(c => (
-                        <button
-                            key={c}
-                            onClick={() => {
-                                setBrushColor(c);
-                                setIsEraser(false);
-                            }}
-                            className={`w-10 h-10 rounded-full border-2 transition-all ${brushColor === c && !isEraser ? 'border-white scale-110 shadow-lg' : 'border-transparent opacity-80'}`}
-                            style={{ backgroundColor: c }}
-                        />
-                    ))}
-                </div>
-
-                {/* Frames */}
-                <div className="overflow-x-auto">
-                    <div className="flex gap-2 min-w-min px-2">
+                {/* Frames - Unique to Avatar Editor, kept separate */}
+                <div className="overflow-x-auto no-scrollbar">
+                    <div className="flex gap-2 min-w-min px-2 justify-center">
                         {FRAMES.map(f => (
                             <button
                                 key={f.id}
@@ -153,6 +129,37 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
                         ))}
                     </div>
                 </div>
+
+                <Toolbar
+                    brushColor={brushColor}
+                    brushSize={brushSize}
+                    brushType={brushType}
+                    isEraser={isEraser}
+                    isEyedropper={isEyedropper}
+                    onColorChange={(c) => {
+                        setBrushColor(c);
+                        setIsEraser(false);
+                        setIsEyedropper(false);
+                    }}
+                    onSizeChange={setBrushSize}
+                    onTypeChange={(t) => {
+                        setBrushType(t);
+                        setIsEraser(false);
+                        setIsEyedropper(false);
+                    }}
+                    onEraserToggle={() => {
+                        setIsEraser(!isEraser);
+                        setIsEyedropper(false);
+                    }}
+                    onEyedropperToggle={() => {
+                        setIsEyedropper(!isEyedropper);
+                        setIsEraser(false);
+                    }}
+                    onUndo={handleUndo}
+                    onClear={handleClear}
+                    availableColors={availableColors}
+                    availableBrushes={availableBrushes}
+                />
             </div>
         </div>
     );

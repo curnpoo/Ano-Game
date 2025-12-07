@@ -76,7 +76,7 @@ export const NameEntryScreen: React.FC<NameEntryScreenProps> = ({ onContinue }) 
                             type="submit"
                             disabled={!isValid}
                             className={`w-full py-4 rounded-full font-bold text-xl transition-all ${isValid
-                                ? 'btn-90s bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 text-white jelly-hover'
+                                ? 'btn-90s bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 text-black jelly-hover'
                                 : 'bg-gray-200 text-gray-400 cursor-not-allowed rounded-full'
                                 }`}
                         >

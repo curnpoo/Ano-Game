@@ -65,7 +65,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                 <div className="w-full max-w-sm space-y-4">
                     <button
                         onClick={() => setMode('register')}
-                        className="w-full bg-gradient-to-r from-green-400 to-emerald-600 text-white font-bold py-5 rounded-2xl shadow-xl text-xl hover:scale-[1.02] active:scale-95 transition-all"
+                        className="w-full bg-gradient-to-r from-green-400 to-emerald-600 text-black font-bold py-5 rounded-2xl shadow-xl text-xl hover:scale-[1.02] active:scale-95 transition-all"
                     >
                         🆕 Create Account
                     </button>
@@ -175,7 +175,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                         className={`w-full py-4 rounded-xl font-bold text-lg transition-all ${loading
                             ? 'bg-gray-400 text-white'
                             : mode === 'register'
-                                ? 'bg-gradient-to-r from-green-400 to-emerald-600 text-white hover:scale-[1.02]'
+                                ? 'bg-gradient-to-r from-green-400 to-emerald-600 text-black hover:scale-[1.02]'
                                 : 'bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:scale-[1.02]'
                             } disabled:opacity-50`}
                     >

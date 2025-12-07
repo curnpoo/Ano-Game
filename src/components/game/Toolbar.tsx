@@ -1,31 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { vibrate } from '../../utils/haptics';
 
 interface ToolbarProps {
     brushColor: string;
     brushSize: number;
+    brushType?: string;
     isEraser: boolean;
     onColorChange: (color: string) => void;
     onSizeChange: (size: number) => void;
+    onTypeChange?: (type: string) => void;
     onEraserToggle: () => void;
     onUndo: () => void;
     onClear: () => void;
     isEyedropper: boolean;
     onEyedropperToggle: () => void;
-}
 
-const COLORS = [
-    '#FFFFFF', // White
-    '#000000', // Black
-    '#FF69B4', // Hot Pink
-    '#FF0000', // Red
-    '#FF8C00', // Orange
-    '#FFE135', // Yellow
-    '#32CD32', // Lime Green
-    '#00D9FF', // Cyan
-    '#4169E1', // Blue
-    '#9B59B6', // Purple
-];
+    // Unlocked items
+    availableColors?: { id: string; name: string }[];
+    availableBrushes?: { id: string; name: string; emoji: string }[];
+}
 
 const SIZES = [
     { label: 'S', size: 5, emoji: '•' },
@@ -36,21 +29,59 @@ const SIZES = [
 export const Toolbar: React.FC<ToolbarProps> = ({
     brushColor,
     brushSize,
+    brushType = 'default',
     isEraser,
     onColorChange,
     onSizeChange,
+    onTypeChange,
     onEraserToggle,
     onUndo,
     onClear,
     isEyedropper,
-    onEyedropperToggle
+    onEyedropperToggle,
+    availableColors = [],
+    availableBrushes = []
 }) => {
+    // Determine which colors to show (default if empty/undefined)
+    const effectiveColors = availableColors.length > 0 ? availableColors.map(c => c.id) : [
+        '#FFFFFF', '#000000', '#FF69B4', '#FF0000', '#FF8C00', '#FFE135', '#32CD32', '#00D9FF', '#4169E1', '#9B59B6'
+    ];
+
+    // Determine brushes (always have default if empty)
+    const effectiveBrushes = availableBrushes.length > 0 ? availableBrushes : [
+        { id: 'default', name: 'Standard', emoji: '🖊️' }
+    ];
+
     return (
-        <div className="flex flex-col items-center gap-3 w-full max-w-md mx-auto">
+        <div className="flex flex-col items-center gap-2 w-full max-w-md mx-auto pointer-events-auto">
+
+            {/* Brushes Row (if more than 1) - ABOVE colors */}
+            {effectiveBrushes.length > 1 && onTypeChange && (
+                <div className="bg-white rounded-2xl p-2 shadow-xl border-2 border-purple-500 w-full animate-slide-up overflow-x-auto no-scrollbar">
+                    <div className="flex gap-2 justify-center min-w-min">
+                        {effectiveBrushes.map(brush => (
+                            <button
+                                key={brush.id}
+                                onClick={() => {
+                                    vibrate();
+                                    onTypeChange(brush.id);
+                                }}
+                                className={`px-3 py-1 rounded-xl flex items-center gap-1 transition-all whitespace-nowrap ${brushType === brush.id && !isEraser
+                                    ? 'bg-purple-500 text-white shadow-md'
+                                    : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}
+                            >
+                                <span className="text-lg">{brush.emoji}</span>
+                                <span className="text-xs font-bold">{brush.name}</span>
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
+
             {/* Colors - Grid Overlay */}
-            <div className="bg-white rounded-2xl p-3 shadow-xl border-2 border-purple-500 w-full animate-slide-up">
-                <div className="grid grid-cols-5 gap-2 justify-items-center">
-                    {COLORS.map((color) => (
+            <div className="bg-white rounded-2xl p-3 shadow-xl border-2 border-purple-500 w-full animate-slide-up max-h-32 overflow-y-auto no-scrollbar">
+                <div className="flex flex-wrap gap-2 justify-center">
+                    {effectiveColors.map((color) => (
                         <button
                             key={color}
                             onClick={() => {
@@ -67,8 +98,6 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                                 boxShadow: !isEraser && brushColor === color ? '0 0 10px rgba(155, 89, 182, 0.5)' : 'none',
                                 width: '32px',
                                 height: '32px',
-                                minWidth: '32px',
-                                minHeight: '32px'
                             }}
                         />
                     ))}
@@ -121,7 +150,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                         </button>
                     </div>
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 ml-2 pl-2 border-l-2 border-gray-100">
                         <button
                             onClick={() => {
                                 vibrate();

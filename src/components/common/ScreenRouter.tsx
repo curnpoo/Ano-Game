@@ -64,6 +64,8 @@ interface ScreenRouterProps {
     isMyTimerRunning: boolean;
     isReadying: boolean;
     onReady: () => void;
+    brushType?: string;
+    setBrushType?: (type: string) => void;
     brushColor: string;
     brushSize: number;
     isEraser: boolean;
@@ -136,6 +138,8 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
     handleEraserToggle,
     handleEyedropperToggle,
     handleColorPick,
+    brushType,
+    setBrushType,
     strokes,
     lastGameDetails,
     showToast,
@@ -220,10 +224,12 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                         onReady={onReady}
                         brushColor={brushColor}
                         brushSize={brushSize}
+                        brushType={brushType}
                         isEraser={isEraser}
                         isEyedropper={isEyedropper}
                         setBrushColor={setBrushColor}
                         setBrushSize={setBrushSize}
+                        setBrushType={setBrushType}
                         setStrokes={setStrokes}
                         setIsEraser={setIsEraser}
                         setIsEyedropper={setIsEyedropper}

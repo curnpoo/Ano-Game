@@ -6,6 +6,7 @@ interface GameCanvasProps {
     imageUrl: string;
     brushColor: string;
     brushSize: number;
+    brushType?: string; // Add prop
     isDrawingEnabled: boolean;
     strokes: DrawingStroke[];
     onStrokesChange: (strokes: DrawingStroke[]) => void;
@@ -18,6 +19,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     imageUrl,
     brushColor,
     brushSize,
+    brushType = 'default',
     isDrawingEnabled,
     strokes,
     onStrokesChange,
@@ -65,21 +67,70 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         ctx.fillStyle = '#FFFFFF';
         ctx.fillRect(0, 0, width, height);
 
-        ctx.lineCap = 'round';
-        ctx.lineJoin = 'round';
-
-        strokes.forEach(stroke => {
+        const renderStroke = (stroke: DrawingStroke) => {
             if (stroke.points.length === 0) return;
+
             ctx.beginPath();
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
             ctx.strokeStyle = stroke.color;
             ctx.fillStyle = stroke.color;
             ctx.lineWidth = stroke.size;
             ctx.globalCompositeOperation = stroke.isEraser ? 'destination-out' : 'source-over';
+            ctx.shadowBlur = 0;
+            ctx.shadowColor = 'transparent';
+
+            // Special Brush Styles
+            if (!stroke.isEraser) {
+                switch (stroke.type) {
+                    case 'marker':
+                        ctx.globalAlpha = 0.5; // Transparent overlay effect
+                        break;
+                    case 'neon':
+                        ctx.shadowBlur = 10;
+                        ctx.shadowColor = stroke.color;
+                        ctx.lineWidth = stroke.size * 0.8; // Slightly thinner core
+                        break;
+                    case 'pixel':
+                        ctx.lineCap = 'square';
+                        ctx.lineJoin = 'miter';
+                        ctx.imageSmoothingEnabled = false;
+                        break;
+                    case 'calligraphy':
+                        ctx.lineCap = 'butt';
+                        // We'll simulate calligraphy by drawing flattened ovals along the path? 
+                        // Or just simple flattened line interaction. 
+                        // Easier: use a flattened scaling for the context if possible, or just change lineCap.
+                        // For simple implementation:
+                        ctx.save();
+                        ctx.lineWidth = stroke.size;
+                        // A simple hack for calligraphy in standard 2D canvas path is hard without manual point drawing loop.
+                        // Let's stick to standard path but maybe variable width logic is too complex for this step.
+                        // Just use butt cap for now.
+                        break;
+                    case 'spray':
+                        // Spray is complex to re-render from path alone without storing particle data.
+                        // We will approximate it by drawing a fuzzy line.
+                        ctx.shadowBlur = stroke.size;
+                        ctx.shadowColor = stroke.color;
+                        ctx.lineWidth = stroke.size * 0.5;
+                        break;
+                    default:
+                        ctx.globalAlpha = 1.0;
+                        break;
+                }
+            }
+
+            // Draw Path
             if (stroke.points.length === 1) {
                 const x = stroke.points[0].x / 100 * width;
                 const y = stroke.points[0].y / 100 * height;
-                ctx.arc(x, y, stroke.size / 2, 0, Math.PI * 2);
-                ctx.fill();
+                if (stroke.type === 'pixel') {
+                    ctx.fillRect(x - stroke.size / 2, y - stroke.size / 2, stroke.size, stroke.size);
+                } else {
+                    ctx.arc(x, y, stroke.size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
             } else {
                 ctx.moveTo(stroke.points[0].x / 100 * width, stroke.points[0].y / 100 * height);
                 for (let i = 1; i < stroke.points.length; i++) {
@@ -87,27 +138,20 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
                 }
                 ctx.stroke();
             }
-        });
+
+            // Reset Context Styles
+            ctx.globalAlpha = 1.0;
+            ctx.shadowBlur = 0;
+            if (stroke.type === 'calligraphy') ctx.restore();
+            ctx.imageSmoothingEnabled = true;
+        };
+
+        strokes.forEach(renderStroke);
 
         if (currentStroke && currentStroke.points.length > 0) {
-            ctx.beginPath();
-            ctx.strokeStyle = currentStroke.color;
-            ctx.fillStyle = currentStroke.color;
-            ctx.lineWidth = currentStroke.size;
-            ctx.globalCompositeOperation = currentStroke.isEraser ? 'destination-out' : 'source-over';
-            if (currentStroke.points.length === 1) {
-                const x = currentStroke.points[0].x / 100 * width;
-                const y = currentStroke.points[0].y / 100 * height;
-                ctx.arc(x, y, currentStroke.size / 2, 0, Math.PI * 2);
-                ctx.fill();
-            } else {
-                ctx.moveTo(currentStroke.points[0].x / 100 * width, currentStroke.points[0].y / 100 * height);
-                for (let i = 1; i < currentStroke.points.length; i++) {
-                    ctx.lineTo(currentStroke.points[i].x / 100 * width, currentStroke.points[i].y / 100 * height);
-                }
-                ctx.stroke();
-            }
+            renderStroke(currentStroke);
         }
+
         ctx.globalCompositeOperation = 'source-over';
     }, [strokes, currentStroke]);
 
@@ -195,7 +239,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             color: brushColor,
             size: brushSize,
             points: [point],
-            isEraser
+            isEraser,
+            type: brushType // Use prop
         });
     };
 

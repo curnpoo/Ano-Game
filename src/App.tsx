@@ -59,6 +59,7 @@ function App() {
   const {
     brushColor, setBrushColor,
     brushSize, setBrushSize,
+    brushType, setBrushType,
     strokes, setStrokes,
     strokesRef,
     isEraser, setIsEraser,
@@ -1067,10 +1068,12 @@ function App() {
         onReady={handleReady}
         brushColor={brushColor}
         brushSize={brushSize}
+        brushType={brushType}
         isEraser={isEraser}
         isEyedropper={isEyedropper}
         setBrushColor={setBrushColor}
         setBrushSize={setBrushSize}
+        setBrushType={setBrushType}
         setStrokes={setStrokes}
         setIsEraser={setIsEraser}
         setIsEyedropper={setIsEyedropper}

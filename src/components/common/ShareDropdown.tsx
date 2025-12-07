@@ -6,11 +6,17 @@ interface ShareDropdownProps {
     roomCode: string;
     /** Custom URL - defaults to join URL with room code */
     url?: string;
+    className?: string;
+    buttonClassName?: string;
+    buttonStyle?: React.CSSProperties;
 }
 
 export const ShareDropdown: React.FC<ShareDropdownProps> = ({
     roomCode,
-    url
+    url,
+    className = '',
+    buttonClassName = '',
+    buttonStyle
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [showQR, setShowQR] = useState(false);
@@ -79,7 +85,7 @@ export const ShareDropdown: React.FC<ShareDropdownProps> = ({
     };
 
     return (
-        <div className="relative">
+        <div className={`relative ${className}`}>
             {/* Trigger Button */}
             <button
                 ref={buttonRef}
@@ -88,10 +94,11 @@ export const ShareDropdown: React.FC<ShareDropdownProps> = ({
                     setIsOpen(!isOpen);
                     if (!isOpen) setShowQR(false);
                 }}
-                className="bg-white/10 hover:bg-white/20 text-[var(--theme-text)] px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all"
+                className={`bg-white/10 hover:bg-white/20 text-[var(--theme-text)] px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all ${buttonClassName}`}
+                style={buttonStyle}
             >
                 <span className="text-lg">📤</span>
-                Share
+                <span className="hidden sm:inline">Share</span>
             </button>
 
             {/* Dropdown Menu */}

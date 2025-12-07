@@ -81,9 +81,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
+            <div className="flex-1 flex flex-col px-4 pb-4 space-y-4 overflow-hidden">
                 {/* Name Input */}
-                <div className="rounded-[2rem] p-4 shadow-lg"
+                <div className="rounded-[2rem] p-4 shadow-lg shrink-0"
                     style={{
                         backgroundColor: 'var(--theme-card-bg)',
                         border: '2px solid var(--theme-border)'
@@ -103,40 +103,42 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     />
                 </div>
 
-                {/* Avatar Display */}
-                <div className="rounded-[2rem] p-4 shadow-lg"
+                {/* Avatar Display - Fills remaining space */}
+                <div className="flex-1 rounded-[2rem] p-4 shadow-lg flex flex-col min-h-0"
                     style={{
                         backgroundColor: 'var(--theme-card-bg)',
                         border: '2px solid var(--theme-border)'
                     }}>
-                    <label className="block text-sm font-bold mb-2" style={{ color: 'var(--theme-text-secondary)' }}>YOUR AVATAR</label>
+                    <label className="block text-sm font-bold mb-2 shrink-0" style={{ color: 'var(--theme-text-secondary)' }}>YOUR AVATAR</label>
                     <button
                         onClick={onEditAvatar}
-                        className="w-full flex flex-col items-center p-4 rounded-3xl border-2 border-dashed transition-all group hover:scale-[1.02]"
+                        className="flex-1 w-full flex flex-col items-center justify-center p-4 rounded-3xl border-2 border-dashed transition-all group hover:scale-[1.02] hover:bg-black/5 dark:hover:bg-white/5"
                         style={{
                             borderColor: 'var(--theme-border)',
                             backgroundColor: 'var(--theme-bg-secondary)'
                         }}
                     >
-                        <div className="w-32 h-32 relative mb-2 group-hover:scale-105 transition-transform">
+                        <div className="relative mb-4 group-hover:scale-110 transition-transform">
                             <AvatarDisplay
                                 strokes={player.avatarStrokes}
                                 avatar={player.avatar}
                                 frame={player.frame}
                                 color={player.color}
-                                size={128}
+                                size={180}
+                                className="shadow-2xl"
                             />
-                            <div className="absolute bottom-0 right-0 text-white p-2 rounded-full shadow-lg"
+                            <div className="absolute -bottom-2 -right-2 text-2xl text-white p-3 rounded-full shadow-lg border-2 border-white animate-bounce-gentle"
                                 style={{ backgroundColor: 'var(--theme-accent)' }}>
                                 ✏️
                             </div>
                         </div>
-                        <span className="font-bold" style={{ color: 'var(--theme-accent)' }}>Tap to Edit Avatar</span>
+                        <span className="font-black text-xl" style={{ color: 'var(--theme-accent)' }}>TAP TO EDIT</span>
+                        <span className="text-sm font-medium opacity-60" style={{ color: 'var(--theme-text)' }}>Customize your look</span>
                     </button>
                 </div>
             </div>
 
-            <div className="p-4 safe-area-inset-bottom">
+            <div className="px-4 pb-4 safe-area-inset-bottom shrink-0">
                 <button
                     onClick={handleSave}
                     className="w-full py-4 text-white font-bold text-xl rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all"

@@ -243,7 +243,7 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                         ) : (
                             <button
                                 onClick={handleVote}
-                                className="w-full max-w-[200px] text-white py-4 rounded-2xl font-black text-xl shadow-xl transform transition-all hover:scale-105 active:scale-95"
+                                className="w-full max-w-[200px] text-black py-4 rounded-2xl font-black text-xl shadow-xl transform transition-all hover:scale-105 active:scale-95"
                                 style={{
                                     background: 'linear-gradient(135deg, var(--theme-accent) 0%, #FFD700 100%)',
                                     textShadow: '0 2px 0 rgba(0,0,0,0.2)'

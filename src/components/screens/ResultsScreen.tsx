@@ -345,7 +345,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
             {isHost ? (
                 <button
                     onClick={onNextRound}
-                    className="w-full max-w-xs text-white px-8 py-4 rounded-2xl font-black text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all"
+                    className="w-full max-w-xs text-black px-8 py-4 rounded-2xl font-black text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all"
                     style={{
                         background: 'linear-gradient(135deg, var(--theme-accent) 0%, #FFD700 100%)'
                     }}

@@ -82,6 +82,7 @@ export interface DrawingStroke {
     color: string;
     size: number;
     isEraser?: boolean;
+    type?: string; // 'default' | 'marker' | 'calligraphy' | 'pixel' | 'neon' | 'spray'
 }
 
 export interface PlayerDrawing {

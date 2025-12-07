@@ -62,7 +62,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                     <p className="mb-6 text-gray-600">The game is currently in the <strong>{room.status}</strong> phase.</p>
                     <button
                         onClick={onJoinGame}
-                        className="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-white font-bold py-4 rounded-xl shadow-lg hover:scale-105 transition-transform"
+                        className="w-full bg-gradient-to-r from-green-400 to-emerald-500 text-black font-bold py-4 rounded-xl shadow-lg hover:scale-105 transition-transform"
                     >
                         🚀 Rejoin Game
                     </button>
@@ -97,19 +97,25 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                 </div>
 
                 {/* Room Code Card */}
-                <div className="p-6 rounded-[2rem] shadow-xl relative overflow-hidden"
+                <div className="p-6 rounded-[2rem] shadow-xl relative"
                     style={{
                         backgroundColor: 'var(--theme-card-bg)',
-                        border: '2px solid var(--theme-border)'
+                        border: '2px solid var(--theme-border)',
+                        zIndex: 20
                     }}>
-                    <div className="flex justify-between items-start">
+                    <div className="flex justify-between items-stretch gap-4">
                         <div>
                             <div className="text-xs font-bold tracking-widest opacity-60 mb-1 text-[var(--theme-text-secondary)]">ROOM CODE</div>
                             <div className="text-6xl font-black tracking-widest rainbow-text drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
                                 {room.roomCode}
                             </div>
                         </div>
-                        <ShareDropdown roomCode={room.roomCode} />
+                        <ShareDropdown
+                            roomCode={room.roomCode}
+                            className="flex-1 max-w-[120px]"
+                            buttonClassName="w-full h-full justify-center text-lg rounded-2xl bg-white/5 border-2"
+                            buttonStyle={{ borderColor: 'var(--theme-border)' }}
+                        />
                     </div>
                 </div>
 
@@ -191,7 +197,12 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                     {/* Leave Room (Inside Players Card as per screenshot) */}
                     <button
                         onClick={onLeave}
-                        className="w-full mt-6 bg-[#8B0000] text-[#FFaaaa] font-bold py-4 rounded-xl hover:bg-[#A52A2A] transition-all flex items-center justify-center gap-2 shadow-inner"
+                        className="w-full mt-6 font-bold py-4 rounded-xl transition-all flex items-center justify-center gap-2 shadow-inner hover:scale-[1.02]"
+                        style={{
+                            backgroundColor: 'red',
+                            color: 'white',
+                            border: '2px solid var(--theme-border)'
+                        }}
                     >
                         🚪 Leave Room
                     </button>

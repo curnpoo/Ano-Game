@@ -14,6 +14,8 @@ export const useDrawingState = ({ onToast }: UseDrawingStateProps = {}) => {
     const [isEraser, setIsEraser] = useState(false);
     const [isEyedropper, setIsEyedropper] = useState(false);
 
+    const [brushType, setBrushType] = useState('default');
+
     // Keep ref in sync with state
     useEffect(() => {
         strokesRef.current = strokes;
@@ -53,6 +55,8 @@ export const useDrawingState = ({ onToast }: UseDrawingStateProps = {}) => {
         setBrushColor,
         brushSize,
         setBrushSize: setBrushSizeSafe,
+        brushType,
+        setBrushType,
         strokes,
         setStrokes,
         strokesRef,

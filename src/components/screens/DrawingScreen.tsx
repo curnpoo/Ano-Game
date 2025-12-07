@@ -6,6 +6,9 @@ import { SaboteurPanel } from '../game/SaboteurPanel';
 import { SabotageOverlay } from '../game/SabotageOverlay';
 import { StorageService } from '../../services/storage';
 
+import { CosmeticsService } from '../../services/cosmetics';
+import type { DrawingStroke } from '../../types';
+
 interface DrawingScreenProps {
     room: GameRoom;
     player: Player;
@@ -13,22 +16,24 @@ interface DrawingScreenProps {
     isReadying: boolean;
     onReady: () => void;
 
-    // Drawing State (passed from hook)
+    // Drawing props
     brushColor: string;
     brushSize: number;
-    strokes: any[]; // Receive current strokes state
+    brushType?: string;
     isEraser: boolean;
     isEyedropper: boolean;
     setBrushColor: (color: string) => void;
     setBrushSize: (size: number) => void;
-    setStrokes: (strokes: any[]) => void; // Using any[] avoids import cycle or complex type if generic
-    setIsEraser: (is: boolean) => void;
-    setIsEyedropper: (is: boolean) => void;
+    setBrushType?: (type: string) => void;
+    setStrokes: (strokes: DrawingStroke[]) => void;
+    setIsEraser: (isEraser: boolean) => void;
+    setIsEyedropper: (isEyedropper: boolean) => void;
     handleUndo: () => void;
     handleClear: () => void;
     handleEraserToggle: () => void;
     handleEyedropperToggle: () => void;
     handleColorPick: (color: string) => void;
+    strokes: DrawingStroke[];
 }
 
 export const DrawingScreen: React.FC<DrawingScreenProps> = ({
@@ -39,11 +44,12 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
     onReady,
     brushColor,
     brushSize,
-    strokes,
+    brushType = 'default',
     isEraser,
     isEyedropper,
     setBrushColor,
     setBrushSize,
+    setBrushType,
     setStrokes,
     setIsEraser,
     setIsEyedropper,
@@ -51,10 +57,19 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
     handleClear,
     handleEraserToggle,
     handleEyedropperToggle,
-    handleColorPick
+    handleColorPick,
+    strokes
 }) => {
     const playerState = room.playerStates[player.id];
     const hasSubmitted = playerState?.status === 'submitted';
+
+    // Get unlockables
+    const availableBrushes = CosmeticsService.getAvailableBrushes();
+    const availableColors = CosmeticsService.getAvailableColors();
+
+    const currentRound = room.roundNumber;
+    const isSabotageMode = room.sabotageRound === currentRound;
+    const isDoublePoints = room.isDoublePoints;
 
     const unfinishedPlayers = useMemo(() => {
         return room.players.filter(p =>
@@ -68,7 +83,8 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
 
     return (
         <div className="absolute inset-0 flex flex-col pt-20 pb-4 px-4 overflow-hidden pointer-events-none">
-            <div className="w-full max-w-lg mx-auto flex-1 flex flex-col relative pointer-events-auto">
+            {/* Canvas Container */}
+            <div className="flex-1 relative w-full h-full max-w-lg mx-auto pointer-events-auto">
 
                 {/* Helper Text */}
                 {!hasSubmitted && isMyTimerRunning && (
@@ -82,7 +98,7 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                 )}
 
                 {/* Canvas Area */}
-                <div className="relative aspect-square w-full bg-white rounded-3xl shadow-xl overflow-hidden border-4 border-white ring-4 ring-black/5 transform transition-all duration-300 hover:scale-[1.01]">
+                <div className="absolute inset-0 z-0 bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-gray-100">
 
                     {/* Base Image */}
                     {room.currentImage && (
@@ -137,7 +153,7 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                                 <button
                                     onClick={onReady}
                                     disabled={isReadying}
-                                    className="w-full btn-90s bg-gradient-to-r from-lime-400 to-emerald-500 text-white px-8 py-4 rounded-xl font-bold text-xl jelly-hover shadow-lg disabled:opacity-70 disabled:grayscale"
+                                    className="w-full btn-90s bg-gradient-to-r from-lime-400 to-emerald-500 text-black px-8 py-4 rounded-xl font-bold text-xl jelly-hover shadow-lg disabled:opacity-70 disabled:grayscale"
                                 >
                                     {isReadying ? (
                                         <span className="flex items-center justify-center gap-2">
@@ -179,28 +195,39 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                     )}
                 </div>
 
-                {/* Toolbar - BELOW the image */}
-                {isMyTimerRunning && !hasSubmitted && (
-                    <div className="flex-shrink-0 z-30 pb-4 px-2 pop-in">
-                        <Toolbar
-                            brushColor={brushColor}
-                            brushSize={brushSize}
-                            isEraser={isEraser}
-                            onColorChange={(color) => {
-                                setBrushColor(color);
+            </div>
+
+            {/* Toolbar - BELOW the image */}
+            {isMyTimerRunning && !hasSubmitted && (
+                <div className="flex-shrink-0 z-30 pb-4 px-2 pop-in pointer-events-auto w-full max-w-lg mx-auto">
+                    <Toolbar
+                        brushColor={brushColor}
+                        brushSize={brushSize}
+                        brushType={brushType}
+                        isEraser={isEraser}
+                        onColorChange={(color) => {
+                            setBrushColor(color);
+                            setIsEraser(false);
+                            setIsEyedropper(false);
+                        }}
+                        onSizeChange={setBrushSize}
+                        onTypeChange={(type) => {
+                            if (setBrushType) {
+                                setBrushType(type);
                                 setIsEraser(false);
                                 setIsEyedropper(false);
-                            }}
-                            onSizeChange={setBrushSize}
-                            onEraserToggle={handleEraserToggle}
-                            onUndo={handleUndo}
-                            onClear={handleClear}
-                            isEyedropper={isEyedropper}
-                            onEyedropperToggle={handleEyedropperToggle}
-                        />
-                    </div>
-                )}
-            </div>
+                            }
+                        }}
+                        onEraserToggle={handleEraserToggle}
+                        onUndo={handleUndo}
+                        onClear={handleClear}
+                        isEyedropper={isEyedropper}
+                        onEyedropperToggle={handleEyedropperToggle}
+                        availableColors={availableColors}
+                        availableBrushes={availableBrushes}
+                    />
+                </div>
+            )}
 
             {/* Saboteur Panel */}
             {room.saboteurId === player.id && !room.sabotageTargetId && (
