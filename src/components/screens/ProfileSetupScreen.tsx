@@ -7,7 +7,7 @@ interface ProfileSetupScreenProps {
     initialName?: string;
 }
 
-const COLORS = ['#FF69B4', '#9B59B6', '#3498DB', '#1ABC9C', '#F1C40F', '#E67E22', '#E74C3C', '#34495E', '#000000'];
+const COLORS = ['#000000', '#FFFFFF', '#FF69B4', '#9B59B6', '#3498DB', '#1ABC9C', '#F1C40F', '#E67E22', '#E74C3C', '#34495E'];
 const FRAMES = [
     { id: 'none', name: 'Simple', class: 'border-2 border-current' },
     { id: 'glow', name: 'Glow', class: 'shadow-[0_0_15px_currentColor]' },

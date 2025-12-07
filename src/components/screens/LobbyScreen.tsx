@@ -8,6 +8,7 @@ import { StorageService } from '../../services/storage';
 import { usePresence } from '../../hooks/usePresence';
 import { XPService } from '../../services/xp';
 import { BadgeService } from '../../services/badgeService';
+import { formatCurrency } from '../../services/currency';
 
 interface LobbyScreenProps {
     room: GameRoom;
@@ -18,7 +19,7 @@ interface LobbyScreenProps {
     onKick: (playerId: string) => void;
     onJoinGame: () => void;
     onBack: () => void;
-    onShowHowToPlay: () => void;
+
 }
 
 export const LobbyScreen: React.FC<LobbyScreenProps> = ({
@@ -29,8 +30,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     onKick,
     onJoinGame,
     onBack,
-    onLeave,
-    onShowHowToPlay
+    onLeave
 }) => {
     const [showSettings, setShowSettings] = useState(false);
     const [, setTick] = useState(0); // Force update for idle timer
@@ -160,42 +160,56 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
 
                             return (
                                 <div key={p.id}
-                                    className="flex items-center justify-between p-3 rounded-2xl mb-2 relative overflow-hidden transition-all"
+                                    className="flex items-center justify-between p-4 rounded-2xl mb-3 relative overflow-hidden transition-all shadow-sm"
                                     style={{
                                         backgroundColor: 'var(--theme-highlight)',
-                                        borderLeft: cardColor ? `6px solid ${cardColor}` : 'none',
+                                        borderLeft: cardColor ? `8px solid ${cardColor}` : 'none',
                                         background: cardColor ? `linear-gradient(90deg, ${cardColor}22, var(--theme-highlight) 30%)` : 'var(--theme-highlight)'
                                     }}>
-                                    <div className="flex items-center gap-3 relative z-10">
+                                    <div className="flex items-center gap-4 relative z-10">
                                         <div className="relative">
                                             <AvatarDisplay
                                                 strokes={p.avatarStrokes}
                                                 avatar={p.avatar}
                                                 // frame={p.frame}
                                                 color={p.color}
-                                                size={48}
+                                                size={56}
                                             />
                                             {p.id === room.hostId && (
-                                                <span className="absolute -top-1 -right-1 text-lg">👑</span>
+                                                <span className="absolute -top-2 -right-2 text-xl filter drop-shadow-md">👑</span>
                                             )}
                                         </div>
                                         <div>
-                                            <div className="flex items-center gap-1.5">
-                                                <div className="font-bold text-[var(--theme-text)] leading-tight">{p.name}</div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="font-bold text-lg text-[var(--theme-text)] leading-tight">{p.name}</div>
                                                 {/* Badge */}
                                                 {activeBadgeInfo && (
-                                                    <span title={activeBadgeInfo.name} className="text-lg drop-shadow-md cursor-help">
+                                                    <span title={activeBadgeInfo.name} className="text-xl drop-shadow-md cursor-help">
                                                         {activeBadgeInfo.emoji}
                                                     </span>
                                                 )}
                                             </div>
 
                                             <div className="flex items-center gap-2 mt-0.5">
-                                                {/* Level & Rank */}
-                                                <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/5 dark:bg-white/10" title={tier.name}>
-                                                    <span className="text-xs">{tier.icon}</span>
-                                                    <span className="text-[10px] font-black opacity-70 uppercase">Lvl {p.level || 0}</span>
-                                                </div>
+                                                {/* Dynamic Stat Display */}
+                                                {(p.cosmetics?.activeStat === 'wins' && p.stats) ? (
+                                                    <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/5 dark:bg-white/10" title="Games Won">
+                                                        <span className="text-xs">🏆</span>
+                                                        <span className="text-[10px] font-black opacity-70 uppercase">{p.stats.gamesWon} Wins</span>
+                                                    </div>
+                                                ) : (p.cosmetics?.activeStat === 'earnings' && p.stats) ? (
+                                                    <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/5 dark:bg-white/10" title="Total Earnings">
+                                                        <span className="text-xs">💰</span>
+                                                        <span className="text-[10px] font-black opacity-70 uppercase">{formatCurrency(p.stats.totalCurrencyEarned)}</span>
+                                                    </div>
+                                                ) : (p.cosmetics?.activeStat === 'none') ? (
+                                                    null
+                                                ) : (
+                                                    <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/5 dark:bg-white/10" title={tier.name}>
+                                                        <span className="text-xs">{tier.icon}</span>
+                                                        <span className="text-[10px] font-black opacity-70 uppercase">Lvl {p.level || 0}</span>
+                                                    </div>
+                                                )}
 
                                                 {p.id === currentPlayerId && (
                                                     <div className="text-[10px] font-bold tracking-wider opacity-60 text-[var(--theme-text)]">YOU</div>
@@ -291,7 +305,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                     onLeaveGame={onLeave}
                     onEndGame={isHost ? () => StorageService.closeRoom(room.roomCode) : undefined}
                     onKick={isHost ? (playerId: string) => StorageService.kickPlayer(room.roomCode, playerId) : undefined}
-                    onShowHowToPlay={onShowHowToPlay}
+
                 />
             )}
         </div>

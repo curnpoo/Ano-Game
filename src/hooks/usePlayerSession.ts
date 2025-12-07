@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AuthService } from '../services/auth';
 import { StorageService } from '../services/storage';
+import { XPService } from '../services/xp';
+import { StatsService } from '../services/stats';
 import type { Player, Screen } from '../types';
 
 interface UsePlayerSessionProps {
@@ -38,7 +40,10 @@ export const usePlayerSession = ({ setCurrentScreen }: UsePlayerSessionProps) =>
                             avatarStrokes: authUser.avatarStrokes,
                             joinedAt: authUser.createdAt,
                             lastSeen: Date.now(),
-                            cosmetics: authUser.cosmetics
+                            cosmetics: authUser.cosmetics,
+                            level: XPService.getLevel(),
+                            xp: XPService.getXP(),
+                            stats: StatsService.getStats()
                         };
                         StorageService.saveSession(session);
                         setPlayer(session);
@@ -77,7 +82,13 @@ export const usePlayerSession = ({ setCurrentScreen }: UsePlayerSessionProps) =>
 
     const handleUpdateProfile = useCallback((profileData: Partial<Player>) => {
         if (!player) return;
-        const updatedPlayer = { ...player, ...profileData };
+        const updatedPlayer = {
+            ...player,
+            ...profileData,
+            level: XPService.getLevel(),
+            xp: XPService.getXP(),
+            stats: StatsService.getStats()
+        };
         setPlayer(updatedPlayer);
         StorageService.saveSession(updatedPlayer);
 

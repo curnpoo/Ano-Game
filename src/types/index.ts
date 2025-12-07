@@ -62,6 +62,7 @@ export interface PlayerCosmetics {
     activeBadge?: string; // Currently displayed badge
     activeTheme?: string; // light/dark mode preference
     activeFont?: string;  // purchased font
+    activeStat?: string; // Stat to display on card (level, wins, earnings, etc)
     purchasedItems?: string[]; // Items bought with currency
 }
 
@@ -80,6 +81,7 @@ export interface Player {
     isHost?: boolean;
     joinedAt: number;
     lastSeen: number; // timestamp for heartbeat
+    stats?: PlayerStats; // Stats for display in lobby
     cosmetics?: PlayerCosmetics;
 }
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import logo from '../../assets/logo_icon.png';
-import { HowToPlayModal } from '../game/HowToPlayModal';
+
 import { AboutModal } from '../common/AboutModal';
 import { InstallPromptModal } from '../common/InstallPromptModal';
 import { ShareModal } from '../common/ShareModal';
@@ -29,7 +29,7 @@ const FloatingBubble: React.FC<{ delay: number; size: number; color: string; lef
 
 export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onPlay, joiningRoomCode }) => {
     const [mounted, setMounted] = useState(false);
-    const [showHowToPlay, setShowHowToPlay] = useState(false);
+
     const [showAbout, setShowAbout] = useState(false);
     const [showShare, setShowShare] = useState(false);
 
@@ -78,7 +78,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onPlay, joiningRoo
                         ✨ The party drawing game! ✨
                     </p>
                 </div>
-                
+
                 {joiningRoomCode && (
                     <div className="bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-xl border-2 border-purple-400 animate-bounce-in">
                         <div className="text-xs font-bold uppercase tracking-widest text-purple-600 mb-1">
@@ -101,12 +101,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onPlay, joiningRoo
                 </button>
 
                 <div className="flex flex-wrap justify-center gap-3 text-lg">
-                    <button
-                        onClick={() => setShowHowToPlay(true)}
-                        className="hover:scale-110 transition-transform wiggle-hover bg-white/20 backdrop-blur-sm px-5 py-2 rounded-full font-bold"
-                    >
-                        ❓ How to Play
-                    </button>
+
                     <button
                         onClick={() => setShowAbout(true)}
                         className="hover:scale-110 transition-transform wiggle-hover bg-white/20 backdrop-blur-sm px-5 py-2 rounded-full font-bold"
@@ -123,7 +118,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onPlay, joiningRoo
             </div>
 
             {/* Modals */}
-            <HowToPlayModal isOpen={showHowToPlay} onClose={() => setShowHowToPlay(false)} />
+
             <AboutModal isOpen={showAbout} onClose={() => setShowAbout(false)} />
             <ShareModal isOpen={showShare} onClose={() => setShowShare(false)} />
             <InstallPromptModal />

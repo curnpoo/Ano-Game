@@ -112,6 +112,10 @@ export const getThemeClass = (themeId: string = 'default'): string => {
             return 'theme-bg-gold';
         case 'galaxy':
             return 'theme-bg-galaxy';
+        case 'premium-light':
+            return 'theme-bg-premium-light';
+        case 'premium-dark':
+            return 'theme-bg-premium-dark';
         default:
             return 'theme-bg-default';
     }

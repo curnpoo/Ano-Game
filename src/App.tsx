@@ -1250,8 +1250,6 @@ function App() {
         onNextRound={handleNextRound}
         onPlayAgain={handlePlayAgain}
         onShowRewards={showGameRewards}
-        onShowHowToPlay={() => setShowHowToPlay(true)}
-
         onEquipTheme={handleEquipTheme}
         onSabotageSelect={handleSabotageSelect}
 

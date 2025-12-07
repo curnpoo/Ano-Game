@@ -1,4 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
+import { hexToHsl } from '../../utils/colorUtils';
 
 interface ColorWheelProps {
     color: string;
@@ -16,7 +17,27 @@ export const ColorWheel: React.FC<ColorWheelProps> = ({
     const wheelRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
 
-    const handleInteraction = (e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) => {
+    // Parse initial color
+    const [hsl, setHsl] = useState({ h: 0, s: 100, l: 50 });
+
+    useEffect(() => {
+        if (color.startsWith('#')) {
+            const { h, s, l } = hexToHsl(color);
+            setHsl({ h, s, l });
+        } else if (color.startsWith('hsl')) {
+            // Simple parse for hsl(h, s%, l%)
+            const match = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
+            if (match) {
+                setHsl({
+                    h: parseInt(match[1]),
+                    s: parseInt(match[2]),
+                    l: parseInt(match[3])
+                });
+            }
+        }
+    }, []); // Only on mount to avoid loops, or careful dependency
+
+    const handleWheelInteraction = (e: React.MouseEvent | React.TouchEvent | MouseEvent | TouchEvent) => {
         if (!wheelRef.current) return;
 
         const rect = wheelRef.current.getBoundingClientRect();
@@ -29,49 +50,31 @@ export const ColorWheel: React.FC<ColorWheelProps> = ({
         const dx = clientX - centerX;
         const dy = clientY - centerY;
 
-        // Calculate angle in degrees (0-360)
         let angle = Math.atan2(dy, dx) * (180 / Math.PI);
-        // Adjust so 0 is at top or right as preferred. Math.atan2 0 is at 3 o'clock.
-        // Let's standard 0-360 positive.
         if (angle < 0) angle += 360;
 
-        // Angle 0 = Red in HSL color wheel usually corresponds to 0 degrees if we align it right.
-        // Using standard conic-gradient(red, yellow, lime, aqua, blue, magenta, red)
-        // Red is at 0deg (top if from N, or right if from E).
-        // By default conic gradient starts at 12 o'clock (top) in CSS? No, often top.
-        // Let's assume standard CSS conic gradient starts at top (0deg).
-        // atan2(dy, dx) 0 is right.
-        // x positive, y 0 -> 0 angle.
-        // y positive is DOWN in DOM.
-        // So dx>0, dy>0 is bottom-right (positive angle).
-        // Check CSS conic-gradient defaults: starts at top positions clockwise.
-        // We need to map our calculated angle to the CSS angle.
+        // Angle + 90 to match CSS gradient if needed, but assuming 0=Red at right (standard math) or top.
+        // Let's assume standard math: 0 is right. conic-gradient starts top.
+        // So we need to rotate +90.
+        const hue = Math.round((angle + 90) % 360);
 
-        // Actually simpler: Just map the angle to HSL hue.
-        // We can create visual feedback to ensure it matches.
+        updateColor(hue, hsl.s, hsl.l);
+    };
 
-        // Let's shift angle by 90 degrees to match standard CSS conic gradient if needed, 
-        // or just rotate the gradient.
-
-        // Let's calculate Hue directly.
-        // We want 0deg = Red, which is standard.
-        // atan2 returns angle from X axis.
-        // We can just use that angle as Hue, maybe adding 90 deg if needed.
-        const hue = Math.round(angle);
-
-        const newColor = `hsl(${hue}, 100%, 50%)`;
-        onChange(newColor);
+    const updateColor = (h: number, s: number, l: number) => {
+        setHsl({ h, s, l });
+        onChange(`hsl(${h}, ${s}%, ${l}%)`);
     };
 
     const onMouseDown = (e: React.MouseEvent) => {
         setIsDragging(true);
-        handleInteraction(e);
+        handleWheelInteraction(e);
     };
 
     useEffect(() => {
         const onMouseMove = (e: MouseEvent) => {
             if (isDragging) {
-                handleInteraction(e);
+                handleWheelInteraction(e);
             }
         };
 
@@ -88,38 +91,87 @@ export const ColorWheel: React.FC<ColorWheelProps> = ({
             window.removeEventListener('mousemove', onMouseMove);
             window.removeEventListener('mouseup', onMouseUp);
         };
-    }, [isDragging]);
+    }, [isDragging, hsl]);
 
     return (
-        <div
-            ref={wheelRef}
-            className={`relative rounded-full shadow-xl cursor-crosshair touch-none ${className}`}
-            style={{
-                width: size,
-                height: size,
-                background: 'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)',
-                border: '4px solid white'
-            }}
-            onMouseDown={onMouseDown}
-            onTouchStart={(e) => {
-                // Simple touch support
-                // Prevent scrolling
-                // e.preventDefault(); // Might block scroll on mobile if inside list
-                handleInteraction(e.nativeEvent);
-            }}
-            onTouchMove={(e) => {
-                handleInteraction(e.nativeEvent);
-            }}
-        >
-            {/* Center indicator or selected color preview */}
+        <div className={`flex flex-col items-center gap-4 ${className}`}>
+            {/* Wheel */}
             <div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full shadow-inner border-4 border-white pointer-events-none"
+                ref={wheelRef}
+                className="relative rounded-full shadow-xl cursor-crosshair touch-none"
                 style={{
-                    width: size * 0.2, // 20% size
-                    height: size * 0.2,
-                    backgroundColor: color
+                    width: size,
+                    height: size,
+                    background: 'conic-gradient(from 0deg, red, yellow, lime, aqua, blue, magenta, red)',
+                    border: '4px solid white',
+                    boxShadow: '0 0 15px rgba(0,0,0,0.2)'
                 }}
-            />
+                onMouseDown={onMouseDown}
+                onTouchStart={(e) => handleWheelInteraction(e.nativeEvent)}
+                onTouchMove={(e) => handleWheelInteraction(e.nativeEvent)}
+            >
+                <div
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full shadow-inner border-4 border-white pointer-events-none transition-colors"
+                    style={{
+                        width: size * 0.3,
+                        height: size * 0.3,
+                        backgroundColor: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`
+                    }}
+                />
+            </div>
+
+            {/* Sliders */}
+            <div className="w-full max-w-xs space-y-3 p-4 bg-white/5 rounded-2xl">
+                {/* Saturation */}
+                <div className="flex items-center gap-3">
+                    <span className="text-xs font-bold w-4">S</span>
+                    <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={hsl.s}
+                        onChange={(e) => updateColor(hsl.h, parseInt(e.target.value), hsl.l)}
+                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                        style={{
+                            background: `linear-gradient(to right, #808080, hsl(${hsl.h}, 100%, 50%))`
+                        }}
+                    />
+                </div>
+                {/* Lightness */}
+                <div className="flex items-center gap-3">
+                    <span className="text-xs font-bold w-4">L</span>
+                    <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={hsl.l}
+                        onChange={(e) => updateColor(hsl.h, hsl.s, parseInt(e.target.value))}
+                        className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                        style={{
+                            background: `linear-gradient(to right, black, hsl(${hsl.h}, ${hsl.s}%, 50%), white)`
+                        }}
+                    />
+                </div>
+            </div>
+
+            {/* Presets */}
+            <div className="flex gap-3">
+                <button
+                    onClick={() => updateColor(0, 0, 0)}
+                    className="w-10 h-10 rounded-full border-2 border-white shadow-lg bg-black hover:scale-110 transition-transform"
+                    title="Black"
+                />
+                <button
+                    onClick={() => updateColor(0, 0, 100)}
+                    className="w-10 h-10 rounded-full border-2 border-gray-300 shadow-lg bg-white hover:scale-110 transition-transform"
+                    title="White"
+                />
+                <button
+                    onClick={() => updateColor(0, 100, 50)} // Reset to Red
+                    className="w-10 h-10 rounded-full border-2 border-white shadow-lg bg-red-500 hover:scale-110 transition-transform"
+                    title="Reset Red"
+                />
+            </div>
         </div>
     );
 };

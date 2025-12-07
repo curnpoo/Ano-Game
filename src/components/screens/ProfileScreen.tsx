@@ -28,6 +28,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
     const [backgroundColor, setBackgroundColor] = useState(player.backgroundColor || '#ffffff');
     const [cardColor, setCardColor] = useState(player.cosmetics?.activeCardColor || '#ffffff');
     const [activeBadge, setActiveBadge] = useState(player.cosmetics?.activeBadge || '');
+    const [activeStat, setActiveStat] = useState(player.cosmetics?.activeStat || 'level');
 
     const balance = CurrencyService.getCurrency();
     const stats = StatsService.getStats();
@@ -43,8 +44,10 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 backgroundColor: backgroundColor,
                 cosmetics: {
                     ...player.cosmetics || { brushesUnlocked: [], colorsUnlocked: [], badges: [] },
+                    ...player.cosmetics || { brushesUnlocked: [], colorsUnlocked: [], badges: [] },
                     activeCardColor: cardColor,
-                    activeBadge: activeBadge
+                    activeBadge: activeBadge,
+                    activeStat: activeStat
                 }
             });
             onBack();
@@ -212,6 +215,70 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                             }}>
                             <h3 className="text-lg font-bold text-center" style={{ color: 'var(--theme-text)' }}>💳 CARD STYLING</h3>
 
+                            {/* Card Preview */}
+                            <div className="w-full">
+                                <label className="block text-sm font-bold mb-2 text-center" style={{ color: 'var(--theme-text-secondary)' }}>PREVIEW</label>
+                                <div className="flex items-center justify-between p-4 rounded-2xl relative overflow-hidden transition-all select-none shadow-sm"
+                                    style={{
+                                        backgroundColor: 'var(--theme-highlight)',
+                                        borderLeft: cardColor ? `8px solid ${cardColor}` : 'none',
+                                        background: cardColor ? `linear-gradient(90deg, ${cardColor}22, var(--theme-highlight) 30%)` : 'var(--theme-highlight)'
+                                    }}>
+                                    <div className="flex items-center gap-4 relative z-10">
+                                        <div className="relative">
+                                            <AvatarDisplay
+                                                strokes={player.avatarStrokes}
+                                                avatar={player.avatar}
+                                                frame={player.frame}
+                                                color={player.color}
+                                                backgroundColor={backgroundColor} // Use current background color selection
+                                                size={56}
+                                            />
+                                        </div>
+                                        <div>
+                                            <div className="flex items-center gap-2">
+                                                <div className="font-bold text-lg text-[var(--theme-text)] leading-tight">{name || 'Player'}</div>
+                                                {/* Badge Preview */}
+                                                {activeBadge && (
+                                                    <span className="text-xl drop-shadow-md">
+                                                        {BadgeService.getBadgeInfo(activeBadge)?.emoji}
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <div className="flex items-center gap-2 mt-0.5">
+                                                {/* Stat Preview */}
+                                                {activeStat === 'level' && (
+                                                    <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/5 dark:bg-white/10">
+                                                        <span className="text-xs">{XPService.getTierForLevel(level).icon}</span>
+                                                        <span className="text-[10px] font-black opacity-70 uppercase">Lvl {level}</span>
+                                                    </div>
+                                                )}
+                                                {activeStat === 'wins' && (
+                                                    <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/5 dark:bg-white/10">
+                                                        <span className="text-xs">🏆</span>
+                                                        <span className="text-[10px] font-black opacity-70 uppercase">{stats.gamesWon} Wins</span>
+                                                    </div>
+                                                )}
+                                                {activeStat === 'earnings' && (
+                                                    <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/5 dark:bg-white/10">
+                                                        <span className="text-xs">💰</span>
+                                                        <span className="text-[10px] font-black opacity-70 uppercase">{formatCurrency(stats.totalCurrencyEarned)}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-2 relative z-10 opacity-50">
+                                        <div className="px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest"
+                                            style={{ backgroundColor: '#D97706', color: '#3E2723' }}>
+                                            READY!
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+
                             {/* Card Color */}
                             <div className="flex flex-col items-center">
                                 <label className="block text-sm font-bold mb-4" style={{ color: 'var(--theme-text-secondary)' }}>CARD COLOR</label>
@@ -271,6 +338,32 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                                         Playing games to unlock badges!
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Stat Selection */}
+                            <div className="flex flex-col items-center">
+                                <label className="block text-sm font-bold mb-4" style={{ color: 'var(--theme-text-secondary)' }}>STAT TO SHOW</label>
+                                <div className="flex flex-wrap justify-center gap-2">
+                                    {[
+                                        { id: 'level', label: 'Level', emoji: '⭐' },
+                                        { id: 'wins', label: 'Wins', emoji: '🏆' },
+                                        { id: 'earnings', label: 'Earnings', emoji: '💰' },
+                                        { id: 'none', label: 'None', emoji: '🚫' }
+                                    ].map(stat => (
+                                        <button
+                                            key={stat.id}
+                                            onClick={() => setActiveStat(stat.id)}
+                                            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all border-2 ${activeStat === stat.id ? 'scale-105 shadow-md' : 'opacity-60 hover:opacity-100'}`}
+                                            style={{
+                                                backgroundColor: activeStat === stat.id ? 'var(--theme-accent)' : 'var(--theme-bg-secondary)',
+                                                borderColor: activeStat === stat.id ? 'var(--theme-text)' : 'transparent',
+                                                color: 'var(--theme-text)'
+                                            }}
+                                        >
+                                            {stat.emoji} {stat.label}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         </div>
 
