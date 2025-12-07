@@ -34,7 +34,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
 
     return (
-    return (
         <div
             className="min-h-screen flex flex-col"
             style={{

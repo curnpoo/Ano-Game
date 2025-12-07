@@ -74,7 +74,6 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
     const currentItems = tabs.find(t => t.id === activeTab)?.items || [];
 
     return (
-    return (
         <div
             className="min-h-screen flex flex-col"
             style={{
