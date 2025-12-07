@@ -97,6 +97,8 @@ function App() {
     playerCount: number;
   } | null>(null);
 
+  const [pendingGameStats, setPendingGameStats] = useState<{ xp: number, coins: number, isWinner: boolean } | null>(null);
+
   // Fetch last game details when on home screen
   useEffect(() => {
     const checkLastGame = async () => {
@@ -393,6 +395,14 @@ function App() {
       }
 
       // Status or Round changed - trigger transition
+      // Check for Host Restart (Final -> Lobby)
+      if (lastStatusRef.current === 'final' && status === 'lobby') {
+        const sortedPlayers = [...(room.players || [])].sort((a, b) => (room.scores[b.id] || 0) - (room.scores[a.id] || 0));
+        const isWinner = sortedPlayers[0]?.id === player?.id;
+        // Deterministic calc
+        setPendingGameStats({ xp: 100, coins: 50 + (isWinner ? 100 : 0), isWinner });
+      }
+
       lastStatusRef.current = status;
       lastRoundRef.current = round;
       lastWaitingRef.current = amWaiting;
@@ -1477,6 +1487,47 @@ function App() {
           onGoHome={handleGoHome}
           showToast={showToast}
         />
+      )}
+
+      {/* Universal Game Stats Modal (Host Restart) */}
+      {pendingGameStats && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[100] pop-in">
+          <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 text-center border-4 border-yellow-400 shadow-2xl relative overflow-hidden">
+            {/* Shine effect */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none" />
+
+            <div className="text-6xl mb-4 animate-bounce">🎁</div>
+            <h2 className="text-3xl font-black text-gray-800 mb-2">Round Rewards</h2>
+            <p className="text-gray-500 mb-6">Host started a new game! Here's what you earned:</p>
+
+            <div className="space-y-4 mb-8">
+              {/* Coins */}
+              <div className="bg-green-50 rounded-xl p-4 border-2 border-green-100 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">🪙</span>
+                  <span className="font-bold text-green-700">Coins</span>
+                </div>
+                <div className="text-2xl font-black text-green-600">+{pendingGameStats.coins}</div>
+              </div>
+
+              {/* XP */}
+              <div className="bg-purple-50 rounded-xl p-4 border-2 border-purple-100 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-3xl">✨</span>
+                  <span className="font-bold text-purple-700">XP</span>
+                </div>
+                <div className="text-2xl font-black text-purple-600">+{pendingGameStats.xp}</div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setPendingGameStats(null)}
+              className="w-full bg-black text-white py-4 rounded-xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl"
+            >
+              Continue to Lobby
+            </button>
+          </div>
+        </div>
       )}
     </div >
   );
