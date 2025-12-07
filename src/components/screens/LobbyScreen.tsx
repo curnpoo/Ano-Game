@@ -16,6 +16,7 @@ interface LobbyScreenProps {
     onKick: (playerId: string) => void;
     onJoinGame: () => void;
     onBack: () => void;
+    onShowHowToPlay: () => void;
 }
 
 export const LobbyScreen: React.FC<LobbyScreenProps> = ({
@@ -26,7 +27,8 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     onKick,
     onJoinGame,
     onBack,
-    onLeave
+    onLeave,
+    onShowHowToPlay
 }) => {
     const [showSettings, setShowSettings] = useState(false);
     const [, setTick] = useState(0); // Force update for idle timer
@@ -260,6 +262,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                     onLeaveGame={onLeave}
                     onEndGame={isHost ? () => StorageService.closeRoom(room.roomCode) : undefined}
                     onKick={isHost ? (playerId: string) => StorageService.kickPlayer(room.roomCode, playerId) : undefined}
+                    onShowHowToPlay={onShowHowToPlay}
                 />
             )}
         </div>

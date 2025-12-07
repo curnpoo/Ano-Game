@@ -46,6 +46,7 @@ export interface UserAccount {
     // Profile Data
     avatarStrokes?: DrawingStroke[];
     color?: string;
+    backgroundColor?: string;
     frame?: string;
     avatar?: string; // fallback emoji
 }
@@ -56,6 +57,7 @@ export interface PlayerCosmetics {
     badges: string[];
     activeBrush?: string;
     activeColor?: string;
+    activeBackgroundColor?: string;
     activeTheme?: string; // light/dark mode preference
     activeFont?: string;  // purchased font
     purchasedItems?: string[]; // Items bought with currency
@@ -64,7 +66,8 @@ export interface PlayerCosmetics {
 export interface Player {
     id: string;
     name: string;
-    color: string; // Avatar background color
+    color: string; // Avatar background color (this seems to be stroke color based on existing usage?)
+    backgroundColor?: string; // Avatar background fill
     avatar?: string; // emoji
     avatarStrokes?: DrawingStroke[]; // Drawn avatar
     frame: string; // frame id
@@ -232,7 +235,7 @@ export interface ToastState {
     type: 'error' | 'success' | 'info';
 }
 
-export type Screen = 'welcome' | 'login' | 'name-entry' | 'home' | 'room-selection' | 'store' | 'profile' | 'avatar-editor' | 'lobby' | 'waiting' | 'uploading' | 'sabotage-selection' | 'drawing' | 'voting' | 'results' | 'final' | 'stats' | 'level-progress';
+export type Screen = 'welcome' | 'login' | 'name-entry' | 'home' | 'room-selection' | 'store' | 'profile' | 'avatar-editor' | 'lobby' | 'waiting' | 'joining-game' | 'uploading' | 'sabotage-selection' | 'drawing' | 'voting' | 'results' | 'final' | 'stats' | 'level-progress';
 
 // Stats history for graphs over time
 export interface StatsHistoryEntry {

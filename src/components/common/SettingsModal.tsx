@@ -15,6 +15,7 @@ interface SettingsModalProps {
     onEndGame?: () => void;
     onGoHome?: () => void;
     onKick?: (playerId: string) => void;
+    onShowHowToPlay?: () => void;
 }
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -27,7 +28,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     onLeaveGame,
     onEndGame,
     onGoHome,
-    onKick
+
+    onKick,
+    onShowHowToPlay
 }) => {
     const [name, setName] = useState(player.name);
     const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
@@ -435,6 +438,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             )}
 
                         </div>
+
+                    )}
+
+                    {/* How to Play - Available to everyone */}
+                    {onShowHowToPlay && (
+                        <button
+                            onClick={() => {
+                                onShowHowToPlay();
+                                onClose();
+                            }}
+                            className="w-full py-3 px-4 bg-gradient-to-r from-pink-100 to-purple-100 text-purple-600 font-bold rounded-xl border-2 border-purple-200 hover:scale-[1.02] transition-all flex items-center justify-center gap-2 mb-2"
+                        >
+                            <span className="text-xl">❓</span> How to Play
+                        </button>
                     )}
 
                     {/* Main Save Button */}

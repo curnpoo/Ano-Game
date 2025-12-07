@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import type { Player } from '../../types';
 import { AvatarDisplay } from '../common/AvatarDisplay';
+import { ColorWheel } from '../common/ColorWheel';
 import { CurrencyService, formatCurrency } from '../../services/currency';
 import { StatsService } from '../../services/stats';
 import { XPService } from '../../services/xp';
@@ -23,13 +24,17 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 }) => {
     const [activeTab, setActiveTab] = useState<Tab>('edit');
     const [name, setName] = useState(player.name);
+    const [backgroundColor, setBackgroundColor] = useState(player.backgroundColor || '#ffffff');
     const balance = CurrencyService.getCurrency();
     const stats = StatsService.getStats();
     const level = XPService.getLevel();
 
     const handleSave = () => {
         if (name.trim()) {
-            onUpdateProfile({ name: name.trim() });
+            onUpdateProfile({
+                name: name.trim(),
+                backgroundColor: backgroundColor
+            });
             onBack();
         }
     };
@@ -151,6 +156,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                                         avatar={player.avatar}
                                         frame={player.frame}
                                         color={player.color}
+                                        backgroundColor={backgroundColor}
                                         size={160}
                                         className="shadow-2xl"
                                     />
@@ -162,6 +168,30 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                                 <span className="font-black text-xl" style={{ color: 'var(--theme-accent)' }}>TAP TO EDIT</span>
                                 <span className="text-sm font-medium opacity-60" style={{ color: 'var(--theme-text)' }}>Customize your look</span>
                             </button>
+                        </div>
+
+
+
+                        {/* Background Color Picker */}
+                        <div className="rounded-[2rem] p-4 shadow-lg flex flex-col items-center"
+                            style={{
+                                backgroundColor: 'var(--theme-card-bg)',
+                                border: '2px solid var(--theme-border)'
+                            }}>
+                            <label className="block text-sm font-bold mb-4" style={{ color: 'var(--theme-text-secondary)' }}>BACKGROUND COLOR</label>
+
+                            <ColorWheel
+                                color={backgroundColor}
+                                onChange={setBackgroundColor}
+                                size={200}
+                                className="mb-4"
+                            />
+
+                            {/* Color Preview Badge */}
+                            <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 border border-white/20">
+                                <div className="w-6 h-6 rounded-full border border-gray-200" style={{ backgroundColor }} />
+                                <span className="font-mono text-xs uppercase opacity-70" style={{ color: 'var(--theme-text)' }}>{backgroundColor}</span>
+                            </div>
                         </div>
 
                         {/* Save Button */}
@@ -216,6 +246,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     );
 };

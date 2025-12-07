@@ -60,6 +60,7 @@ interface ScreenRouterProps {
     onNextRound: () => void;
     onPlayAgain: () => void;
     onShowRewards: (action: 'home' | 'replay') => void;
+    onShowHowToPlay: () => void; // New prop for manual trigger
 
     // Store
     onEquipTheme: (themeId?: string) => void;
@@ -127,6 +128,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
     onVote,
     onNextRound,
     onShowRewards,
+    onShowHowToPlay,
     onEquipTheme,
     onSabotageSelect,
     isMyTimerRunning,
@@ -282,6 +284,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                     playerCount: lastGameDetails.playerCount || 0
                 } : null}
                 onRejoin={onRejoin}
+                onShowHowToPlay={onShowHowToPlay}
             />;
 
         case 'store':
@@ -331,6 +334,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                 onKick={onKickPlayer}
                 onJoinGame={onJoinCurrentRound}
                 onBack={onMinimizeGame}
+                onShowHowToPlay={onShowHowToPlay}
             />;
 
         case 'waiting':

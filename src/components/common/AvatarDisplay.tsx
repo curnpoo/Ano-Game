@@ -5,7 +5,12 @@ interface AvatarDisplayProps {
     strokes?: DrawingStroke[];
     avatar?: string; // Fallback emoji
     frame?: string;
-    color?: string;
+    color?: string; // This is actually the stroke "color" in the parent usage usually? Or frame color?
+    // In Player interface: 
+    // color: string; // Avatar background color (this seems to be stroke color based on existing usage?)
+    // backgroundColor?: string; // Avatar background fill
+    // Check usage in ProfileScreen: player.color passed to color prop.
+    backgroundColor?: string;
     size?: number; // pixel size (e.g. 48 for w-12)
     className?: string;
 }
@@ -14,7 +19,8 @@ export const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
     strokes,
     avatar,
     frame,
-    color,
+    color, // Used for border/text color usually
+    backgroundColor = '#ffffff', // Default to white
     size = 48,
     className = ''
 }) => {
@@ -22,12 +28,12 @@ export const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
     if (!strokes || strokes.length === 0) {
         return (
             <div
-                className={`rounded-2xl bg-white flex items-center justify-center shadow-sm ${frame || ''} ${className}`}
+                className={`rounded-2xl flex items-center justify-center shadow-sm ${frame || ''} ${className}`}
                 style={{
                     color: color,
                     width: size,
                     height: size,
-                    backgroundColor: 'white !important', // Explicit override
+                    backgroundColor: backgroundColor,
                     fontSize: size * 0.6
                 }}
             >
@@ -38,13 +44,13 @@ export const AvatarDisplay: React.FC<AvatarDisplayProps> = ({
 
     return (
         <div
-            className={`rounded-2xl bg-white overflow-hidden relative shadow-sm flex items-center justify-center ${frame || ''} ${className}`}
+            className={`rounded-2xl overflow-hidden relative shadow-sm flex items-center justify-center ${frame || ''} ${className}`}
             style={{
                 width: size,
                 height: size,
                 borderColor: color,
-                color: color, // checks out: allows currentColor to work in classes
-                backgroundColor: 'white !important' // Explicit override for all themes
+                color: color, // allows currentColor to work in classes
+                backgroundColor: backgroundColor
             }}
         >
             <svg

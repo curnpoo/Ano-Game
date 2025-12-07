@@ -25,7 +25,7 @@ export const ShareDropdown: React.FC<ShareDropdownProps> = ({
     const buttonRef = useRef<HTMLButtonElement>(null);
 
     // Generate the share URL
-    const shareUrl = url || `${window.location.origin}?join=${roomCode}`;
+    const shareUrl = url || `${window.location.origin}/?join=${roomCode}`;
 
     // Close dropdown on outside click
     useEffect(() => {

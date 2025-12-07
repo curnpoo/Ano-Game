@@ -4,9 +4,10 @@ import { vibrate, HapticPatterns } from '../../utils/haptics';
 
 interface LoginScreenProps {
     onLogin: () => void;
+    joiningRoomCode?: string | null;
 }
 
-export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
+export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, joiningRoomCode }) => {
     const [mode, setMode] = useState<'choose' | 'login' | 'register'>('choose');
     const [username, setUsername] = useState('');
     const [pin, setPin] = useState('');
@@ -61,6 +62,17 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin }) => {
                         Draw, Vote, Win!
                     </p>
                 </div>
+
+                {joiningRoomCode && (
+                    <div className="mb-6 w-full max-w-sm bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-xl border-2 border-purple-400 animate-bounce-in text-center">
+                        <div className="text-xs font-bold uppercase tracking-widest text-purple-600 mb-1">
+                            Joining Room
+                        </div>
+                        <div className="text-3xl font-black text-gray-800 tracking-wider">
+                            {joiningRoomCode}
+                        </div>
+                    </div>
+                )}
 
                 <div className="w-full max-w-sm space-y-4">
                     <button

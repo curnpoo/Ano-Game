@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 import { CasinoScreen } from './components/screens/CasinoScreen';
+import { WelcomeScreen } from './components/screens/WelcomeScreen';
+import { LoginScreen } from './components/screens/LoginScreen';
+import { JoiningGameScreen } from './components/screens/JoiningGameScreen';
 import { AuthService } from './services/auth';
 import { StorageService } from './services/storage';
 import { ImageService } from './services/image';
@@ -32,6 +35,10 @@ import { useNotifications } from './hooks/useNotifications';
 import { usePlayerSession } from './hooks/usePlayerSession';
 import type { Player, GameSettings, PlayerDrawing, GameRoom, Screen } from './types';
 
+// Extended Screen type to include the new joining screen
+// Note: In a real app we'd update the type definition in types.ts, casting for now if needed or relying on string loose typing
+
+
 function App() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
   const {
@@ -40,6 +47,9 @@ function App() {
     isInitialLoading,
     handleUpdateProfile
   } = usePlayerSession({ setCurrentScreen });
+
+  // Pending Room Code from URL
+  const [pendingRoomCode, setPendingRoomCode] = useState<string | null>(null);
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -114,6 +124,40 @@ function App() {
     checkLastGame();
   }, [currentScreen]);
 
+  // Check URL for join code on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const joinCode = params.get('join');
+    if (joinCode) {
+      const code = joinCode.toUpperCase();
+      console.log('Found join code in URL:', code);
+      setPendingRoomCode(code);
+
+      // Clear URL to prevent re-joining on reload (optional, but good UX)
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
+  // Auto-join effect when we have a player AND a pending room code
+  useEffect(() => {
+    if (player && pendingRoomCode && !isLoading && !roomCode) {
+      // If we are logged in and have a pending code, show joining screen and try to join
+      setCurrentScreen('joining-game');
+
+      // Small delay to let the UI render
+      const timer = setTimeout(() => {
+        handleJoinRoom(pendingRoomCode);
+        // We don't clear pendingRoomCode immediately in case it fails, 
+        // but handleJoinRoom will handle success/failure toast
+        // If success -> roomCode set -> transition to lobby
+        // If fail -> toast -> stay on home/welcome? 
+        // actually handleJoinRoom catches errors.
+      }, 500); // 500ms delay for visual feedback
+
+      return () => clearTimeout(timer);
+    }
+  }, [player, pendingRoomCode, isLoading, roomCode]);
+
   // Auth Redirect: If no player and not in auth flow, go to welcome
   useEffect(() => {
     if (!player && !isLoading && !isInitialLoading) {
@@ -148,6 +192,22 @@ function App() {
       else if (room.status === 'final') setCurrentScreen('final');
     }
   };
+
+  const handleCloseHowToPlay = () => {
+    setShowHowToPlay(false);
+    localStorage.setItem('has_seen_onboarding', 'true');
+  };
+
+  // Onboarding Effect: Auto-show on Home if not seen
+  useEffect(() => {
+    if (currentScreen === 'home' && !localStorage.getItem('has_seen_onboarding') && !isInitialLoading) {
+      // Small delay to ensure smooth transition
+      const timer = setTimeout(() => {
+        setShowHowToPlay(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [currentScreen, isInitialLoading]);
 
   const handleRejoin = async (code: string) => {
     if (!player) return;
@@ -382,9 +442,14 @@ function App() {
       }
       else if (status === 'voting') setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'voting');
       else if (status === 'results') setCurrentScreen('results');
-      else if (status === 'final') setCurrentScreen('final');
+      else if (room.status === 'final') setCurrentScreen('final');
+
+      // If we successfully joined (room exists), clear pending code
+      if (pendingRoomCode === roomCode) {
+        setPendingRoomCode(null);
+      }
     }
-  }, [room?.status, room?.roundNumber, isLoading, currentScreen, isBrowsing, amWaiting, shouldShowWaitingRoom]);
+  }, [room?.status, room?.roundNumber, isLoading, currentScreen, isBrowsing, amWaiting, shouldShowWaitingRoom, roomCode, pendingRoomCode]);
 
   // Effect: Kicked / Removed check
   useEffect(() => {
@@ -608,12 +673,27 @@ function App() {
     }
   };
 
+  // Helper: Common Join Logic after Auth
+  const attemptPendingJoin = () => {
+    if (pendingRoomCode) {
+      setCurrentScreen('joining-game');
+      handleJoinRoom(pendingRoomCode);
+    } else {
+      setCurrentScreen('home');
+    }
+  };
+
+  const handleCancelJoin = () => {
+    setPendingRoomCode(null);
+    setCurrentScreen('home');
+  };
+
   const handleLoginComplete = async () => {
     const authUser = AuthService.getCurrentUser();
     if (authUser) {
       // Check if profile is set up
       if (authUser.avatarStrokes && authUser.color) {
-        // Profile ready, go home
+        // Profile ready
         const session: Player = {
           id: authUser.id,
           name: authUser.username,
@@ -626,7 +706,9 @@ function App() {
         };
         StorageService.saveSession(session);
         setPlayer(session);
-        setCurrentScreen('home');
+
+        // Check pending join
+        attemptPendingJoin();
       } else {
         // Need to setup profile (Avatar/Color)
         setCurrentScreen('name-entry');
@@ -662,7 +744,9 @@ function App() {
       };
       StorageService.saveSession(newPlayer);
       setPlayer(newPlayer);
-      setCurrentScreen('home');
+
+      // Check pending join
+      attemptPendingJoin();
     } else {
       // Guest Flow
       const newPlayer: Player = {
@@ -680,7 +764,9 @@ function App() {
       };
       StorageService.saveSession(newPlayer);
       setPlayer(newPlayer);
-      setCurrentScreen('home');
+
+      // Check pending join
+      attemptPendingJoin();
     }
   };
 
@@ -712,6 +798,10 @@ function App() {
         setIsBrowsing(false);
         setCurrentScreen('lobby');
         showToast('Joined room! 🎮', 'success');
+        // Clear pending code on success
+        if (code === pendingRoomCode) {
+          setPendingRoomCode(null);
+        }
       } else {
         showToast('Room not found! Check the code 🔍', 'error');
       }
@@ -721,6 +811,9 @@ function App() {
     }
     setIsLoading(false);
   };
+
+
+
 
   const handleSettingsChange = async (settings: Partial<GameSettings>) => {
     if (!roomCode) return;
@@ -760,7 +853,7 @@ function App() {
     if (!roomCode || !player) return;
     try {
       setIsReadying(true); // Immediate feedback
-      
+
       // Optimistic Start
       setOptimisticTimerStart(Date.now());
       setIsMyTimerRunning(true);
@@ -996,6 +1089,26 @@ function App() {
         />
       )}
 
+      {currentScreen === 'joining-game' && pendingRoomCode && (
+        <JoiningGameScreen
+          roomCode={pendingRoomCode}
+          onCancel={handleCancelJoin}
+        />
+      )}
+
+      {currentScreen === 'welcome' && (
+        <WelcomeScreen
+          onPlay={() => setCurrentScreen('login')}
+          joiningRoomCode={pendingRoomCode}
+        />
+      )}
+
+      {currentScreen === 'login' && (
+        <LoginScreen
+          onLogin={handleLoginComplete}
+          joiningRoomCode={pendingRoomCode}
+        />
+      )}
       {/* Casino Screen */}
       {showCasino && (
         <CasinoScreen onClose={() => setShowCasino(false)} />
@@ -1023,8 +1136,12 @@ function App() {
           }}
         />
       )}
-
-      <HowToPlayModal isOpen={showHowToPlay} onClose={() => setShowHowToPlay(false)} />
+      {showHowToPlay && (
+        <HowToPlayModal
+          isOpen={showHowToPlay}
+          onClose={handleCloseHowToPlay}
+        />
+      )}
 
       {/* Notification Prompt */}
       <NotificationPromptModal
@@ -1133,6 +1250,7 @@ function App() {
         onNextRound={handleNextRound}
         onPlayAgain={handlePlayAgain}
         onShowRewards={showGameRewards}
+        onShowHowToPlay={() => setShowHowToPlay(true)}
 
         onEquipTheme={handleEquipTheme}
         onSabotageSelect={handleSabotageSelect}

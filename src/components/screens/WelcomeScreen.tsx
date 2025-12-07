@@ -7,6 +7,7 @@ import { ShareModal } from '../common/ShareModal';
 
 interface WelcomeScreenProps {
     onPlay: () => void;
+    joiningRoomCode?: string | null;
 }
 
 // Floating bubble component
@@ -26,7 +27,7 @@ const FloatingBubble: React.FC<{ delay: number; size: number; color: string; lef
     />
 );
 
-export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onPlay }) => {
+export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onPlay, joiningRoomCode }) => {
     const [mounted, setMounted] = useState(false);
     const [showHowToPlay, setShowHowToPlay] = useState(false);
     const [showAbout, setShowAbout] = useState(false);
@@ -77,12 +78,26 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onPlay }) => {
                         ✨ The party drawing game! ✨
                     </p>
                 </div>
+                
+                {joiningRoomCode && (
+                    <div className="bg-white/90 backdrop-blur-sm p-4 rounded-2xl shadow-xl border-2 border-purple-400 animate-bounce-in">
+                        <div className="text-xs font-bold uppercase tracking-widest text-purple-600 mb-1">
+                            Joining Room
+                        </div>
+                        <div className="text-3xl font-black text-gray-800 tracking-wider">
+                            {joiningRoomCode}
+                        </div>
+                        <div className="text-sm text-gray-500 mt-1 font-medium">
+                            Log in to join!
+                        </div>
+                    </div>
+                )}
 
                 <button
                     onClick={onPlay}
                     className="w-full btn-90s bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 text-white font-bold text-2xl py-5 px-8 jelly-hover pulse-glow"
                 >
-                    🚀 Play Now! 🚀
+                    {joiningRoomCode ? '🚀 Join & Play! 🚀' : '🚀 Play Now! 🚀'}
                 </button>
 
                 <div className="flex flex-wrap justify-center gap-3 text-lg">

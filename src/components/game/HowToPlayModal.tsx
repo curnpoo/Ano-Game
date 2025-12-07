@@ -67,9 +67,16 @@ export const HowToPlayModal: React.FC<HowToPlayModalProps> = ({ isOpen, onClose 
 
                 <button
                     onClick={onClose}
-                    className="w-full btn-90s bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 text-white font-bold text-xl py-4 jelly-hover"
+                    className="w-full btn-90s bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 text-white font-bold text-xl py-4 jelly-hover mb-3"
                 >
                     ✨ Got it! Let's Go! ✨
+                </button>
+
+                <button
+                    onClick={onClose}
+                    className="w-full text-gray-400 font-bold text-sm hover:text-gray-600 transition-colors"
+                >
+                    Skip Tutorial
                 </button>
             </div>
         </div>

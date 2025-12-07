@@ -17,6 +17,7 @@ interface HomeScreenProps {
         playerCount: number;
     } | null;
     onRejoin?: (code: string) => void;
+    onShowHowToPlay: () => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -28,7 +29,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     onCasino,
     onLevelProgress,
     lastGameDetails,
-    onRejoin
+    onRejoin,
+    onShowHowToPlay
 }) => {
     const [showAdminModal, setShowAdminModal] = useState(false);
 
@@ -127,7 +129,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         { id: 'casino', label: 'CASINO', emoji: '🎰', onClick: onCasino },
                         { id: 'store', label: 'STORE', emoji: '🛒', onClick: onStore },
                         { id: 'profile', label: 'PROFILE', emoji: '👤', onClick: onProfile },
-                        { id: 'settings', label: 'SETTINGS', emoji: '⚙️', onClick: onSettings }
+                        { id: 'settings', label: 'SETTINGS', emoji: '⚙️', onClick: onSettings },
+                        { id: 'howToPlay', label: 'HOW TO PLAY', emoji: '💡', onClick: onShowHowToPlay } // Added How To Play button
                     ].map(card => (
                         <button
                             key={card.id}
