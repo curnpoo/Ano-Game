@@ -7,6 +7,8 @@ const CURRENCY_KEY = 'player_currency';
 const PURCHASED_ITEMS_KEY = 'player_purchased_items';
 const LOCAL_USER_KEY = 'logged_in_user';
 
+import { XPService } from './xp';
+
 // Format currency with $ and commas (e.g., $1,999)
 export const formatCurrency = (amount: number): string => {
     return '$' + Math.floor(amount).toLocaleString('en-US');
@@ -47,8 +49,11 @@ export const CurrencyService = {
 
     // Add currency (returns new balance)
     addCurrency(amount: number): number {
+        // Apply Tier Bonus
+        const finalAmount = XPService.applyCurrencyBonus(amount);
+
         const current = this.getCurrency();
-        const newBalance = current + amount;
+        const newBalance = current + finalAmount;
         this.setCurrency(newBalance);
         return newBalance;
     },

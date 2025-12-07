@@ -321,7 +321,8 @@ function App() {
 
     // Calculate penalty (20% of total time, rounded up)
     const penalty = Math.ceil(totalDuration * 0.20);
-    const bonusTime = (hasTimeBonus ? 5 : 0) - (isTimeSabotaged ? penalty : 0);
+    const levelTimeBonus = XPService.getTimeBonus();
+    const bonusTime = (hasTimeBonus ? 5 : 0) + levelTimeBonus - (isTimeSabotaged ? penalty : 0);
 
     const effectiveStartedAt = myState?.timerStartedAt || optimisticTimerStart;
 

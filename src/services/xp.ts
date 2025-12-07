@@ -4,12 +4,13 @@ const XP_KEY = 'player_xp';
 const LEVEL_KEY = 'player_level';
 
 // Level tier definitions with power bonuses
+// Level tier definitions with power bonuses
 export const LEVEL_TIERS = [
-    { name: 'Bronze', minLevel: 0, color: '#CD7F32', icon: '🥉', xpBonus: 0, currencyBonus: 0, timeBonus: 0 },
-    { name: 'Silver', minLevel: 10, color: '#C0C0C0', icon: '🥈', xpBonus: 0.1, currencyBonus: 0.1, timeBonus: 1 },
-    { name: 'Gold', minLevel: 25, color: '#FFD700', icon: '🥇', xpBonus: 0.2, currencyBonus: 0.2, timeBonus: 2 },
-    { name: 'Platinum', minLevel: 50, color: '#00CED1', icon: '💎', xpBonus: 0.35, currencyBonus: 0.3, timeBonus: 3 },
-    { name: 'Diamond', minLevel: 100, color: '#9B59B6', icon: '💠', xpBonus: 0.5, currencyBonus: 0.5, timeBonus: 5 }
+    { name: 'Bronze', minLevel: 0, color: '#CD7F32', icon: '🥉', xpBonus: 0.05, currencyBonus: 0.05, timeBonus: 0 },
+    { name: 'Silver', minLevel: 10, color: '#C0C0C0', icon: '🥈', xpBonus: 0.15, currencyBonus: 0.25, timeBonus: 2 },
+    { name: 'Gold', minLevel: 25, color: '#FFD700', icon: '🥇', xpBonus: 0.3, currencyBonus: 0.5, timeBonus: 4 },
+    { name: 'Platinum', minLevel: 50, color: '#00CED1', icon: '💎', xpBonus: 0.5, currencyBonus: 1.0, timeBonus: 7 },
+    { name: 'Diamond', minLevel: 100, color: '#9B59B6', icon: '💠', xpBonus: 1.0, currencyBonus: 2.5, timeBonus: 10 }
 ] as const;
 
 export type LevelTier = typeof LEVEL_TIERS[number];

@@ -18,7 +18,7 @@ import { FinalResultsScreen } from '../screens/FinalResultsScreen';
 import { StatsScreen } from '../screens/StatsScreen';
 import { SabotageSelectionScreen } from '../screens/SabotageSelectionScreen';
 import { LevelProgressScreen } from '../screens/LevelProgressScreen';
-import { DrawingTimer } from '../game/DrawingTimer';
+
 import type { SabotageEffect } from '../../types';
 
 interface ScreenRouterProps {
@@ -206,16 +206,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                         )}
                     </div>
 
-                    {/* Timer Bar - Full Width */}
-                    {isMyTimerRunning && !hasSubmitted && (
-                        <div className="w-full px-2 mb-3 shrink-0">
-                            <DrawingTimer
-                                endsAt={timerEndsAt || Date.now()}
-                                onTimeUp={onTimeUp}
-                                totalDuration={timerDuration}
-                            />
-                        </div>
-                    )}
+
 
                     {/* Canvas Area - Centered */}
                     <div className="flex-1 flex items-center justify-center min-h-0">
@@ -225,6 +216,9 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                             isMyTimerRunning={isMyTimerRunning}
                             isReadying={isReadying}
                             onReady={onReady}
+                            timerEndsAt={timerEndsAt}
+                            onTimeUp={onTimeUp}
+                            timerDuration={timerDuration}
                             brushColor={brushColor}
                             brushSize={brushSize}
                             brushType={brushType}

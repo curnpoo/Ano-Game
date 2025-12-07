@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import type { GameRoom, Player } from '../../types';
 import { GameCanvas } from '../game/GameCanvas';
 import { Toolbar } from '../game/Toolbar';
+import { DrawingTimer } from '../game/DrawingTimer';
 
 import { CosmeticsService } from '../../services/cosmetics';
 import type { DrawingStroke } from '../../types';
@@ -12,6 +13,9 @@ interface DrawingScreenProps {
     isMyTimerRunning: boolean;
     isReadying: boolean;
     onReady: () => void;
+    timerEndsAt: number | null;
+    onTimeUp: () => void;
+    timerDuration: number;
 
     // Drawing props
     brushColor: string;
@@ -41,6 +45,9 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
     isMyTimerRunning,
     isReadying,
     onReady,
+    timerEndsAt,
+    onTimeUp,
+    timerDuration,
     brushColor,
     brushSize,
     brushType = 'default',
@@ -167,7 +174,18 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
     return (
         <div className={containerClass}>
             {/* Blurrable Canvas Content */}
-            <div className={`flex-1 relative w-full max-w-lg mx-auto flex flex-col justify-start pt-4 items-center min-h-0 ${canvasBlurClass}`}>
+            <div className={`flex-1 relative w-full max-w-lg mx-auto flex flex-col justify-center items-center min-h-0 ${canvasBlurClass}`}>
+
+                {/* Timer directly attached to canvas - only show when running */}
+                {isMyTimerRunning && !hasSubmitted && (
+                    <div className="w-full mb-3 shrink-0 z-10 px-1">
+                        <DrawingTimer
+                            endsAt={timerEndsAt || Date.now()}
+                            onTimeUp={onTimeUp}
+                            totalDuration={timerDuration}
+                        />
+                    </div>
+                )}
 
                 {/* Canvas Area */}
                 <div className="relative w-full z-0 bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-gray-100 aspect-square">
