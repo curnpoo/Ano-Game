@@ -106,36 +106,44 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
     }, [spinning, balance, bet, reels]);
 
     return (
+    return (
         <div
-            className="fixed inset-0 bg-gradient-to-b from-purple-900 via-purple-800 to-black flex flex-col items-center p-4 z-50 overflow-y-auto"
-            style={{ paddingTop: 'max(1.5rem, env(safe-area-inset-top) + 1rem)' }}
+            className="fixed inset-0 flex flex-col items-center p-4 z-50 overflow-y-auto"
+            style={{
+                paddingTop: 'max(1.5rem, env(safe-area-inset-top) + 1rem)',
+                backgroundColor: 'var(--theme-bg-primary)'
+            }}
         >
             {/* Home Button Card */}
             <button
                 onClick={onClose}
-                className="w-full max-w-md mb-6 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border-2 border-white/20 flex items-center gap-4 hover:bg-white/20 active:scale-95 transition-all"
+                className="w-full max-w-md mb-6 rounded-[2rem] p-4 border-2 flex items-center gap-4 hover:brightness-110 active:scale-95 transition-all shadow-lg"
+                style={{
+                    backgroundColor: 'var(--theme-card-bg)',
+                    borderColor: 'var(--theme-border)'
+                }}
             >
                 <div className="text-3xl">🏠</div>
                 <div className="flex-1 text-left">
-                    <div className="text-lg font-bold text-white">Back to Home</div>
-                    <div className="text-white/60 text-sm">Return to main menu</div>
+                    <div className="text-lg font-bold" style={{ color: 'var(--theme-text)' }}>Back to Home</div>
+                    <div className="text-sm font-medium" style={{ color: 'var(--theme-text-secondary)' }}>Return to main menu</div>
                 </div>
-                <div className="text-2xl text-white/60">←</div>
+                <div className="text-2xl" style={{ color: 'var(--theme-text-secondary)' }}>←</div>
             </button>
 
             {/* Title */}
             <div className="text-center mb-6">
-                <h1 className="text-4xl font-bold text-yellow-400 drop-shadow-lg mb-2">
+                <h1 className="text-4xl font-black text-yellow-500 drop-shadow-lg mb-2">
                     🎰 CASINO 🎰
                 </h1>
-                <div className="text-yellow-300 text-xl font-bold">
+                <div className="text-yellow-400 text-xl font-bold">
                     {formatCurrency(balance)}
                 </div>
             </div>
 
             {/* Slot Machine */}
-            <div className="bg-gradient-to-b from-yellow-600 to-yellow-700 p-6 rounded-3xl shadow-2xl border-4 border-yellow-400 mb-6">
-                <div className="bg-black rounded-2xl p-4 flex gap-2">
+            <div className="bg-gradient-to-b from-yellow-600 to-yellow-700 p-6 rounded-[2rem] shadow-2xl border-4 border-yellow-400 mb-6 w-full max-w-md">
+                <div className="bg-black rounded-2xl p-4 flex gap-2 justify-center">
                     {reels.map((symbol, i) => (
                         <div
                             key={i}
@@ -169,18 +177,23 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
 
             {/* Bet Selector */}
             <div className="flex items-center gap-4 mb-6">
-                <span className="text-white font-bold">BET:</span>
+                <span className="font-bold" style={{ color: 'var(--theme-text)' }}>BET:</span>
                 {[1, 2, 5].map(amount => (
                     <button
                         key={amount}
                         onClick={() => setBet(amount)}
                         disabled={balance < amount}
-                        className={`w-12 h-12 rounded-full font-bold text-lg transition-all
+                        className={`w-12 h-12 rounded-full font-bold text-lg transition-all border-2
                             ${bet === amount
-                                ? 'bg-yellow-400 text-purple-900 scale-110 shadow-lg'
-                                : 'bg-purple-700 text-white hover:bg-purple-600'}
+                                ? 'scale-110 shadow-lg'
+                                : 'hover:opacity-80'}
                             ${balance < amount ? 'opacity-50 cursor-not-allowed' : ''}
                         `}
+                        style={{
+                            backgroundColor: bet === amount ? 'var(--theme-accent)' : 'var(--theme-bg-secondary)',
+                            color: bet === amount ? '#fff' : 'var(--theme-text)',
+                            borderColor: 'var(--theme-border)'
+                        }}
                     >
                         ${amount}
                     </button>
@@ -191,28 +204,33 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
             <button
                 onClick={spin}
                 disabled={spinning || balance < bet}
-                className={`px-12 py-4 rounded-2xl font-bold text-2xl transition-all
+                className={`px-12 py-4 rounded-2xl font-bold text-2xl transition-all w-full max-w-xs
                     ${spinning
                         ? 'bg-gray-600 text-gray-400'
                         : balance < bet
                             ? 'bg-red-600 text-white opacity-50'
-                            : 'bg-gradient-to-r from-green-400 to-green-600 text-white hover:scale-105 shadow-lg jelly-hover'}
+                            : 'hover:scale-105 shadow-xl'}
                 `}
+                style={{
+                    background: (!spinning && balance >= bet) ? 'linear-gradient(135deg, var(--theme-accent) 0%, #FFD700 100%)' : undefined,
+                    color: '#fff'
+                }}
             >
                 {spinning ? '🎲 SPINNING...' : balance < bet ? '💸 BROKE!' : `SPIN! ($${bet})`}
             </button>
 
             {/* Paytable */}
-            <div className="mt-8 text-center text-white/70 text-sm">
+            <div className="mt-8 text-center text-sm" style={{ color: 'var(--theme-text-secondary)' }}>
                 <div className="font-bold mb-2">PAYOUTS:</div>
                 <div className="flex flex-wrap justify-center gap-2">
                     {Object.entries(WINNING_COMBOS).map(([symbol, mult]) => (
-                        <span key={symbol} className="bg-black/30 px-2 py-1 rounded">
+                        <span key={symbol} className="px-2 py-1 rounded border opacity-70"
+                            style={{ backgroundColor: 'var(--theme-bg-secondary)', borderColor: 'var(--theme-border)' }}>
                             {symbol}x3 = {mult}x
                         </span>
                     ))}
                 </div>
-                <div className="mt-2">Two of a kind = 1.5x</div>
+                <div className="mt-2 text-xs">Two of a kind = 1.5x</div>
             </div>
         </div>
     );

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import type { GameRoom } from '../types';
 import { StorageService } from '../services/storage';
 
-export const useRoom = (roomCode: string | null, currentPlayerId: string | null) => {
+export const useRoom = (roomCode: string | null, _currentPlayerId: string | null) => {
     const [room, setRoom] = useState<GameRoom | null>(null);
     const [error, setError] = useState<string | null>(null);
 
@@ -31,29 +31,7 @@ export const useRoom = (roomCode: string | null, currentPlayerId: string | null)
         };
     }, [roomCode]);
 
-    // Update player's lastSeen periodically
-    useEffect(() => {
-        if (!roomCode || !currentPlayerId) return;
-
-        const updateLastSeen = async () => {
-            try {
-                await StorageService.updateRoom(roomCode, (r) => {
-                    const pIndex = r.players.findIndex(p => p.id === currentPlayerId);
-                    if (pIndex >= 0) {
-                        r.players[pIndex].lastSeen = Date.now();
-                    }
-                    return r;
-                });
-            } catch (err) {
-                console.error('Failed to update lastSeen:', err);
-            }
-        };
-
-        // Update every 30 seconds instead of every second (reduces Firebase writes)
-        const intervalId = setInterval(updateLastSeen, 30000);
-
-        return () => clearInterval(intervalId);
-    }, [roomCode, currentPlayerId]);
+    // Note: lastSeen is updated via heartbeat in App.tsx
 
     const refreshRoom = async () => {
         if (!roomCode) return;

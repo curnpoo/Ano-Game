@@ -94,7 +94,7 @@ export interface PlayerState {
 }
 
 export interface Vote {
-    oderId: string;
+    voterId: string;
     votedForId: string;
     votedAt: number;
 }
@@ -136,7 +136,7 @@ export interface GameRoom {
     chatEvents?: ChatMessage[];
 
     // Voting
-    votes: { [oderId: string]: string }; // oderId -> votedForId
+    votes: { [voterId: string]: string }; // voterId -> votedForId
 
     // Scores (accumulated across rounds)
     scores: { [playerId: string]: number };
@@ -171,7 +171,7 @@ export interface ChatMessage {
 }
 
 export interface PlayerSession {
-    oderId: string;
+    voterId: string;
     playerName: string;
     currentRoom?: string;
     assignedColor: string;
@@ -196,3 +196,9 @@ export interface RoomHistoryEntry {
     endReason?: 'finished' | 'early' | 'cancelled' | 'left';
     leaderName?: string;
 }
+export interface ToastState {
+    message: string;
+    type: 'error' | 'success' | 'info';
+}
+
+export type Screen = 'welcome' | 'login' | 'name-entry' | 'home' | 'room-selection' | 'store' | 'profile' | 'avatar-editor' | 'lobby' | 'waiting' | 'uploading' | 'drawing' | 'voting' | 'results' | 'final';

@@ -46,8 +46,10 @@ body {
   --border-color: var(--theme-border, transparent);
   --button-bg: var(--theme-button-bg, #9B59B6);
   --button-text: var(--theme-button-text, #ffffff);
+  --button-text: var(--theme-button-text, #ffffff);
   --card-bg: var(--theme-card-bg, rgba(255, 255, 255, 0.9));
   --card-text: var(--theme-card-text, var(--text-primary));
+  --card-border: var(--theme-border, transparent);
   --font-main: var(--theme-font, 'Inter', sans-serif);
   --radius-main: var(--theme-radius, 1.5rem);
 }
@@ -68,11 +70,13 @@ body {
 }
 
 /* Base Card Style Override */
+/* Base Card Style Override */
 .bg-white {
   background-color: var(--card-bg) !important;
   color: var(--card-text);
-  border-color: var(--border-color);
+  border: var(--card-border) !important;
   border-radius: var(--radius-main);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 /* Button Override */

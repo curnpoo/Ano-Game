@@ -87,38 +87,39 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
     return (
         <div
             className="min-h-screen flex flex-col items-center justify-start p-4 relative overflow-y-auto overflow-x-hidden"
-            style={{ paddingTop: 'max(2rem, env(safe-area-inset-top) + 1rem)' }}
+            style={{
+                paddingTop: 'max(2rem, env(safe-area-inset-top) + 1rem)',
+                backgroundColor: 'var(--theme-bg-primary)'
+            }}
         >
             <div className={`w-full max-w-md relative z-10 flex flex-col gap-4 ${mounted ? 'slide-up' : 'opacity-0'}`}>
                 {/* Home Button Card */}
                 <button
                     onClick={onBack}
-                    className="w-full bg-gradient-to-r from-gray-100 to-gray-200 rounded-2xl p-4 shadow-lg border-2 border-gray-300 flex items-center gap-4 hover:scale-[1.02] active:scale-95 transition-all"
+                    className="w-full rounded-[2rem] p-4 shadow-lg border-2 flex items-center gap-4 hover:brightness-110 active:scale-95 transition-all"
+                    style={{
+                        backgroundColor: 'var(--theme-card-bg)',
+                        borderColor: 'var(--theme-border)'
+                    }}
                 >
                     <div className="text-3xl">🏠</div>
                     <div className="flex-1 text-left">
-                        <div className="text-lg font-bold text-gray-800">Back to Home</div>
-                        <div className="text-gray-500 text-sm">Return to main menu</div>
+                        <div className="text-lg font-bold" style={{ color: 'var(--theme-text)' }}>Back to Home</div>
+                        <div className="text-sm font-medium" style={{ color: 'var(--theme-text-secondary)' }}>Return to main menu</div>
                     </div>
-                    <div className="text-2xl text-gray-400">←</div>
+                    <div className="text-2xl" style={{ color: 'var(--theme-text-secondary)' }}>←</div>
                 </button>
 
-                <div className="rounded-[2rem] p-8 space-y-8"
+                <div className="rounded-[2rem] p-8 space-y-8 shadow-2xl"
                     style={{
-                        backgroundColor: 'var(--card-bg)',
-                        color: 'var(--card-text)',
-                        border: '4px solid var(--theme-accent)',
-                        boxShadow: '0 15px 30px rgba(0,0,0,0.1)'
+                        backgroundColor: 'var(--theme-card-bg)',
+                        color: 'var(--theme-text)',
+                        border: '2px solid var(--theme-border)'
                     }}>
 
                     <div className="text-center space-y-2">
                         <div className="text-4xl bounce-scale">👋</div>
-                        <h2 className="text-3xl font-bold"
-                            style={{
-                                background: 'linear-gradient(135deg, #00D9FF, #9B59B6)',
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent'
-                            }}>
+                        <h2 className="text-3xl font-black" style={{ color: 'var(--theme-text)' }}>
                             Hi, {playerName}!
                         </h2>
                     </div>
@@ -126,23 +127,31 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
                     <div className="space-y-6">
                         <button
                             onClick={onCreateRoom}
-                            className="w-full btn-90s bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 text-white font-bold text-xl py-5 jelly-hover"
+                            className="w-full text-white font-black text-xl py-5 rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all"
+                            style={{
+                                background: 'linear-gradient(135deg, var(--theme-accent) 0%, #FFD700 100%)'
+                            }}
                         >
                             🎨 Create New Room
                         </button>
 
                         <div className="relative flex items-center justify-center">
                             <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t-4 border-dashed border-purple-200"></div>
+                                <div className="w-full border-t-2 border-dashed" style={{ borderColor: 'var(--theme-border)' }}></div>
                             </div>
-                            <span className="relative bg-white px-6 py-2 text-lg text-purple-400 font-bold rounded-full border-4 border-purple-200">
-                                ✨ or ✨
+                            <span className="relative px-4 py-1 text-sm font-bold rounded-full border-2"
+                                style={{
+                                    backgroundColor: 'var(--theme-bg-secondary)',
+                                    color: 'var(--theme-text-secondary)',
+                                    borderColor: 'var(--theme-border)'
+                                }}>
+                                OR
                             </span>
                         </div>
 
                         <form onSubmit={handleJoin} className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="block text-lg font-bold text-purple-600 text-center">
+                            <div className="space-y-3">
+                                <label className="block text-lg font-bold text-center" style={{ color: 'var(--theme-text)' }}>
                                     🔗 Join existing room
                                 </label>
                                 <div className="flex gap-2 w-full">
@@ -151,19 +160,22 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
                                         value={roomCode}
                                         onChange={(e) => setRoomCode(e.target.value.toUpperCase())}
                                         placeholder="ABCD"
-                                        className="input-90s flex-1 min-w-0 text-center uppercase tracking-widest font-mono border-cyan-300 focus:border-cyan-500"
+                                        className="flex-1 min-w-0 text-center uppercase tracking-widest font-mono text-xl py-3 rounded-2xl border-2 focus:outline-none"
                                         style={{
-                                            background: 'linear-gradient(to bottom, #fff, #f0f8ff)'
+                                            backgroundColor: 'var(--theme-bg-secondary)',
+                                            color: 'var(--theme-text)',
+                                            borderColor: 'var(--theme-border)'
                                         }}
                                         maxLength={6}
                                     />
                                     <button
                                         type="submit"
                                         disabled={roomCode.length < 4}
-                                        className={`px-4 py-3 rounded-2xl font-bold text-lg transition-all flex-shrink-0 ${roomCode.length >= 4
-                                            ? 'btn-90s bg-gradient-to-r from-lime-400 to-emerald-500 text-white'
-                                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                            }`}
+                                        className="px-6 py-3 rounded-2xl font-bold text-lg transition-all flex-shrink-0 shadow-md hover:scale-105 active:scale-95 disabled:opacity-50 disabled:grayscale disabled:pointer-events-none"
+                                        style={{
+                                            backgroundColor: 'var(--theme-accent)',
+                                            color: '#ffffff'
+                                        }}
                                     >
                                         Go!
                                     </button>
@@ -177,58 +189,63 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
                 {/* Recent Games List */}
                 {history.length > 0 && (
                     <div className="w-full slide-up" style={{ animationDelay: '0.2s' }}>
-                        <div className="bg-white/90 backdrop-blur-sm rounded-[2rem] p-6 shadow-xl border-4 border-white">
-                            <h3 className="text-xl font-bold text-purple-600 mb-4 flex items-center gap-2">
+                        <div className="rounded-[2rem] p-6 shadow-xl border-2"
+                            style={{
+                                backgroundColor: 'var(--theme-card-bg)',
+                                borderColor: 'var(--theme-border)'
+                            }}>
+                            <h3 className="text-xl font-bold mb-4 flex items-center gap-2" style={{ color: 'var(--theme-text)' }}>
                                 🕒 Recent Games
                             </h3>
                             <div className="space-y-3">
                                 {history.map((game) => (
                                     <div key={game.roomCode}
-                                        className={`p-4 rounded-xl border-2 transition-all ${game.isActive
-                                            ? 'bg-white border-purple-200 hover:border-purple-400 shadow-sm'
-                                            : 'bg-gray-50 border-gray-100 opacity-75'
-                                            }`}
+                                        className="p-4 rounded-2xl border-2 transition-all"
+                                        style={{
+                                            backgroundColor: 'var(--theme-bg-secondary)',
+                                            borderColor: game.isActive ? 'var(--theme-accent)' : 'transparent',
+                                            opacity: game.isActive ? 1 : 0.7
+                                        }}
                                     >
                                         <div className="flex items-center justify-between">
                                             <div>
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-2xl font-black" style={{ color: '#1f2937' }}>{game.roomCode}</span>
+                                                    <span className="text-2xl font-black" style={{ color: 'var(--theme-text)' }}>{game.roomCode}</span>
                                                     {game.isActive ? (
-                                                        <span className="bg-green-100 text-green-600 text-xs px-2 py-1 rounded-full font-bold">
-                                                            ● Active
+                                                        <span className="bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                                                            Active
                                                         </span>
                                                     ) : (
-                                                        <span className="bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded-full font-bold">
-                                                            ● {getInactiveStatusText(game)}
+                                                        <span className="bg-gray-500 text-white text-xs px-2 py-1 rounded-full font-bold">
+                                                            {getInactiveStatusText(game)}
                                                         </span>
                                                     )}
                                                 </div>
                                                 <div className="flex flex-wrap gap-2 mt-2">
                                                     {game.hostName && (
-                                                        <span className="inline-flex items-center gap-1 bg-purple-50 text-purple-700 px-2 py-1 rounded-md text-xs font-bold border border-purple-100">
+                                                        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold border opacity-80"
+                                                            style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
                                                             👤 <span className="truncate max-w-[80px]">{game.hostName}</span>
                                                         </span>
                                                     )}
-                                                    <span className="inline-flex items-center gap-1 bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-xs font-bold border border-blue-100">
+                                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold border opacity-80"
+                                                        style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
                                                         👥 {game.playerCount}
                                                     </span>
-                                                    <span className="inline-flex items-center gap-1 bg-orange-50 text-orange-700 px-2 py-1 rounded-md text-xs font-bold border border-orange-100">
+                                                    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold border opacity-80"
+                                                        style={{ borderColor: 'var(--theme-border)', color: 'var(--theme-text-secondary)' }}>
                                                         🔄 Rd {game.roundNumber}
                                                     </span>
                                                 </div>
 
                                                 {/* Status/Result Message */}
                                                 {game.winnerName ? (
-                                                    <div className="text-sm font-bold text-amber-500 mt-1">
+                                                    <div className="text-sm font-bold text-yellow-500 mt-2">
                                                         🏆 Winner: {game.winnerName}
                                                     </div>
                                                 ) : game.leaderName ? (
-                                                    <div className="text-sm font-bold text-purple-500 mt-1">
-                                                        👑 Leader: {game.leaderName} (Ended early)
-                                                    </div>
-                                                ) : game.endReason === 'cancelled' ? (
-                                                    <div className="text-sm italic text-gray-400 mt-1">
-                                                        Ended before start
+                                                    <div className="text-sm font-bold text-purple-500 mt-2">
+                                                        👑 Leader: {game.leaderName}
                                                     </div>
                                                 ) : null}
                                             </div>
@@ -236,12 +253,13 @@ export const RoomSelectionScreen: React.FC<RoomSelectionScreenProps> = ({
                                             {game.isActive ? (
                                                 <button
                                                     onClick={() => onJoinRoom(game.roomCode)}
-                                                    className="px-4 py-2 rounded-lg bg-purple-500 text-white font-bold hover:bg-purple-600 transition-colors shadow-md"
+                                                    className="px-4 py-2 rounded-xl font-bold text-white hover:scale-105 transition-all shadow-md"
+                                                    style={{ backgroundColor: 'var(--theme-accent)' }}
                                                 >
                                                     Join
                                                 </button>
                                             ) : (
-                                                <button disabled className="px-4 py-2 rounded-lg bg-gray-200 text-gray-400 font-bold cursor-not-allowed">
+                                                <button disabled className="px-4 py-2 rounded-xl bg-gray-300 text-gray-500 font-bold cursor-not-allowed opacity-50">
                                                     Closed
                                                 </button>
                                             )}

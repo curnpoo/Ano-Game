@@ -70,8 +70,11 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
 
     if (!currentDrawing) {
         return (
-            <div className="min-h-screen bg-90s-animated flex items-center justify-center">
-                <div className="text-2xl font-bold text-white">No drawings to vote on!</div>
+            <div className="min-h-screen flex items-center justify-center"
+                style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
+                <div className="text-2xl font-bold" style={{ color: 'var(--theme-text)' }}>
+                    No drawings to vote on!
+                </div>
             </div>
         );
     }
@@ -81,28 +84,34 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
             className={`fixed inset-0 flex flex-col p-4 ${mounted ? 'pop-in' : 'opacity-0'} overflow-hidden touch-none`}
             style={{
                 paddingTop: 'max(1rem, env(safe-area-inset-top) + 1rem)',
-                paddingBottom: 'max(1rem, env(safe-area-inset-bottom) + 1rem)'
+                paddingBottom: 'max(1rem, env(safe-area-inset-bottom) + 1rem)',
+                backgroundColor: 'var(--theme-bg-primary)'
             }}
         >
             {/* Header */}
             <div className="text-center mb-4">
-                <h1 className="text-3xl font-bold text-white drop-shadow-lg mb-2">
+                <h1 className="text-3xl font-black mb-2" style={{ color: 'var(--theme-text)' }}>
                     🗳️ Vote Time!
                 </h1>
-                <div className="inline-block bg-white/90 rounded-full px-4 py-2 font-bold text-purple-600">
+                <div className="inline-block px-4 py-2 rounded-full font-bold shadow-lg"
+                    style={{
+                        backgroundColor: 'var(--theme-card-bg)',
+                        color: 'var(--theme-accent)',
+                        border: '2px solid var(--theme-border)'
+                    }}>
                     {votedCount}/{totalPlayers} voted
                 </div>
 
                 {/* Sabotage victim reveal */}
                 {room.sabotageTargetId && (
-                    <div className="mt-3 bg-red-500/90 text-white rounded-full px-4 py-2 font-bold text-sm inline-block animate-pulse">
+                    <div className="mt-3 bg-[#8B0000] text-[#FFaaaa] rounded-full px-4 py-2 font-bold text-sm inline-block animate-pulse shadow-md border border-red-900/30">
                         ⚠️ {room.players.find(p => p.id === room.sabotageTargetId)?.name || 'Someone'} was SABOTAGED!
                     </div>
                 )}
 
                 {/* Show missing voters if few remain */}
                 {(totalPlayers - votedCount) <= 2 && (totalPlayers - votedCount) > 0 && (
-                    <div className="mt-2 text-sm text-white/90 font-medium animate-pulse">
+                    <div className="mt-2 text-sm font-medium animate-pulse" style={{ color: 'var(--theme-text-secondary)' }}>
                         Waiting for: {room.players.filter(p => !room.votes[p.id]).map(p => p.name).join(', ')}
                     </div>
                 )}
@@ -111,9 +120,9 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
             {/* Drawing Display */}
             <div className="flex-1 flex flex-col items-center justify-center">
                 {/* Player Name */}
-                <div className="bg-white rounded-2xl px-6 py-3 mb-4 pop-in flex items-center gap-3"
+                <div className="rounded-[2rem] px-6 py-3 mb-4 pop-in flex items-center gap-3 shadow-xl"
                     style={{
-                        boxShadow: '0 4px 0 rgba(155, 89, 182, 0.3)',
+                        backgroundColor: 'var(--theme-card-bg)', // Using theme card bg
                         border: `3px solid ${currentDrawing.player.color}`
                     }}>
                     <AvatarDisplay
@@ -125,15 +134,14 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                     />
                     <span className="text-xl font-bold" style={{ color: currentDrawing.player.color }}>
                         {currentDrawing.player.name}
-                        {isOwnDrawing && <span className="ml-2 text-gray-400">(You)</span>}
+                        {isOwnDrawing && <span className="ml-2 text-[var(--theme-text-secondary)] opacity-60">(You)</span>}
                     </span>
                 </div>
 
                 {/* Drawing Canvas - Show the image with their drawing */}
-                <div className="relative w-full max-w-md aspect-square rounded-2xl overflow-hidden"
+                <div className="relative w-full max-w-md aspect-square rounded-3xl overflow-hidden shadow-2xl"
                     style={{
-                        boxShadow: '0 10px 0 rgba(155, 89, 182, 0.4), 0 20px 40px rgba(0, 0, 0, 0.3)',
-                        border: '5px solid white'
+                        border: '4px solid var(--theme-card-bg)' // Clean border
                     }}>
                     {/* Base image */}
                     <img
@@ -145,14 +153,13 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                     {/* Block overlay */}
                     {room.block && (
                         <div
-                            className="absolute"
+                            className="absolute shadow-inner"
                             style={{
                                 left: `${room.block.x}%`,
                                 top: `${room.block.y}%`,
                                 width: `${room.block.size}%`,
                                 height: `${room.block.size}%`,
-                                borderRadius: room.block.type === 'circle' ? '50%' : '8px',
-                                boxShadow: 'inset 0 0 20px rgba(0,0,0,0.1)',
+                                borderRadius: room.block.type === 'circle' ? '50%' : '12px',
                                 backgroundColor: '#ffffff',
                                 opacity: 1,
                                 zIndex: 10
@@ -175,7 +182,7 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                 </div>
 
                 {/* Navigation Dots */}
-                <div className="flex gap-2 mt-4">
+                <div className="flex gap-2 mt-6">
                     {drawings.map((_, i) => (
                         <button
                             key={i}
@@ -183,31 +190,37 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                                 vibrate();
                                 setSelectedIndex(i);
                             }}
-                            className={`w-3 h-3 rounded-full transition-all ${i === selectedIndex
-                                ? 'bg-white scale-125'
-                                : 'bg-white/40 hover:bg-white/60'
+                            className={`w-3 h-3 rounded-full transition-all duration-300 ${i === selectedIndex
+                                ? 'scale-125'
+                                : 'opacity-40 hover:opacity-100'
                                 }`}
+                            style={{
+                                backgroundColor: i === selectedIndex ? 'var(--theme-accent)' : 'var(--theme-text)'
+                            }}
                         />
                     ))}
                 </div>
             </div>
 
             {/* Bottom Actions */}
-            <div className="mt-4 flex flex-col items-center gap-3">
-                {/* Navigation Arrows */}
+            <div className="mt-6 flex flex-col items-center gap-3">
                 {/* Navigation Arrows & Vote Button */}
-                <div className="flex items-center justify-between w-full max-w-sm px-2 gap-2">
+                <div className="flex items-center justify-between w-full max-w-sm px-2 gap-4">
                     <button
                         onClick={() => {
                             vibrate();
                             setSelectedIndex(Math.max(0, selectedIndex - 1));
                         }}
                         disabled={selectedIndex === 0}
-                        className={`w-12 h-12 flex-shrink-0 rounded-full text-2xl transition-all ${selectedIndex === 0
-                            ? 'bg-gray-200 text-gray-400'
-                            : 'bg-white hover:scale-110 jelly-hover'
+                        className={`w-14 h-14 flex-shrink-0 rounded-full text-2xl transition-all flex items-center justify-center shadow-lg ${selectedIndex === 0
+                            ? 'opacity-30 cursor-not-allowed'
+                            : 'hover:scale-110 active:scale-95'
                             }`}
-                        style={{ boxShadow: selectedIndex !== 0 ? '0 3px 0 rgba(0,0,0,0.2)' : 'none' }}
+                        style={{
+                            backgroundColor: 'var(--theme-card-bg)',
+                            color: 'var(--theme-text)',
+                            border: '2px solid var(--theme-border)'
+                        }}
                     >
                         ←
                     </button>
@@ -215,17 +228,26 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                     {/* Vote Button Area - Centered & Flexible */}
                     <div className="flex-1 flex justify-center min-w-0">
                         {hasVoted ? (
-                            <div className="bg-green-500 text-white px-6 py-3 rounded-2xl font-bold text-lg shadow-lg whitespace-nowrap animate-bounce">
+                            <div className="px-6 py-4 rounded-2xl font-bold text-lg shadow-lg whitespace-nowrap animate-bounce flex items-center justify-center gap-2"
+                                style={{ backgroundColor: '#22c55e', color: '#ffffff' }}>
                                 ✓ Voted!
                             </div>
                         ) : isOwnDrawing ? (
-                            <div className="bg-gray-300 text-gray-500 px-4 py-3 rounded-2xl font-bold text-sm text-center shadow-inner leading-tight">
+                            <div className="px-6 py-4 rounded-2xl font-bold text-sm text-center shadow-inner leading-tight opacity-70"
+                                style={{
+                                    backgroundColor: 'var(--theme-bg-secondary)',
+                                    color: 'var(--theme-text)'
+                                }}>
                                 Your Drawing
                             </div>
                         ) : (
                             <button
                                 onClick={handleVote}
-                                className="w-full max-w-[160px] btn-90s bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 text-white py-3 rounded-2xl font-bold text-lg jelly-hover shadow-lg truncate px-2"
+                                className="w-full max-w-[200px] text-white py-4 rounded-2xl font-black text-xl shadow-xl transform transition-all hover:scale-105 active:scale-95"
+                                style={{
+                                    background: 'linear-gradient(135deg, var(--theme-accent) 0%, #FFD700 100%)',
+                                    textShadow: '0 2px 0 rgba(0,0,0,0.2)'
+                                }}
                             >
                                 🗳️ VOTE
                             </button>
@@ -238,18 +260,22 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                             setSelectedIndex(Math.min(drawings.length - 1, selectedIndex + 1));
                         }}
                         disabled={selectedIndex === drawings.length - 1}
-                        className={`w-12 h-12 flex-shrink-0 rounded-full text-2xl transition-all ${selectedIndex === drawings.length - 1
-                            ? 'bg-gray-200 text-gray-400'
-                            : 'bg-white hover:scale-110 jelly-hover'
+                        className={`w-14 h-14 flex-shrink-0 rounded-full text-2xl transition-all flex items-center justify-center shadow-lg ${selectedIndex === drawings.length - 1
+                            ? 'opacity-30 cursor-not-allowed'
+                            : 'hover:scale-110 active:scale-95'
                             }`}
-                        style={{ boxShadow: selectedIndex !== drawings.length - 1 ? '0 3px 0 rgba(0,0,0,0.2)' : 'none' }}
+                        style={{
+                            backgroundColor: 'var(--theme-card-bg)',
+                            color: 'var(--theme-text)',
+                            border: '2px solid var(--theme-border)'
+                        }}
                     >
                         →
                     </button>
                 </div>
 
                 {hasVoted && (
-                    <p className="text-white/80 font-medium animate-pulse">
+                    <p className="font-bold text-sm animate-pulse" style={{ color: 'var(--theme-text-secondary)' }}>
                         Waiting for others to vote...
                     </p>
                 )}

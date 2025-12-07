@@ -158,8 +158,9 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
 
     if (!latestResult) {
         return (
-            <div className="min-h-screen bg-90s-animated flex items-center justify-center">
-                <div className="text-2xl font-bold text-white">Loading results...</div>
+            <div className="min-h-screen flex items-center justify-center"
+                style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
+                <div className="text-2xl font-bold" style={{ color: 'var(--theme-text)' }}>Loading results...</div>
             </div>
         );
     }
@@ -171,16 +172,19 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
 
     return (
         <div className={`min-h-screen flex flex-col items-center justify-start pt-16 sm:pt-20 p-4 ${mounted ? 'pop-in' : 'opacity-0'}`}
-            style={{ paddingTop: 'max(4rem, env(safe-area-inset-top))' }}>
+            style={{
+                paddingTop: 'max(4rem, env(safe-area-inset-top))',
+                backgroundColor: 'var(--theme-bg-primary)'
+            }}>
             {/* Confetti! */}
             {showConfetti && <Confetti />}
 
             {/* Header */}
             <div className="text-center mb-6">
-                <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-2">
+                <h1 className="text-4xl font-black drop-shadow-lg mb-2" style={{ color: 'var(--theme-text)' }}>
                     🏆 Round {room.roundNumber} Results!
                 </h1>
-                <p className="text-white/80 font-medium">
+                <p className="font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
                     Round {room.roundNumber} of {room.settings.totalRounds}
                 </p>
             </div>
@@ -203,13 +207,13 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
                                     className="shadow-md"
                                 />
                             </div>
-                            <div className="bg-gradient-to-b from-gray-300 to-gray-400 w-24 h-24 rounded-t-lg flex flex-col items-center justify-center"
+                            <div className="bg-gradient-to-b from-gray-300 to-gray-400 w-24 h-24 rounded-t-2xl flex flex-col items-center justify-center border-t border-white/30"
                                 style={{ boxShadow: '0 4px 0 rgba(0,0,0,0.2)' }}>
-                                <span className="text-2xl font-bold text-gray-700">2nd</span>
-                                <span className="text-sm text-gray-600">{second.votes} votes</span>
-                                <span className="text-xs text-gray-500">+{second.points} pts</span>
+                                <span className="text-2xl font-bold text-gray-800">2nd</span>
+                                <span className="text-sm text-gray-700 font-bold">{second.votes} votes</span>
+                                <span className="text-xs text-gray-600">+{second.points} pts</span>
                             </div>
-                            <p className="mt-2 font-bold text-white text-sm">{second.playerName}</p>
+                            <p className="mt-2 font-bold text-sm" style={{ color: 'var(--theme-text)' }}>{second.playerName}</p>
                         </div>
                     );
                 })()}
@@ -230,13 +234,13 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
                                     className="shadow-lg border-4 border-yellow-400"
                                 />
                             </div>
-                            <div className="bg-gradient-to-b from-yellow-400 to-yellow-500 w-28 h-32 rounded-t-lg flex flex-col items-center justify-center"
+                            <div className="bg-gradient-to-b from-yellow-400 to-yellow-500 w-28 h-32 rounded-t-2xl flex flex-col items-center justify-center border-t border-white/30"
                                 style={{ boxShadow: '0 4px 0 rgba(0,0,0,0.2)' }}>
-                                <span className="text-3xl font-bold text-yellow-800">1st</span>
-                                <span className="text-sm text-yellow-700">{first.votes} votes</span>
-                                <span className="text-xs text-yellow-600">+{first.points} pts</span>
+                                <span className="text-3xl font-bold text-yellow-900">1st</span>
+                                <span className="text-sm text-yellow-800 font-bold">{first.votes} votes</span>
+                                <span className="text-xs text-yellow-700">+{first.points} pts</span>
                             </div>
-                            <p className="mt-2 font-bold text-white">{first.playerName}</p>
+                            <p className="mt-2 font-bold text-lg" style={{ color: 'var(--theme-text)' }}>{first.playerName}</p>
                         </div>
                     );
                 })()}
@@ -257,29 +261,35 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
                                     className="shadow-md"
                                 />
                             </div>
-                            <div className="bg-gradient-to-b from-orange-300 to-orange-400 w-20 h-16 rounded-t-lg flex flex-col items-center justify-center"
+                            <div className="bg-gradient-to-b from-orange-300 to-orange-400 w-20 h-16 rounded-t-2xl flex flex-col items-center justify-center border-t border-white/30"
                                 style={{ boxShadow: '0 4px 0 rgba(0,0,0,0.2)' }}>
-                                <span className="text-xl font-bold text-orange-800">3rd</span>
-                                <span className="text-xs text-orange-700">{third.votes} votes</span>
-                                <span className="text-xs text-orange-600">+{third.points} pts</span>
+                                <span className="text-xl font-bold text-orange-900">3rd</span>
+                                <span className="text-xs text-orange-800 font-bold">{third.votes} votes</span>
+                                <span className="text-xs text-orange-800">+{third.points} pts</span>
                             </div>
-                            <p className="mt-2 font-bold text-white text-sm">{third.playerName}</p>
+                            <p className="mt-2 font-bold text-sm" style={{ color: 'var(--theme-text)' }}>{third.playerName}</p>
                         </div>
                     );
                 })()}
             </div>
 
             {/* Current Scores */}
-            <div className="bg-white/90 rounded-2xl p-4 mb-6 w-full max-w-sm"
-                style={{ boxShadow: '0 4px 0 rgba(155, 89, 182, 0.3)' }}>
-                <h3 className="text-lg font-bold text-purple-600 mb-3 text-center">📊 Leaderboard</h3>
+            <div className="rounded-[2rem] p-6 mb-6 w-full max-w-md shadow-xl"
+                style={{
+                    backgroundColor: 'var(--theme-card-bg)',
+                    border: '2px solid var(--theme-border)'
+                }}>
+                <h3 className="text-xl font-bold mb-4 text-center flex items-center justify-center gap-2" style={{ color: 'var(--theme-text)' }}>
+                    📊 Leaderboard
+                </h3>
                 <div className="space-y-2">
                     {room.players
                         .sort((a, b) => (room.scores[b.id] || 0) - (room.scores[a.id] || 0))
                         .map((player, i) => (
-                            <div key={player.id} className="flex items-center justify-between px-3 py-2 rounded-lg bg-gray-50">
-                                <div className="flex items-center gap-2">
-                                    <span className="font-bold text-gray-400">#{i + 1}</span>
+                            <div key={player.id} className="flex items-center justify-between p-3 rounded-2xl"
+                                style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+                                <div className="flex items-center gap-3">
+                                    <span className="font-bold w-6 text-sm" style={{ color: 'var(--theme-text-secondary)' }}>#{i + 1}</span>
                                     <AvatarDisplay
                                         strokes={player.avatarStrokes}
                                         avatar={player.avatar}
@@ -287,9 +297,9 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
                                         color={player.color}
                                         size={32}
                                     />
-                                    <span className="font-medium">{player.name}</span>
+                                    <span className="font-bold" style={{ color: 'var(--theme-text)' }}>{player.name}</span>
                                 </div>
-                                <span className="font-bold text-purple-600">{room.scores[player.id] || 0} pts</span>
+                                <span className="font-black" style={{ color: 'var(--theme-accent)' }}>{room.scores[player.id] || 0} pts</span>
                             </div>
                         ))}
                 </div>
@@ -297,16 +307,25 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
 
             {/* Fun Awards */}
             {awards.length > 0 && (
-                <div className="bg-white/90 rounded-2xl p-4 mb-6 w-full max-w-sm"
-                    style={{ boxShadow: '0 4px 0 rgba(255, 140, 0, 0.3)' }}>
-                    <h3 className="text-lg font-bold text-orange-500 mb-3 text-center">🏅 Fun Awards</h3>
-                    <div className="flex flex-wrap justify-center gap-2">
+                <div className="rounded-[2rem] p-6 mb-6 w-full max-w-md shadow-xl"
+                    style={{
+                        backgroundColor: 'var(--theme-card-bg)',
+                        border: '2px solid var(--theme-border)'
+                    }}>
+                    <h3 className="text-xl font-bold mb-4 text-center flex items-center justify-center gap-2" style={{ color: 'var(--theme-text)' }}>
+                        🏅 Fun Awards
+                    </h3>
+                    <div className="flex flex-wrap justify-center gap-3">
                         {awards.map((a, i) => (
-                            <div key={i} className="bg-gradient-to-br from-yellow-50 to-orange-50 px-3 py-2 rounded-xl border-2 border-orange-200 text-center pop-in"
-                                style={{ animationDelay: `${i * 0.1}s` }}>
+                            <div key={i} className="px-4 py-3 rounded-2xl text-center pop-in shadow-sm flex flex-col items-center gap-1"
+                                style={{
+                                    animationDelay: `${i * 0.1}s`,
+                                    backgroundColor: 'var(--theme-bg-secondary)',
+                                    border: '1px solid var(--theme-border)'
+                                }}>
                                 <div className="text-2xl">{a.award.emoji}</div>
-                                <div className="text-xs font-bold text-orange-600">{a.award.label}</div>
-                                <div className="text-xs text-gray-500">{a.playerName}</div>
+                                <div className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--theme-accent)' }}>{a.award.label}</div>
+                                <div className="text-xs font-bold" style={{ color: 'var(--theme-text)' }}>{a.playerName}</div>
                             </div>
                         ))}
                     </div>
@@ -317,12 +336,15 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
             {isHost ? (
                 <button
                     onClick={onNextRound}
-                    className="btn-90s bg-gradient-to-r from-green-400 to-emerald-500 text-white px-8 py-4 rounded-2xl font-bold text-xl jelly-hover"
+                    className="w-full max-w-xs text-white px-8 py-4 rounded-2xl font-black text-xl shadow-2xl hover:scale-105 active:scale-95 transition-all"
+                    style={{
+                        background: 'linear-gradient(135deg, var(--theme-accent) 0%, #FFD700 100%)'
+                    }}
                 >
                     ➡️ Next Round
                 </button>
             ) : (
-                <p className="text-white/80 font-medium animate-pulse">
+                <p className="font-bold animate-pulse text-center" style={{ color: 'var(--theme-text-secondary)' }}>
                     Waiting for host to start next round...
                 </p>
             )}

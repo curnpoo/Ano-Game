@@ -3,96 +3,60 @@
 
 export const getThemeVariables = (themeId: string = 'default') => {
     switch (themeId) {
-        case 'dark':
+        case 'light':
+        case 'premium-light':
             return {
-                '--theme-bg': '#0f172a',
-                '--theme-bg-secondary': '#1e293b',
-                '--theme-text': '#f8fafc',
-                '--theme-text-secondary': '#94a3b8',
-                '--theme-accent': '#e94560',
-                '--theme-border': '#334155',
-                '--theme-button-bg': '#e94560',
-                '--theme-button-text': '#ffffff',
-                '--theme-card-bg': 'rgba(30, 41, 59, 0.95)',
+                '--theme-bg': 'linear-gradient(135deg, #FFF5EB 0%, #FFD1B3 100%)', // Soft Peach Gradient
+                '--theme-bg-secondary': '#E0F2F1', // Minty green secondary
+                '--theme-text': '#4A3B32', // Dark Brown
+                '--theme-text-secondary': '#8D6E63', // Light Brown
+                '--theme-accent': '#FFB74D', // Orange Accent
+                '--theme-border': '#E0F2F1', // Mint border
+                '--theme-button-bg': '#FFB74D',
+                '--theme-button-text': '#4A3B32',
+                '--theme-card-bg': '#C1E1C1', // Mint/Sage Green Card from screenshot
                 '--theme-font': "'Inter', sans-serif",
-                '--theme-radius': '0.75rem',
-                '--theme-card-text': '#f8fafc', // Light text on dark card
+                '--theme-radius': '1.5rem',
+                '--theme-card-text': '#4A3B32',
+                '--theme-highlight': '#FFE0B2', // Lighter orange
+                '--card-border': 'none',
             };
-        case 'cardboard':
+        case 'dark':
+        case 'premium-dark':
             return {
-                '--theme-bg': '#d2b48c',
-                '--theme-bg-secondary': '#e6ccb2',
-                '--theme-text': '#5d4037',
-                '--theme-text-secondary': '#8d6e63',
-                '--theme-accent': '#8b4513',
-                '--theme-border': '#8b4513',
-                '--theme-button-bg': '#8b4513',
-                '--theme-button-text': '#d2b48c',
-                '--theme-card-bg': '#faeedd',
-                '--theme-font': "'Chalkboard SE', 'Comic Sans MS', sans-serif",
-                '--theme-radius': '255px 15px 225px 15px/15px 225px 15px 255px', // Organic/Rough
-                '--theme-card-text': '#5d4037', // Dark brown on light card
-            };
-        case 'neon':
-            return {
-                '--theme-bg': '#000000',
-                '--theme-bg-secondary': '#0a0a0a',
-                '--theme-text': '#00ff00',
-                '--theme-text-secondary': '#00cc00',
-                '--theme-accent': '#00ff00',
-                '--theme-border': '#00ff00',
-                '--theme-button-bg': '#000000',
-                '--theme-button-text': '#00ff00',
-                '--theme-card-bg': 'rgba(0, 0, 0, 0.9)',
-                '--theme-font': "'Courier New', monospace",
-                '--theme-radius': '0px', // Sharp
-                '--theme-card-text': '#e0ffe0', // Very light green on black card
-            };
-        case 'retro':
-            return {
-                '--theme-bg': '#E0E7FF', // Light Indigo
-                '--theme-bg-secondary': '#C7D2FE',
-                '--theme-text': '#4338ca', // Indigo 700
-                '--theme-text-secondary': '#6366f1',
-                '--theme-accent': '#4f46e5',
-                '--theme-border': '#312e81',
-                '--theme-button-bg': '#4f46e5',
-                '--theme-button-text': '#ffffff',
-                '--theme-card-bg': '#ffffff',
-                '--theme-font': "'Courier New', monospace",
-                '--theme-radius': '0px',
-                '--theme-card-text': '#4338ca', // Indigo on white card
-            };
-        case 'kawaii':
-            return {
-                '--theme-bg': '#ffe4e6', // Rose 100
-                '--theme-bg-secondary': '#fff1f2', // Rose 50
-                '--theme-text': '#be185d', // Pink 700
-                '--theme-text-secondary': '#db2777', // Pink 600
-                '--theme-accent': '#f472b6', // Pink 400
-                '--theme-border': '#fbcfe8', // Pink 200
-                '--theme-button-bg': '#f472b6',
-                '--theme-button-text': '#ffffff',
-                '--theme-card-bg': 'rgba(255, 255, 255, 0.9)',
-                '--theme-font': "'Comic Sans MS', 'Chalkboard SE', cursive",
-                '--theme-radius': '2rem', // Extra rounded
-                '--theme-card-text': '#be185d', // Pink on light card
+                '--theme-bg': 'linear-gradient(135deg, #1F1F1F 0%, #2D2D2D 100%)', // Dark Gray Gradient
+                '--theme-bg-secondary': '#2C241B', // Darker brown/gray
+                '--theme-text': '#FFF8E1', // Cream/White
+                '--theme-text-secondary': '#D7CCC8',
+                '--theme-accent': '#FFD54F', // Gold
+                '--theme-border': '#FFD54F', // Gold Border
+                '--theme-button-bg': '#3E2723', // Dark Brown Button
+                '--theme-button-text': '#FFD54F', // Gold Text
+                '--theme-card-bg': '#2C241B', // Dark Brown/Black Card
+                '--theme-font': "'Inter', sans-serif",
+                '--theme-radius': '1.5rem',
+                '--theme-card-text': '#FFF8E1',
+                '--theme-highlight': '#4E342E',
+                '--card-border': '2px solid #FFD54F', // Gold border for cards
             };
         case 'default':
         default:
+            // Default is now the Premium Dark
             return {
-                '--theme-bg': 'linear-gradient(135deg, #0f766e 0%, #0c4a6e 100%)', // Darker Teal to Navy fade
-                '--theme-bg-secondary': '#f0fdf4',
-                '--theme-text': '#f0f9ff', // Light text for dark bg
-                '--theme-text-secondary': '#bae6fd',
-                '--theme-accent': '#2dd4bf', // Teal accent
-                '--theme-border': 'rgba(45, 212, 191, 0.3)',
-                '--theme-button-bg': 'linear-gradient(to right, #14b8a6, #0ea5e9)',
-                '--theme-button-text': '#ffffff',
-                '--theme-card-bg': 'rgba(255, 255, 255, 0.8)', // More transparent
+                '--theme-bg': 'linear-gradient(180deg, #2a2a2a 0%, #1a1a1a 100%)', // Dark Matte
+                '--theme-bg-secondary': '#1a1a1a',
+                '--theme-text': '#F5F5F5',
+                '--theme-text-secondary': '#A3A3A3',
+                '--theme-accent': '#F0E68C', // Khaki/Gold
+                '--theme-border': '#F0E68C',
+                '--theme-button-bg': '#333333',
+                '--theme-button-text': '#F0E68C',
+                '--theme-card-bg': '#1E1E1E', // Dark card
                 '--theme-font': "'Inter', -apple-system, BlinkMacSystemFont, sans-serif",
-                '--theme-radius': '1.5rem',
-                '--theme-card-text': '#1f2937', // Dark gray on white card (Fixes visibility)
+                '--theme-radius': '1.2rem',
+                '--theme-card-text': '#F5F5F5',
+                '--theme-highlight': '#444444',
+                '--card-border': '1px solid #333333',
             };
     }
 };

@@ -25,25 +25,34 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
     };
 
     return (
-        <div className="min-h-screen p-4 flex flex-col items-center justify-center relative overflow-hidden">
+        <div className="min-h-screen p-4 flex flex-col items-center justify-center relative overflow-hidden"
+            style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
             {/* Decorative elements */}
             <div className="absolute top-10 left-10 text-6xl animate-bounce">📸</div>
             <div className="absolute bottom-10 right-10 text-6xl animate-bounce" style={{ animationDelay: '0.5s' }}>🖼️</div>
 
             <div className="w-full max-w-md space-y-8 relative z-10 text-center pop-in">
 
-                <div className="bg-white rounded-[2rem] p-8 shadow-2xl border-4 border-white">
-                    <h2 className="text-3xl font-bold mb-6 rainbow-text">
+                <div className="rounded-[2rem] p-8 shadow-2xl"
+                    style={{
+                        backgroundColor: 'var(--theme-card-bg)',
+                        border: '2px solid var(--theme-border)'
+                    }}>
+                    <h2 className="text-3xl font-black mb-6" style={{ color: 'var(--theme-text)' }}>
                         Round {room.roundNumber + 1}
                     </h2>
 
                     {isUploader ? (
                         <div className="space-y-6">
-                            <div className="text-xl font-bold text-gray-700">
+                            <div className="text-xl font-bold" style={{ color: 'var(--theme-text-secondary)' }}>
                                 It's your turn to pick the image!
                             </div>
 
-                            <div className="bg-orange-50 rounded-2xl p-8 border-4 border-dashed border-orange-300 relative cursor-pointer hover:scale-105 transition-transform group">
+                            <div className="rounded-3xl p-8 border-4 border-dashed relative cursor-pointer hover:scale-105 transition-transform group"
+                                style={{
+                                    backgroundColor: 'var(--theme-bg-secondary)',
+                                    borderColor: 'var(--theme-accent)'
+                                }}>
                                 <input
                                     type="file"
                                     accept="image/*"
@@ -51,7 +60,7 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                 />
                                 <div className="text-6xl mb-4 group-hover:scale-110 transition-transform">📤</div>
-                                <div className="font-bold text-orange-500">
+                                <div className="font-bold" style={{ color: 'var(--theme-accent)' }}>
                                     Tap to Upload Image
                                 </div>
                             </div>
@@ -69,11 +78,11 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
                                 />
                             </div>
 
-                            <div className="text-xl font-bold text-gray-700">
+                            <div className="text-xl font-bold" style={{ color: 'var(--theme-text)' }}>
                                 Waiting for <span style={{ color: uploader?.color }}>{uploaderName}</span>...
                             </div>
 
-                            <div className="text-gray-500 animate-pulse">
+                            <div className="font-bold animate-pulse" style={{ color: 'var(--theme-text-secondary)' }}>
                                 They are choosing an image for us to draw!
                             </div>
                         </div>

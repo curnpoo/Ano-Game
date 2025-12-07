@@ -4,9 +4,7 @@ import { SettingsModal } from '../common/SettingsModal';
 import { GameSettingsPanel } from '../game/GameSettingsPanel';
 import { AvatarDisplay } from '../common/AvatarDisplay';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
-import { AuthService } from '../../services/auth';
 import { StorageService } from '../../services/storage';
-import { getThemeContainerStyle } from '../../utils/themes';
 
 interface LobbyScreenProps {
     room: GameRoom;
@@ -34,9 +32,9 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     const [, setTick] = useState(0); // Force update for idle timer
 
     // Theme Support
-    const currentUser = AuthService.getCurrentUser();
-    const activeTheme = currentUser?.cosmetics?.activeTheme || 'default';
-    const cardStyle = getThemeContainerStyle(activeTheme);
+    // const currentUser = AuthService.getCurrentUser();
+    // const activeTheme = currentUser?.cosmetics?.activeTheme || 'default';
+
 
     useEffect(() => {
         // Force update every second to check idle status
@@ -82,46 +80,50 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     }
 
     return (
-        <div className="min-h-screen flex flex-col pb-safe overflow-y-auto"
-            style={{ paddingTop: 'max(1.5rem, env(safe-area-inset-top) + 1rem)' }}>
+        <div className="min-h-screen flex flex-col pb-safe overflow-y-auto px-4"
+            style={{ paddingTop: 'max(1rem, env(safe-area-inset-top) + 0.5rem)' }}>
 
-            <div className="w-full max-w-md mx-auto space-y-4 px-4 pb-8">
-                {/* Header Actions */}
-                <div className="grid grid-cols-2 gap-3">
+            <div className="w-full max-w-md mx-auto space-y-4 pb-8">
+                {/* Top Navigation Bar */}
+                <div className="flex justify-between gap-4">
                     <button
                         onClick={onBack}
-                        className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border-2 border-white/20 hover:bg-white/20 active:scale-95 transition-all text-center group"
+                        className="flex-1 bg-white p-4 rounded-2xl border-2 border-white/10 hover:bg-white/10 transition-all flex flex-col items-center justify-center gap-1 shadow-lg"
+                        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-card-bg)' }}
                     >
-                        <div className="text-3xl mb-1 group-hover:scale-110 transition-transform">🏠</div>
-                        <div className="font-bold text-white text-sm">Home</div>
+                        <span className="text-2xl">🏠</span>
+                        <span className="font-bold text-sm text-[var(--theme-text)]">Home</span>
                     </button>
                     <button
                         onClick={() => setShowSettings(true)}
-                        className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border-2 border-white/20 hover:bg-white/20 active:scale-95 transition-all text-center group"
+                        className="flex-1 bg-white p-4 rounded-2xl border-2 border-white/10 hover:bg-white/10 transition-all flex flex-col items-center justify-center gap-1 shadow-lg"
+                        style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-card-bg)' }}
                     >
-                        <div className="text-3xl mb-1 group-hover:scale-110 transition-transform">⚙️</div>
-                        <div className="font-bold text-white text-sm">Settings</div>
+                        <span className="text-2xl">⚙️</span>
+                        <span className="font-bold text-sm text-[var(--theme-text)]">Settings</span>
                     </button>
                 </div>
 
                 {/* Room Code Card */}
-                <div className="flex justify-between items-center shadow-xl transition-all duration-300"
-                    style={cardStyle}>
-                    <div>
-                        <div className="text-xs uppercase tracking-wider font-bold mb-1 opacity-70">Room Code</div>
-                        <div className="text-5xl font-mono font-black tracking-widest bg-gradient-to-r from-pink-500 via-red-500 to-yellow-500 text-transparent bg-clip-text animate-pulse-slow drop-shadow-sm select-all">
-                            {room.roomCode}
+                <div className="p-6 rounded-[2rem] shadow-xl relative overflow-hidden"
+                    style={{
+                        backgroundColor: 'var(--theme-card-bg)',
+                        border: '2px solid var(--theme-border)'
+                    }}>
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <div className="text-xs font-bold tracking-widest opacity-60 mb-1 text-[var(--theme-text-secondary)]">ROOM CODE</div>
+                            <div className="text-6xl font-black tracking-widest rainbow-text drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
+                                {room.roomCode}
+                            </div>
                         </div>
+                        <button
+                            onClick={copyRoomCode}
+                            className="bg-white/10 hover:bg-white/20 text-[var(--theme-text)] px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 transition-all"
+                        >
+                            {copied ? '✓' : '📋'} {copied ? 'Copied' : 'Copy'}
+                        </button>
                     </div>
-                    <button
-                        onClick={copyRoomCode}
-                        className={`px-4 py-2 rounded-xl font-bold text-sm transition-all ${copied
-                            ? 'bg-green-400 text-white'
-                            : 'bg-black/10 hover:bg-black/20 text-current'
-                            }`}
-                    >
-                        {copied ? '✓ Copied!' : '📋 Copy'}
-                    </button>
                 </div>
 
                 {/* Game Settings - Host Only */}
@@ -133,25 +135,26 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                     />
                 )}
 
-                {/* Players List */}
-                <div className="shadow-xl transition-all duration-300"
-                    style={cardStyle}>
-                    <h3 className="text-lg font-bold flex items-center gap-2 mb-4">
-                        👥 Players
-                        <span className="bg-black/10 px-3 py-1 rounded-full text-sm">
+                {/* Players Card */}
+                <div className="p-6 rounded-[2rem] shadow-xl min-h-[300px] flex flex-col"
+                    style={{
+                        backgroundColor: 'var(--theme-card-bg)',
+                        border: '2px solid var(--theme-border)'
+                    }}>
+                    <div className="flex items-center gap-3 mb-6">
+                        <h3 className="text-2xl font-bold text-[var(--theme-text)]">👥 Players</h3>
+                        <span className="bg-white/10 px-3 py-1 rounded-full text-sm font-bold text-[var(--theme-text-secondary)]">
                             {room.players.length}
                         </span>
-                    </h3>
-                    <div className="space-y-2">
-                        {Array.isArray(room.players) && room.players.map((p, index) => {
-                            if (!p) return null;
-                            return (
-                                <div
-                                    key={p.id}
-                                    className="bg-gray-50 p-3 rounded-xl flex items-center justify-between"
-                                    style={{ animationDelay: `${index * 0.1}s` }}
-                                >
-                                    <div className="flex items-center gap-3">
+                    </div>
+
+                    <div className="space-y-3 flex-1 overflow-y-auto max-h-[400px]">
+                        {Array.isArray(room.players) && room.players.map((p) => (
+                            <div key={p.id}
+                                className="flex items-center justify-between p-3 rounded-2xl"
+                                style={{ backgroundColor: 'var(--theme-bg-secondary)' }}>
+                                <div className="flex items-center gap-3">
+                                    <div className="relative">
                                         <AvatarDisplay
                                             strokes={p.avatarStrokes}
                                             avatar={p.avatar}
@@ -159,104 +162,86 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                                             color={p.color}
                                             size={48}
                                         />
-                                        <div>
-                                            <div className="font-bold text-gray-800">
-                                                {p.name} {p.id === room.hostId && '👑'}
-                                            </div>
-                                            {p.id === currentPlayerId && (
-                                                <div className="text-xs text-purple-500 font-bold">YOU</div>
-                                            )}
-                                        </div>
+                                        {p.id === room.hostId && (
+                                            <span className="absolute -top-1 -right-1 text-lg">👑</span>
+                                        )}
                                     </div>
-                                    <div className="flex items-center gap-2">
-                                        <div className={`px-3 py-1 rounded-full text-xs font-bold ${room.playerStates && room.playerStates[p.id]?.status === 'ready'
-                                            ? 'bg-green-100 text-green-600'
-                                            : isIdle(p.lastSeen)
-                                                ? 'bg-gray-100 text-gray-400'
-                                                : 'bg-yellow-100 text-yellow-600'
-                                            }`}>
-                                            {room.playerStates && room.playerStates[p.id]?.status === 'ready'
-                                                ? 'READY!'
-                                                : isIdle(p.lastSeen)
-                                                    ? '💤'
-                                                    : 'WAITING...'}
-                                        </div>
-                                        {isHost && p.id !== currentPlayerId && (
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    if (window.confirm(`Kick ${p.name}?`)) {
-                                                        onKick(p.id);
-                                                    }
-                                                }}
-                                                className="bg-red-100 text-red-500 w-7 h-7 rounded-full hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center text-sm"
-                                            >
-                                                ✕
-                                            </button>
+                                    <div>
+                                        <div className="font-bold text-[var(--theme-text)] leading-tight">{p.name}</div>
+                                        {p.id === currentPlayerId && (
+                                            <div className="text-[10px] font-bold tracking-wider opacity-60 text-[var(--theme-text)]">YOU</div>
                                         )}
                                     </div>
                                 </div>
-                            );
-                        })}
+                                <div className="flex items-center gap-2">
+                                    <div className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest ${isIdle(p.lastSeen) ? 'opacity-50' : ''
+                                        }`}
+                                        style={{ backgroundColor: '#CD853F', color: '#3E2723' }}>
+                                        {room.playerStates && room.playerStates[p.id]?.status === 'ready'
+                                            ? 'READY!'
+                                            : isIdle(p.lastSeen)
+                                                ? 'AWAY...'
+                                                : 'WAITING...'}
+                                    </div>
+                                    {isHost && p.id !== currentPlayerId && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                if (window.confirm(`Kick ${p.name}?`)) {
+                                                    onKick(p.id);
+                                                }
+                                            }}
+                                            className="bg-red-100 text-red-500 w-7 h-7 rounded-full hover:bg-red-500 hover:text-white transition-colors flex items-center justify-center text-sm"
+                                        >
+                                            ✕
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        ))}
                     </div>
 
-                    {/* Leave Room Button */}
+                    {/* Leave Room (Inside Players Card as per screenshot) */}
                     <button
                         onClick={onLeave}
-                        className="w-full mt-4 bg-red-100 text-red-600 font-bold py-3 rounded-xl hover:bg-red-200 transition-all flex items-center justify-center gap-2"
+                        className="w-full mt-6 bg-[#8B0000] text-[#FFaaaa] font-bold py-4 rounded-xl hover:bg-[#A52A2A] transition-all flex items-center justify-center gap-2 shadow-inner"
                     >
-                        <span>🚪</span> Leave Room
+                        🚪 Leave Room
                     </button>
                 </div>
 
-                {/* Start Game Area - Only host can start */}
+                {/* Footer Status Card */}
                 {isHost ? (
                     <button
                         onClick={onStartGame}
                         disabled={room.players.length < 2}
-                        className={`w-full rounded-3xl p-6 text-center relative transition-transform ${room.players.length < 2
-                            ? 'opacity-75 cursor-not-allowed grayscale bg-gray-100'
-                            : 'bg-white cursor-pointer hover:scale-[1.02]'
+                        className={`w-full p-6 rounded-[2rem] text-center shadow-xl transition-all ${room.players.length < 2 ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02]'
                             }`}
                         style={{
-                            boxShadow: room.players.length < 2
-                                ? '0 4px 0 rgba(150, 150, 150, 0.2)'
-                                : '0 10px 0 rgba(255, 140, 0, 0.3), 0 20px 40px rgba(0, 0, 0, 0.15)',
-                            border: room.players.length < 2
-                                ? '4px solid #ccc'
-                                : '4px solid #FF8C00',
-                            background: room.players.length < 2
-                                ? '#f5f5f5'
-                                : 'linear-gradient(135deg, #fff7ed, #fffbeb)'
-                        }}>
-                        <div className="space-y-2 pointer-events-none">
-                            <div className="text-4xl">🚀</div>
-                            <h3 className="text-2xl font-bold"
-                                style={{
-                                    background: room.players.length < 2
-                                        ? '#999'
-                                        : 'linear-gradient(135deg, #FF8C00, #FF69B4)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent'
-                                }}>
-                                Start Game!
-                            </h3>
-                            <p className={`font-medium text-sm ${room.players.length < 2 ? 'text-gray-500' : 'text-orange-400'}`}>
-                                {room.players.length < 2 ? '⚠️ Need at least 2 players' : 'Click to begin!'}
-                            </p>
-                        </div>
+                            backgroundColor: 'var(--theme-card-bg)',
+                            border: '2px solid var(--theme-border)'
+                        }}
+                    >
+                        <div className="text-4xl mb-2">🚀</div>
+                        <h3 className="text-xl font-bold text-[var(--theme-text)]">
+                            {room.players.length < 2 ? 'Waiting for players...' : 'Start Game!'}
+                        </h3>
                     </button>
                 ) : (
-                    <div className="bg-white/90 rounded-2xl p-6 text-center shadow-lg">
-                        <div className="text-4xl mb-2 animate-pulse">⏳</div>
-                        <p className="font-bold text-purple-600">
+                    <div className="w-full p-6 rounded-[2rem] text-center shadow-xl"
+                        style={{
+                            backgroundColor: 'var(--theme-card-bg)',
+                            border: '2px solid var(--theme-border)'
+                        }}>
+                        <div className="text-4xl mb-2 animate-bounce">⏳</div>
+                        <p className="font-bold text-[var(--theme-text)] text-lg">
                             Waiting for host to start the game...
                         </p>
                     </div>
                 )}
 
-                <div className="text-center text-sm text-white/80 font-medium drop-shadow-lg pt-2">
-                    ✨ Fill in the blank and vote for the best drawing! ✨
+                <div className="text-center text-xs font-medium opacity-60 mt-4 text-[var(--theme-text-secondary)] flex items-center justify-center gap-2">
+                    <span>✨</span> Fill in the blank and vote for the best drawing! <span>✨</span>
                 </div>
             </div>
 

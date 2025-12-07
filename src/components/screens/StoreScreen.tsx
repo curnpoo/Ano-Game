@@ -74,37 +74,44 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
     const currentItems = tabs.find(t => t.id === activeTab)?.items || [];
 
     return (
+    return (
         <div
-            className="min-h-screen bg-gradient-to-b from-purple-600 via-purple-700 to-purple-900 flex flex-col"
+            className="min-h-screen flex flex-col"
             style={{
                 paddingTop: 'max(1.5rem, env(safe-area-inset-top) + 1rem)',
-                paddingBottom: 'max(1rem, env(safe-area-inset-bottom))'
+                paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+                backgroundColor: 'var(--theme-bg-primary)'
             }}
         >
             {/* Home Button Card */}
             <button
                 onClick={onBack}
-                className="mx-4 mb-4 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border-2 border-white/20 flex items-center gap-4 hover:bg-white/20 active:scale-95 transition-all"
+                className="mx-4 mb-4 rounded-[2rem] p-4 border-2 flex items-center gap-4 hover:brightness-110 active:scale-95 transition-all shadow-lg"
+                style={{
+                    backgroundColor: 'var(--theme-card-bg)',
+                    borderColor: 'var(--theme-border)'
+                }}
             >
                 <div className="text-3xl">🏠</div>
                 <div className="flex-1 text-left">
-                    <div className="text-lg font-bold text-white">Back to Home</div>
-                    <div className="text-white/60 text-sm">Return to main menu</div>
+                    <div className="text-lg font-bold" style={{ color: 'var(--theme-text)' }}>Back to Home</div>
+                    <div className="text-sm font-medium" style={{ color: 'var(--theme-text-secondary)' }}>Return to main menu</div>
                 </div>
-                <div className="text-2xl text-white/60">←</div>
+                <div className="text-2xl" style={{ color: 'var(--theme-text-secondary)' }}>←</div>
             </button>
 
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2 mb-2">
-                <h1 className="text-2xl font-black text-white drop-shadow-lg">🛒 STORE</h1>
-                <div className="bg-green-500 text-white px-4 py-2 rounded-xl font-bold font-mono">
+                <h1 className="text-2xl font-black drop-shadow-lg" style={{ color: 'var(--theme-text)' }}>🛒 STORE</h1>
+                <div className="text-white px-4 py-2 rounded-xl font-bold font-mono shadow-md"
+                    style={{ backgroundColor: 'var(--theme-accent)' }}>
                     {formatCurrency(balance)}
                 </div>
             </div>
 
             {/* Purchase message */}
             {purchaseMessage && (
-                <div className="mx-4 mb-2 bg-white rounded-xl p-3 text-center font-bold pop-in shadow-lg">
+                <div className="mx-4 mb-2 rounded-xl p-3 text-center font-bold pop-in shadow-lg border-2 border-green-400 bg-green-100 text-green-800">
                     {purchaseMessage}
                 </div>
             )}
@@ -115,10 +122,15 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`px-4 py-2 rounded-xl font-bold whitespace-nowrap transition-all ${activeTab === tab.id
-                            ? 'bg-white text-purple-600 shadow-lg scale-105'
-                            : 'bg-white/20 text-white hover:bg-white/30'
+                        className={`px-4 py-2 rounded-xl font-bold whitespace-nowrap transition-all border-2 ${activeTab === tab.id
+                            ? 'shadow-lg scale-105'
+                            : 'hover:brightness-110 grayscale opacity-80'
                             }`}
+                        style={{
+                            backgroundColor: activeTab === tab.id ? 'var(--theme-accent)' : 'var(--theme-bg-secondary)',
+                            color: activeTab === tab.id ? '#fff' : 'var(--theme-text)',
+                            borderColor: 'var(--theme-border)'
+                        }}
                     >
                         {tab.label}
                     </button>
@@ -135,10 +147,14 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
                         return (
                             <div
                                 key={item.id}
-                                className={`bg-white rounded-2xl p-4 shadow-lg flex flex-col items-center justify-between relative overflow-hidden transition-all ${equipped ? 'ring-4 ring-green-400 scale-[1.02]' : ''}`}
+                                className={`rounded-[2rem] p-4 shadow-lg flex flex-col items-center justify-between relative overflow-hidden transition-all ${equipped ? 'ring-4 ring-green-400 scale-[1.02]' : ''}`}
+                                style={{
+                                    backgroundColor: 'var(--theme-card-bg)',
+                                    border: '2px solid var(--theme-border)'
+                                }}
                             >
                                 {equipped && (
-                                    <div className="absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg">
+                                    <div className="absolute top-0 right-0 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-bl-lg z-10">
                                         ACTIVE
                                     </div>
                                 )}
@@ -148,11 +164,11 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
                                 </div>
 
                                 <div className="text-center w-full mb-3">
-                                    <div className="font-bold text-black text-lg leading-tight mb-1">
+                                    <div className="font-bold text-lg leading-tight mb-1" style={{ color: 'var(--theme-text)' }}>
                                         {item.name}
                                     </div>
                                     {item.description && (
-                                        <div className="text-xs text-gray-700 line-clamp-2 min-h-[2.5em]">
+                                        <div className="text-xs line-clamp-2 min-h-[2.5em]" style={{ color: 'var(--theme-text-secondary)' }}>
                                             {item.description}
                                         </div>
                                     )}
@@ -161,16 +177,15 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
                                 <button
                                     onClick={() => handleAction(item)}
                                     disabled={activeTab === 'themes' ? false : owned} // Themes can be clicked to equip even if owned
-                                    className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 shadow-md ${activeTab === 'themes' && owned
-                                        ? equipped
-                                            ? 'bg-gray-100 text-gray-400 border-2 border-gray-200 cursor-default'
-                                            : 'bg-purple-500 text-white hover:bg-purple-600'
-                                        : owned
-                                            ? 'bg-gray-200 text-gray-500'
-                                            : balance >= item.price
-                                                ? 'bg-gradient-to-r from-green-400 to-emerald-500 text-white hover:shadow-lg'
-                                                : 'bg-red-50 text-red-400 border border-red-100'
-                                        }`}
+                                    className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 shadow-md border-2`}
+                                    style={{
+                                        backgroundColor: activeTab === 'themes' && owned
+                                            ? equipped ? 'var(--theme-bg-secondary)' : 'var(--theme-accent)'
+                                            : owned ? 'var(--theme-bg-secondary)' : (balance >= item.price ? 'var(--theme-accent)' : 'red'),
+                                        color: (activeTab === 'themes' && owned && !equipped) || (!owned && balance >= item.price) ? '#fff' : 'var(--theme-text)',
+                                        borderColor: 'var(--theme-border)',
+                                        opacity: (!owned && balance < item.price) ? 0.5 : 1
+                                    }}
                                 >
                                     {activeTab === 'themes' && owned
                                         ? equipped ? '✓ Equipped' : 'Equip'
@@ -185,7 +200,7 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
                 </div>
 
                 {currentItems.length === 0 && (
-                    <div className="text-center text-white/70 py-12 flex flex-col items-center">
+                    <div className="text-center py-12 flex flex-col items-center" style={{ color: 'var(--theme-text-secondary)' }}>
                         <div className="text-4xl mb-4">📭</div>
                         Nothing available in this category yet!
                     </div>

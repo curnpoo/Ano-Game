@@ -103,36 +103,40 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             }}
         >
             {/* Header with player info - Profile Card */}
-            <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-4 shadow-lg border-2 border-purple-200 mb-6">
-                <div className="flex items-center gap-4">
-                    <div className="w-16 h-16">
+            <div className="bg-white/95 backdrop-blur-sm rounded-[2rem] p-6 shadow-xl mb-8 relative overflow-hidden"
+                style={{
+                    backgroundColor: 'var(--theme-card-bg)',
+                    border: '2px solid var(--theme-border)',
+                    color: 'var(--theme-text)'
+                }}>
+                <div className="flex items-center gap-4 relative z-10">
+                    <div className="w-20 h-20">
                         <AvatarDisplay
                             strokes={player.avatarStrokes}
                             avatar={player.avatar}
                             frame={player.frame}
                             color={player.color}
-                            size={64}
+                            size={80}
                         />
                     </div>
                     <div className="flex-1">
                         <div className="flex items-center justify-between mb-1">
-                            <h2 className="text-xl font-black text-gray-800">{player.name}</h2>
-                            <div className="text-green-600 font-bold">{formatCurrency(balance)}</div>
+                            <h2 className="text-2xl font-black">{player.name}</h2>
+                            <div className="text-xl font-bold text-[#FFD700] drop-shadow-sm">{formatCurrency(balance)}</div>
                         </div>
                         {/* Level & XP */}
-                        <div className="flex items-center gap-2">
-                            <span className="bg-purple-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                        <div className="flex items-center gap-3">
+                            <span className="bg-[#FFD700] text-black text-xs font-black px-2 py-1 rounded-lg">
                                 LVL {XPService.getLevel()}
                             </span>
-                            <div className="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div className="flex-1 bg-black/20 rounded-full h-3 overflow-hidden border border-white/10">
                                 <div
-                                    className="bg-gradient-to-r from-purple-400 to-purple-600 h-full transition-all duration-300"
+                                    className="bg-gradient-to-r from-[#FFD700] to-[#FFA500] h-full transition-all duration-300"
                                     style={{ width: `${XPService.getLevelProgress()}%` }}
+                                    role="progressbar"
+                                    aria-valuenow={XPService.getLevelProgress()}
                                 />
                             </div>
-                            <span className="text-xs text-gray-500 font-medium">
-                                {XPService.getLevelProgress()}/100 XP
-                            </span>
                         </div>
                     </div>
                 </div>
@@ -144,25 +148,37 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     {/* Large Play Button - spans 2 columns */}
                     <button
                         onClick={onPlay}
-                        className={`col-span-2 bg-gradient-to-br ${cards[0].color} rounded-3xl p-6 shadow-xl border-4 ${cards[0].border} 
-                            transform transition-all duration-200 hover:scale-[1.02] active:scale-95 jelly-hover`}
+                        className="col-span-2 rounded-[2rem] p-8 shadow-2xl border-4 transform transition-all duration-200 hover:scale-[1.02] active:scale-95 group relative overflow-hidden"
+                        style={{
+                            backgroundColor: 'var(--theme-card-bg)', // Keep card bg
+                            borderColor: 'var(--theme-accent)',
+                        }}
                     >
-                        <div className="text-5xl mb-2">{cards[0].emoji}</div>
-                        <div className="text-3xl font-black text-white drop-shadow-lg">{cards[0].label}</div>
-                        <div className="text-white/80 text-sm font-medium">{cards[0].description}</div>
+                        <div className="absolute inset-0 bg-gradient-to-r from-[var(--theme-accent)]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <div className="text-6xl mb-2 group-hover:rotate-12 transition-transform duration-300">🎮</div>
+                        <div className="text-4xl font-black text-[var(--theme-text)] drop-shadow-sm">PLAY</div>
+                        <div className="text-[var(--theme-text-secondary)] font-bold text-sm">Start a new game</div>
                     </button>
 
-                    {/* Other cards - 2x2 grid */}
-                    {cards.slice(1).map(card => (
+                    {/* Secondary Actions */}
+                    {[
+                        { id: 'casino', label: 'CASINO', emoji: '🎰', onClick: onCasino },
+                        { id: 'store', label: 'STORE', emoji: '🛒', onClick: onStore },
+                        { id: 'profile', label: 'PROFILE', emoji: '👤', onClick: onProfile },
+                        { id: 'settings', label: 'SETTINGS', emoji: '⚙️', onClick: onSettings }
+                    ].map(card => (
                         <button
                             key={card.id}
                             onClick={card.onClick}
-                            className={`bg-gradient-to-br ${card.color} rounded-2xl p-4 shadow-xl border-3 ${card.border}
-                                transform transition-all duration-200 hover:scale-[1.03] active:scale-95 jelly-hover`}
+                            className="bg-white rounded-[1.5rem] p-4 shadow-lg border-2 transform transition-all duration-200 hover:scale-[1.03] active:scale-95 flex flex-col items-center justify-center gap-1"
+                            style={{
+                                backgroundColor: 'var(--theme-card-bg)',
+                                borderColor: 'var(--theme-border)',
+                                color: 'var(--theme-text)'
+                            }}
                         >
                             <div className="text-3xl mb-1">{card.emoji}</div>
-                            <div className="text-lg font-bold text-white drop-shadow">{card.label}</div>
-                            <div className="text-white/70 text-xs">{card.description}</div>
+                            <div className="text-sm font-bold opacity-90">{card.label}</div>
                         </button>
                     ))}
 
@@ -170,27 +186,31 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     {lastGameDetails && onRejoin && (
                         <button
                             onClick={() => onRejoin(lastGameDetails.roomCode)}
-                            className="col-span-2 bg-white rounded-2xl p-4 shadow-lg border-2 border-orange-200 flex items-center justify-between group active:scale-95 transition-all"
+                            className="col-span-2 bg-white rounded-[1.5rem] p-4 shadow-lg border-2 border-orange-200 flex items-center justify-between group active:scale-95 transition-all mt-2"
+                            style={{
+                                backgroundColor: 'var(--theme-card-bg)',
+                                borderColor: 'var(--theme-accent)'
+                            }}
                         >
                             <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center text-xl group-hover:rotate-12 transition-transform">
+                                <div className="w-10 h-10 bg-orange-100/20 rounded-full flex items-center justify-center text-xl group-hover:rotate-12 transition-transform">
                                     🔙
                                 </div>
                                 <div className="text-left">
-                                    <div className="text-xs font-bold text-orange-400 uppercase tracking-wider">Rejoin Game</div>
-                                    <div className="text-gray-800 font-bold">Host: {lastGameDetails.hostName}</div>
-                                    <div className="text-xs text-gray-500">{lastGameDetails.playerCount} Players • {lastGameDetails.roomCode}</div>
+                                    <div className="text-[10px] font-bold text-[var(--theme-accent)] uppercase tracking-wider">Rejoin Game</div>
+                                    <div className="text-[var(--theme-text)] font-bold">{lastGameDetails.hostName}'s Game</div>
+                                    <div className="text-xs text-[var(--theme-text-secondary)]">{lastGameDetails.playerCount} Players • {lastGameDetails.roomCode}</div>
                                 </div>
                             </div>
-                            <div className="text-orange-400 font-bold text-sm">Join →</div>
+                            <div className="text-[var(--theme-accent)] font-bold text-sm">Join →</div>
                         </button>
                     )}
                 </div>
             </div>
 
             {/* Footer */}
-            <div className="text-center text-white/60 text-xs mt-4">
-                Draw. Vote. Win! 🎨
+            <div className="text-center text-[var(--theme-text-secondary)] text-xs font-bold tracking-widest opacity-50 mt-8">
+                ANTIGRAVITY GAMES
             </div>
 
             {/* Admin Modal */}

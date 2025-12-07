@@ -24,23 +24,19 @@ export const WaitingRoomScreen: React.FC<WaitingRoomScreenProps> = ({
     const me = room.waitingPlayers?.find(p => p.id === currentPlayerId) || room.players.find(p => p.id === currentPlayerId);
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-y-auto pb-safe">
+        <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-y-auto pb-safe"
+            style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
             {/* Decorative elements */}
             <div className="fixed top-10 left-10 text-6xl animate-bounce pointer-events-none z-0">⏳</div>
             <div className="fixed bottom-10 right-10 text-6xl animate-pulse pointer-events-none z-0">🎮</div>
 
-            <div className={`bg-white rounded-[2rem] p-8 max-w-md w-full text-center relative z-10 my-auto ${mounted ? 'pop-in' : 'opacity-0'}`}
+            <div className={`rounded-[2rem] p-8 max-w-md w-full text-center relative z-10 my-auto shadow-2xl ${mounted ? 'pop-in' : 'opacity-0'}`}
                 style={{
-                    boxShadow: '0 10px 0 rgba(0, 0, 0, 0.2), 0 20px 40px rgba(0, 0, 0, 0.15)',
-                    border: '4px solid #FF69B4'
+                    backgroundColor: 'var(--theme-card-bg)',
+                    border: '2px solid var(--theme-border)'
                 }}>
 
-                <h1 className="text-3xl font-bold mb-4"
-                    style={{
-                        background: 'linear-gradient(135deg, #FF69B4, #9B59B6)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent'
-                    }}>
+                <h1 className="text-3xl font-black mb-4" style={{ color: 'var(--theme-text)' }}>
                     Waiting Room
                 </h1>
 
@@ -55,20 +51,29 @@ export const WaitingRoomScreen: React.FC<WaitingRoomScreenProps> = ({
                     />
                 </div>
 
-                <div className="bg-gray-100 rounded-xl p-6 mb-6">
-                    <p className="text-gray-600 font-medium mb-2">
+                <div className="rounded-2xl p-6 mb-6"
+                    style={{
+                        backgroundColor: 'var(--theme-bg-secondary)',
+                        border: '1px solid var(--theme-border)'
+                    }}>
+                    <p className="font-medium mb-2" style={{ color: 'var(--theme-text-secondary)' }}>
                         The game is currently in progress.
                     </p>
-                    <p className="text-xl font-bold text-purple-600 animate-pulse">
+                    <p className="text-xl font-bold animate-pulse" style={{ color: 'var(--theme-accent)' }}>
                         You'll join in Round {currentRound} of {totalRounds}!
                     </p>
                 </div>
 
                 <div className="space-y-4">
-                    <div className="text-sm text-gray-500 font-bold uppercase tracking-wider">
+                    <div className="text-sm font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-secondary)' }}>
                         Current Status
                     </div>
-                    <div className="inline-block bg-yellow-100 text-yellow-700 px-4 py-2 rounded-full font-bold">
+                    <div className="inline-block px-4 py-2 rounded-full font-bold shadow-sm"
+                        style={{
+                            backgroundColor: 'var(--theme-bg-secondary)',
+                            color: 'var(--theme-text)',
+                            border: '1px solid var(--theme-border)'
+                        }}>
                         {room.status === 'uploading' ? '📸 Uploading Image' :
                             room.status === 'drawing' ? '🎨 Drawing Phase' :
                                 room.status === 'voting' ? '🗳️ Voting Phase' :
@@ -79,16 +84,20 @@ export const WaitingRoomScreen: React.FC<WaitingRoomScreenProps> = ({
                 {/* Show who hasn't finished yet */}
                 {room.status === 'drawing' && (
                     <div className="mt-4">
-                        <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2">
+                        <div className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-secondary)' }}>
                             Still Drawing ({room.players.filter(p => room.playerStates?.[p.id]?.status !== 'submitted').length})
                         </div>
                         <div className="flex flex-wrap justify-center gap-2 max-h-32 overflow-y-auto custom-scrollbar">
                             {room.players
                                 .filter(p => room.playerStates?.[p.id]?.status !== 'submitted')
                                 .map(p => (
-                                    <div key={p.id} className="flex items-center gap-1 bg-white border border-gray-200 px-2 py-1 rounded-lg shadow-sm animate-pulse">
+                                    <div key={p.id} className="flex items-center gap-1 px-2 py-1 rounded-lg shadow-sm animate-pulse"
+                                        style={{
+                                            backgroundColor: 'var(--theme-bg-secondary)',
+                                            border: '1px solid var(--theme-border)'
+                                        }}>
                                         <span className="text-xs">{p.avatar || '👤'}</span>
-                                        <span className="text-xs font-semibold text-gray-600 truncate max-w-[80px]">{p.name}</span>
+                                        <span className="text-xs font-semibold truncate max-w-[80px]" style={{ color: 'var(--theme-text)' }}>{p.name}</span>
                                     </div>
                                 ))}
                         </div>
@@ -98,28 +107,32 @@ export const WaitingRoomScreen: React.FC<WaitingRoomScreenProps> = ({
                 {/* Show who is uploading */}
                 {room.status === 'uploading' && (
                     <div className="mt-4">
-                        <div className="text-xs text-gray-500 font-bold uppercase tracking-wider mb-2">
+                        <div className="text-xs font-bold uppercase tracking-wider mb-2" style={{ color: 'var(--theme-text-secondary)' }}>
                             Waiting for Uploader
                         </div>
                         {(() => {
                             const uploader = room.players.find(p => p.id === (room.currentUploaderId || room.hostId));
                             return uploader ? (
-                                <div className="flex items-center justify-center gap-2 bg-white border border-orange-200 px-4 py-2 rounded-xl shadow-sm animate-bounce-gentle">
+                                <div className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl shadow-sm animate-bounce-gentle"
+                                    style={{
+                                        backgroundColor: 'var(--theme-bg-secondary)',
+                                        border: '1px solid var(--theme-border)'
+                                    }}>
                                     <span className="text-2xl">{uploader.avatar || '📸'}</span>
                                     <div className="text-left">
-                                        <div className="font-bold text-gray-700">{uploader.name}</div>
-                                        <div className="text-xs text-orange-500 font-medium">Picking an image...</div>
+                                        <div className="font-bold" style={{ color: 'var(--theme-text)' }}>{uploader.name}</div>
+                                        <div className="text-xs font-medium opacity-80" style={{ color: 'var(--theme-accent)' }}>Picking an image...</div>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="text-sm text-gray-400 italic">Unknown Uploader</div>
+                                <div className="text-sm italic" style={{ color: 'var(--theme-text-secondary)' }}>Unknown Uploader</div>
                             );
                         })()}
                     </div>
                 )}
 
-                <div className="mt-8 pt-6 border-t-2 border-gray-100 space-y-4">
-                    <p className="text-gray-400 text-sm">
+                <div className="mt-8 pt-6 border-t-2 space-y-4" style={{ borderColor: 'var(--theme-border)' }}>
+                    <p className="text-sm opacity-60 font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
                         Sit tight! You've been added to the queue.
                         <br />
                         You'll join automatically in the next round.
@@ -129,7 +142,10 @@ export const WaitingRoomScreen: React.FC<WaitingRoomScreenProps> = ({
                     {(room.status !== 'lobby') && (
                         <button
                             onClick={onJoinGame}
-                            className="w-full bg-gradient-to-r from-cyan-400 to-blue-500 text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-transform flex items-center justify-center gap-2"
+                            className="w-full text-white font-bold py-3 px-6 rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-transform flex items-center justify-center gap-2"
+                            style={{
+                                backgroundColor: 'var(--theme-accent)'
+                            }}
                         >
                             <span>🚀</span>
                             <span>Join Current Round</span>

@@ -276,6 +276,53 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                     <hr className="border-gray-100" />
 
+                    {/* Theme Toggle */}
+                    <div className="space-y-2">
+                        <label className="text-sm font-bold text-gray-500 uppercase tracking-wider">App Theme</label>
+                        <div className="grid grid-cols-2 gap-3">
+                            <button
+                                onClick={() => onUpdateProfile({
+                                    cosmetics: {
+                                        activeTheme: 'premium-light',
+                                        brushesUnlocked: player.cosmetics?.brushesUnlocked || [],
+                                        colorsUnlocked: player.cosmetics?.colorsUnlocked || [],
+                                        badges: player.cosmetics?.badges || [],
+                                        purchasedItems: player.cosmetics?.purchasedItems || [],
+                                        activeBrush: player.cosmetics?.activeBrush,
+                                        activeColor: player.cosmetics?.activeColor
+                                    }
+                                })}
+                                className={`py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 border-2 transition-all ${player.cosmetics?.activeTheme === 'premium-light' || player.cosmetics?.activeTheme === 'light'
+                                        ? 'bg-orange-100 border-orange-400 text-orange-600'
+                                        : 'bg-gray-50 border-gray-100 text-gray-400 hover:bg-gray-100'
+                                    }`}
+                            >
+                                ☀️ Light
+                            </button>
+                            <button
+                                onClick={() => onUpdateProfile({
+                                    cosmetics: {
+                                        activeTheme: 'premium-dark',
+                                        brushesUnlocked: player.cosmetics?.brushesUnlocked || [],
+                                        colorsUnlocked: player.cosmetics?.colorsUnlocked || [],
+                                        badges: player.cosmetics?.badges || [],
+                                        purchasedItems: player.cosmetics?.purchasedItems || [],
+                                        activeBrush: player.cosmetics?.activeBrush,
+                                        activeColor: player.cosmetics?.activeColor
+                                    }
+                                })}
+                                className={`py-3 px-4 rounded-xl font-bold flex items-center justify-center gap-2 border-2 transition-all ${(player.cosmetics?.activeTheme === 'premium-dark' || player.cosmetics?.activeTheme === 'dark' || !player.cosmetics?.activeTheme || player.cosmetics?.activeTheme === 'default')
+                                    ? 'bg-gray-800 border-gray-600 text-white'
+                                    : 'bg-gray-50 border-gray-100 text-gray-400 hover:bg-gray-100'
+                                    }`}
+                            >
+                                🌙 Dark
+                            </button>
+                        </div>
+                    </div>
+
+                    <hr className="border-gray-100" />
+
                     {/* Notifications */}
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">

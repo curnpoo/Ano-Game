@@ -34,37 +34,49 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
 
     return (
+    return (
         <div
-            className="min-h-screen bg-gradient-to-b from-blue-500 via-blue-600 to-blue-800 flex flex-col"
+            className="min-h-screen flex flex-col"
             style={{
                 paddingTop: 'max(1.5rem, env(safe-area-inset-top) + 1rem)',
-                paddingBottom: 'max(1rem, env(safe-area-inset-bottom))'
+                paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+                backgroundColor: 'var(--theme-bg-primary)'
             }}
         >
             {/* Home Button Card */}
             <button
                 onClick={onBack}
-                className="mx-4 mb-4 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border-2 border-white/20 flex items-center gap-4 hover:bg-white/20 active:scale-95 transition-all"
+                className="mx-4 mb-4 rounded-[2rem] p-4 border-2 flex items-center gap-4 hover:brightness-110 active:scale-95 transition-all shadow-lg"
+                style={{
+                    backgroundColor: 'var(--theme-card-bg)',
+                    borderColor: 'var(--theme-border)'
+                }}
             >
                 <div className="text-3xl">🏠</div>
                 <div className="flex-1 text-left">
-                    <div className="text-lg font-bold text-white">Back to Home</div>
-                    <div className="text-white/60 text-sm">Return to main menu</div>
+                    <div className="text-lg font-bold" style={{ color: 'var(--theme-text)' }}>Back to Home</div>
+                    <div className="text-sm font-medium" style={{ color: 'var(--theme-text-secondary)' }}>Return to main menu</div>
                 </div>
-                <div className="text-2xl text-white/60">←</div>
+                <div className="text-2xl" style={{ color: 'var(--theme-text-secondary)' }}>←</div>
             </button>
 
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2 mb-2">
-                <h1 className="text-2xl font-black text-white drop-shadow-lg">👤 PROFILE</h1>
+                <h1 className="text-2xl font-black drop-shadow-lg" style={{ color: 'var(--theme-text)' }}>👤 PROFILE</h1>
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => setShowStats(true)}
-                        className="bg-white/20 text-white px-3 py-2 rounded-xl font-bold hover:bg-white/30 transition-all"
+                        className="px-3 py-2 rounded-xl font-bold transition-all border-2"
+                        style={{
+                            backgroundColor: 'var(--theme-bg-secondary)',
+                            color: 'var(--theme-text)',
+                            borderColor: 'var(--theme-border)'
+                        }}
                     >
                         📊 Stats
                     </button>
-                    <div className="bg-green-500 text-white px-4 py-2 rounded-xl font-bold">
+                    <div className="px-4 py-2 rounded-xl font-bold text-white shadow-md"
+                        style={{ backgroundColor: 'var(--theme-accent)' }}>
                         {formatCurrency(balance)}
                     </div>
                 </div>
@@ -72,23 +84,40 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
             <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-4">
                 {/* Name Input */}
-                <div className="bg-white rounded-2xl p-4 shadow-lg">
-                    <label className="block text-sm font-bold text-gray-700 mb-2">NAME</label>
+                <div className="rounded-[2rem] p-4 shadow-lg"
+                    style={{
+                        backgroundColor: 'var(--theme-card-bg)',
+                        border: '2px solid var(--theme-border)'
+                    }}>
+                    <label className="block text-sm font-bold mb-2" style={{ color: 'var(--theme-text-secondary)' }}>NAME</label>
                     <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         maxLength={15}
-                        className="w-full px-4 py-3 bg-gray-50 rounded-xl border-2 border-gray-200 focus:border-blue-500 focus:outline-none font-bold text-center text-lg"
+                        className="w-full px-4 py-3 rounded-2xl border-2 focus:outline-none font-bold text-center text-lg"
+                        style={{
+                            backgroundColor: 'var(--theme-bg-secondary)',
+                            color: 'var(--theme-text)',
+                            borderColor: 'var(--theme-border)'
+                        }}
                     />
                 </div>
 
                 {/* Avatar Display */}
-                <div className="bg-white rounded-2xl p-4 shadow-lg">
-                    <label className="block text-sm font-bold text-gray-700 mb-2">YOUR AVATAR</label>
+                <div className="rounded-[2rem] p-4 shadow-lg"
+                    style={{
+                        backgroundColor: 'var(--theme-card-bg)',
+                        border: '2px solid var(--theme-border)'
+                    }}>
+                    <label className="block text-sm font-bold mb-2" style={{ color: 'var(--theme-text-secondary)' }}>YOUR AVATAR</label>
                     <button
                         onClick={onEditAvatar}
-                        className="w-full flex flex-col items-center p-4 rounded-xl border-2 border-dashed border-gray-300 hover:border-blue-500 hover:bg-blue-50 transition-all group"
+                        className="w-full flex flex-col items-center p-4 rounded-3xl border-2 border-dashed transition-all group hover:scale-[1.02]"
+                        style={{
+                            borderColor: 'var(--theme-border)',
+                            backgroundColor: 'var(--theme-bg-secondary)'
+                        }}
                     >
                         <div className="w-32 h-32 relative mb-2 group-hover:scale-105 transition-transform">
                             <AvatarDisplay
@@ -98,19 +127,23 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                                 color={player.color}
                                 size={128}
                             />
-                            <div className="absolute bottom-0 right-0 bg-blue-500 text-white p-2 rounded-full shadow-lg">
+                            <div className="absolute bottom-0 right-0 text-white p-2 rounded-full shadow-lg"
+                                style={{ backgroundColor: 'var(--theme-accent)' }}>
                                 ✏️
                             </div>
                         </div>
-                        <span className="text-blue-500 font-bold">Tap to Edit Avatar</span>
+                        <span className="font-bold" style={{ color: 'var(--theme-accent)' }}>Tap to Edit Avatar</span>
                     </button>
                 </div>
             </div>
 
-            <div className="p-4 bg-white/10 backdrop-blur-sm safe-area-inset-bottom">
+            <div className="p-4 safe-area-inset-bottom">
                 <button
                     onClick={handleSave}
-                    className="w-full py-4 bg-black text-white font-bold text-xl rounded-2xl shadow-lg hover:bg-gray-800 active:scale-95 transition-all"
+                    className="w-full py-4 text-white font-bold text-xl rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all"
+                    style={{
+                        background: 'linear-gradient(135deg, var(--theme-accent) 0%, #FFD700 100%)'
+                    }}
                 >
                     Save Changes
                 </button>

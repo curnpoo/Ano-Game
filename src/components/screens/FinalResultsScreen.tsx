@@ -134,7 +134,10 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
     return (
         <div
             className={`min-h-screen flex flex-col items-center p-4 relative overflow-hidden ${mounted ? 'pop-in' : 'opacity-0'}`}
-            style={{ paddingTop: 'max(1.5rem, env(safe-area-inset-top) + 1rem)' }}
+            style={{
+                paddingTop: 'max(1.5rem, env(safe-area-inset-top) + 1rem)',
+                backgroundColor: 'var(--theme-bg-primary)'
+            }}
         >
             {/* Confetti Effect */}
             {showConfetti && <Confetti />}
@@ -142,22 +145,26 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
             {/* Home Button Card */}
             <button
                 onClick={handleGoHome}
-                className="w-full max-w-md mb-4 bg-white/10 backdrop-blur-sm rounded-2xl p-4 border-2 border-white/20 flex items-center gap-4 hover:bg-white/20 active:scale-95 transition-all z-10"
+                className="w-full max-w-md mb-4 rounded-[2rem] p-4 flex items-center gap-4 hover:brightness-110 active:scale-95 transition-all z-10 shadow-lg"
+                style={{
+                    backgroundColor: 'var(--theme-card-bg)',
+                    border: '2px solid var(--theme-border)'
+                }}
             >
                 <div className="text-3xl">🏠</div>
                 <div className="flex-1 text-left">
-                    <div className="text-lg font-bold text-white">Back to Home</div>
-                    <div className="text-white/60 text-sm">Return to main menu</div>
+                    <div className="text-lg font-bold" style={{ color: 'var(--theme-text)' }}>Back to Home</div>
+                    <div className="text-sm font-medium" style={{ color: 'var(--theme-text-secondary)' }}>Return to main menu</div>
                 </div>
-                <div className="text-2xl text-white/60">←</div>
+                <div className="text-2xl" style={{ color: 'var(--theme-text-secondary)' }}>←</div>
             </button>
 
             {/* Header */}
             <div className="text-center mb-6 z-10">
-                <h1 className="text-5xl font-bold text-white drop-shadow-lg mb-2 animate-pulse">
+                <h1 className="text-5xl font-black drop-shadow-xl mb-2 animate-pulse" style={{ color: 'var(--theme-text)' }}>
                     🏆 GAME OVER! 🏆
                 </h1>
-                <p className="text-white/80 font-medium text-xl">
+                <p className="font-bold text-xl" style={{ color: 'var(--theme-text-secondary)' }}>
                     After {room.settings.totalRounds} rounds...
                 </p>
             </div>
@@ -169,21 +176,18 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                     <div className="flex flex-col items-center pop-in" style={{ animationDelay: '0.3s' }}>
                         <div className="text-5xl mb-2">🥈</div>
                         <div
-                            className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-white mb-2 border-4 border-white"
-                            style={{
-                                backgroundColor: second.color,
-                                boxShadow: '0 6px 0 rgba(0,0,0,0.2)'
-                            }}
+                            className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-white mb-2 border-4 border-white shadow-xl"
+                            style={{ backgroundColor: second.color }}
                         >
                             {second.name.charAt(0).toUpperCase()}
                         </div>
-                        <div className="bg-gradient-to-b from-gray-300 to-gray-400 w-28 h-28 rounded-t-xl flex flex-col items-center justify-center"
+                        <div className="bg-gradient-to-b from-gray-300 to-gray-400 w-28 h-28 rounded-t-2xl flex flex-col items-center justify-center border-t border-white/30"
                             style={{ boxShadow: '0 6px 0 rgba(0,0,0,0.2)' }}>
-                            <span className="text-3xl font-bold text-gray-700">2nd</span>
-                            <span className="text-lg font-bold text-gray-600">{room.scores[second.id] || 0}</span>
-                            <span className="text-sm text-gray-500">points</span>
+                            <span className="text-3xl font-bold text-gray-800">2nd</span>
+                            <span className="text-lg font-bold text-gray-700">{room.scores[second.id] || 0}</span>
+                            <span className="text-sm text-gray-600">points</span>
                         </div>
-                        <p className="mt-2 font-bold text-white text-lg">{second.name}</p>
+                        <p className="mt-2 font-bold text-lg" style={{ color: 'var(--theme-text)' }}>{second.name}</p>
                     </div>
                 )}
 
@@ -192,7 +196,7 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                     <div className="flex flex-col items-center pop-in" style={{ animationDelay: '0.1s' }}>
                         <div className="text-6xl mb-2 animate-bounce">👑</div>
                         <div
-                            className="w-32 h-32 rounded-full flex items-center justify-center text-4xl font-bold text-white mb-2 border-4 border-yellow-300"
+                            className="w-32 h-32 rounded-full flex items-center justify-center text-4xl font-bold text-white mb-2 border-4 border-yellow-300 shadow-xl"
                             style={{
                                 backgroundColor: first.color,
                                 boxShadow: '0 8px 0 rgba(0,0,0,0.2), 0 0 30px rgba(255, 215, 0, 0.5)'
@@ -200,13 +204,13 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                         >
                             {first.name.charAt(0).toUpperCase()}
                         </div>
-                        <div className="bg-gradient-to-b from-yellow-400 to-yellow-500 w-36 h-36 rounded-t-xl flex flex-col items-center justify-center"
+                        <div className="bg-gradient-to-b from-yellow-400 to-yellow-500 w-36 h-36 rounded-t-2xl flex flex-col items-center justify-center border-t border-white/30"
                             style={{ boxShadow: '0 6px 0 rgba(0,0,0,0.2)' }}>
-                            <span className="text-4xl font-bold text-yellow-800">1st</span>
-                            <span className="text-2xl font-bold text-yellow-700">{room.scores[first.id] || 0}</span>
-                            <span className="text-sm text-yellow-600">points</span>
+                            <span className="text-4xl font-bold text-yellow-900">1st</span>
+                            <span className="text-2xl font-bold text-yellow-800">{room.scores[first.id] || 0}</span>
+                            <span className="text-sm text-yellow-700">points</span>
                         </div>
-                        <p className="mt-2 font-bold text-white text-xl">🎉 {first.name} 🎉</p>
+                        <p className="mt-2 font-black text-2xl" style={{ color: 'var(--theme-text)' }}>{first.name}</p>
                     </div>
                 )}
 
@@ -215,50 +219,55 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                     <div className="flex flex-col items-center pop-in" style={{ animationDelay: '0.5s' }}>
                         <div className="text-4xl mb-2">🥉</div>
                         <div
-                            className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold text-white mb-2 border-4 border-white"
-                            style={{
-                                backgroundColor: third.color,
-                                boxShadow: '0 4px 0 rgba(0,0,0,0.2)'
-                            }}
+                            className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold text-white mb-2 border-4 border-white shadow-xl"
+                            style={{ backgroundColor: third.color }}
                         >
                             {third.name.charAt(0).toUpperCase()}
                         </div>
-                        <div className="bg-gradient-to-b from-orange-300 to-orange-400 w-24 h-20 rounded-t-xl flex flex-col items-center justify-center"
+                        <div className="bg-gradient-to-b from-orange-300 to-orange-400 w-24 h-20 rounded-t-2xl flex flex-col items-center justify-center border-t border-white/30"
                             style={{ boxShadow: '0 6px 0 rgba(0,0,0,0.2)' }}>
-                            <span className="text-2xl font-bold text-orange-800">3rd</span>
-                            <span className="text-lg font-bold text-orange-700">{room.scores[third.id] || 0}</span>
-                            <span className="text-xs text-orange-600">points</span>
+                            <span className="text-2xl font-bold text-orange-900">3rd</span>
+                            <span className="text-lg font-bold text-orange-800">{room.scores[third.id] || 0}</span>
+                            <span className="text-xs text-orange-700">points</span>
                         </div>
-                        <p className="mt-2 font-bold text-white">{third.name}</p>
+                        <p className="mt-2 font-bold text-lg" style={{ color: 'var(--theme-text)' }}>{third.name}</p>
                     </div>
                 )}
             </div>
 
             {/* All Scores */}
-            <div className="bg-white/90 rounded-2xl p-4 mb-6 w-full max-w-sm z-10"
-                style={{ boxShadow: '0 6px 0 rgba(155, 89, 182, 0.3)' }}>
-                <h3 className="text-lg font-bold text-purple-600 mb-3 text-center">📊 Final Scores</h3>
+            <div className="rounded-[2rem] p-6 mb-6 w-full max-w-md shadow-2xl z-10"
+                style={{
+                    backgroundColor: 'var(--theme-card-bg)',
+                    border: '2px solid var(--theme-border)'
+                }}>
+                <h3 className="text-xl font-bold mb-4 text-center" style={{ color: 'var(--theme-text)' }}>📊 Final Scores</h3>
                 <div className="space-y-2">
                     {sortedPlayers.map((player, i) => (
                         <div
                             key={player.id}
-                            className={`flex items-center justify-between px-3 py-2 rounded-lg ${i === 0 ? 'bg-yellow-100' : 'bg-gray-50'
-                                }`}
+                            className="flex items-center justify-between p-3 rounded-2xl transition-transform"
+                            style={{
+                                backgroundColor: i === 0 ? 'var(--theme-accent-alpha-20)' : 'var(--theme-bg-secondary)',
+                                border: i === 0 ? '2px solid var(--theme-accent)' : 'none'
+                            }}
                         >
-                            <div className="flex items-center gap-2">
-                                <span className="font-bold text-gray-400 w-6">#{i + 1}</span>
+                            <div className="flex items-center gap-3">
+                                <span className="font-bold w-6" style={{ color: 'var(--theme-text-secondary)' }}>#{i + 1}</span>
                                 <div
-                                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold"
+                                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm"
                                     style={{ backgroundColor: player.color }}
                                 >
                                     {player.name.charAt(0).toUpperCase()}
                                 </div>
-                                <span className="font-medium text-gray-800">{player.name}</span>
+                                <span className="font-bold" style={{ color: 'var(--theme-text)' }}>{player.name}</span>
                                 {player.id === currentPlayerId && (
-                                    <span className="text-xs text-gray-400">(You)</span>
+                                    <span className="text-xs opacity-60 font-bold" style={{ color: 'var(--theme-text)' }}>(You)</span>
                                 )}
                             </div>
-                            <span className="font-bold text-purple-600 text-lg">{room.scores[player.id] || 0}</span>
+                            <span className="font-black text-lg" style={{ color: i === 0 ? 'var(--theme-accent)' : 'var(--theme-text)' }}>
+                                {room.scores[player.id] || 0}
+                            </span>
                         </div>
                     ))}
                 </div>
@@ -268,50 +277,68 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
             {isHost ? (
                 <button
                     onClick={handlePlayAgain}
-                    className="btn-90s bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-500 text-white px-10 py-5 rounded-2xl font-bold text-2xl jelly-hover z-10"
+                    className="z-10 w-full max-w-sm text-white px-10 py-5 rounded-[2rem] font-black text-2xl shadow-2xl hover:scale-105 active:scale-95 transition-all"
+                    style={{
+                        background: 'linear-gradient(135deg, var(--theme-accent) 0%, #FFD700 100%)'
+                    }}
                 >
                     🎮 Play Again!
                 </button>
             ) : (
-                <p className="text-white/80 font-medium animate-pulse z-10">
+                <p className="z-10 font-bold animate-pulse text-lg" style={{ color: 'var(--theme-text-secondary)' }}>
                     Waiting for host to start new game...
                 </p>
             )}
 
             {/* Rewards Modal */}
             {showStatsModal && earnedStats && (
-                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 pop-in">
-                    <div className="bg-white rounded-3xl p-8 w-full max-w-sm mx-4 text-center border-4 border-yellow-400 shadow-2xl relative overflow-hidden">
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center z-50 pop-in">
+                    <div className="bg-white rounded-[2.5rem] p-8 w-full max-w-sm mx-4 text-center border-4 border-yellow-400 shadow-2xl relative overflow-hidden"
+                        style={{
+                            backgroundColor: 'var(--theme-card-bg)',
+                            borderColor: 'var(--theme-accent)'
+                        }}>
                         {/* Shine effect */}
-                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent pointer-events-none" />
+                        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent pointer-events-none" />
 
                         <div className="text-6xl mb-4 animate-bounce">🎁</div>
-                        <h2 className="text-3xl font-black text-gray-800 mb-2">Round Rewards</h2>
-                        <p className="text-gray-500 mb-6">Great game! Here's what you earned:</p>
+                        <h2 className="text-3xl font-black mb-2" style={{ color: 'var(--theme-text)' }}>Round Rewards</h2>
+                        <p className="mb-6 font-medium" style={{ color: 'var(--theme-text-secondary)' }}>Great game! Here's what you earned:</p>
 
                         <div className="space-y-4 mb-8">
                             {/* Coins */}
-                            <div className="bg-green-50 rounded-xl p-4 border-2 border-green-100 flex items-center justify-between">
+                            <div className="rounded-2xl p-4 border-2 flex items-center justify-between"
+                                style={{
+                                    backgroundColor: 'var(--theme-bg-secondary)',
+                                    borderColor: 'var(--theme-border)'
+                                }}>
                                 <div className="flex items-center gap-3">
                                     <span className="text-3xl">🪙</span>
-                                    <span className="font-bold text-green-700">Coins</span>
+                                    <span className="font-bold" style={{ color: 'var(--theme-text)' }}>Coins</span>
                                 </div>
-                                <div className="text-2xl font-black text-green-600">+{earnedStats.coins}</div>
+                                <div className="text-2xl font-black text-green-500">+{earnedStats.coins}</div>
                             </div>
 
                             {/* XP */}
-                            <div className="bg-purple-50 rounded-xl p-4 border-2 border-purple-100 flex items-center justify-between">
+                            <div className="rounded-2xl p-4 border-2 flex items-center justify-between"
+                                style={{
+                                    backgroundColor: 'var(--theme-bg-secondary)',
+                                    borderColor: 'var(--theme-border)'
+                                }}>
                                 <div className="flex items-center gap-3">
                                     <span className="text-3xl">✨</span>
-                                    <span className="font-bold text-purple-700">XP</span>
+                                    <span className="font-bold" style={{ color: 'var(--theme-text)' }}>XP</span>
                                 </div>
-                                <div className="text-2xl font-black text-purple-600">+{earnedStats.xp}</div>
+                                <div className="text-2xl font-black text-purple-500">+{earnedStats.xp}</div>
                             </div>
                         </div>
 
                         <button
                             onClick={handleContinue}
-                            className="w-full bg-black text-white py-4 rounded-xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl"
+                            className="w-full text-white py-4 rounded-xl font-bold text-lg hover:scale-105 active:scale-95 transition-all shadow-xl"
+                            style={{
+                                backgroundColor: 'var(--theme-accent)'
+                            }}
                         >
                             Continue
                         </button>

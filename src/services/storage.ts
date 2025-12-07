@@ -264,7 +264,6 @@ export const StorageService = {
         };
 
         await set(roomRef, newRoom);
-        await set(roomRef, newRoom);
         StorageService.saveRoomCode(roomCode); // Save for persistence
         StorageService.saveRoomToHistory(newRoom);
         return roomCode;
@@ -653,9 +652,9 @@ export const StorageService = {
     },
 
     // Submit vote
-    submitVote: async (roomCode: string, oderId: string, votedForId: string): Promise<GameRoom | null> => {
+    submitVote: async (roomCode: string, voterId: string, votedForId: string): Promise<GameRoom | null> => {
         return StorageService.updateRoom(roomCode, (r) => {
-            const newVotes = { ...r.votes, [oderId]: votedForId };
+            const newVotes = { ...r.votes, [voterId]: votedForId };
 
             // Check if all players have voted
             const allVoted = r.players.every(p => newVotes[p.id]);
