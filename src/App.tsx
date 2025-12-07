@@ -919,7 +919,7 @@ function App() {
     const originalPoints = validStrokes.reduce((acc: number, s: any) => acc + s.points.length, 0);
     const newPoints = simplifiedStrokes.reduce((acc: number, s: any) => acc + s.points.length, 0);
     if (originalPoints > 0) {
-      console.log(`Optimization: Reduced ${originalPoints} points to ${newPoints} (${Math.round((1 - newPoints / originalPoints) * 100)}% reduction)`);
+      // console.log(`Optimization: Reduced ${originalPoints} points to ${newPoints} (${Math.round((1 - newPoints / originalPoints) * 100)}% reduction)`);
     }
 
     const drawing: PlayerDrawing = {

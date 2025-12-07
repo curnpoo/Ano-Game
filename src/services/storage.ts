@@ -1,5 +1,6 @@
 import { ref, set, get, onValue, runTransaction, remove } from 'firebase/database';
 import { database } from '../firebase';
+import { ImageService } from './image';
 import type { GameRoom, Player, GameSettings, BlockInfo, PlayerState, PlayerDrawing, RoundResult, RoomHistoryEntry, ChatMessage, PlayerCosmetics } from '../types';
 import { generateId } from '../utils/id';
 
@@ -291,6 +292,10 @@ export const StorageService = {
     },
 
     closeRoom: async (roomCode: string): Promise<void> => {
+        // Delete images from Firebase Storage first
+        await ImageService.deleteRoomImages(roomCode);
+
+        // Then delete the room from the database
         const roomRef = ref(database, `${ROOMS_PATH}/${roomCode}`);
         await remove(roomRef);
     },
@@ -377,7 +382,7 @@ export const StorageService = {
 
     // Subscribe to room changes (real-time)
     subscribeToRoom: (roomCode: string, callback: (room: GameRoom | null) => void): (() => void) => {
-        console.log('Subscribing to room:', roomCode);
+        // console.log('Subscribing to room:', roomCode);
         const roomRef = ref(database, `${ROOMS_PATH}/${roomCode}`);
 
         const unsubscribe = onValue(roomRef, (snapshot) => {

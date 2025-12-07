@@ -1,4 +1,4 @@
-import { ref, uploadString, getDownloadURL } from 'firebase/storage';
+import { ref, uploadString, getDownloadURL, listAll, deleteObject } from 'firebase/storage';
 import { storage } from '../firebase';
 
 export const ImageService = {
@@ -60,11 +60,11 @@ export const ImageService = {
                         const fileName = `${timestamp}_${Math.random().toString(36).substr(2, 9)}.webp`;
                         const storageRef = ref(storage, `game-images/${roomCode}/${fileName}`);
 
-                        console.log('Uploading processed image to Firebase Storage...');
+                        // console.log('Uploading processed image to Firebase Storage...');
                         const snapshot = await uploadString(storageRef, squareBase64, 'data_url');
                         const downloadURL = await getDownloadURL(snapshot.ref);
 
-                        console.log('Image uploaded successfully:', downloadURL);
+                        // console.log('Image uploaded successfully:', downloadURL);
                         resolve(downloadURL);
 
                     } catch (error: any) {
@@ -90,5 +90,24 @@ export const ImageService = {
             reader.onerror = (e) => reject(e);
             reader.readAsDataURL(file);
         });
+    },
+
+    // Delete all images for a room (called when room is closed)
+    deleteRoomImages: async (roomCode: string): Promise<void> => {
+        try {
+            const folderRef = ref(storage, `game-images/${roomCode}`);
+            const fileList = await listAll(folderRef);
+
+            // Delete all files in the folder
+            const deletePromises = fileList.items.map(fileRef => deleteObject(fileRef));
+            await Promise.all(deletePromises);
+
+            console.log(`Deleted ${fileList.items.length} images for room ${roomCode}`);
+        } catch (error: any) {
+            // Ignore "not found" errors (folder doesn't exist)
+            if (error?.code !== 'storage/object-not-found') {
+                console.error('Error deleting room images:', error);
+            }
+        }
     }
 };
