@@ -54,7 +54,7 @@ const TIPS = [
     "💡 Tip: Don't worry, be happy. And draw something funny."
 ];
 
-import { LoadingStage } from '../../types';
+import type { LoadingStage } from '../../types';
 
 interface LoadingScreenProps {
     onGoHome?: () => void;

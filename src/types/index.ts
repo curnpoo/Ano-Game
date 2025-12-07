@@ -47,6 +47,7 @@ export interface GameInvite {
     roomCode: string;     // Room to join
     sentAt: number;       // Timestamp
     status: 'pending' | 'accepted' | 'declined' | 'expired';
+    origin?: string;      // Origin URL for dynamic links
 }
 
 export interface FriendRequest {

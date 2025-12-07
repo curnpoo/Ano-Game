@@ -171,9 +171,8 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
     const renderDrawingLayout = () => {
         if (!room || !player) return null;
         // Use effective duration if passed (calculated in App.tsx with bonuses), otherwise fallback to settings
-        const effectiveDuration = (timerEndsAt && isMyTimerRunning)
-            ? Math.ceil((timerEndsAt - (room.playerStates[player.id]?.timerStartedAt || Date.now())) / 1000)
-            : (room?.settings?.timerDuration || 20); // Fallback
+        // const effectiveDuration ... (removed unused)
+
 
         // Better approach: Calculate effective duration based on room settings + bonuses
         // But App.tsx already calculates 'bonusTime'. We should pass that or the total.
@@ -231,7 +230,6 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                             isMyTimerRunning={isMyTimerRunning}
                             isReadying={isReadying}
                             onReady={onReady}
-                            timerEndsAt={timerEndsAt}
                             timerEndsAt={timerEndsAt}
                             onTimeUp={onTimeUp}
                             timerDuration={totalTimerDuration || room.settings.timerDuration || 20}

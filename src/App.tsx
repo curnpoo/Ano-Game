@@ -30,15 +30,16 @@ import {
 import { simplifyStrokes } from './utils/geometry';
 import { getThemeClass, getThemeVariables } from './utils/themes';
 import { ThemeTransition } from './components/common/ThemeTransition';
-import { requestPushPermission, storePushToken, isPushSupported, onForegroundMessage } from './services/pushNotifications';
-
+import { requestPushPermission, onForegroundMessage } from './services/pushNotifications';
 import { useNotifications } from './hooks/useNotifications';
 import { usePlayerSession } from './hooks/usePlayerSession';
 import type { Player, GameSettings, PlayerDrawing, GameRoom, Screen } from './types';
 
+
 // Extended Screen type to include the new joining screen
 // Note: In a real app we'd update the type definition in types.ts, casting for now if needed or relying on string loose typing
-import { LoadingStage, RoomHistoryEntry } from './types';
+import type { LoadingStage, RoomHistoryEntry } from './types';
+
 
 
 const App = () => {
@@ -183,8 +184,9 @@ const App = () => {
       if (code && currentScreen === 'home') {
         const details = await StorageService.getRoomPreview(code);
         if (details) {
-          setLastGameDetails({ ...details, roomCode: code });
+          setLastGameDetails({ ...details, roomCode: code, lastSeen: Date.now() });
         } else {
+
           setLastGameDetails(null);
         }
       } else {

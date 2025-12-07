@@ -23,14 +23,12 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
 }) => {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [hasVoted, setHasVoted] = useState(false);
-    const [mounted, setMounted] = useState(false);
-
     // Fetch drawings from separate path (optimized)
     const { drawings: drawingsMap, loading: drawingsLoading } = useDrawings(room.roomCode, room.roundNumber);
 
-    useEffect(() => {
-        setMounted(true);
-    }, []);
+    // useEffect(() => {
+    //     setMounted(true);
+    // }, []);
 
     // Get all completed drawings and sort by join time for stability
     const drawings = room.players

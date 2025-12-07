@@ -271,7 +271,7 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
 const CasinoStatsModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const stats = CasinoService.getStats();
     const winRate = CasinoService.getWinRate();
-    const roi = CasinoService.getROI();
+    // const roi = CasinoService.getROI();
 
     const statItems = [
         { label: 'Total Spins', value: stats.totalSpins, emoji: '🎰' },
