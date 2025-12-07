@@ -29,7 +29,7 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
     const lastValueRef = useRef(value);
 
     // Generate values array
-    const values = [];
+    const values: number[] = [];
     for (let i = min; i <= max; i += step) {
         values.push(i);
     }
@@ -39,7 +39,6 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
 
     // Calculate item width (each item is 80px)
     const itemWidth = 80;
-    const containerPadding = 150; // Half of visible area minus half item width
 
     // Scroll to correct position when value changes externally
     useEffect(() => {
@@ -109,7 +108,7 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
     }, [disabled, itemWidth, maxAllowed, onChange, values]);
 
     // Debounce scroll end detection
-    const scrollTimeout = useRef<NodeJS.Timeout>();
+    const scrollTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const onScroll = useCallback(() => {
         handleScroll();

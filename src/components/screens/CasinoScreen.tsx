@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { CurrencyService, formatCurrency } from '../../services/currency';
+import { CasinoService, SpinResult } from '../../services/casino';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
 import { HorizontalPicker } from '../common/HorizontalPicker';
 
@@ -24,6 +25,8 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
     const [spinning, setSpinning] = useState(false);
     const [result, setResult] = useState<{ message: string; win: number } | null>(null);
     const [spinningReels, setSpinningReels] = useState([false, false, false]);
+    const [showStats, setShowStats] = useState(false);
+
 
     // Update balance when it changes externally
     React.useEffect(() => {
@@ -75,30 +78,34 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
             vibrate(HapticPatterns.light);
         }, 1000);
 
-        setTimeout(() => {
+        setTimeout(async () => {
             setReels(results);
             setSpinningReels([false, false, false]);
 
             // Check for wins
             let winAmount = 0;
             let message = '';
+            let spinResult: SpinResult = 'loss';
 
             // All three match
             if (results[0] === results[1] && results[1] === results[2]) {
                 const multiplier = WINNING_COMBOS[results[0]] || 2;
                 winAmount = bet * multiplier;
                 message = `🎉 JACKPOT! ${results[0]} x3 = ${multiplier}x`;
+                spinResult = 'jackpot';
                 vibrate(HapticPatterns.success);
             }
             // Two match
             else if (results[0] === results[1] || results[1] === results[2] || results[0] === results[2]) {
                 winAmount = bet * 1.5;
                 message = `✨ Two of a kind! +${winAmount.toFixed(0)}$`;
+                spinResult = 'two_of_a_kind';
                 vibrate(HapticPatterns.medium);
             }
             // No match
             else {
                 message = '😢 No luck this time...';
+                spinResult = 'loss';
                 vibrate(HapticPatterns.error);
             }
 
@@ -107,10 +114,14 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
                 setBalance(CurrencyService.getCurrency());
             }
 
+            // Track casino stats
+            await CasinoService.recordSpin(bet, Math.floor(winAmount), spinResult);
+
             setResult({ message, win: winAmount });
             setSpinning(false);
         }, 1500);
     }, [spinning, balance, bet, reels]);
+
 
     return (
         <div

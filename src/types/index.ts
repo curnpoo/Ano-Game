@@ -1,3 +1,21 @@
+// Casino stats for tracking gambling activity
+export interface CasinoStats {
+    totalSpins: number;
+    wins: number;
+    losses: number;
+    jackpotWins: number;      // Triple matches
+    twoOfAKindWins: number;   // Two matching
+    totalBetAmount: number;   // Total $ wagered
+    totalWinnings: number;    // Total $ won
+    totalLosses: number;      // Total $ lost
+    biggestWin: number;       // Largest single win
+    biggestBet: number;       // Largest single bet
+    currentStreak: number;    // Current win/loss streak (positive = wins, negative = losses)
+    longestWinStreak: number;
+    longestLoseStreak: number;
+    netProfit: number;        // totalWinnings - totalBetAmount
+}
+
 // Player lifetime stats
 export interface PlayerStats {
     gamesPlayed: number;
@@ -9,7 +27,9 @@ export interface PlayerStats {
     totalCurrencyEarned: number;
     totalXPEarned: number;
     highestLevel: number;
+    casinoStats?: CasinoStats;
 }
+
 
 // User account for login system
 export interface UserAccount {

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { XPService } from '../../services/xp';
 import { AuthService } from '../../services/auth';
+import { StatsService } from '../../services/stats';
 import type { GameRoom } from '../../types';
 import { Confetti } from '../common/Confetti';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
@@ -68,6 +69,17 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                 // Award Currency (e.g., 50 coins for playing, +100 for winning)
                 const currencyEarned = 50 + (isWinner ? 100 : 0);
                 const newCurrency = (currentUser.currency || 0) + currencyEarned;
+
+                // Track currency earned in stats
+                await StatsService.recordCurrencyEarned(currencyEarned);
+
+                // Track sabotage stats if this was a sabotage round
+                if (room.saboteurId === currentPlayerId) {
+                    await StatsService.recordWasSaboteur();
+                }
+                if (room.sabotageTargetId === currentPlayerId && room.sabotageTriggered) {
+                    await StatsService.recordSabotaged();
+                }
 
                 AuthService.updateUser(currentPlayerId, { // Changed player.id to currentPlayerId
                     stats: newStats,

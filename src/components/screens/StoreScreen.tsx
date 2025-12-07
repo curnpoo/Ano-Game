@@ -102,8 +102,8 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2 mb-2">
                 <h1 className="text-2xl font-black drop-shadow-lg" style={{ color: 'var(--theme-text)' }}>🛒 STORE</h1>
-                <div className="text-white px-4 py-2 rounded-xl font-bold font-mono shadow-md"
-                    style={{ backgroundColor: 'var(--theme-accent)' }}>
+                <div className="px-4 py-2 rounded-xl font-bold font-mono shadow-md"
+                    style={{ backgroundColor: 'var(--theme-accent)', color: '#000' }}>
                     {formatCurrency(balance)}
                 </div>
             </div>
@@ -181,7 +181,7 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
                                         backgroundColor: activeTab === 'themes' && owned
                                             ? equipped ? 'var(--theme-bg-secondary)' : 'var(--theme-accent)'
                                             : owned ? 'var(--theme-bg-secondary)' : (balance >= item.price ? 'var(--theme-accent)' : 'red'),
-                                        color: (activeTab === 'themes' && owned && !equipped) || (!owned && balance >= item.price) ? '#fff' : 'var(--theme-text)',
+                                        color: (activeTab === 'themes' && owned && !equipped) || (!owned && balance >= item.price) ? '#000' : 'var(--theme-text)',
                                         borderColor: 'var(--theme-border)',
                                         opacity: (!owned && balance < item.price) ? 0.5 : 1
                                     }}

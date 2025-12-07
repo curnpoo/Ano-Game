@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { XPService } from '../../services/xp';
 import { AuthService } from '../../services/auth';
+import { StatsService } from '../../services/stats';
 import type { GameRoom, Player } from '../../types';
 import { AvatarDisplay } from '../common/AvatarDisplay';
 import { Confetti } from '../common/Confetti';
@@ -92,6 +93,14 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
                     totalXPEarned: currentStats.totalXPEarned + xpAward,
                     highestLevel: Math.max(currentStats.highestLevel, newLevel || 1)
                 };
+
+                // Track sabotage stats if applicable for this round
+                if (room.saboteurId === player.id && room.roundNumber === room.sabotageRound) {
+                    StatsService.recordWasSaboteur();
+                }
+                if (room.sabotageTargetId === player.id && room.sabotageTriggered && room.roundNumber === room.sabotageRound) {
+                    StatsService.recordSabotaged();
+                }
 
                 // Sync to AuthService (local + eventually firebase)
                 if (AuthService.getCurrentUser()) {
