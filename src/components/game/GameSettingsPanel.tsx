@@ -43,8 +43,11 @@ export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
                                     : 'opacity-50 cursor-not-allowed'
                                 }`}
                             style={{
-                                borderColor: settings.timerDuration === seconds ? 'var(--theme-accent)' : 'var(--theme-border)',
-                                color: settings.timerDuration === seconds ? 'var(--theme-button-text)' : 'var(--theme-text-secondary)',
+                                backgroundColor: settings.timerDuration === seconds ? '#F3E5AB' : 'transparent',
+                                borderColor: settings.timerDuration === seconds ? '#D4C596' : 'var(--theme-border)',
+                                color: settings.timerDuration === seconds ? '#4A3B2A' : 'var(--theme-text-secondary)',
+                                boxShadow: settings.timerDuration === seconds ? '0 3px 0 #D4C596' : 'none',
+                                transform: settings.timerDuration === seconds ? 'translateY(-2px)' : 'none'
                             }}
                         >
                             {seconds}s
@@ -71,9 +74,11 @@ export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
                                     : 'opacity-50 cursor-not-allowed'
                                 }`}
                             style={{
-                                backgroundColor: 'transparent',
-                                borderColor: settings.totalRounds === rounds ? 'var(--theme-accent)' : 'var(--theme-border)',
-                                color: settings.totalRounds === rounds ? 'var(--theme-button-text)' : 'var(--theme-text-secondary)',
+                                backgroundColor: settings.totalRounds === rounds ? '#F3E5AB' : 'transparent',
+                                borderColor: settings.totalRounds === rounds ? '#D4C596' : 'var(--theme-border)',
+                                color: settings.totalRounds === rounds ? '#4A3B2A' : 'var(--theme-text-secondary)',
+                                boxShadow: settings.totalRounds === rounds ? '0 3px 0 #D4C596' : 'none',
+                                transform: settings.totalRounds === rounds ? 'translateY(-2px)' : 'none'
                             }}
                         >
                             {rounds}
