@@ -372,8 +372,8 @@ export const FriendsService = {
         }
     },
 
-    // Get pending friend requests (sent)
-    async getSentFriendRequests(): Promise<FriendRequest[]> {
+    // Get pending friend requests (sent), populated with user details
+    async getSentFriendRequests(): Promise<(FriendRequest & { toUser?: UserAccount })[]> {
         const currentUser = AuthService.getCurrentUser();
         if (!currentUser) return [];
 
@@ -384,14 +384,26 @@ export const FriendsService = {
 
             if (!snapshot.exists()) return [];
 
-            const requests: FriendRequest[] = [];
+            const requests: (FriendRequest & { toUser?: UserAccount })[] = [];
+
+            // Promise.all to fetch all target users parallel
+            const promises: Promise<void>[] = [];
+
             snapshot.forEach((child) => {
                 const req = child.val() as FriendRequest;
                 if (req.status === 'pending') {
-                    requests.push(req);
+                    const fetchPromise = this.getUserById(req.toUserId).then(user => {
+                        if (user) {
+                            requests.push({ ...req, toUser: user });
+                        } else {
+                            requests.push(req);
+                        }
+                    });
+                    promises.push(fetchPromise);
                 }
             });
 
+            await Promise.all(promises);
             return requests.sort((a, b) => b.createdAt - a.createdAt);
         } catch (error) {
             console.error('Error getting sent friend requests:', error);
@@ -413,7 +425,33 @@ export const FriendsService = {
                 return { success: false, error: 'Not authorized' };
             }
 
+            // Update status
             await update(requestRef, { status: 'accepted' });
+
+            // FORCE FRIEND ADDITION CLIENT-SIDE (Redundancy for Cloud Function)
+            try {
+                // Add sender to current user's friend list
+                const myFriends = [...(currentUser.friends || [])];
+                if (!myFriends.includes(req.fromUserId)) {
+                    myFriends.push(req.fromUserId);
+                    await AuthService.updateUser(currentUser.id, { friends: myFriends });
+                }
+
+                // Add current user to sender's friend list
+                const senderRef = ref(database, `${USERS_PATH}/${req.fromUserId}`);
+                const senderSnapshot = await get(senderRef);
+                if (senderSnapshot.exists()) {
+                    const sender = senderSnapshot.val() as UserAccount;
+                    const senderFriends = [...(sender.friends || [])];
+                    if (!senderFriends.includes(currentUser.id)) {
+                        senderFriends.push(currentUser.id);
+                        await update(senderRef, { friends: senderFriends });
+                    }
+                }
+            } catch (err) {
+                console.error('Manual friend addition failed, hoping Cloud Function works:', err);
+            }
+
             return { success: true };
         } catch (error) {
             console.error('Error accepting friend request:', error);

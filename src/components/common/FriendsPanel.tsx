@@ -27,7 +27,7 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, ope
 
     const [friends, setFriends] = useState<UserAccount[]>([]);
     const [requests, setRequests] = useState<FriendRequest[]>([]);
-    const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
+    const [sentRequests, setSentRequests] = useState<(FriendRequest & { toUser?: UserAccount })[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [activeTab, setActiveTab] = useState<'friends' | 'requests'>('friends');
     const [selectedFriend, setSelectedFriend] = useState<UserAccount | null>(null);
@@ -99,10 +99,11 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, ope
         <>
             {/* Friends Button / Panel */}
             <div
-                className="rounded-[1.5rem] shadow-lg overflow-hidden transition-all duration-300"
+                className="rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 backdrop-blur-md"
                 style={{
-                    backgroundColor: 'var(--theme-card-bg)',
-                    border: '2px solid #22c55e'
+                    backgroundColor: 'rgba(0, 0, 0, 0.85)', // Darker, more premium background
+                    border: '2px solid #22c55e',
+                    boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)'
                 }}
             >
                 {/* Header Button */}
@@ -153,16 +154,19 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, ope
 
                         {/* Search Toggle (Only on Friends tab) */}
                         {activeTab === 'friends' && (
-                            <button
-                                onClick={() => setShowSearch(!showSearch)}
-                                className="w-full p-3 flex items-center justify-center gap-2 font-bold transition-colors hover:bg-white/5"
-                                style={{
-                                    color: '#22c55e',
-                                    borderBottom: '1px solid var(--theme-border)'
-                                }}
-                            >
-                                {showSearch ? '✕ Close' : '➕ Add Friend'}
-                            </button>
+                            <div className="p-2">
+                                <button
+                                    onClick={() => setShowSearch(!showSearch)}
+                                    className="w-full p-3 rounded-xl flex items-center justify-center gap-2 font-bold transition-all hover:scale-[1.02] active:scale-95 shadow-lg"
+                                    style={{
+                                        background: showSearch ? 'var(--theme-bg-secondary)' : 'linear-gradient(135deg, #22c55e, #16a34a)',
+                                        color: showSearch ? 'var(--theme-text)' : 'white',
+                                        boxShadow: showSearch ? 'none' : '0 4px 12px rgba(34, 197, 94, 0.3)'
+                                    }}
+                                >
+                                    {showSearch ? '✕ Close Search' : '➕ Add Friend'}
+                                </button>
+                            </div>
                         )}
 
                         {/* Search Input */}
@@ -298,14 +302,30 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, ope
                                                     {sentRequests.map((req) => (
                                                         <div
                                                             key={req.id}
-                                                            className="p-3 rounded-xl flex items-center justify-between opacity-75"
+                                                            className="p-3 rounded-2xl flex items-center justify-between opacity-75 transition-all hover:opacity-100"
                                                             style={{ backgroundColor: 'var(--theme-highlight)' }}
                                                         >
-                                                            <div className="font-bold text-[var(--theme-text)]">
-                                                                To: {req.toUserId} <span className="text-[10px] opacity-70">(Pending)</span>
+                                                            <div className="flex items-center gap-3">
+                                                                {req.toUser && (
+                                                                    <AvatarDisplay
+                                                                        strokes={req.toUser.avatarStrokes}
+                                                                        avatar={req.toUser.avatar}
+                                                                        color={req.toUser.color}
+                                                                        backgroundColor={req.toUser.backgroundColor}
+                                                                        size={36}
+                                                                    />
+                                                                )}
+                                                                <div>
+                                                                    <div className="font-bold text-[var(--theme-text)]">
+                                                                        {req.toUser?.username || 'Unknown User'}
+                                                                    </div>
+                                                                    <div className="text-[10px] font-bold text-[var(--theme-text-secondary)] uppercase tracking-wider">
+                                                                        Pending Response
+                                                                    </div>
+                                                                </div>
                                                             </div>
-                                                            <div className="text-xs text-[var(--theme-text-secondary)]">
-                                                                Waiting...
+                                                            <div className="text-xs font-bold text-[var(--theme-text-secondary)] bg-[var(--theme-bg-secondary)] px-2 py-1 rounded-lg">
+                                                                ⏳ Sent
                                                             </div>
                                                         </div>
                                                     ))}
