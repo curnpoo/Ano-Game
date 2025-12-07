@@ -16,18 +16,19 @@ export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
     isHost
 }) => {
     return (
-        <div className="bg-white/90 backdrop-blur-sm rounded-2xl p-4 space-y-4"
+        <div className="backdrop-blur-sm rounded-2xl p-4 space-y-4"
             style={{
+                backgroundColor: 'var(--theme-card-bg)',
                 boxShadow: '0 6px 0 rgba(155, 89, 182, 0.2)',
                 border: '3px solid #9B59B6'
             }}>
-            <h3 className="text-lg font-bold text-purple-600 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-purple-400 flex items-center gap-2">
                 ⚙️ Game Settings
             </h3>
 
             {/* Timer Duration */}
             <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-600">
+                <label className="text-sm font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
                     ⏱️ Drawing Time
                 </label>
                 <div className="flex gap-2">
@@ -39,10 +40,12 @@ export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
                             className={`flex-1 py-2 px-3 rounded-xl font-bold text-sm transition-all ${settings.timerDuration === seconds
                                 ? 'bg-gradient-to-r from-pink-500 to-purple-500 text-white scale-105'
                                 : isHost
-                                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                    ? 'hover:opacity-80'
+                                    : 'opacity-50 cursor-not-allowed'
                                 }`}
                             style={{
+                                backgroundColor: settings.timerDuration === seconds ? undefined : 'var(--theme-bg-secondary)',
+                                color: settings.timerDuration === seconds ? undefined : 'var(--theme-text)',
                                 boxShadow: settings.timerDuration === seconds
                                     ? '0 3px 0 rgba(155, 89, 182, 0.4)'
                                     : '0 2px 0 rgba(0, 0, 0, 0.1)'
@@ -56,7 +59,7 @@ export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
 
             {/* Number of Rounds */}
             <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-600">
+                <label className="text-sm font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
                     🔄 Number of Rounds
                 </label>
                 <div className="flex gap-2">
@@ -68,10 +71,12 @@ export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
                             className={`flex-1 py-2 px-3 rounded-xl font-bold text-sm transition-all ${settings.totalRounds === rounds
                                 ? 'bg-gradient-to-r from-cyan-400 to-blue-500 text-white scale-105'
                                 : isHost
-                                    ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                                    : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                    ? 'hover:opacity-80'
+                                    : 'opacity-50 cursor-not-allowed'
                                 }`}
                             style={{
+                                backgroundColor: settings.totalRounds === rounds ? undefined : 'var(--theme-bg-secondary)',
+                                color: settings.totalRounds === rounds ? undefined : 'var(--theme-text)',
                                 boxShadow: settings.totalRounds === rounds
                                     ? '0 3px 0 rgba(0, 217, 255, 0.4)'
                                     : '0 2px 0 rgba(0, 0, 0, 0.1)'
@@ -84,7 +89,7 @@ export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
             </div>
 
             {!isHost && (
-                <p className="text-xs text-gray-400 text-center italic">
+                <p className="text-xs text-center italic" style={{ color: 'var(--theme-text-secondary)' }}>
                     Only the host can change settings
                 </p>
             )}

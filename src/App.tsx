@@ -793,22 +793,22 @@ function App() {
 
 
   const handleLeaveGame = async (targetScreen: Screen = 'room-selection') => {
-    if (!roomCode || !player) return;
-
-    // Attempt to remove from server, but don't block local exit
-    try {
-      await StorageService.removePlayerFromRoom(roomCode, player.id);
-    } catch (err) {
-      console.error('Failed to leave game:', err);
-    }
-
-    // Always exit locally
+    // Always do local cleanup first
     StorageService.leaveRoom();
     setRoomCode(null);
     setCurrentScreen(targetScreen);
     setIsLoading(false);
     setIsLoadingTransition(false);
     showToast('Left game 👋', 'info');
+
+    // Then try to remove from server if we have the info
+    if (roomCode && player) {
+      try {
+        await StorageService.removePlayerFromRoom(roomCode, player.id);
+      } catch (err) {
+        console.error('Failed to leave game:', err);
+      }
+    }
   };
 
   const handleJoinCurrentRound = async () => {
