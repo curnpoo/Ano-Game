@@ -1,5 +1,5 @@
 import React from 'react';
-import { XPService, LEVEL_TIERS } from '../../services/xp';
+import { XPService } from '../../services/xp';
 import { CurrencyService, formatCurrency } from '../../services/currency';
 import { StatsService } from '../../services/stats';
 import { AvatarDisplay } from './AvatarDisplay';

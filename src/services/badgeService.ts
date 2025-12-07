@@ -1,7 +1,7 @@
 // Badge Service - Handles badge awards and checks
 
 import { BADGES } from '../constants/cosmetics';
-import { XPService } from './xp';
+
 import { AuthService } from './auth';
 
 const BADGES_KEY = 'player_badges';

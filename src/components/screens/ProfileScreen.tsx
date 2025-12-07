@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { Player, PlayerStats } from '../../types';
+import type { Player } from '../../types';
 import { AvatarDisplay } from '../common/AvatarDisplay';
 import { CurrencyService, formatCurrency } from '../../services/currency';
 import { StatsService } from '../../services/stats';
