@@ -183,6 +183,22 @@ function App() {
     });
   }, [player?.cosmetics?.activeTheme]);
 
+  // Font Effect: Apply active font to document
+  useEffect(() => {
+    const fontId = player?.cosmetics?.activeFont || 'default';
+    const fontMap: { [key: string]: string } = {
+      'default': "'Inter', sans-serif",
+      'comic': "'Comic Neue', cursive",
+      'pixel': "'Press Start 2P', cursive",
+      'mono': "'JetBrains Mono', monospace",
+      'handwritten': "'Caveat', cursive",
+      'retro': "'VT323', monospace"
+    };
+    const fontFamily = fontMap[fontId] || fontMap['default'];
+    document.documentElement.style.setProperty('--theme-font', fontFamily);
+    document.body.style.fontFamily = fontFamily;
+  }, [player?.cosmetics?.activeFont]);
+
   // Calculated state for dependencies
   // Check if I am an active player (in the current game)
   const amInGame = room?.players.some(p => p.id === player?.id);
@@ -195,11 +211,9 @@ function App() {
 
   const amWaiting = room?.playerStates?.[player?.id || '']?.status === 'waiting' || false;
 
-  const handleEquipTheme = (themeId?: string) => {
-    setIsTransitionActive(true);
-
+  const handleEquipTheme = (fontId?: string) => {
     // Immediate local update for visual responsiveness
-    if (themeId && player) {
+    if (fontId && player) {
       setPlayer(prev => {
         if (!prev) return prev;
 
@@ -215,7 +229,7 @@ function App() {
           ...prev,
           cosmetics: {
             ...currentCosmetics,
-            activeTheme: themeId,
+            activeFont: fontId,
             // Fallbacks for safety during partial updates
             brushesUnlocked: currentCosmetics.brushesUnlocked || [],
             colorsUnlocked: currentCosmetics.colorsUnlocked || [],
@@ -336,47 +350,39 @@ function App() {
       lastRoundRef.current = round;
       lastWaitingRef.current = amWaiting;
 
-      setIsLoadingTransition(true);
-
-      const timer = setTimeout(() => {
-        setIsLoadingTransition(false);
-
-        // Send notifications (only when status actually changed)
-        if (statusChanged) {
-          if (status === 'uploading' && room?.currentUploaderId === player?.id) {
-            notifyYourTurnToUpload();
-          } else if (status === 'drawing' && !amWaiting) {
-            notifyDrawingPhaseStarted();
-          } else if (status === 'voting' && !amWaiting) {
-            notifyVotingStarted();
-          } else if (status === 'results') {
-            notifyResultsReady();
-            handleRoundEndRewards(room);
-          } else if (status === 'final') {
-            notifyFinalResults();
-            handleGameEndRewards(room);
-          }
+      // Send notifications (only when status actually changed)
+      if (statusChanged) {
+        if (status === 'uploading' && room?.currentUploaderId === player?.id) {
+          notifyYourTurnToUpload();
+        } else if (status === 'drawing' && !amWaiting) {
+          notifyDrawingPhaseStarted();
+        } else if (status === 'voting' && !amWaiting) {
+          notifyVotingStarted();
+        } else if (status === 'results') {
+          notifyResultsReady();
+          handleRoundEndRewards(room);
+        } else if (status === 'final') {
+          notifyFinalResults();
+          handleGameEndRewards(room);
         }
+      }
 
-        // Routing Logic
-        if (status === 'lobby') setCurrentScreen('lobby');
-        else if (status === 'uploading') setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'uploading');
-        else if (status === 'sabotage-selection') setCurrentScreen('sabotage-selection');
-        else if (status === 'drawing') {
-          if (shouldShowWaitingRoom) {
-            setCurrentScreen('waiting');
-          } else {
-            setCurrentScreen('drawing');
-            setStrokes([]);
-            setIsMyTimerRunning(false);
-          }
+      // Routing Logic - Immediate transition, no fake delay
+      if (status === 'lobby') setCurrentScreen('lobby');
+      else if (status === 'uploading') setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'uploading');
+      else if (status === 'sabotage-selection') setCurrentScreen('sabotage-selection');
+      else if (status === 'drawing') {
+        if (shouldShowWaitingRoom) {
+          setCurrentScreen('waiting');
+        } else {
+          setCurrentScreen('drawing');
+          setStrokes([]);
+          setIsMyTimerRunning(false);
         }
-        else if (status === 'voting') setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'voting');
-        else if (status === 'results') setCurrentScreen('results'); // Spectators can see results too usually? Or waiting? Let's show results.
-        else if (status === 'final') setCurrentScreen('final');
-      }, 1500);
-
-      return () => clearTimeout(timer);
+      }
+      else if (status === 'voting') setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'voting');
+      else if (status === 'results') setCurrentScreen('results');
+      else if (status === 'final') setCurrentScreen('final');
     }
   }, [room?.status, room?.roundNumber, isLoading, currentScreen, isBrowsing, amWaiting, shouldShowWaitingRoom]);
 
@@ -665,7 +671,7 @@ function App() {
         joinedAt: Date.now(),
         lastSeen: Date.now(),
         cosmetics: {
-          activeTheme: 'premium-light',
+          activeFont: 'default',
           brushesUnlocked: [],
           colorsUnlocked: [],
           badges: [],

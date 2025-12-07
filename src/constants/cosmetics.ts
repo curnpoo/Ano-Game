@@ -50,13 +50,12 @@ export const POWERUPS = [
     { id: 'steal', name: 'Vote Steal', emoji: '🎭', description: 'Steal 1 vote from leader', price: 30, consumable: true }
 ];
 
-// Player card themes (permanent unlocks)
-// Player card themes (permanent unlocks)
-export const CARD_THEMES = [
-    { id: 'default', name: 'Classic', preview: '⬜', description: 'Standard rounded style', price: 0 },
-    { id: 'cardboard', name: 'Cardboard', preview: '📦', description: 'Recycled chic & organic shapes', price: 5 },
-    { id: 'dark', name: 'Dark Mode', preview: '⬛', description: 'Sleek dark background', price: 15 },
-    { id: 'neon', name: 'Neon Glow', preview: '💜', description: 'Sharp edges & high contrast', price: 35 },
-    { id: 'retro', name: 'Retro', preview: '👾', description: 'Monospace font & pixel vibes', price: 25 },
-    { id: 'kawaii', name: 'Kawaii', preview: '🌸', description: 'Cute pinks & round shapes', price: 20 }
+// Purchasable fonts (permanent unlocks)
+export const FONTS = [
+    { id: 'default', name: 'Inter', fontFamily: "'Inter', sans-serif", description: 'Clean & modern', price: 0 },
+    { id: 'comic', name: 'Comic Neue', fontFamily: "'Comic Neue', cursive", description: 'Fun & playful', price: 10 },
+    { id: 'pixel', name: 'Press Start 2P', fontFamily: "'Press Start 2P', cursive", description: 'Retro gaming vibes', price: 25 },
+    { id: 'mono', name: 'JetBrains Mono', fontFamily: "'JetBrains Mono', monospace", description: 'Developer favorite', price: 15 },
+    { id: 'handwritten', name: 'Caveat', fontFamily: "'Caveat', cursive", description: 'Handwritten style', price: 15 },
+    { id: 'retro', name: 'VT323', fontFamily: "'VT323', monospace", description: 'Terminal nostalgia', price: 20 }
 ];

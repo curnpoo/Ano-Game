@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { CurrencyService, formatCurrency } from '../../services/currency';
 import { AuthService } from '../../services/auth';
-import { UNLOCKABLE_BRUSHES, POWERUPS, CARD_THEMES } from '../../constants/cosmetics';
+import { UNLOCKABLE_BRUSHES, POWERUPS, FONTS } from '../../constants/cosmetics';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
 
 interface StoreScreenProps {
     onBack: () => void;
-    onEquip?: (themeId: string) => void;
+    onFontChange?: (fontId: string) => void;
 }
 
-type Tab = 'brushes' | 'powerups' | 'themes';
+type Tab = 'brushes' | 'powerups' | 'fonts';
 
-export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => {
+export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onFontChange }) => {
     const [balance, setBalance] = useState(CurrencyService.getCurrency());
     const [activeTab, setActiveTab] = useState<Tab>('brushes');
     const [purchaseMessage, setPurchaseMessage] = useState<string | null>(null);
@@ -23,11 +23,11 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
     const handleAction = (item: any) => {
         const owned = isOwned(item.id, item.price);
 
-        if (activeTab === 'themes' && owned) {
-            // Equip Logic
+        if (activeTab === 'fonts' && owned) {
+            // Equip Font Logic
             const currentUser = AuthService.getCurrentUser();
             if (currentUser) {
-                const newCosmetics = { ...currentUser.cosmetics, activeTheme: item.id };
+                const newCosmetics = { ...currentUser.cosmetics, activeFont: item.id };
                 AuthService.updateUser(currentUser.id, { cosmetics: newCosmetics });
 
                 try {
@@ -36,11 +36,11 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
                     console.error('Haptic feedback failed:', err);
                 }
 
-                setPurchaseMessage(`🎨 Equipped ${item.name}!`);
+                setPurchaseMessage(`✏️ Equipped ${item.name}!`);
                 setTimeout(() => setPurchaseMessage(null), 1500);
 
-                // Trigger transition if handler provided, passing the new theme ID
-                onEquip?.(item.id);
+                // Trigger immediate font update
+                onFontChange?.(item.id);
             }
             return;
         }
@@ -62,13 +62,13 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
 
     const isEquipped = (itemId: string) => {
         const currentUser = AuthService.getCurrentUser();
-        return currentUser?.cosmetics?.activeTheme === itemId;
+        return currentUser?.cosmetics?.activeFont === itemId;
     };
 
     const tabs = [
         { id: 'brushes' as Tab, label: '🖌️ Brushes', items: UNLOCKABLE_BRUSHES.filter(b => b.price > 0) },
         { id: 'powerups' as Tab, label: '⚡ Powerups', items: POWERUPS },
-        { id: 'themes' as Tab, label: '🎨 Themes', items: CARD_THEMES }
+        { id: 'fonts' as Tab, label: '✏️ Fonts', items: FONTS }
     ];
 
     const currentItems = tabs.find(t => t.id === activeTab)?.items || [];
@@ -141,7 +141,8 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
                 <div className="grid grid-cols-2 gap-3">
                     {currentItems.map((item: any) => {
                         const owned = isOwned(item.id, item.price);
-                        const equipped = activeTab === 'themes' && isEquipped(item.id);
+                        const equipped = activeTab === 'fonts' && isEquipped(item.id);
+                        const isFont = activeTab === 'fonts';
 
                         return (
                             <div
@@ -158,12 +159,28 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
                                     </div>
                                 )}
 
-                                <div className="text-5xl mb-3 mt-1 hover:scale-110 transition-transform cursor-default">
-                                    {item.emoji || item.preview || '🎁'}
-                                </div>
+                                {/* Font Preview: Show "Aa" in the font's style */}
+                                {isFont ? (
+                                    <div
+                                        className="text-4xl mb-3 mt-1 hover:scale-110 transition-transform cursor-default"
+                                        style={{ fontFamily: item.fontFamily }}
+                                    >
+                                        Aa
+                                    </div>
+                                ) : (
+                                    <div className="text-5xl mb-3 mt-1 hover:scale-110 transition-transform cursor-default">
+                                        {item.emoji || item.preview || '🎁'}
+                                    </div>
+                                )}
 
                                 <div className="text-center w-full mb-3">
-                                    <div className="font-bold text-lg leading-tight mb-1" style={{ color: 'var(--theme-text)' }}>
+                                    <div 
+                                        className="font-bold text-lg leading-tight mb-1" 
+                                        style={{ 
+                                            color: 'var(--theme-text)',
+                                            fontFamily: isFont ? item.fontFamily : undefined
+                                        }}
+                                    >
                                         {item.name}
                                     </div>
                                     {item.description && (
@@ -175,18 +192,18 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip }) => 
 
                                 <button
                                     onClick={() => handleAction(item)}
-                                    disabled={activeTab === 'themes' ? false : owned} // Themes can be clicked to equip even if owned
+                                    disabled={isFont ? false : owned}
                                     className={`w-full py-3 rounded-xl font-bold text-sm transition-all active:scale-95 shadow-md border-2`}
                                     style={{
-                                        backgroundColor: activeTab === 'themes' && owned
+                                        backgroundColor: isFont && owned
                                             ? equipped ? 'var(--theme-bg-secondary)' : 'var(--theme-accent)'
                                             : owned ? 'var(--theme-bg-secondary)' : (balance >= item.price ? 'var(--theme-accent)' : 'red'),
-                                        color: (activeTab === 'themes' && owned && !equipped) || (!owned && balance >= item.price) ? '#000' : 'var(--theme-text)',
+                                        color: (isFont && owned && !equipped) || (!owned && balance >= item.price) ? '#000' : 'var(--theme-text)',
                                         borderColor: 'var(--theme-border)',
                                         opacity: (!owned && balance < item.price) ? 0.5 : 1
                                     }}
                                 >
-                                    {activeTab === 'themes' && owned
+                                    {isFont && owned
                                         ? equipped ? '✓ Equipped' : 'Equip'
                                         : owned
                                             ? '✓ Owned'

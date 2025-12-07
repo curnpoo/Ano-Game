@@ -23,8 +23,6 @@ const TIPS = [
     "💡 Tip: What do you call a sad strawberry? A blueberry.",
     "💡 Tip: Jet fuel can't melt steel beams, but your drawing might melt my eyes.",
     "💡 Tip: Taxation is theft, but tracing is worse.",
-    "💡 Tip: This loading screen is actually mining crypto on your device. Thanks!",
-    "💡 Tip: 5G towers caused this loading time.",
     "💡 Tip: The earth is flat, just like your drawing skills.",
     "💡 Tip: Aliens built the pyramids, and you can't even draw a circle.",
     "💡 Tip: Don't look behind you.",
@@ -43,27 +41,16 @@ const TIPS = [
     "💡 Tip: The eyedropper tool can be used to copy colors from the image.",
     "💡 Tip: Unlock stuff by winning games!",
     "💡 Tip: The cake is a lie. Just like your drawing skills.",
-    "💡 Tip: This loading screen is longer than my last relationship.",
     "💡 Tip: Have you tried turning it off and on again?",
-    "💡 Tip: My other loading screen is a Porsche.",
     "💡 Tip: Don't trust anyone, not even yourself. Especially not your drawing hand.",
     "💡 Tip: The early bird gets the worm, but the second mouse gets the cheese.",
     "💡 Tip: If at first you don't succeed, redefine success.",
     "💡 Tip: Life is like a box of chocolates. You never know what you're gonna draw.",
     "💡 Tip: I'm not saying I'm Batman, I'm just saying no one has ever seen me and Batman in the same room.",
     "💡 Tip: The best way to predict the future is to create it. Or just draw it badly.",
-    "💡 Tip: Why did the scarecrow win an award? Because he was outstanding in his field!",
     "💡 Tip: My therapist told me to embrace my flaws. I'm still working on my drawing of a perfect circle.",
     "💡 Tip: If you think nobody cares if you're alive, try missing a couple of payments.",
-    "💡 Tip: I told my wife she was drawing her eyebrows too high. She looked surprised.",
-    "💡 Tip: What do you call a fake noodle? An impasta!",
-    "💡 Tip: I'm reading a book on anti-gravity. It's impossible to put down!",
-    "💡 Tip: Did you hear about the artist who could only draw perfect circles? He was well-rounded.",
-    "💡 Tip: Why don't scientists trust atoms? Because they make up everything!",
-    "💡 Tip: My computer just beat me at chess. But I'm sure it was just a fluke.",
     "💡 Tip: I've been trying to come up with a pun about drawing, but I'm just sketching for ideas.",
-    "💡 Tip: What do you call a sad strawberry? A blueberry!",
-    "💡 Tip: This loading screen is powered by hamsters on tiny treadmills.",
     "💡 Tip: Don't worry, be happy. And draw something funny."
 ];
 
@@ -87,53 +74,67 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({ onGoHome }) => {
     }, []);
 
     return (
-        <div className="fixed inset-0 bg-90s-animated flex flex-col items-center justify-center z-50 p-8 text-center">
-            <div className="bg-white/90 backdrop-blur-sm p-8 rounded-[2rem] shadow-2xl max-w-md w-full border-4 border-purple-500 animate-bounce-in">
-                <div className="text-6xl mb-6 animate-spin-slow">🎡</div>
-                <h2 className="text-4xl font-black text-purple-600 mb-4 animate-pulse tracking-wider">LOADING...</h2>
-                <div className="h-4 bg-gray-100 rounded-full overflow-hidden mb-6 border-2 border-gray-200 shadow-inner relative">
-                    {/* Progress Bar with CSS animation */}
-                    <div
-                        className="h-full bg-gradient-to-r from-purple-500 via-pink-500 to-red-500 rounded-full"
-                        style={{
-                            width: '100%',
-                            transition: 'width 2s ease-in-out',
-                            animation: 'fillBar 2s ease-out forwards'
-                        }}
-                    />
+        <div className="fixed inset-0 flex flex-col items-center justify-center z-50 overflow-hidden"
+            style={{ background: 'var(--theme-background, #f3e8d0)' }}>
 
-                    {/* Sparkle effect moving across */}
-                    <div
-                        className="absolute top-0 bottom-0 w-full animate-shimmer"
-                        style={{
-                            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent)',
-                            transform: 'skewX(-20deg)'
-                        }}
-                    />
-                </div>
-                <style>{`
-                    @keyframes fillBar {
-                        0% { width: 0%; }
-                        100% { width: 100%; }
-                    }
-                    @keyframes shimmer {
-                        0% { transform: translateX(-100%) skewX(-20deg); }
-                        100% { transform: translateX(200%) skewX(-20deg); }
-                    }
-                    .animate-shimmer {
-                        animation: shimmer 1.5s infinite;
-                    }
-                `}</style>
-                <p className="text-gray-600 font-bold text-lg italic mb-4">
+            {/* Paint Tools Background - Large floating monogram */}
+            <style>{`
+                @keyframes float-diagonal {
+                    0%, 100% { transform: translate(0, 0) rotate(-5deg); }
+                    50% { transform: translate(15px, -15px) rotate(5deg); }
+                }
+                @keyframes float-diagonal-reverse {
+                    0%, 100% { transform: translate(0, 0) rotate(5deg); }
+                    50% { transform: translate(-15px, 15px) rotate(-5deg); }
+                }
+                @keyframes float-diagonal-alt {
+                    0%, 100% { transform: translate(0, 0) rotate(0deg); }
+                    50% { transform: translate(12px, 12px) rotate(8deg); }
+                }
+                .tool-bg-1 { animation: float-diagonal 4s ease-in-out infinite; }
+                .tool-bg-2 { animation: float-diagonal-reverse 5s ease-in-out infinite; animation-delay: 0.5s; }
+                .tool-bg-3 { animation: float-diagonal-alt 4.5s ease-in-out infinite; animation-delay: 1s; }
+                .tool-bg-4 { animation: float-diagonal 5.5s ease-in-out infinite; animation-delay: 1.5s; }
+                .tool-bg-5 { animation: float-diagonal-reverse 4.2s ease-in-out infinite; animation-delay: 0.8s; }
+            `}</style>
+
+            {/* Background paint tools - scattered around */}
+            <div className="absolute inset-0 pointer-events-none opacity-30">
+                <div className="absolute tool-bg-1 text-8xl" style={{ top: '10%', left: '10%' }}>🖌️</div>
+                <div className="absolute tool-bg-2 text-7xl" style={{ top: '15%', right: '15%' }}>✏️</div>
+                <div className="absolute tool-bg-3 text-9xl" style={{ bottom: '20%', left: '5%' }}>🎨</div>
+                <div className="absolute tool-bg-4 text-6xl" style={{ bottom: '25%', right: '10%' }}>🖍️</div>
+                <div className="absolute tool-bg-5 text-7xl" style={{ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' }}>🖼️</div>
+            </div>
+
+            {/* Content Card */}
+            <div
+                className="relative backdrop-blur-sm p-8 rounded-[2rem] shadow-2xl max-w-md w-full mx-4 animate-bounce-in"
+                style={{
+                    background: 'var(--theme-card-bg, rgba(255,255,255,0.95))',
+                    border: '3px solid var(--theme-accent, #FFB74D)'
+                }}
+            >
+                <h2 className="text-2xl font-black mb-4 animate-pulse tracking-wider text-center"
+                    style={{ color: 'var(--theme-text, #333)' }}>
+                    Loading...
+                </h2>
+
+                <p className="font-bold text-base italic text-center"
+                    style={{ color: 'var(--theme-text-secondary, #666)' }}>
                     {tip}
                 </p>
 
                 {showStuckButton && onGoHome && (
-                    <div className="animate-fade-in pt-4 border-t border-gray-200 mt-4">
-                        <p className="text-sm text-gray-500 mb-2">Taking a while?</p>
+                    <div className="animate-fade-in pt-4 border-t mt-4 text-center"
+                        style={{ borderColor: 'var(--theme-border, #e0e0e0)' }}>
+                        <p className="text-sm mb-2" style={{ color: 'var(--theme-text-secondary, #888)' }}>
+                            Taking a while?
+                        </p>
                         <button
                             onClick={onGoHome}
-                            className="text-sm font-bold text-purple-500 hover:text-purple-700 underline"
+                            className="text-sm font-bold underline hover:opacity-80"
+                            style={{ color: 'var(--theme-accent, #FFB74D)' }}
                         >
                             Stuck? Reset App 🔄
                         </button>

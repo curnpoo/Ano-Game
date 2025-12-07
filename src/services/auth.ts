@@ -89,7 +89,7 @@ export const AuthService = {
                 purchasedItems: [],
                 cosmetics: {
                     ...defaultCosmetics,
-                    activeTheme: 'default'
+                    activeFont: 'default'
                 }
             };
 

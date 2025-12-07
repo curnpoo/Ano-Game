@@ -286,7 +286,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
         case 'store':
             return <StoreScreen
                 onBack={onStoreBack}
-                onEquip={onEquipTheme}
+                onFontChange={onEquipTheme}
             />;
 
         case 'profile':

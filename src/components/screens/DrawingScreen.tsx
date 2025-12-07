@@ -33,7 +33,7 @@ interface DrawingScreenProps {
     strokes: DrawingStroke[];
 }
 
-type TransitionState = 'idle' | 'loading' | 'countdown' | 'go';
+type TransitionState = 'idle' | 'countdown' | 'go';
 
 export const DrawingScreen: React.FC<DrawingScreenProps> = ({
     room,
@@ -78,21 +78,14 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
     const isSabotaged = room.sabotageTargetId === player.id && room.sabotageTriggered;
     const sabotageEffect = room.sabotageEffect;
 
-    // Handler: Click "I'm Ready" button
+    // Handler: Click "I'm Ready" button - go straight to countdown
     const handleReadyClick = useCallback(() => {
-        setTransitionState('loading');
+        setTransitionState('countdown');
+        setCountdownValue(3);
     }, []);
 
     // Effect: Manage transition sequence
     useEffect(() => {
-        if (transitionState === 'loading') {
-            // Loading phase: wait 1.5s then proceed to countdown
-            const timer = setTimeout(() => {
-                setTransitionState('countdown');
-                setCountdownValue(3);
-            }, 1500);
-            return () => clearTimeout(timer);
-        }
 
         if (transitionState === 'countdown') {
             if (countdownValue > 0) {
@@ -128,28 +121,18 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
     }, [isSabotaged, sabotageEffect]);
 
     // Effect: Visual Distortion
-    const baseContainerClass = "w-full h-full flex flex-col overflow-hidden";
+    const baseContainerClass = "w-full h-full flex flex-col overflow-hidden relative";
     const sabotageClass = (isSabotaged && sabotageEffect?.type === 'visual_distortion')
-        ? "animate-shake-hard filter blur-[1px]"
+        ? "animate-shake-hard"
         : "";
-    const loadingBlurClass = transitionState === 'loading' ? "filter blur-md transition-all duration-500" : "transition-all duration-500";
-    const containerClass = `${baseContainerClass} ${sabotageClass} ${loadingBlurClass}`;
+    const containerClass = `${baseContainerClass} ${sabotageClass}`;
+
+    const canvasBlurClass = "transition-all duration-500";
 
     return (
         <div className={containerClass}>
-            {/* Canvas Container */}
-            <div className="flex-1 relative w-full max-w-lg mx-auto flex flex-col min-h-0">
-
-                {/* Helper Text */}
-                {!hasSubmitted && isMyTimerRunning && (
-                    <div className="text-center mb-2 pop-in">
-                        <p className="font-bold text-gray-400 text-sm bg-white/80 backdrop-blur-sm inline-block px-4 py-1 rounded-full shadow-sm">
-                            {room.roundNumber === 1
-                                ? "Start the chain! Draw something awesome! 🎨"
-                                : "Add to the drawing! Keep it going! 🔗"}
-                        </p>
-                    </div>
-                )}
+            {/* Blurrable Canvas Content */}
+            <div className={`flex-1 relative w-full max-w-lg mx-auto flex flex-col justify-center items-center min-h-0 ${canvasBlurClass}`}>
 
                 {/* Canvas Area */}
                 <div className="relative w-full z-0 bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-gray-100 aspect-square">
@@ -186,62 +169,11 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                         brushColor={brushColor}
                         brushSize={brushSize}
                         isEraser={isEraser}
-                        strokes={strokes} // Use passed strokes prop
+                        strokes={strokes}
                         onStrokesChange={setStrokes}
-                        isEyedropper={isEyedropper} // Prop name is isEyedropper
+                        isEyedropper={isEyedropper}
                         onColorPick={handleColorPick}
                     />
-
-                    {/* Transition Overlays */}
-                    {!isMyTimerRunning && !hasSubmitted && (
-                        <>
-                            {/* Idle State: Show "I'm Ready" modal */}
-                            {transitionState === 'idle' && (
-                                <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-30">
-                                    <div className="bg-white rounded-3xl p-8 text-center max-w-sm mx-4 shadow-2xl pop-in border-4 border-purple-500">
-                                        <div className="text-6xl mb-4 animate-bounce">🎨</div>
-                                        <h3 className="text-2xl font-bold text-purple-600 mb-2">It's Drawing Time!</h3>
-                                        <p className="text-gray-500 mb-6">You have {room.settings.timerDuration} seconds to draw.</p>
-                                        <button
-                                            onClick={handleReadyClick}
-                                            disabled={isReadying}
-                                            className="w-full btn-90s bg-gradient-to-r from-lime-400 to-emerald-500 text-black px-8 py-4 rounded-xl font-bold text-xl jelly-hover shadow-lg disabled:opacity-70 disabled:grayscale"
-                                        >
-                                            I'M READY! 🚀
-                                        </button>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Loading State: Full screen blur with spinner */}
-                            {transitionState === 'loading' && (
-                                <div className="absolute inset-0 bg-black/50 backdrop-blur-md flex items-center justify-center z-40 animate-fade-in">
-                                    <div className="flex flex-col items-center gap-4">
-                                        <div className="animate-spin rounded-full h-16 w-16 border-4 border-white border-t-transparent shadow-lg"></div>
-                                        <p className="text-white font-bold text-lg animate-pulse">Getting Ready...</p>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Countdown State: Large numbers */}
-                            {transitionState === 'countdown' && countdownValue > 0 && (
-                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-40 animate-fade-in">
-                                    <div className="text-9xl font-black text-white drop-shadow-2xl animate-ping-once">
-                                        {countdownValue}
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* GO! State */}
-                            {transitionState === 'go' && (
-                                <div className="absolute inset-0 bg-gradient-to-br from-lime-500/70 to-emerald-600/70 flex items-center justify-center z-40 animate-fade-in">
-                                    <div className="text-8xl font-black text-white drop-shadow-2xl animate-ping-once">
-                                        GO! 🚀
-                                    </div>
-                                </div>
-                            )}
-                        </>
-                    )}
 
                     {/* Show "submitted" overlay */}
                     {hasSubmitted && (
@@ -271,8 +203,50 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                         </div>
                     )}
                 </div>
-
             </div>
+
+            {/* Transition Overlays - OUTSIDE the blurred content */}
+            {!isMyTimerRunning && !hasSubmitted && (
+                <>
+                    {/* Idle State: Show "I'm Ready" modal */}
+                    {transitionState === 'idle' && (
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50">
+                            <div className="bg-white rounded-3xl p-8 text-center max-w-sm mx-4 shadow-2xl pop-in border-4 border-purple-500">
+                                <div className="text-6xl mb-4 animate-bounce">🎨</div>
+                                <h3 className="text-2xl font-bold text-purple-600 mb-2">It's Drawing Time!</h3>
+                                <p className="text-gray-500 mb-6">You have {room.settings.timerDuration} seconds to draw.</p>
+                                <button
+                                    onClick={handleReadyClick}
+                                    disabled={isReadying}
+                                    className="w-full btn-90s bg-gradient-to-r from-lime-400 to-emerald-500 text-black px-8 py-4 rounded-xl font-bold text-xl jelly-hover shadow-lg disabled:opacity-70 disabled:grayscale"
+                                >
+                                    I'M READY! 🚀
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+
+
+                    {/* Countdown State: Large numbers */}
+                    {transitionState === 'countdown' && countdownValue > 0 && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center z-50 animate-fade-in">
+                            <div className="text-9xl font-black text-white drop-shadow-2xl animate-ping-once" key={countdownValue}>
+                                {countdownValue}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* GO! State */}
+                    {transitionState === 'go' && (
+                        <div className="absolute inset-0 bg-gradient-to-br from-lime-500/70 to-emerald-600/70 flex items-center justify-center z-50 animate-fade-in">
+                            <div className="text-8xl font-black text-white drop-shadow-2xl animate-ping-once">
+                                GO! 🚀
+                            </div>
+                        </div>
+                    )}
+                </>
+            )}
 
             {/* Toolbar - BELOW the image */}
             {isMyTimerRunning && !hasSubmitted && (

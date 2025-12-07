@@ -78,9 +78,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                 </div>
             )}
 
-            {/* Colors - Grid Overlay */}
-            <div className="bg-white rounded-2xl p-3 shadow-xl border-2 border-purple-500 w-full animate-slide-up max-h-32 overflow-y-auto no-scrollbar">
-                <div className="flex flex-wrap gap-2 justify-center">
+            {/* Colors - Single Row Grid for Fast Access */}
+            <div className="bg-white rounded-2xl px-3 py-2 shadow-xl border-2 border-purple-500 w-full animate-slide-up">
+                <div className="grid gap-2 justify-items-center" style={{ gridTemplateColumns: `repeat(${Math.min(effectiveColors.length, 10)}, 1fr)` }}>
                     {effectiveColors.map((color) => (
                         <button
                             key={color}
@@ -88,16 +88,18 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                                 vibrate();
                                 onColorChange(color);
                             }}
-                            className={`w-8 h-8 rounded-full transition-all flex-shrink-0 ${!isEraser && brushColor === color
-                                ? 'scale-125 ring-3 ring-purple-400 ring-offset-2'
-                                : 'hover:scale-110'
+                            className={`rounded-full transition-all flex-shrink-0 ${!isEraser && brushColor === color
+                                ? 'scale-110 ring-2 ring-purple-400 ring-offset-1'
+                                : 'hover:scale-105'
                                 }`}
                             style={{
                                 backgroundColor: color,
                                 border: color === '#FFFFFF' ? '2px solid #ccc' : '2px solid rgba(0,0,0,0.1)',
-                                boxShadow: !isEraser && brushColor === color ? '0 0 10px rgba(155, 89, 182, 0.5)' : 'none',
-                                width: '32px',
-                                height: '32px',
+                                boxShadow: !isEraser && brushColor === color ? '0 0 8px rgba(155, 89, 182, 0.5)' : 'none',
+                                width: '28px',
+                                height: '28px',
+                                minWidth: '28px',
+                                minHeight: '28px',
                             }}
                         />
                     ))}
@@ -105,9 +107,9 @@ export const Toolbar: React.FC<ToolbarProps> = ({
             </div>
 
             {/* Controls Bar */}
-            <div className="bg-white rounded-2xl p-2 flex items-center justify-between gap-2 w-full shadow-lg border-2 border-purple-200">
+            <div className="bg-white rounded-2xl p-2 flex items-center gap-1 w-full shadow-lg border-2 border-purple-200">
                 {/* Sizes */}
-                <div className="flex gap-1 pr-2 border-r-2 border-gray-100">
+                <div className="flex gap-1">
                     {SIZES.map((s) => (
                         <button
                             key={s.label}
@@ -115,7 +117,7 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                                 vibrate();
                                 onSizeChange(s.size);
                             }}
-                            className={`w-10 h-10 rounded-xl font-bold flex items-center justify-center transition-all ${brushSize === s.size
+                            className={`w-9 h-9 rounded-xl font-bold flex items-center justify-center transition-all ${brushSize === s.size
                                 ? 'bg-purple-500 text-white shadow-md'
                                 : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
                                 }`}
@@ -125,59 +127,64 @@ export const Toolbar: React.FC<ToolbarProps> = ({
                     ))}
                 </div>
 
-                {/* Tools */}
-                <div className="flex justify-between items-center bg-white/10 p-2 rounded-xl backdrop-blur-sm">
-                    <div className="flex gap-2">
-                        <button
-                            onClick={() => {
-                                vibrate();
-                                onUndo();
-                            }}
-                            className="w-12 h-12 bg-white rounded-xl shadow-lg flex items-center justify-center text-xl active:scale-95 transition-transform"
-                            title="Undo"
-                        >
-                            ↩️
-                        </button>
-                        <button
-                            onClick={() => {
-                                vibrate();
-                                onClear();
-                            }}
-                            className="w-12 h-12 bg-red-100 text-red-600 rounded-xl shadow-lg flex items-center justify-center text-xl active:scale-95 transition-transform"
-                            title="Clear All"
-                        >
-                            🗑️
-                        </button>
-                    </div>
+                {/* Divider */}
+                <div className="w-px h-8 bg-gray-200 mx-1" />
 
-                    <div className="flex gap-2 ml-2 pl-2 border-l-2 border-gray-100">
-                        <button
-                            onClick={() => {
-                                vibrate();
-                                onEyedropperToggle();
-                            }}
-                            className={`w-12 h-12 rounded-xl shadow-lg flex items-center justify-center text-xl active:scale-95 transition-all border-2 ${isEyedropper
-                                ? 'bg-cyan-100 border-cyan-500 scale-110'
-                                : 'bg-white border-transparent'
-                                }`}
-                            title="Eyedropper"
-                        >
-                            👁️
-                        </button>
-                        <button
-                            onClick={() => {
-                                vibrate();
-                                onEraserToggle();
-                            }}
-                            className={`w-12 h-12 rounded-xl shadow-lg flex items-center justify-center text-xl active:scale-95 transition-all border-2 ${isEraser
-                                ? 'bg-pink-100 border-pink-500 scale-110'
-                                : 'bg-white border-transparent'
-                                }`}
-                            title="Eraser"
-                        >
-                            🧼
-                        </button>
-                    </div>
+                {/* Action Tools */}
+                <div className="flex gap-1">
+                    <button
+                        onClick={() => {
+                            vibrate();
+                            onUndo();
+                        }}
+                        className="w-10 h-10 bg-white rounded-xl shadow-md flex items-center justify-center text-lg active:scale-95 transition-transform border border-gray-100"
+                        title="Undo"
+                    >
+                        ↩️
+                    </button>
+                    <button
+                        onClick={() => {
+                            vibrate();
+                            onClear();
+                        }}
+                        className="w-10 h-10 bg-red-50 text-red-600 rounded-xl shadow-md flex items-center justify-center text-lg active:scale-95 transition-transform border border-red-100"
+                        title="Clear All"
+                    >
+                        🗑️
+                    </button>
+                </div>
+
+                {/* Divider */}
+                <div className="w-px h-8 bg-gray-200 mx-1" />
+
+                {/* Selection Tools */}
+                <div className="flex gap-1">
+                    <button
+                        onClick={() => {
+                            vibrate();
+                            onEyedropperToggle();
+                        }}
+                        className={`w-10 h-10 rounded-xl shadow-md flex items-center justify-center text-lg active:scale-95 transition-all border ${isEyedropper
+                            ? 'bg-cyan-100 border-cyan-400 ring-2 ring-cyan-300'
+                            : 'bg-white border-gray-100'
+                            }`}
+                        title="Eyedropper"
+                    >
+                        👁️
+                    </button>
+                    <button
+                        onClick={() => {
+                            vibrate();
+                            onEraserToggle();
+                        }}
+                        className={`w-10 h-10 rounded-xl shadow-md flex items-center justify-center text-lg active:scale-95 transition-all border ${isEraser
+                            ? 'bg-pink-100 border-pink-400 ring-2 ring-pink-300'
+                            : 'bg-white border-gray-100'
+                            }`}
+                        title="Eraser"
+                    >
+                        🧼
+                    </button>
                 </div>
             </div>
         </div>
