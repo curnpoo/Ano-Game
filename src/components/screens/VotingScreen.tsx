@@ -145,14 +145,17 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                     {/* Block overlay */}
                     {room.block && (
                         <div
-                            className="absolute bg-white"
+                            className="absolute"
                             style={{
                                 left: `${room.block.x}%`,
                                 top: `${room.block.y}%`,
                                 width: `${room.block.size}%`,
                                 height: `${room.block.size}%`,
-                                borderRadius: room.block.type === 'circle' ? '50%' : '0',
-                                boxShadow: 'inset 0 0 20px rgba(0,0,0,0.1)'
+                                borderRadius: room.block.type === 'circle' ? '50%' : '8px',
+                                boxShadow: 'inset 0 0 20px rgba(0,0,0,0.1)',
+                                backgroundColor: '#ffffff',
+                                opacity: 1,
+                                zIndex: 10
                             }}
                         />
                     )}
