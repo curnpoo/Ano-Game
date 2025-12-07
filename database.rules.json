@@ -2,14 +2,34 @@
     "rules": {
         ".read": true,
         ".write": true,
-        "users": {
-            ".indexOn": [
-                "username"
-            ]
-        },
         "rooms": {
+            "$room_id": {
+                ".validate": "newData.hasChildren(['status', 'hostId'])",
+                "status": {
+                    ".validate": "newData.isString()"
+                },
+                "roundNumber": {
+                    ".validate": "newData.isNumber()"
+                },
+                "players": {
+                    "$player_index": {
+                        ".validate": "newData.hasChildren(['id', 'name'])"
+                    }
+                }
+            },
             ".indexOn": [
                 "status"
+            ]
+        },
+        "users": {
+            "$user_id": {
+                ".validate": "newData.hasChild('username')",
+                "username": {
+                    ".validate": "newData.isString() && newData.val().length < 30"
+                }
+            },
+            ".indexOn": [
+                "username"
             ]
         }
     }

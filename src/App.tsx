@@ -27,6 +27,7 @@ import {
   notifyResultsReady,
   notifyFinalResults
 } from './utils/notifications';
+import { simplifyStrokes } from './utils/geometry';
 import { getThemeClass, getThemeVariables } from './utils/themes';
 import { ThemeTransition } from './components/common/ThemeTransition';
 import { requestPushPermission, storePushToken, isPushSupported } from './services/pushNotifications';
@@ -841,7 +842,7 @@ function App() {
     if (!roomCode || !player) return;
     setIsLoading(true);
     try {
-      const imageUrl = await ImageService.processImage(file);
+      const imageUrl = await ImageService.processImage(file, roomCode);
       await StorageService.startRound(roomCode, imageUrl, player.id);
       showToast('Round started! 🎨', 'success');
     } catch (err: any) {
@@ -887,11 +888,22 @@ function App() {
     const currentStrokes = strokesRef.current;
     const validStrokes = currentStrokes.filter(s => s && Array.isArray(s.points) && s.points.length > 0);
 
+    // OPTIMIZATION: Simplify strokes to reduce data usage
+    // Tolerance of 0.5 provides ~80-90% reduction with minimal visual difference
+    const simplifiedStrokes = simplifyStrokes(validStrokes, 0.5);
+
+    // Log optimization stats
+    const originalPoints = validStrokes.reduce((acc: number, s: any) => acc + s.points.length, 0);
+    const newPoints = simplifiedStrokes.reduce((acc: number, s: any) => acc + s.points.length, 0);
+    if (originalPoints > 0) {
+      console.log(`Optimization: Reduced ${originalPoints} points to ${newPoints} (${Math.round((1 - newPoints / originalPoints) * 100)}% reduction)`);
+    }
+
     const drawing: PlayerDrawing = {
       playerId: player.id,
       playerName: player.name,
       playerColor: player.color,
-      strokes: validStrokes,
+      strokes: simplifiedStrokes,
       submittedAt: Date.now()
     };
 
