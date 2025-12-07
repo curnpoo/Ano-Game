@@ -24,12 +24,12 @@ export const WaitingRoomScreen: React.FC<WaitingRoomScreenProps> = ({
     const me = room.waitingPlayers?.find(p => p.id === currentPlayerId) || room.players.find(p => p.id === currentPlayerId);
 
     return (
-        <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-y-auto pb-safe">
             {/* Decorative elements */}
-            <div className="absolute top-10 left-10 text-6xl animate-bounce">⏳</div>
-            <div className="absolute bottom-10 right-10 text-6xl animate-pulse">🎮</div>
+            <div className="fixed top-10 left-10 text-6xl animate-bounce pointer-events-none z-0">⏳</div>
+            <div className="fixed bottom-10 right-10 text-6xl animate-pulse pointer-events-none z-0">🎮</div>
 
-            <div className={`bg-white rounded-[2rem] p-8 max-w-md w-full text-center relative z-10 ${mounted ? 'pop-in' : 'opacity-0'}`}
+            <div className={`bg-white rounded-[2rem] p-8 max-w-md w-full text-center relative z-10 my-auto ${mounted ? 'pop-in' : 'opacity-0'}`}
                 style={{
                     boxShadow: '0 10px 0 rgba(0, 0, 0, 0.2), 0 20px 40px rgba(0, 0, 0, 0.15)',
                     border: '4px solid #FF69B4'

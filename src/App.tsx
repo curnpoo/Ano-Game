@@ -435,20 +435,23 @@ function App() {
   useEffect(() => {
     // Only run check if we have a room, player, and data is fully loaded
     if (roomCode && room && player && !isLoading && !isInitialLoading && !isBrowsing) {
-      // Add a small safety check - ensure players array is populated (not empty due to glitch)
-      // Taking a length of 0 seriously only if status is not 'lobby' maybe? 
-      // Actually, just checking if *I* am in there is enough, assuming array is correct.
-
+      // Check if player is missing
       const amInPlayers = room.players.some(p => p.id === player.id);
       const amInWaiting = room.waitingPlayers?.some(p => p.id === player.id);
 
       if (!amInPlayers && !amInWaiting) {
-        // Double check - if we just created the room, we might not be in the list yet?
-        // But useRoom hook should handle that.
-
-        // I was kicked
-        setShowKicked(true);
-        setKickCountdown(3);
+        // Debounce the kick check to prevent race conditions during transitions
+        // e.g. when moving from Lobby -> Game, sometimes the list updates asynchronously
+        const timer = setTimeout(() => {
+          // Re-check after 2s
+          const currentPlayers = room.players.some(p => p.id === player.id);
+          const currentWaiting = room.waitingPlayers?.some(p => p.id === player.id);
+          if (!currentPlayers && !currentWaiting) {
+            setShowKicked(true);
+            setKickCountdown(3);
+          }
+        }, 2000);
+        return () => clearTimeout(timer);
       }
     }
   }, [room, player, roomCode, isLoading, isInitialLoading, isBrowsing]);
@@ -1190,7 +1193,24 @@ function App() {
               showToast('Failed to join round', 'error');
             }
           }}
-          onBack={() => handleLeaveGame('home')}
+          onJoinGame={async () => {
+            if (!roomCode || !player) return;
+            try {
+              await StorageService.joinCurrentGame(roomCode, player.id);
+              showToast('Joined the round! 🚀', 'success');
+
+              // Force screen transition immediately
+              if (room.status === 'uploading') setCurrentScreen('uploading');
+              else if (room.status === 'drawing') setCurrentScreen('drawing');
+              else if (room.status === 'voting') setCurrentScreen('voting');
+              else if (room.status === 'results') setCurrentScreen('results');
+              else if (room.status === 'final') setCurrentScreen('final');
+            } catch (err) {
+              console.error(err);
+              showToast('Failed to join round', 'error');
+            }
+          }}
+          onBack={handleMinimizeGame}
         />
       )}
 
