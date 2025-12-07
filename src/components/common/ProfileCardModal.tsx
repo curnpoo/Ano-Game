@@ -20,7 +20,7 @@ export const ProfileCardModal: React.FC<ProfileCardModalProps> = ({
     onInvite,
     roomCode
 }) => {
-    const [friendButtonState, setFriendButtonState] = useState<'add' | 'remove' | 'confirm' | 'pending'>('add');
+    const [friendButtonState, setFriendButtonState] = useState<'add' | 'remove' | 'confirm' | 'sent' | 'received'>('add');
     const [isLoading, setIsLoading] = useState(false);
     const [showNameHistory, setShowNameHistory] = useState(false);
     const [inviteCooldown, setInviteCooldown] = useState(0);
@@ -39,8 +39,11 @@ export const ProfileCardModal: React.FC<ProfileCardModalProps> = ({
             if (FriendsService.isFriend(user.id)) {
                 setFriendButtonState('remove');
             } else {
-                const pending = await FriendsService.isFriendRequestPending(user.id);
-                setFriendButtonState(pending ? 'pending' : 'add');
+                const status = await FriendsService.getFriendRequestStatus(user.id);
+                if (status === 'friend') setFriendButtonState('remove');
+                else if (status === 'sent') setFriendButtonState('sent');
+                else if (status === 'received') setFriendButtonState('received');
+                else setFriendButtonState('add');
             }
         };
         checkStatus();
@@ -68,7 +71,7 @@ export const ProfileCardModal: React.FC<ProfileCardModalProps> = ({
             const result = await FriendsService.sendFriendRequest(user.id);
             setIsLoading(false);
             if (result.success) {
-                setFriendButtonState('pending');
+                setFriendButtonState('sent');
             } else {
                 // Maybe show error?
                 console.error(result.error);
@@ -83,6 +86,13 @@ export const ProfileCardModal: React.FC<ProfileCardModalProps> = ({
             if (result.success) {
 
                 setFriendButtonState('add');
+            }
+        } else if (friendButtonState === 'received') {
+            setIsLoading(true);
+            const result = await FriendsService.acceptFriendRequestFromUser(user.id);
+            setIsLoading(false);
+            if (result.success) {
+                setFriendButtonState('remove'); // Now friends
             }
         }
     };
@@ -114,11 +124,17 @@ export const ProfileCardModal: React.FC<ProfileCardModalProps> = ({
                     text: 'white',
                     label: 'Are you sure?'
                 };
-            case 'pending':
+            case 'sent':
                 return {
                     bg: '#94a3b8',
                     text: 'white',
                     label: '🕒 Request Sent'
+                };
+            case 'received':
+                return {
+                    bg: '#22c55e',
+                    text: 'white',
+                    label: '✅ Accept Request'
                 };
         }
     };
@@ -313,8 +329,8 @@ export const ProfileCardModal: React.FC<ProfileCardModalProps> = ({
                     {!isOwnProfile && (
                         <button
                             onClick={handleFriendAction}
-                            disabled={isLoading || friendButtonState === 'pending'}
-                            className={`w-full py-3 px-4 rounded-xl font-bold transition-all ${isLoading || friendButtonState === 'pending' ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-95'
+                            disabled={isLoading || friendButtonState === 'sent'}
+                            className={`w-full py-3 px-4 rounded-xl font-bold transition-all ${isLoading || friendButtonState === 'sent' ? 'opacity-50 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-95'
                                 }`}
                             style={{
                                 backgroundColor: btnStyle.bg,

@@ -299,39 +299,50 @@ export const FriendsService = {
         }
     },
 
-    // Check if a friend request is pending
-    async isFriendRequestPending(toUserId: string): Promise<boolean> {
+    async getFriendRequestStatus(otherUserId: string): Promise<'none' | 'friend' | 'sent' | 'received'> {
         const currentUser = AuthService.getCurrentUser();
-        if (!currentUser) return false;
+        if (!currentUser) return 'none';
+
+        if (currentUser.friends?.includes(otherUserId)) return 'friend';
 
         try {
             const requestsRef = ref(database, FRIEND_REQUESTS_PATH);
+
+            // Check sent
             const sentQuery = query(requestsRef, orderByChild('fromUserId'), equalTo(currentUser.id));
-            const snapshot = await get(sentQuery);
-
-            let exists = false;
-            snapshot.forEach((child) => {
+            const sentSnapshot = await get(sentQuery);
+            let sentExists = false;
+            sentSnapshot.forEach((child) => {
                 const req = child.val() as FriendRequest;
-                if (req.toUserId === toUserId && req.status === 'pending') {
-                    exists = true;
+                if (req.toUserId === otherUserId && req.status === 'pending') {
+                    sentExists = true;
                 }
             });
+            if (sentExists) return 'sent';
 
-            if (exists) return true;
-
+            // Check received
             const receivedQuery = query(requestsRef, orderByChild('toUserId'), equalTo(currentUser.id));
-            const snapshot2 = await get(receivedQuery);
-            snapshot2.forEach((child) => {
+            const receivedSnapshot = await get(receivedQuery);
+            let receivedExists = false;
+            receivedSnapshot.forEach((child) => {
                 const req = child.val() as FriendRequest;
-                if (req.fromUserId === toUserId && req.status === 'pending') {
-                    exists = true;
+                if (req.fromUserId === otherUserId && req.status === 'pending') {
+                    receivedExists = true;
                 }
             });
+            if (receivedExists) return 'received';
 
-            return exists;
+            return 'none';
         } catch (error) {
-            return false;
+            console.error('Error checking friend status:', error);
+            return 'none';
         }
+    },
+
+    // Check if a friend request is pending (Legacy generic check)
+    async isFriendRequestPending(toUserId: string): Promise<boolean> {
+        const status = await this.getFriendRequestStatus(toUserId);
+        return status === 'sent' || status === 'received';
     },
 
     // Get pending friend requests (received)
@@ -357,6 +368,33 @@ export const FriendsService = {
             return requests.sort((a, b) => b.createdAt - a.createdAt);
         } catch (error) {
             console.error('Error getting friend requests:', error);
+            return [];
+        }
+    },
+
+    // Get pending friend requests (sent)
+    async getSentFriendRequests(): Promise<FriendRequest[]> {
+        const currentUser = AuthService.getCurrentUser();
+        if (!currentUser) return [];
+
+        try {
+            const requestsRef = ref(database, FRIEND_REQUESTS_PATH);
+            const requestsQuery = query(requestsRef, orderByChild('fromUserId'), equalTo(currentUser.id));
+            const snapshot = await get(requestsQuery);
+
+            if (!snapshot.exists()) return [];
+
+            const requests: FriendRequest[] = [];
+            snapshot.forEach((child) => {
+                const req = child.val() as FriendRequest;
+                if (req.status === 'pending') {
+                    requests.push(req);
+                }
+            });
+
+            return requests.sort((a, b) => b.createdAt - a.createdAt);
+        } catch (error) {
+            console.error('Error getting sent friend requests:', error);
             return [];
         }
     },
@@ -399,6 +437,23 @@ export const FriendsService = {
             return { success: true };
         } catch (error) {
             console.error('Error declining friend request:', error);
+            return { success: false, error: 'Failed' };
+        }
+    },
+
+    // Accept friend request from a specific user
+    async acceptFriendRequestFromUser(userId: string): Promise<{ success: boolean; error?: string }> {
+        try {
+            const requests = await this.getFriendRequests();
+            const request = requests.find(r => r.fromUserId === userId);
+
+            if (!request) {
+                return { success: false, error: 'Request not found' };
+            }
+
+            return await this.acceptFriendRequest(request.id);
+        } catch (error) {
+            console.error('Error accepting friend request from user:', error);
             return { success: false, error: 'Failed' };
         }
     }

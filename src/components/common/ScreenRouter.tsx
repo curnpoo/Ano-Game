@@ -27,6 +27,7 @@ interface ScreenRouterProps {
     currentScreen: Screen;
     player: Player | null;
     room: GameRoom | null;
+    joiningRoomCode?: string | null;
 
     // Auth/Profile Handlers
     onPlayNow: () => void;
@@ -109,6 +110,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
     currentScreen,
     player,
     room,
+    joiningRoomCode,
     onPlayNow,
     onLoginComplete,
     onProfileComplete,
@@ -250,10 +252,10 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
     // Main Switch
     switch (currentScreen) {
         case 'welcome':
-            return <WelcomeScreen onPlay={onPlayNow} />;
+            return <WelcomeScreen onPlay={onPlayNow} joiningRoomCode={joiningRoomCode} />;
 
         case 'login':
-            return <LoginScreen onLogin={onLoginComplete} />;
+            return <LoginScreen onLogin={onLoginComplete} joiningRoomCode={joiningRoomCode} />;
 
         case 'name-entry':
             // Need AuthService? No, ProfileSetupScreen just returns data

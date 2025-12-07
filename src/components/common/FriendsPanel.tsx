@@ -27,6 +27,7 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, ope
 
     const [friends, setFriends] = useState<UserAccount[]>([]);
     const [requests, setRequests] = useState<FriendRequest[]>([]);
+    const [sentRequests, setSentRequests] = useState<FriendRequest[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [activeTab, setActiveTab] = useState<'friends' | 'requests'>('friends');
     const [selectedFriend, setSelectedFriend] = useState<UserAccount | null>(null);
@@ -38,12 +39,14 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, ope
 
     const loadData = async () => {
         setIsLoading(true);
-        const [friendsList, requestsList] = await Promise.all([
+        const [friendsList, requestsList, sentList] = await Promise.all([
             FriendsService.getFriends(),
-            FriendsService.getFriendRequests()
+            FriendsService.getFriendRequests(),
+            FriendsService.getSentFriendRequests()
         ]);
         setFriends(friendsList);
         setRequests(requestsList);
+        setSentRequests(sentList);
         setIsLoading(false);
     };
 
@@ -234,7 +237,7 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, ope
                             )}
 
                             {!isLoading && activeTab === 'requests' && (
-                                requests.length === 0 ? (
+                                requests.length === 0 && sentRequests.length === 0 ? (
                                     <div className="p-6 text-center">
                                         <div className="text-3xl mb-2">📭</div>
                                         <div className="text-sm text-[var(--theme-text-secondary)]">
@@ -242,32 +245,65 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, ope
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="p-2 space-y-2">
-                                        {requests.map((req) => (
-                                            <div
-                                                key={req.id}
-                                                className="p-3 rounded-xl flex items-center justify-between"
-                                                style={{ backgroundColor: 'var(--theme-highlight)' }}
-                                            >
-                                                <div className="font-bold text-[var(--theme-text)]">
-                                                    {req.fromUsername}
+                                    <div className="p-2 space-y-4">
+                                        {requests.length > 0 && (
+                                            <div>
+                                                <div className="text-xs font-bold uppercase text-[var(--theme-text-secondary)] mb-2 px-1">
+                                                    Received
                                                 </div>
-                                                <div className="flex gap-2">
-                                                    <button
-                                                        onClick={() => handleAcceptRequest(req.id)}
-                                                        className="px-3 py-1 rounded-lg bg-green-500 text-white font-bold text-sm hover:scale-105 transition-transform"
-                                                    >
-                                                        Accept
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDeclineRequest(req.id)}
-                                                        className="px-3 py-1 rounded-lg bg-red-500 text-white font-bold text-sm hover:scale-105 transition-transform"
-                                                    >
-                                                        ✕
-                                                    </button>
+                                                <div className="space-y-2">
+                                                    {requests.map((req) => (
+                                                        <div
+                                                            key={req.id}
+                                                            className="p-3 rounded-xl flex items-center justify-between"
+                                                            style={{ backgroundColor: 'var(--theme-highlight)' }}
+                                                        >
+                                                            <div className="font-bold text-[var(--theme-text)]">
+                                                                {req.fromUsername}
+                                                            </div>
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => handleAcceptRequest(req.id)}
+                                                                    className="px-3 py-1 rounded-lg bg-green-500 text-white font-bold text-sm hover:scale-105 transition-transform"
+                                                                >
+                                                                    Accept
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleDeclineRequest(req.id)}
+                                                                    className="px-3 py-1 rounded-lg bg-red-500 text-white font-bold text-sm hover:scale-105 transition-transform"
+                                                                >
+                                                                    ✕
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </div>
-                                        ))}
+                                        )}
+
+                                        {sentRequests.length > 0 && (
+                                            <div>
+                                                <div className="text-xs font-bold uppercase text-[var(--theme-text-secondary)] mb-2 px-1">
+                                                    Sent
+                                                </div>
+                                                <div className="space-y-2">
+                                                    {sentRequests.map((req) => (
+                                                        <div
+                                                            key={req.id}
+                                                            className="p-3 rounded-xl flex items-center justify-between opacity-75"
+                                                            style={{ backgroundColor: 'var(--theme-highlight)' }}
+                                                        >
+                                                            <div className="font-bold text-[var(--theme-text)]">
+                                                                To: {req.toUserId} <span className="text-[10px] opacity-70">(Pending)</span>
+                                                            </div>
+                                                            <div className="text-xs text-[var(--theme-text-secondary)]">
+                                                                Waiting...
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
                                 )
                             )}

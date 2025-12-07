@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 
 import { CasinoScreen } from './components/screens/CasinoScreen';
-import { WelcomeScreen } from './components/screens/WelcomeScreen';
-import { LoginScreen } from './components/screens/LoginScreen';
+
 import { JoiningGameScreen } from './components/screens/JoiningGameScreen';
 import { AuthService } from './services/auth';
 import { StorageService } from './services/storage';
@@ -1159,19 +1158,7 @@ function App() {
         />
       )}
 
-      {currentScreen === 'welcome' && (
-        <WelcomeScreen
-          onPlay={() => setCurrentScreen('login')}
-          joiningRoomCode={pendingRoomCode}
-        />
-      )}
 
-      {currentScreen === 'login' && (
-        <LoginScreen
-          onLogin={handleLoginComplete}
-          joiningRoomCode={pendingRoomCode}
-        />
-      )}
 
       {/* Transition Overlays */}
       <TunnelTransition
@@ -1303,6 +1290,7 @@ function App() {
           currentScreen={currentScreen}
           player={player}
           room={room}
+          joiningRoomCode={pendingRoomCode}
 
           onPlayNow={handlePlayNow}
           onLoginComplete={handleLoginComplete}
