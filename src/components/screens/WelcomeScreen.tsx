@@ -57,7 +57,7 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onPlay }) => {
                     {/* Logo with rounded corners to hide white background corners */}
                     <img
                         src={logo}
-                        alt="Fill the Blank"
+                        alt="Ano Draw"
                         className="w-40 h-40 object-cover rounded-[2rem] shadow-xl bubble-float border-4 border-white/50"
                         style={{ animationDelay: '0.5s' }}
                     />
@@ -66,13 +66,13 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onPlay }) => {
                         style={{
                             textShadow: '0px 4px 0 #9B59B6, 0px 8px 0 rgba(0,0,0,0.2)'
                         }}>
-                        <span className="rainbow-text">Fill the</span>
+                        <span className="rainbow-text">Ano</span>
                         <br />
-                        <span className="text-white">Blank</span>
+                        <span className="text-white">Draw</span>
                     </h1>
 
                     <p className="text-xl text-yellow-200 font-bold bubble-float" style={{ animationDelay: '0.5s' }}>
-                        ✨ A drawing game to see who has the best guess! ✨
+                        ✨ The party drawing game! ✨
                     </p>
                 </div>
 

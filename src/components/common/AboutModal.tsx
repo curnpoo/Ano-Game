@@ -17,12 +17,16 @@ export const AboutModal: React.FC<AboutModalProps> = ({ isOpen, onClose }) => {
                     border: '5px solid #FF69B4'
                 }}>
 
-                <h2 className="text-3xl font-bold text-purple-600">About</h2>
+                <h2 className="text-3xl font-bold text-purple-600">About Ano Draw</h2>
 
-                <div className="text-6xl animate-bounce py-4">❤️</div>
+                <div className="text-6xl animate-bounce py-4">🎨</div>
 
                 <p className="text-xl font-bold text-gray-700">
-                    Made with love by <span className="text-pink-500">Curren</span> and a <span className="text-blue-500">computer</span>.
+                    A <span className="text-pink-500">Bored at Work</span> production.
+                </p>
+
+                <p className="text-sm text-gray-500">
+                    Made with ❤️ by Curren and a computer.
                 </p>
 
                 <button

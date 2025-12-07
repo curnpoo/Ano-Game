@@ -241,7 +241,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                 )}
 
                 <div className="text-center text-xs font-medium opacity-60 mt-4 text-[var(--theme-text-secondary)] flex items-center justify-center gap-2">
-                    <span>✨</span> Fill in the blank and vote for the best drawing! <span>✨</span>
+                    <span>✨</span> Annotate photos, vote for the best! <span>✨</span>
                 </div>
             </div>
 
