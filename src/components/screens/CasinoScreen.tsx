@@ -106,7 +106,6 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
     }, [spinning, balance, bet, reels]);
 
     return (
-    return (
         <div
             className="fixed inset-0 flex flex-col items-center p-4 z-50 overflow-y-auto"
             style={{
@@ -176,23 +175,23 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
             )}
 
             {/* Bet Selector */}
-            <div className="flex items-center gap-4 mb-6">
-                <span className="font-bold" style={{ color: 'var(--theme-text)' }}>BET:</span>
-                {[1, 2, 5].map(amount => (
+            <div className="flex flex-wrap items-center justify-center gap-3 mb-6">
+                <span className="font-bold w-full text-center mb-2" style={{ color: 'var(--theme-text)' }}>BET:</span>
+                {[1, 5, 10, 25, 50, 100].map(amount => (
                     <button
                         key={amount}
                         onClick={() => setBet(amount)}
                         disabled={balance < amount}
-                        className={`w-12 h-12 rounded-full font-bold text-lg transition-all border-2
+                        className={`px-4 py-2 rounded-xl font-bold text-sm transition-all border-2
                             ${bet === amount
                                 ? 'scale-110 shadow-lg'
                                 : 'hover:opacity-80'}
-                            ${balance < amount ? 'opacity-50 cursor-not-allowed' : ''}
+                            ${balance < amount ? 'opacity-30 cursor-not-allowed' : ''}
                         `}
                         style={{
                             backgroundColor: bet === amount ? 'var(--theme-accent)' : 'var(--theme-bg-secondary)',
                             color: bet === amount ? '#fff' : 'var(--theme-text)',
-                            borderColor: 'var(--theme-border)'
+                            borderColor: bet === amount ? 'var(--theme-accent)' : 'var(--theme-border)'
                         }}
                     >
                         ${amount}
