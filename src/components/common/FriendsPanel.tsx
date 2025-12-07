@@ -135,18 +135,26 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, ope
                 {/* Expanded Panel */}
                 {isExpanded && (
                     <div className="border-t" style={{ borderColor: 'var(--theme-border)' }}>
-                        <div className="flex border-b" style={{ borderColor: 'var(--theme-border)' }}>
+                        <div className="flex p-3 gap-2" style={{ borderColor: 'var(--theme-border)' }}>
                             <button
                                 onClick={() => setActiveTab('friends')}
-                                className={`flex-1 p-3 font-bold transition-colors ${activeTab === 'friends' ? 'text-white' : 'text-[var(--theme-text-secondary)]'}`}
-                                style={{ backgroundColor: activeTab === 'friends' ? '#22c55e' : 'transparent' }}
+                                className={`flex-1 py-3 px-4 rounded-2xl font-bold transition-all duration-300 ${activeTab === 'friends' ? 'shadow-lg scale-[1.02]' : 'hover:bg-white/5 opacity-70 hover:opacity-100'}`}
+                                style={{
+                                    backgroundColor: activeTab === 'friends' ? '#22c55e' : 'transparent',
+                                    color: activeTab === 'friends' ? 'white' : 'var(--theme-text-secondary)',
+                                    boxShadow: activeTab === 'friends' ? '0 4px 12px rgba(34, 197, 94, 0.3)' : 'none'
+                                }}
                             >
                                 Friends ({friends.length})
                             </button>
                             <button
                                 onClick={() => setActiveTab('requests')}
-                                className={`flex-1 p-3 font-bold transition-colors ${activeTab === 'requests' ? 'text-white' : 'text-[var(--theme-text-secondary)]'}`}
-                                style={{ backgroundColor: activeTab === 'requests' ? '#22c55e' : 'transparent' }}
+                                className={`flex-1 py-3 px-4 rounded-2xl font-bold transition-all duration-300 ${activeTab === 'requests' ? 'shadow-lg scale-[1.02]' : 'hover:bg-white/5 opacity-70 hover:opacity-100'}`}
+                                style={{
+                                    backgroundColor: activeTab === 'requests' ? '#22c55e' : 'transparent',
+                                    color: activeTab === 'requests' ? 'white' : 'var(--theme-text-secondary)',
+                                    boxShadow: activeTab === 'requests' ? '0 4px 12px rgba(34, 197, 94, 0.3)' : 'none'
+                                }}
                             >
                                 Requests ({requests.length})
                             </button>

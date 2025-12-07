@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ReactDOM from 'react-dom';
 import { AvatarDisplay } from './AvatarDisplay';
 import { XPService } from '../../services/xp';
 import { BadgeService } from '../../services/badgeService';
@@ -148,9 +149,10 @@ export const ProfileCardModal: React.FC<ProfileCardModalProps> = ({
 
     const btnStyle = getFriendButtonStyle();
 
-    return (
+    return ReactDOM.createPortal(
         <div
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+            className="fixed inset-0 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in"
+            style={{ zIndex: 9999 }}
             onClick={onClose}
         >
             <div
@@ -365,6 +367,7 @@ export const ProfileCardModal: React.FC<ProfileCardModalProps> = ({
                     )}
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };
