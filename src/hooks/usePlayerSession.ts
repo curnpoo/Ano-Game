@@ -73,7 +73,14 @@ export const usePlayerSession = ({ setCurrentScreen, onProgress, onComplete }: U
                         }
                     }
                     onProgress?.('profile', 'completed');
+                } else {
+                    // No auth user - still need to mark profile as completed
+                    onProgress?.('profile', 'loading');
+                    onProgress?.('profile', 'completed');
                 }
+
+                // Check for active games
+                onProgress?.('room', 'loading');
 
                 if (session) {
                     setPlayer(session);
@@ -84,25 +91,32 @@ export const usePlayerSession = ({ setCurrentScreen, onProgress, onComplete }: U
                     const isRecent = Date.now() - lastActive < 10 * 60 * 1000; // 10 minutes
 
                     if (lastRoomCode && isRecent) {
-                        onProgress?.('room', 'loading');
                         setRoomCode(lastRoomCode);
                         try {
                             const room = await StorageService.joinRoom(lastRoomCode, session);
                             if (!room) {
                                 StorageService.leaveRoom();
+                                onProgress?.('room', 'completed');
                                 setCurrentScreen('home');
                             } else {
                                 onProgress?.('room', 'completed');
                             }
                         } catch (e) {
                             console.error('Failed to auto-rejoin', e);
+                            onProgress?.('room', 'completed');
                             setCurrentScreen('home');
                         }
                     } else {
+                        onProgress?.('room', 'completed');
                         setCurrentScreen('home');
                     }
+                } else {
+                    // No session - mark room check as complete
+                    onProgress?.('room', 'completed');
                 }
             } finally {
+                // Add delay so user sees all green checkmarks before screen dismisses
+                await new Promise(resolve => setTimeout(resolve, 500));
                 // Signal completion regardless of path
                 if (onComplete) onComplete();
             }
