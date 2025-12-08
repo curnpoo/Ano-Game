@@ -102,8 +102,18 @@ export const DrawingTimer: React.FC<DrawingTimerProps> = ({
 
             {/* Done Button */}
             <button
-                onClick={handleDoneClick}
-                className="h-10 px-5 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-all border border-white/20 font-bold text-sm text-white flex items-center gap-1 shadow-md"
+                onClick={(e) => {
+                    e.stopPropagation();
+                    handleDoneClick();
+                }}
+                onTouchEnd={(e) => {
+                    e.stopPropagation();
+                    // Prevent default click emulation to avoid double-fire
+                    // But preventDefault might block other things? usually safe on button.
+                    // e.preventDefault(); 
+                    handleDoneClick();
+                }}
+                className="h-10 px-5 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition-transform duration-200 border border-white/20 font-bold text-sm text-white flex items-center gap-1 shadow-md pointer-events-auto cursor-pointer z-50"
             >
                 Done <span className="text-green-400">✓</span>
             </button>

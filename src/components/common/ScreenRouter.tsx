@@ -227,6 +227,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                         <DrawingScreen
                             room={room}
                             player={player}
+                            hasSubmitted={hasSubmitted}
                             isMyTimerRunning={isMyTimerRunning}
                             isReadying={isReadying}
                             onReady={onReady}

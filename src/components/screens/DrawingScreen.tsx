@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import type { GameRoom, Player } from '../../types';
 import { GameCanvas } from '../game/GameCanvas';
-import { Toolbar } from '../game/Toolbar';
+import { BentoToolbar } from '../game/BentoToolbar';
 import { DrawingTimer } from '../game/DrawingTimer';
 
 import { CosmeticsService } from '../../services/cosmetics';
@@ -34,7 +34,9 @@ interface DrawingScreenProps {
     handleEraserToggle: () => void;
     handleEyedropperToggle: () => void;
     handleColorPick: (color: string) => void;
+
     strokes: DrawingStroke[];
+    hasSubmitted?: boolean;
 }
 
 type TransitionState = 'idle' | 'countdown' | 'go' | 'fading' | 'drawing';
@@ -64,12 +66,12 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
     handleEraserToggle,
     handleEyedropperToggle,
     handleColorPick,
-    strokes
+    strokes,
+    hasSubmitted: propHasSubmitted
 }) => {
     const playerState = room.playerStates?.[player.id];
-    // Defensive check: only show submitted state if playerState exists AND status is explicitly 'submitted'
-    // This prevents race conditions during upload→drawing transitions
-    const hasSubmitted = playerState?.status === 'submitted' || false;
+    // Use prop if available (includes optimistic state), otherwise fall back to room state
+    const hasSubmitted = propHasSubmitted ?? (playerState?.status === 'submitted' || false);
 
     // Effect: Lock scrolling and gestures
     useEffect(() => {
@@ -119,9 +121,11 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
 
     const unfinishedPlayers = useMemo(() => {
         return room.players.filter(p =>
-            room.playerStates[p.id]?.status !== 'submitted'
+            room.playerStates[p.id]?.status !== 'submitted' &&
+            // Also exclude self if we have optimistically submitted
+            (hasSubmitted ? p.id !== player.id : true)
         );
-    }, [room.players, room.playerStates]);
+    }, [room.players, room.playerStates, hasSubmitted, player.id]);
 
     const isSabotaged = room.sabotageTargetId === player.id && room.sabotageTriggered;
     const sabotageEffect = room.sabotageEffect;
@@ -209,16 +213,19 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
             <div className="relative w-full h-full max-w-lg mx-auto flex flex-col items-center justify-center p-4 z-10 safe-area-padding">
 
                 {/* Timer - Floating Top */}
+                {/* Timer - Above Canvas */}
                 <div
-                    className="absolute top-4 left-4 right-4 z-40 transition-all duration-500 ease-out safe-area-top-padding"
+                    className="w-full mb-2 z-40 transition-all duration-500 ease-out"
                     style={{
-                        transform: showDrawingUI && transitionState === 'drawing' ? 'translateY(0)' : 'translateY(-150%)',
-                        opacity: showDrawingUI && transitionState === 'drawing' ? 1 : 0
+                        transform: showDrawingUI && transitionState === 'drawing' ? 'translateY(0)' : 'translateY(-20px)',
+                        opacity: showDrawingUI && transitionState === 'drawing' ? 1 : 0,
+                        height: showDrawingUI && transitionState === 'drawing' ? 'auto' : 0,
+                        overflow: 'visible'
                     }}
                 >
                     {showDrawingUI && (
                         <DrawingTimer
-                            endsAt={timerEndsAt || Date.now() + 10000} // Default to future if briefly null to prevent instant trigger
+                            endsAt={timerEndsAt || Date.now() + 10000}
                             onTimeUp={onTimeUp}
                             totalDuration={timerDuration}
                         />
@@ -309,14 +316,15 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                 </div>
 
                 {/* Toolbar - Floating Bottom */}
+                {/* Toolbar - Bento Grid Below */}
                 <div
-                    className="absolute bottom-6 left-4 right-4 z-40 transition-all duration-500 ease-out safe-area-bottom-padding"
+                    className="w-full mt-4 z-40 transition-all duration-500 ease-out safe-area-bottom-padding"
                     style={{
-                        transform: showDrawingUI && transitionState === 'drawing' ? 'translateY(0)' : 'translateY(150%)',
+                        transform: showDrawingUI && transitionState === 'drawing' ? 'translateY(0)' : 'translateY(100px)',
                         opacity: showDrawingUI && transitionState === 'drawing' ? 1 : 0
                     }}
                 >
-                    <Toolbar
+                    <BentoToolbar
                         brushColor={brushColor}
                         brushSize={brushSize}
                         brushType={brushType}

@@ -180,10 +180,9 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
     const getPlayer = (playerId: string) => room.players.find(p => p.id === playerId);
 
     return (
-        <div className={`fixed inset-0 overflow-hidden flex flex-col items-center justify-between ${mounted ? 'pop-in' : 'opacity-0'}`}
+        <div className={`min-h-[100dvh] w-full relative overflow-x-hidden flex flex-col items-center ${mounted ? 'pop-in' : 'opacity-0'}`}
             style={{
                 backgroundColor: 'var(--theme-bg-primary)',
-                height: '100dvh'
             }}>
 
             {/* Animated Background Elements */}
@@ -195,11 +194,11 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
             {/* Confetti! */}
             {showConfetti && <Confetti />}
 
-            {/* Main Scrollable Content Container - Flex-1 to take available space */}
-            <div className="flex-1 w-full flex flex-col items-center overflow-y-auto z-10 p-4"
+            {/* Main Content Container - padding bottom for fixed footer */}
+            <div className="w-full flex flex-col items-center z-10 p-4"
                 style={{
                     paddingTop: 'max(4rem, env(safe-area-inset-top))',
-                    paddingBottom: '6rem' // Space for button
+                    paddingBottom: 'max(8rem, calc(6rem + env(safe-area-inset-bottom)))' // Space for fixed button
                 }}>
 
                 {/* Header */}
@@ -387,7 +386,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
             </div>
 
             {/* Fixed Bottom Action Bar */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 pt-6 bg-gradient-to-t from-black/20 to-transparent z-50 flex justify-center backdrop-blur-[2px]"
+            <div className="fixed bottom-0 left-0 right-0 p-4 pt-6 bg-gradient-to-t from-black/20 to-transparent z-50 flex justify-center backdrop-blur-[2px]"
                 style={{ paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom))' }}>
                 {isHost ? (
                     <button
