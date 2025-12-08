@@ -258,6 +258,7 @@ const App = () => {
   const lastStatusRef = useRef<string | null>(null);
   const lastRoundRef = useRef<number | null>(null);
   const lastWaitingRef = useRef<boolean>(false);
+  const submissionLockRef = useRef<boolean>(false); // Prevent concurrent submissions
 
   const [pendingGameStats, setPendingGameStats] = useState<{ xp: number, coins: number, isWinner: boolean, action: 'home' | 'replay' } | null>(null);
   const [optimisticTimerStart, setOptimisticTimerStart] = useState<number | null>(null);
@@ -339,6 +340,10 @@ const App = () => {
       else if (room.status === 'voting') setCurrentScreen('voting');
       else if (room.status === 'results') setCurrentScreen('results');
       else if (room.status === 'final') setCurrentScreen('final');
+      else if (room.status === 'rewards') {
+        setCurrentScreen('final');
+        showGameRewards('replay');
+      }
     }
   };
 
@@ -463,8 +468,8 @@ const App = () => {
 
     // Calculate penalty (20% of total time, rounded up)
     const penalty = Math.ceil(totalDuration * 0.20);
-    const levelTimeBonus = XPService.getTimeBonus();
-    const bonusTime = (hasTimeBonus ? 5 : 0) + levelTimeBonus - (isTimeSabotaged ? penalty : 0);
+    // REMOVED: Level-based time bonus to ensure fairness
+    const bonusTime = (hasTimeBonus ? 5 : 0) - (isTimeSabotaged ? penalty : 0);
 
     const effectiveStartedAt = myState?.timerStartedAt || optimisticTimerStart;
 
@@ -533,6 +538,10 @@ const App = () => {
         else if (status === 'voting') setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'voting');
         else if (status === 'results') setCurrentScreen('results');
         else if (status === 'final') setCurrentScreen('final');
+        else if (status === 'rewards') {
+          setCurrentScreen('final');
+          showGameRewards('replay');
+        }
       }
       // 2. Room Status Change (Navigation) - if we are on a "joining" screen OR the lobby
       else if (['room-selection', 'welcome', 'name-entry', 'joining-game', 'lobby'].includes(currentScreen)) {
@@ -547,26 +556,28 @@ const App = () => {
       }
       // 3. In-game status changes (for players already in the game on other screens)
       else if (statusChanged) {
-        if (status === 'uploading') setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'uploading');
+        if (status === 'lobby') {
+          setCurrentScreen('lobby');
+          setPendingGameStats(null);
+        }
+        else if (status === 'uploading') setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'uploading');
         else if (status === 'sabotage-selection') setCurrentScreen('sabotage-selection');
         else if (status === 'drawing') {
-          // Safeguard: Only transition to drawing if playerStates are properly initialized
-          // This prevents race conditions where status changes before playerStates are set
-          const hasPlayerState = room.playerStates && player?.id && room.playerStates[player.id];
-          if (hasPlayerState) {
-            setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'drawing');
-            if (!shouldShowWaitingRoom) {
-              setStrokes([]);
-              setIsMyTimerRunning(false);
-            }
-          } else {
-            console.warn('Drawing status changed but playerState not yet initialized, deferring screen sync');
-            // Don't return - let the effect continue to update refs and handle notifications
+
+
+          setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'drawing');
+          if (!shouldShowWaitingRoom) {
+            setStrokes([]);
+            setIsMyTimerRunning(false);
           }
         }
         else if (status === 'voting') setCurrentScreen(shouldShowWaitingRoom ? 'waiting' : 'voting');
         else if (status === 'results') setCurrentScreen('results');
         else if (status === 'final') setCurrentScreen('final');
+        else if (status === 'rewards') {
+          setCurrentScreen('final');
+          showGameRewards('replay');
+        }
       }
       // Handle Notifications
       if (statusChanged) {
@@ -1098,10 +1109,18 @@ const App = () => {
   const handleTimeUp = useCallback(async () => {
     if (!roomCode || !player || !room) return;
 
+    // LOCK: Prevent concurrent submissions (race condition guard)
+    if (submissionLockRef.current) {
+      console.log('[handleTimeUp] Submission already in progress, ignoring duplicate call');
+      return;
+    }
+    submissionLockRef.current = true;
+
     // Guard: Prevent duplicate submissions
     const playerState = room.playerStates[player.id];
     if (playerState?.status === 'submitted' || optimisticHasSubmitted) {
       console.log('Drawing already submitted, skipping duplicate submission');
+      submissionLockRef.current = false;
       return;
     }
 
@@ -1140,6 +1159,9 @@ const App = () => {
     } catch (err) {
       console.error('Failed to submit drawing:', err);
       showError(err);
+    } finally {
+      // Release lock after submission completes (success or failure)
+      submissionLockRef.current = false;
     }
   }, [roomCode, player, room, showToast, optimisticHasSubmitted]);
 
@@ -1165,7 +1187,14 @@ const App = () => {
   };
 
   const handlePlayAgain = async () => {
-    if (!roomCode) return;
+    if (!roomCode || !room || !player) return;
+
+    // Only host can reset the game
+    if (room.hostId !== player.id) {
+      showToast('Waiting for host to restart... ⏳', 'info');
+      return;
+    }
+
     try {
       await StorageService.resetGame(roomCode);
     } catch (err) {

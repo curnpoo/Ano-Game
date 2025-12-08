@@ -184,7 +184,7 @@ export interface RoundResult {
 }
 
 
-export type GameStatus = 'lobby' | 'uploading' | 'sabotage-selection' | 'drawing' | 'voting' | 'results' | 'final';
+export type GameStatus = 'lobby' | 'uploading' | 'sabotage-selection' | 'drawing' | 'voting' | 'results' | 'final' | 'rewards';
 
 export interface GameRoom {
     roomCode: string;

@@ -216,11 +216,13 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                         opacity: showDrawingUI && transitionState === 'drawing' ? 1 : 0
                     }}
                 >
-                    <DrawingTimer
-                        endsAt={timerEndsAt || Date.now()}
-                        onTimeUp={onTimeUp}
-                        totalDuration={timerDuration}
-                    />
+                    {showDrawingUI && (
+                        <DrawingTimer
+                            endsAt={timerEndsAt || Date.now() + 10000} // Default to future if briefly null to prevent instant trigger
+                            onTimeUp={onTimeUp}
+                            totalDuration={timerDuration}
+                        />
+                    )}
                 </div>
 
                 {/* Main Drawing Surface */}
@@ -274,14 +276,30 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
 
                                 {/* List unfinished players */}
                                 {unfinishedPlayers.length > 0 && (
-                                    <div className="bg-amber-50 rounded-2xl p-4 border-2 border-amber-100">
+                                    <div className="bg-amber-50 rounded-2xl p-4 border-2 border-amber-100 transition-all duration-300">
                                         <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-3">Still Drawing</p>
-                                        <div className="flex flex-wrap justify-center gap-2">
-                                            {unfinishedPlayers.map(p => (
-                                                <div key={p.id} className="w-8 h-8 rounded-full bg-amber-200 border-2 border-amber-300 flex items-center justify-center text-lg shadow-sm animate-pulse" title={p.name}>
-                                                    {p.avatar || '👤'}
+                                        <div className="flex flex-col gap-2 items-center">
+                                            <div className="flex flex-wrap justify-center gap-3">
+                                                {unfinishedPlayers.slice(0, 3).map(p => (
+                                                    <div key={p.id} className="flex flex-col items-center animate-pulse" title={p.name}>
+                                                        <div className="w-10 h-10 rounded-full bg-amber-200 border-2 border-amber-300 flex items-center justify-center text-xl shadow-sm overflow-hidden mb-1 relative">
+                                                            {p.avatarImageUrl ? (
+                                                                <img src={p.avatarImageUrl} alt={p.name} className="w-full h-full object-cover" />
+                                                            ) : (
+                                                                <span>{p.avatar || '👤'}</span>
+                                                            )}
+                                                        </div>
+                                                        <span className="font-bold text-gray-600 text-[10px] bg-white/80 px-2 py-0.5 rounded-full backdrop-blur-sm border border-amber-100 shadow-sm max-w-[80px] truncate">
+                                                            {p.name}
+                                                        </span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                            {unfinishedPlayers.length > 3 && (
+                                                <div className="text-xs font-bold text-amber-600/80 bg-amber-100/50 px-3 py-1 rounded-full mt-1">
+                                                    and {unfinishedPlayers.length - 3} more...
                                                 </div>
-                                            ))}
+                                            )}
                                         </div>
                                     </div>
                                 )}

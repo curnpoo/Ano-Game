@@ -93,13 +93,19 @@ export const WaitingRoomScreen: React.FC<WaitingRoomScreenProps> = ({
                             {room.players
                                 .filter(p => room.playerStates?.[p.id]?.status !== 'submitted')
                                 .map(p => (
-                                    <div key={p.id} className="flex items-center gap-1 px-2 py-1 rounded-lg shadow-sm animate-pulse"
+                                    <div key={p.id} className="flex items-center gap-2 px-3 py-1.5 rounded-xl shadow-sm animate-pulse transition-all"
                                         style={{
                                             backgroundColor: 'var(--theme-bg-secondary)',
                                             border: '1px solid var(--theme-border)'
                                         }}>
-                                        <span className="text-xs">{p.avatar || '👤'}</span>
-                                        <span className="text-xs font-semibold truncate max-w-[80px]" style={{ color: 'var(--theme-text)' }}>{p.name}</span>
+                                        <div className="w-6 h-6 rounded-full overflow-hidden flex items-center justify-center bg-gray-100 flex-shrink-0 relative">
+                                            {p.avatarImageUrl ? (
+                                                <img src={p.avatarImageUrl} alt={p.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <span className="text-xs">{p.avatar || '👤'}</span>
+                                            )}
+                                        </div>
+                                        <span className="text-xs font-bold truncate max-w-[90px]" style={{ color: 'var(--theme-text)' }}>{p.name}</span>
                                     </div>
                                 ))}
                         </div>

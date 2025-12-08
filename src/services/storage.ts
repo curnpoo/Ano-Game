@@ -104,10 +104,7 @@ export const StorageService = {
                 room.playerStates[p.id]?.status === 'submitted'
             );
 
-            console.log(`checkAndAdvanceState: drawing phase - ${room.players.length} players, allSubmitted: ${allSubmitted}`);
-
             if (allSubmitted && room.players.length > 0) {
-                console.log('checkAndAdvanceState: Advancing to voting');
                 room.status = 'voting';
             }
         }
@@ -766,11 +763,8 @@ export const StorageService = {
             // 20% chance for double points round
             const isDoublePoints = Math.random() < 0.2;
 
-            // Random player gets time bonus (not the uploader)
-            const eligibleForBonus = r.players.filter(p => p.id !== uploadedBy);
-            const timeBonusPlayerId = eligibleForBonus.length > 0
-                ? eligibleForBonus[Math.floor(Math.random() * eligibleForBonus.length)].id
-                : null;
+            // No random time bonus (User requested fairness)
+            const timeBonusPlayerId = null;
 
             // Check if this is the sabotage round
             const nextRoundNumber = r.roundNumber + 1;
@@ -871,6 +865,11 @@ export const StorageService = {
 
         // Then update room state (without the drawing data)
         return StorageService.updateRoom(roomCode, (r) => {
+            // ATOMIC Guard: Prevent duplicate submissions (inside transaction)
+            if (r.playerStates[drawing.playerId]?.status === 'submitted') {
+                return r; // Return unchanged room
+            }
+
             const newPlayerStates = {
                 ...r.playerStates,
                 [drawing.playerId]: {
@@ -1025,6 +1024,14 @@ export const StorageService = {
                 roundResults: []
             };
         });
+    },
+
+    // Trigger rewards phase for all players
+    triggerRewards: async (roomCode: string): Promise<GameRoom | null> => {
+        return StorageService.updateRoom(roomCode, (r) => ({
+            ...r,
+            status: 'rewards'
+        }));
     },
 
     // --- Join Active Game ---

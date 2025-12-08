@@ -112,8 +112,21 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
         onShowRewards('home');
     };
 
-    const handlePlayAgain = () => {
-        onShowRewards('replay');
+    const handlePlayAgain = async () => {
+        // If there are other players, trigger the global rewards phase
+        if (room.players.length > 1) {
+            try {
+                // This updates room status to 'rewards', which App.tsx catches
+                await import('../../services/storage').then(m => m.StorageService.triggerRewards(room.roomCode));
+            } catch (err) {
+                console.error('Failed to trigger rewards:', err);
+                // Fallback to local
+                onShowRewards('replay');
+            }
+        } else {
+            // Just me, show local immediately
+            onShowRewards('replay');
+        }
     };
 
 
