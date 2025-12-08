@@ -521,6 +521,9 @@
     align-items: center;
     justify-content: center;
     pointer-events: none;
+    /* Force GPU compositing for smooth animations */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
 }
 
 .transition-active {
