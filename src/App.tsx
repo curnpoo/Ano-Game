@@ -149,16 +149,24 @@ const App = () => {
   }, [startLoadingScenario]);
 
 
+  // Complete all remaining stages and dismiss loading with visible delay
   const stopLoadingWithDelay = useCallback(() => {
+    // First, mark ALL remaining stages as complete
+    loadingStages.forEach(stage => {
+      if (stage.status !== 'completed') {
+        updateLoadingStage(stage.id, 'completed');
+      }
+    });
+
+    // Then wait 150ms so user sees all green checkmarks before dismissing
     const elapsed = Date.now() - loadingStartTimeRef.current;
     const minDelay = 300;
-    const remaining = Math.max(0, minDelay - elapsed);
-    if (remaining > 0) {
-      setTimeout(() => setIsLoading(false), remaining);
-    } else {
-      setIsLoading(false);
-    }
-  }, []);
+    const completionDelay = 150; // Extra delay to show all green checks
+    const totalMinDelay = Math.max(minDelay, elapsed) + completionDelay;
+    const remaining = totalMinDelay - elapsed;
+
+    setTimeout(() => setIsLoading(false), remaining);
+  }, [loadingStages, updateLoadingStage]);
 
   const {
     player, setPlayer,
