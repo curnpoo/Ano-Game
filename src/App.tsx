@@ -43,7 +43,7 @@ import type { Player, GameSettings, PlayerDrawing, GameRoom, Screen } from './ty
 
 // Extended Screen type to include the new joining screen
 // Note: In a real app we'd update the type definition in types.ts, casting for now if needed or relying on string loose typing
-import type { LoadingStage, RoomHistoryEntry } from './types';
+import type { RoomHistoryEntry } from './types';
 
 
 
@@ -136,7 +136,7 @@ const App = () => {
     isOnline,
     isSlow,
     updateStage: updateLoadingStage,
-    clearStages: clearLoadingStages,
+    clearStages: _clearLoadingStages,
     startScenario: startLoadingScenario,
   } = useLoadingProgress();
   const loadingStartTimeRef = useRef<number>(0);
