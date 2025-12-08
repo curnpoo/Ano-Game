@@ -22,7 +22,7 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
     avatar,
     frame,
     color, // Used for border/text color usually
-    backgroundColor = 'transparent', // Default to transparent for dark theme
+    backgroundColor = 'white', // Default to white background
     size = 48,
     className = '',
     playerId

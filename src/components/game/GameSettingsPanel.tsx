@@ -17,21 +17,21 @@ export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
     isHost
 }) => {
     return (
-        <div className="backdrop-blur-sm rounded-2xl p-4 space-y-4"
+        <div className="backdrop-blur-sm rounded-2xl p-3 space-y-2"
             style={{
                 backgroundColor: 'var(--theme-card-bg)',
                 border: '2px solid var(--theme-border)'
             }}>
             {/* Centered Heading */}
-            <h3 className="text-base font-bold text-center mb-3" style={{ color: '#F3E5AB' }}>
+            <h3 className="text-base font-bold text-center" style={{ color: '#F3E5AB' }}>
                 ⚙️ Game Settings
             </h3>
 
             {/* Side-by-Side Pickers */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2">
                 {/* Drawing Time */}
-                <div className="space-y-2">
-                    <label className="text-xs font-medium text-center block" style={{ color: 'var(--theme-text-secondary)' }}>
+                <div className="space-y-1">
+                    <label className="text-sm font-bold text-center block" style={{ color: 'var(--theme-text-secondary)' }}>
                         ⏱️ Time
                     </label>
                     <div className="relative">
@@ -57,8 +57,8 @@ export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
                 </div>
 
                 {/* Number of Rounds */}
-                <div className="space-y-2">
-                    <label className="text-xs font-medium text-center block" style={{ color: 'var(--theme-text-secondary)' }}>
+                <div className="space-y-1">
+                    <label className="text-sm font-bold text-center block" style={{ color: 'var(--theme-text-secondary)' }}>
                         🔄 Rounds
                     </label>
                     <div className="relative">
@@ -84,8 +84,8 @@ export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
             </div>
 
             {/* Sabotage Toggle */}
-            <div className="flex items-center justify-between pt-2">
-                <label className="text-sm font-medium flex items-center gap-2" style={{ color: 'var(--theme-text-secondary)' }}>
+            <div className="flex items-center justify-between pt-1">
+                <label className="text-sm font-bold flex items-center gap-2" style={{ color: 'var(--theme-text-secondary)' }}>
                     😈 Sabotage
                 </label>
                 <button

@@ -183,7 +183,7 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
                 <div
                     ref={scrollRef}
                     onScroll={onScroll}
-                    className="flex overflow-x-auto py-4 scroll-smooth hide-scrollbar"
+                    className="flex overflow-x-auto py-2 scroll-smooth hide-scrollbar"
                     style={{
                         WebkitOverflowScrolling: 'touch',
                         scrollSnapType: 'x mandatory',
@@ -204,7 +204,7 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
                                 className="flex-shrink-0 flex items-center justify-center cursor-pointer transition-all duration-150"
                                 style={{
                                     width: `${itemWidth}px`,
-                                    height: '60px',
+                                    height: '44px',
                                     scrollSnapAlign: 'center',
                                     transform: `scale(${scale})`,
                                     opacity: isDisabled ? 0.2 : opacity,

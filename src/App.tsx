@@ -328,7 +328,8 @@ const App = () => {
 
   // "Waiting" in the context of routing means "Spectator" or "Queued"
   // It should NOT refer to an active player who is just waiting for their turn
-  const shouldShowWaitingRoom = !amInGame && (amInQueue || true); // If not in game, show waiting room (spectator)
+  // Only show waiting room if player is explicitly in the waiting queue, not during transitions
+  const shouldShowWaitingRoom = !amInGame && amInQueue;
 
   const amWaiting = room?.playerStates?.[player?.id || '']?.status === 'waiting' || false;
 
