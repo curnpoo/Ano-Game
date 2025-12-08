@@ -271,7 +271,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 onClick={handleAnimatedClose}
             />
             <div
-                className={`relative z-10 w-full sm:w-[500px] sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl pointer-events-auto max-h-[85vh] overflow-y-auto overscroll-contain touch-pan-y
+                className={`relative z-10 w-full sm:w-[500px] sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl pointer-events-auto max-h-[85vh] overflow-y-auto overscroll-contain touch-pan-y touch-scroll-allowed
                 glass-panel border-t border-x border-white/20 sm:border !bg-black/80 backdrop-blur-xl
                 ${isClosing ? 'modal-slide-down' : 'modal-slide-up'}`}
             >

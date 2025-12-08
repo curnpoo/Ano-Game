@@ -986,6 +986,13 @@ const App = () => {
   const handleTimeUp = useCallback(async () => {
     if (!roomCode || !player || !room) return;
 
+    // Guard: Prevent duplicate submissions
+    const playerState = room.playerStates[player.id];
+    if (playerState?.status === 'submitted' || optimisticHasSubmitted) {
+      console.log('Drawing already submitted, skipping duplicate submission');
+      return;
+    }
+
     // IMMEDIATE: Optimistic Updates to prevent "Stuck" state
     setIsMyTimerRunning(false);
     setIsReadying(false);
@@ -1022,7 +1029,7 @@ const App = () => {
       console.error('Failed to submit drawing:', err);
       showError(err);
     }
-  }, [roomCode, player, room, showToast]);
+  }, [roomCode, player, room, showToast, optimisticHasSubmitted]);
 
   const handleVote = async (votedForId: string) => {
     if (!roomCode || !player) return;

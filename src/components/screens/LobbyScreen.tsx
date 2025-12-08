@@ -30,10 +30,12 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     onBack,
     onLeave
 }) => {
+    // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
     const [showSettings, setShowSettings] = useState(false);
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [, setTick] = useState(0); // Force update for idle timer
     const [kickTarget, setKickTarget] = useState<string | null>(null); // Player being kicked
+    const [isStarting, setIsStarting] = useState(false);
 
     // Theme Support
     // const currentUser = AuthService.getCurrentUser();
@@ -47,6 +49,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
         return () => clearInterval(interval);
     }, []);
 
+    // NOW we can do conditional checks
     if (!room || !room.players) {
         return <div>Error: Invalid room data</div>;
     }
@@ -65,18 +68,18 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-4"
                 style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
-                <div className="rounded-[2rem] p-8 shadow-2xl text-center max-w-md w-full"
+                <div className="rounded-2xl p-6 shadow-2xl text-center max-w-md w-full"
                     style={{
                         backgroundColor: 'var(--theme-card-bg)',
                         border: '2px solid var(--theme-border)'
                     }}>
-                    <h2 className="text-2xl font-bold mb-4" style={{ color: 'var(--theme-text)' }}>Game in Progress!</h2>
-                    <p className="mb-6 font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
+                    <h2 className="text-xl font-bold mb-3" style={{ color: 'var(--theme-text)' }}>Game in Progress!</h2>
+                    <p className="mb-4 text-sm font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
                         The game is currently in the <strong style={{ color: 'var(--theme-accent)' }}>{room.status}</strong> phase.
                     </p>
                     <button
                         onClick={onJoinGame}
-                        className="w-full text-white font-bold py-4 rounded-xl shadow-lg hover:scale-105 transition-transform"
+                        className="w-full text-white font-bold py-3 rounded-xl shadow-lg hover:scale-105 transition-transform"
                         style={{
                             backgroundColor: 'var(--theme-accent)'
                         }}
@@ -87,8 +90,6 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
             </div>
         );
     }
-
-    const [isStarting, setIsStarting] = useState(false);
 
     const handleStartGame = async () => {
         setIsStarting(true);
@@ -178,12 +179,12 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                     />
                 )}
 
-                {/* Players Card - Independent Scrolling */}
+                {/* Players Card - Dynamic Height */}
                 <div className="p-3 rounded-[1.5rem] shadow-xl flex flex-col"
                     style={{
                         backgroundColor: 'var(--theme-card-bg)',
                         border: '2px solid var(--theme-border)',
-                        maxHeight: '28vh'
+                        minHeight: room.players.length <= 3 ? '28vh' : 'auto'
                     }}>
                     <div className="flex items-center gap-2 mb-2">
                         <h3 className="text-xl font-bold text-[var(--theme-text)]">👥 Players</h3>
@@ -192,16 +193,8 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                         </span>
                     </div>
 
-                    {/* Scrollable Player List */}
-                    <div className="space-y-2 flex-1 overflow-y-auto pr-2" style={{
-                        scrollbarWidth: 'thin',
-                        scrollbarColor: 'rgba(255, 215, 0, 0.3) transparent'
-                    }}>
-
-                        {/* ... (existing imports, no changes there, handled by replacing block) */}
-
-                        {/* ... */}
-
+                    {/* Player List - Expands with content */}
+                    <div className="space-y-2">
                         {Array.isArray(room.players) && room.players.map((p) => {
                             const playerStatus = room.playerStates && room.playerStates[p.id]?.status === 'ready' ? 'ready' : 'waiting';
 
