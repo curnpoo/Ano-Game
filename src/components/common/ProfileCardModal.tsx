@@ -228,7 +228,7 @@ export const ProfileCardModal: React.FC<ProfileCardModalProps> = ({
 
                         {/* Username history dropdown */}
                         {showNameHistory && user.usernameHistory && (
-                            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 rounded-2xl p-4 shadow-2xl z-50 min-w-[200px] bg-black/95 border border-white/20 backdrop-blur-xl animate-in fade-in zoom-in-95">
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 rounded-2xl p-4 shadow-2xl z-50 min-w-[200px] bg-black/95 border border-white/20 backdrop-blur-xl">
                                 <div className="text-[10px] font-bold opacity-50 mb-3 uppercase tracking-widest text-white">
                                     Previous Names
                                 </div>

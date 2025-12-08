@@ -66,7 +66,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
                 {/* Top Section: Profile Only */}
                 <div className="flex flex-col gap-2.5 shrink-0">
-                    <div className="animate-in slide-in-from-top-4 fade-in duration-500 delay-100">
+                    <div>
                         <ProfileStatusCard player={player} onClick={onLevelProgress} />
                     </div>
                 </div>
@@ -115,7 +115,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     {lastGameDetails && onRejoin && (
                         <button
                             onClick={() => onRejoin(lastGameDetails.roomCode)}
-                            className="w-full bg-orange-500/10 rounded-2xl p-3 border-2 border-orange-500/30 flex items-center justify-between group active:scale-95 transition-all animate-in zoom-in duration-300 shrink-0"
+                            className="w-full bg-orange-500/10 rounded-2xl p-3 border-2 border-orange-500/30 flex items-center justify-between group active:scale-95 transition-all shrink-0"
                         >
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-xl group-hover:rotate-12 transition-transform shadow-lg">
@@ -144,7 +144,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                 className={`
                                     bg-white/5 backdrop-blur-md rounded-3xl p-4 shadow-lg border border-white/10
                                     transform transition-all duration-200 hover:scale-[1.02] active:scale-95
-                                    flex flex-col items-center justify-center gap-3 group animate-in zoom-in fade-in fill-mode-backwards relative
+                                    flex flex-col items-center justify-center gap-3 group relative
                                 `}
                                 style={{
                                     backgroundColor: 'var(--theme-card-bg)',

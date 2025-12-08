@@ -267,13 +267,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     return (
         <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center pointer-events-none">
             <div
-                className={`absolute inset-0 pointer-events-auto bg-black/40 backdrop-blur-sm transition-opacity duration-300 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
+                className={`absolute inset-0 pointer-events-auto bg-black/40 backdrop-blur-sm transition-opacity duration-150 ${isClosing ? 'opacity-0' : 'opacity-100'}`}
                 onClick={handleAnimatedClose}
             />
             <div
                 className={`relative z-10 w-full sm:w-[500px] sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl pointer-events-auto max-h-[85vh] overflow-y-auto overscroll-contain touch-pan-y touch-scroll-allowed
-                glass-panel border-t border-x border-white/20 sm:border !bg-black/80 backdrop-blur-xl
-                ${isClosing ? 'modal-slide-down' : 'modal-slide-up'}`}
+                glass-panel border-t border-x border-white/20 sm:border !bg-black/80 backdrop-blur-xl transition-opacity duration-150
+                ${isClosing ? 'opacity-0' : 'opacity-100'}`}
             >
 
                 {/* Header */}

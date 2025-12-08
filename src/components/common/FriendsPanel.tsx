@@ -183,13 +183,13 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, onJ
 
             {/* Friends Modal Overlay */}
             {isExpanded && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
                     <div
                         className="absolute inset-0 bg-black/70 backdrop-blur-sm"
                         onClick={() => setIsExpanded(false)}
                     />
 
-                    <div className="w-full max-w-lg bg-[#1a1a1a] border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[85vh] relative z-10 animate-in zoom-in-95 duration-200">
+                    <div className="w-full max-w-lg bg-[#1a1a1a] border border-white/10 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col max-h-[85vh] relative z-10">
                         {/* Modal Header */}
                         <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/5">
                             <h2 className="text-xl font-black text-white flex items-center gap-2">
@@ -258,7 +258,7 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, onJ
 
                             {/* Search Area */}
                             {showSearch && (
-                                <div className="p-3 animate-in slide-in-from-top-2">
+                                <div className="p-3">
                                     <div className="flex gap-2">
                                         <input
                                             type="text"
@@ -286,7 +286,7 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, onJ
                                     {searchResult && (
                                         <button
                                             onClick={() => handleFriendClick(searchResult)}
-                                            className="mt-2 w-full p-3 rounded-xl flex items-center gap-3 transition-colors bg-white/10 hover:bg-white/20 border border-white/10 animate-in fade-in"
+                                            className="mt-2 w-full p-3 rounded-xl flex items-center gap-3 transition-colors bg-white/10 hover:bg-white/20 border border-white/10"
                                         >
                                             <AvatarDisplay
                                                 strokes={searchResult.avatarStrokes}
@@ -325,7 +325,7 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, onJ
                                                     <div className="text-sm font-bold text-white/40">No pending requests</div>
                                                 </div>
                                             ) : (
-                                                <div className="space-y-4 animate-in fade-in">
+                                                <div className="space-y-4">
                                                     {/* Incoming Requests */}
                                                     {requests.length > 0 && (
                                                         <div>
@@ -379,7 +379,7 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, onJ
                                                     <div className="text-sm font-bold text-white/40">No friends yet</div>
                                                 </div>
                                             ) : (
-                                                <div className="space-y-2 animate-in fade-in">
+                                                <div className="space-y-2">
                                                     {friends.map((friend) => {
                                                         const level = XPService.getLevelFromXP(friend.xp || 0);
                                                         const tier = XPService.getTierForLevel(level);

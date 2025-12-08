@@ -329,8 +329,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
                     {awards.length > 0 && (
                         <div className="flex flex-nowrap gap-3 overflow-x-auto pb-2 scrollbar-hide px-2">
                             {awards.map((a, i) => (
-                                <div key={i} className="flex-none bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-3 flex flex-col items-center min-w-[100px] shadow-lg animate-in fade-in slide-in-from-bottom-4 duration-500"
-                                    style={{ animationDelay: `${0.6 + (i * 0.1)}s` }}>
+                                <div key={i} className="flex-none bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-3 flex flex-col items-center min-w-[100px] shadow-lg">
                                     <div className="text-2xl mb-1 animate-[tada_3s_infinite_2s]">{a.award.emoji}</div>
                                     <div className="text-[10px] uppercase font-bold tracking-wider opacity-70" style={{ color: 'var(--theme-text)' }}>{a.award.label}</div>
                                     <div className="text-xs font-bold truncate max-w-full" style={{ color: 'var(--theme-text-secondary)' }}>{a.playerName}</div>
