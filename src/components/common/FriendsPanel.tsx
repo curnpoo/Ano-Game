@@ -158,7 +158,10 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, onJ
 
     const handleCloseProfile = () => {
         setSelectedFriend(null);
-        setSearchResults([]);
+        // Only clear search results if not in browse mode
+        if (!browseMode) {
+            setSearchResults([]);
+        }
         loadData(false);
     };
 
