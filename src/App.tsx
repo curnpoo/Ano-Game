@@ -47,7 +47,7 @@ import type { LoadingStage, RoomHistoryEntry } from './types';
 
 const App = () => {
   // --- PWA Update Detection ---
-  const intervalMs = 15 * 1000; // Check for updates every 15 seconds
+  const intervalMs = 60 * 1000; // Check for updates every 60 seconds
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const initialBuildTime = useRef<string | null>(null);
 
