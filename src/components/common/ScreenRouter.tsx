@@ -334,6 +334,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
             if (!player) return null;
             return <RoomSelectionScreen
                 playerName={player.name}
+                currentRoomCode={room?.roomCode || null}
                 onCreateRoom={onCreateRoom}
                 onJoinRoom={onJoinRoom}
                 onBack={onBackToHome}

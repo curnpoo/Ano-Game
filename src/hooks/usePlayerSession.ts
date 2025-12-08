@@ -24,26 +24,20 @@ export const usePlayerSession = ({ setCurrentScreen, onProgress, onComplete }: U
     // Restore session
     useEffect(() => {
         const initSession = async () => {
-            // Helper: wait a minimum time so users can see progress
-            const minDelay = (ms: number) => new Promise(r => setTimeout(r, ms));
-
             try {
                 // 0. Cleanup old rooms (>24 hours)
                 StorageService.cleanupOldRooms().catch(err => {
                     console.error('Room cleanup failed:', err);
                 });
 
-                // Small initial delay so loading screen renders first
-                await minDelay(100);
+                // Tiny initial delay so loading screen renders before first update
+                await new Promise(r => setTimeout(r, 50));
 
                 // 1. Sync with Auth
                 onProgress?.('auth', 'loading');
                 const authUser = await AuthService.syncUser();
                 let session = StorageService.getSession();
-                await minDelay(200); // Minimum visible loading time
                 onProgress?.('auth', 'completed');
-
-                await minDelay(100); // Brief pause before next stage
 
                 if (authUser) {
                     onProgress?.('profile', 'loading');
@@ -81,16 +75,12 @@ export const usePlayerSession = ({ setCurrentScreen, onProgress, onComplete }: U
                             setPlayer(session);
                         }
                     }
-                    await minDelay(200);
                     onProgress?.('profile', 'completed');
                 } else {
                     // No auth user - still show progress
                     onProgress?.('profile', 'loading');
-                    await minDelay(200);
                     onProgress?.('profile', 'completed');
                 }
-
-                await minDelay(100);
 
                 // Check for active games
                 onProgress?.('room', 'loading');
