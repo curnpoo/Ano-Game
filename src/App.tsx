@@ -1440,33 +1440,29 @@ const App = () => {
           player={player}
           room={room}
           joiningRoomCode={pendingRoomCode}
-
           onPlayNow={handlePlayNow}
           onLoginComplete={handleLoginComplete}
           onProfileComplete={handleProfileComplete}
           onUpdateProfile={handleUpdateProfile}
-
           onShowCasino={() => setShowCasinoTransition(true)}
           onShowSettings={() => setShowSettings(true)}
           onRejoin={handleRejoin}
           onPlayWithTransition={() => {
+            // Set screen immediately so it's ready behind the transition
+            setCurrentScreen('room-selection');
             setShowTunnelTransition(true);
           }}
-
           onNavigate={setCurrentScreen}
           onBackToHome={() => setCurrentScreen('home')}
           onStoreBack={handleStoreBack}
           onLeaveGame={() => handleLeaveGame('room-selection')}
-
           onCreateRoom={handleCreateRoom}
           onJoinRoom={handleJoinRoom}
-
           onStartGame={handleStartGame}
           onSettingsChange={handleSettingsChange}
           onKickPlayer={handleKickPlayer}
           onJoinCurrentRound={handleJoinCurrentRound}
           onMinimizeGame={handleMinimizeGame}
-
           onUploadImage={handleUploadImage}
           onVote={handleVote}
           onNextRound={handleNextRound}
@@ -1474,11 +1470,9 @@ const App = () => {
           onShowRewards={showGameRewards}
           onEquipTheme={handleEquipTheme}
           onSabotageSelect={handleSabotageSelect}
-
           isMyTimerRunning={isMyTimerRunning}
           isReadying={isReadying}
           onReady={handleReady}
-
           brushColor={brushColor}
           brushSize={brushSize}
           brushType={brushType}
@@ -1496,15 +1490,13 @@ const App = () => {
           handleEyedropperToggle={handleEyedropperToggle}
           handleColorPick={handleColorPick}
           strokes={strokes}
-
           lastGameDetails={lastGameDetails as any}
           showToast={showToast}
-
           hasSubmitted={hasSubmitted || optimisticHasSubmitted}
           submittedCount={submittedCount}
           totalPlayers={totalPlayers}
           timerEndsAt={timerEndsAt}
-          totalTimerDuration={effectiveTotalDuration} // <--- Pass calculated duration
+          totalTimerDuration={effectiveTotalDuration}
           onTimeUp={handleTimeUp}
         />
       </GlobalBlurTransition>
@@ -1694,13 +1686,11 @@ const App = () => {
 
       {/* Transition Effects */}
       <ThemeTransition isActive={isTransitionActive} onComplete={handleTransitionComplete} />
+      {/* Tunnel Overlay Transition for Play button - plays while screen already showing behind */}
       <TunnelTransition
         isActive={showTunnelTransition}
         isDarkMode={player?.cosmetics?.activeTheme?.includes('dark') || false}
-        onComplete={() => {
-          setShowTunnelTransition(false);
-          handlePlayNow();
-        }}
+        onComplete={() => setShowTunnelTransition(false)}
       />
       <CasinoTransition
         isActive={showCasinoTransition}

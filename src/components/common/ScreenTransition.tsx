@@ -163,6 +163,207 @@ export const TunnelTransition: React.FC<TunnelTransitionProps> = ({
     );
 };
 
+interface TunnelRevealTransitionProps {
+    isActive: boolean;
+    onComplete: () => void;
+    isDarkMode?: boolean;
+    children: React.ReactNode; // Preloaded screen content to reveal
+}
+
+/**
+ * Tunnel transition that reveals content beneath via expanding circular mask
+ * Content is preloaded and visible as the tunnel mask expands
+ */
+export const TunnelRevealTransition: React.FC<TunnelRevealTransitionProps> = ({
+    isActive,
+    onComplete,
+    isDarkMode = false,
+    children
+}) => {
+    const [phase, setPhase] = useState<'idle' | 'tunnel' | 'reveal' | 'complete'>('idle');
+
+    useEffect(() => {
+        if (isActive && phase === 'idle') {
+            setPhase('tunnel');
+
+            // After tunnel animation plays, start reveal
+            const revealTimer = setTimeout(() => {
+                setPhase('reveal');
+            }, 400); // Start reveal midway through tunnel
+
+            // Complete after full animation
+            const completeTimer = setTimeout(() => {
+                setPhase('complete');
+                onComplete();
+            }, 900);
+
+            return () => {
+                clearTimeout(revealTimer);
+                clearTimeout(completeTimer);
+            };
+        }
+
+        // Reset when deactivated
+        if (!isActive && phase === 'complete') {
+            setPhase('idle');
+        }
+    }, [isActive, phase, onComplete]);
+
+    // When idle or complete, render children normally (passthrough)
+    // Complete phase means animation finished, return to normal rendering
+    if (phase === 'idle' || phase === 'complete') {
+        return <>{children}</>;
+    }
+
+    const bgColor = isDarkMode ? '#0a0a0a' : '#f8f5f0';
+    const ringColor = isDarkMode ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)';
+    const textColor = isDarkMode ? '#ffffff' : '#1a1a1a';
+
+    // Tunnel rings configuration
+    const rings = [
+        { scale: 1, delay: 0, textSize: 'text-6xl', opacity: 0.9 },
+        { scale: 1.4, delay: 50, textSize: 'text-5xl', opacity: 0.7 },
+        { scale: 2, delay: 100, textSize: 'text-4xl', opacity: 0.5 },
+        { scale: 2.8, delay: 150, textSize: 'text-3xl', opacity: 0.35 },
+        { scale: 3.8, delay: 200, textSize: 'text-2xl', opacity: 0.2 },
+        { scale: 5, delay: 250, textSize: 'text-xl', opacity: 0.1 },
+    ];
+
+    return (
+        <>
+            {/* Target content layer - revealed via circular mask */}
+            <div
+                className={`fixed inset-0 z-[9998] ${phase === 'reveal' ? 'tunnel-mask-expand' : ''}`}
+                style={{
+                    clipPath: phase === 'tunnel' ? 'circle(0% at 50% 50%)' : undefined
+                }}
+            >
+                <div className={phase === 'reveal' ? 'tunnel-content-ready' : ''}>
+                    {children}
+                </div>
+            </div>
+
+            {/* Tunnel overlay layer - on top during animation */}
+            {(phase === 'tunnel' || phase === 'reveal') && (
+                <div
+                    className={`transition-container transition-active ${phase === 'reveal' ? 'tunnel-rings-out' : ''}`}
+                    style={{
+                        backgroundColor: phase === 'reveal' ? 'transparent' : bgColor,
+                        perspective: '1000px',
+                        perspectiveOrigin: 'center center',
+                        pointerEvents: 'none'
+                    }}
+                >
+                    {/* 3D Tunnel Rings with ANO text */}
+                    {rings.map((ring, i) => (
+                        <div
+                            key={i}
+                            className="absolute inset-0 flex items-center justify-center tunnel-ring-3d"
+                            style={{
+                                animationDelay: `${ring.delay}ms`,
+                                animationDuration: '800ms'
+                            }}
+                        >
+                            {/* Ring circle */}
+                            <div
+                                className="absolute rounded-full flex items-center justify-center"
+                                style={{
+                                    width: `${80 * ring.scale}vmin`,
+                                    height: `${80 * ring.scale}vmin`,
+                                    border: `${3 / ring.scale}px solid ${ringColor}`,
+                                    opacity: ring.opacity,
+                                    transform: `translateZ(${-i * 100}px)`,
+                                }}
+                            >
+                                {/* ANO text positioned on the ring */}
+                                {i < 4 && (
+                                    <>
+                                        {/* Top */}
+                                        <div
+                                            className={`absolute font-black tracking-[0.4em] ${ring.textSize}`}
+                                            style={{
+                                                top: '8%',
+                                                left: '50%',
+                                                transform: 'translateX(-50%)',
+                                                color: textColor,
+                                                opacity: ring.opacity,
+                                                fontFamily: "'Inter', 'SF Pro Display', sans-serif",
+                                                textShadow: isDarkMode
+                                                    ? '0 0 40px rgba(255,255,255,0.2)'
+                                                    : '0 0 40px rgba(0,0,0,0.05)'
+                                            }}
+                                        >
+                                            ANO
+                                        </div>
+                                        {/* Bottom (rotated) */}
+                                        <div
+                                            className={`absolute font-black tracking-[0.4em] ${ring.textSize}`}
+                                            style={{
+                                                bottom: '8%',
+                                                left: '50%',
+                                                transform: 'translateX(-50%) rotate(180deg)',
+                                                color: textColor,
+                                                opacity: ring.opacity * 0.6,
+                                                fontFamily: "'Inter', 'SF Pro Display', sans-serif",
+                                            }}
+                                        >
+                                            ANO
+                                        </div>
+                                        {/* Left */}
+                                        <div
+                                            className={`absolute font-black tracking-[0.4em] ${ring.textSize}`}
+                                            style={{
+                                                left: '5%',
+                                                top: '50%',
+                                                transform: 'translateY(-50%) rotate(-90deg)',
+                                                color: textColor,
+                                                opacity: ring.opacity * 0.5,
+                                                fontFamily: "'Inter', 'SF Pro Display', sans-serif",
+                                            }}
+                                        >
+                                            ANO
+                                        </div>
+                                        {/* Right */}
+                                        <div
+                                            className={`absolute font-black tracking-[0.4em] ${ring.textSize}`}
+                                            style={{
+                                                right: '5%',
+                                                top: '50%',
+                                                transform: 'translateY(-50%) rotate(90deg)',
+                                                color: textColor,
+                                                opacity: ring.opacity * 0.5,
+                                                fontFamily: "'Inter', 'SF Pro Display', sans-serif",
+                                            }}
+                                        >
+                                            ANO
+                                        </div>
+                                    </>
+                                )}
+                            </div>
+                        </div>
+                    ))}
+
+                    {/* Central focal point */}
+                    <div
+                        className="absolute inset-0 flex items-center justify-center tunnel-center"
+                        style={{ animationDuration: '800ms' }}
+                    >
+                        <div
+                            className="w-4 h-4 rounded-full"
+                            style={{
+                                backgroundColor: isDarkMode ? '#fff' : '#000',
+                                boxShadow: isDarkMode
+                                    ? '0 0 60px 20px rgba(255,255,255,0.3)'
+                                    : '0 0 60px 20px rgba(0,0,0,0.1)'
+                            }}
+                        />
+                    </div>
+                </div>
+            )}
+        </>
+    );
+};
+
 interface CasinoTransitionProps {
     isActive: boolean;
     onComplete: () => void;
