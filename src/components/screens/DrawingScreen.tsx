@@ -210,7 +210,7 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
             </div>
 
             {/* Canvas Area - Maximized */}
-            <div className="relative w-full h-full max-w-lg mx-auto flex flex-col items-center justify-center p-4 z-10 safe-area-padding">
+            <div className="relative w-full h-full max-w-lg mx-auto flex flex-col items-center justify-center p-4 pt-20 z-10 safe-area-padding">
 
                 {/* Timer - Floating Top */}
                 {/* Timer - Above Canvas */}
