@@ -144,7 +144,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                 className={`
                                     bg-white/5 backdrop-blur-md rounded-3xl p-4 shadow-lg border border-white/10
                                     transform transition-all duration-200 hover:scale-[1.02] active:scale-95
-                                    flex flex-col items-center justify-center gap-3 group animate-in zoom-in fade-in fill-mode-backwards relative overflow-hidden
+                                    flex flex-col items-center justify-center gap-3 group animate-in zoom-in fade-in fill-mode-backwards relative
                                 `}
                                 style={{
                                     backgroundColor: 'var(--theme-card-bg)',

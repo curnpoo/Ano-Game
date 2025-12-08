@@ -365,6 +365,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                 room={room}
                 currentPlayerId={player.id}
                 onUploadImage={onUploadImage}
+                onShowSettings={onShowSettings}
             />;
 
         case 'drawing':

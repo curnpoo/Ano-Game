@@ -6,12 +6,14 @@ interface UploadScreenProps {
     room: GameRoom;
     currentPlayerId: string;
     onUploadImage: (file: File) => void;
+    onShowSettings?: () => void;
 }
 
 export const UploadScreen: React.FC<UploadScreenProps> = ({
     room,
     currentPlayerId,
-    onUploadImage
+    onUploadImage,
+    onShowSettings
 }) => {
     const currentUploaderId = room.currentUploaderId || room.hostId;
     const isUploader = currentPlayerId === currentUploaderId;
@@ -32,6 +34,16 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
     return (
         <div className="min-h-screen p-4 flex flex-col items-center justify-center relative overflow-hidden"
             style={{ backgroundColor: 'var(--theme-bg-primary)' }}>
+
+            {/* Settings Button - Top Left with Safe Area */}
+            <button
+                onClick={onShowSettings}
+                className="absolute left-4 bg-white/10 backdrop-blur-md p-2 rounded-xl text-white hover:bg-white/20 transition-all active:scale-95 border border-white/10 z-50"
+                style={{ top: 'max(1rem, env(safe-area-inset-top) + 0.5rem)' }}
+            >
+                ⚙️
+            </button>
+
             {/* Decorative elements */}
             <div className="absolute top-10 left-10 text-6xl animate-bounce">📸</div>
             <div className="absolute bottom-10 right-10 text-6xl animate-bounce" style={{ animationDelay: '0.5s' }}>🖼️</div>
