@@ -65,7 +65,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             <div className="flex-1 w-full max-w-md flex flex-col z-10 p-5 gap-4 min-h-full relative justify-center">
 
                 {/* Top Section: Profile Only */}
-                <div className="flex flex-col gap-3 shrink-0">
+                <div className="flex flex-col gap-2.5 shrink-0">
                     <div className="animate-in slide-in-from-top-4 fade-in duration-500 delay-100">
                         <ProfileStatusCard player={player} onClick={onLevelProgress} />
                     </div>

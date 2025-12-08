@@ -22,49 +22,71 @@ export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
                 backgroundColor: 'var(--theme-card-bg)',
                 border: '2px solid var(--theme-border)'
             }}>
-            <h3 className="text-base font-bold flex items-center gap-2 mb-2" style={{ color: '#F3E5AB' }}>
+            {/* Centered Heading */}
+            <h3 className="text-base font-bold text-center mb-3" style={{ color: '#F3E5AB' }}>
                 ⚙️ Game Settings
             </h3>
 
-            {/* Timer Duration */}
-            <div className="space-y-2">
-                <label className="text-sm font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
-                    ⏱️ Drawing Time
-                </label>
-                <div className="py-2">
-                    <HorizontalPicker
-                        min={10}
-                        max={60}
-                        value={settings.timerDuration}
-                        onChange={(val) => isHost && onSettingsChange({ timerDuration: val })}
-                        disabled={!isHost}
-                        options={TIMER_OPTIONS}
-                        suffix="s"
-                    />
+            {/* Side-by-Side Pickers */}
+            <div className="grid grid-cols-2 gap-3">
+                {/* Drawing Time */}
+                <div className="space-y-2">
+                    <label className="text-xs font-medium text-center block" style={{ color: 'var(--theme-text-secondary)' }}>
+                        ⏱️ Time
+                    </label>
+                    <div className="relative">
+                        {/* Left Arrow */}
+                        <div className="absolute left-1 top-1/2 -translate-y-1/2 z-20 pointer-events-none opacity-60">
+                            <span className="text-lg">◀</span>
+                        </div>
+                        {/* Right Arrow */}
+                        <div className="absolute right-1 top-1/2 -translate-y-1/2 z-20 pointer-events-none opacity-60">
+                            <span className="text-lg">▶</span>
+                        </div>
+                        <HorizontalPicker
+                            min={10}
+                            max={60}
+                            value={settings.timerDuration}
+                            onChange={(val) => isHost && onSettingsChange({ timerDuration: val })}
+                            disabled={!isHost}
+                            options={TIMER_OPTIONS}
+                            suffix="s"
+                            compact={true}
+                        />
+                    </div>
                 </div>
-            </div>
 
-            {/* Number of Rounds */}
-            <div className="space-y-2">
-                <label className="text-sm font-medium" style={{ color: 'var(--theme-text-secondary)' }}>
-                    🔄 Number of Rounds
-                </label>
-                <div className="py-2">
-                    <HorizontalPicker
-                        min={1}
-                        max={7}
-                        value={settings.totalRounds}
-                        onChange={(val) => isHost && onSettingsChange({ totalRounds: val })}
-                        disabled={!isHost}
-                        options={ROUND_OPTIONS}
-                    />
+                {/* Number of Rounds */}
+                <div className="space-y-2">
+                    <label className="text-xs font-medium text-center block" style={{ color: 'var(--theme-text-secondary)' }}>
+                        🔄 Rounds
+                    </label>
+                    <div className="relative">
+                        {/* Left Arrow */}
+                        <div className="absolute left-1 top-1/2 -translate-y-1/2 z-20 pointer-events-none opacity-60">
+                            <span className="text-lg">◀</span>
+                        </div>
+                        {/* Right Arrow */}
+                        <div className="absolute right-1 top-1/2 -translate-y-1/2 z-20 pointer-events-none opacity-60">
+                            <span className="text-lg">▶</span>
+                        </div>
+                        <HorizontalPicker
+                            min={1}
+                            max={7}
+                            value={settings.totalRounds}
+                            onChange={(val) => isHost && onSettingsChange({ totalRounds: val })}
+                            disabled={!isHost}
+                            options={ROUND_OPTIONS}
+                            compact={true}
+                        />
+                    </div>
                 </div>
             </div>
 
             {/* Sabotage Toggle */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pt-2">
                 <label className="text-sm font-medium flex items-center gap-2" style={{ color: 'var(--theme-text-secondary)' }}>
-                    😈 Enable Sabotage
+                    😈 Sabotage
                 </label>
                 <button
                     onClick={() => isHost && onSettingsChange({ enableSabotage: !settings.enableSabotage })}

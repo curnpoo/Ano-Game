@@ -12,6 +12,8 @@ interface HorizontalPickerProps {
     disabled?: boolean;
     options?: number[]; // Custom values to pick from
     maxAllowed?: number; // Max value user can select (e.g., based on balance)
+    label?: string; // Optional label to display above picker
+    compact?: boolean; // Compact mode for smaller displays
 }
 
 export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
@@ -24,7 +26,9 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
     suffix = '',
     disabled = false,
     options,
-    maxAllowed
+    maxAllowed,
+    label,
+    compact = false
 }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -130,13 +134,15 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
 
     return (
         <div className="relative w-full max-w-md mx-auto">
-            {/* Label */}
-            <div
-                className="text-center text-sm font-bold mb-3 uppercase tracking-wider"
-                style={{ color: 'var(--theme-text-secondary)' }}
-            >
-                Bet Amount
-            </div>
+            {/* Optional Label */}
+            {label && (
+                <div
+                    className="text-center text-sm font-bold mb-3 uppercase tracking-wider"
+                    style={{ color: 'var(--theme-text-secondary)' }}
+                >
+                    {label}
+                </div>
+            )}
 
             {/* Picker Container */}
             <div
@@ -226,16 +232,18 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
                 </div>
             </div>
 
-            {/* Selected value display */}
-            <div
-                className="text-center mt-4 font-black text-3xl"
-                style={{
-                    color: '#FFD700',
-                    textShadow: '0 0 20px rgba(255, 215, 0, 0.5), 0 2px 4px rgba(0,0,0,0.3)'
-                }}
-            >
-                {prefix}{value}{suffix}
-            </div>
+            {/* Selected value display - hidden in compact mode */}
+            {!compact && (
+                <div
+                    className="text-center mt-4 font-black text-3xl"
+                    style={{
+                        color: '#FFD700',
+                        textShadow: '0 0 20px rgba(255, 215, 0, 0.5), 0 2px 4px rgba(0,0,0,0.3)'
+                    }}
+                >
+                    {prefix}{value}{suffix}
+                </div>
+            )}
         </div>
     );
 };

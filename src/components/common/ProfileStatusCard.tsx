@@ -21,7 +21,7 @@ export const ProfileStatusCard: React.FC<ProfileStatusCardProps> = ({ player, on
     return (
         <div
             onClick={onClick}
-            className="rounded-[2rem] p-4 shadow-xl mb-4 relative overflow-hidden transition-all hover:scale-[1.01] cursor-pointer bg-white/5 backdrop-blur-md border border-white/10 group"
+            className="rounded-[2rem] p-3 shadow-xl relative overflow-hidden transition-all hover:scale-[1.01] cursor-pointer bg-white/5 backdrop-blur-md border border-white/10 group"
             style={{
                 boxShadow: `0 4px 20px -5px ${tier.color}40`,
                 borderColor: `${tier.color}40`
@@ -35,9 +35,9 @@ export const ProfileStatusCard: React.FC<ProfileStatusCardProps> = ({ player, on
                 }}
             />
 
-            <div className="grid grid-cols-[130px_1fr] gap-3 relative z-10">
+            <div className="grid grid-cols-[110px_1fr] gap-2.5 relative z-10">
                 {/* Cell 1: Avatar (Tall on the left) */}
-                <div className="bg-white/5 rounded-[2rem] p-2 flex items-center justify-center border border-white/5 relative overflow-hidden">
+                <div className="bg-white/5 rounded-[1.75rem] p-1.5 flex items-center justify-center border border-white/5 relative overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
                     <AvatarDisplay
                         strokes={player.avatarStrokes}
@@ -45,26 +45,26 @@ export const ProfileStatusCard: React.FC<ProfileStatusCardProps> = ({ player, on
                         frame={player.frame}
                         color={player.color}
                         backgroundColor={player.backgroundColor}
-                        size={110}
+                        size={95}
                         className="!rounded-3xl"
                     />
                 </div>
 
                 {/* Right Side Column */}
-                <div className="flex flex-col gap-2 min-w-0">
+                <div className="flex flex-col gap-1.5 min-w-0">
 
                     {/* Cell 2: Identity & Progress */}
-                    <div className="bg-white/5 rounded-2xl p-3 flex flex-col justify-center gap-3 border border-white/5 relative overflow-hidden flex-1">
+                    <div className="bg-white/5 rounded-2xl p-2.5 flex flex-col justify-center gap-2 border border-white/5 relative overflow-hidden flex-1">
                         <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent pointer-events-none" />
 
                         {/* Name & Badges Row */}
-                        <div className="flex flex-col gap-1.5">
-                            <h2 className="text-2xl font-black truncate leading-none drop-shadow-md" style={{ color: 'var(--theme-text)' }}>
+                        <div className="flex flex-col gap-1">
+                            <h2 className="text-xl font-black truncate leading-none drop-shadow-md" style={{ color: 'var(--theme-text)' }}>
                                 {player.name}
                             </h2>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                                 <span
-                                    className="text-[10px] font-black px-2 py-0.5 rounded flex items-center gap-1 shadow-sm"
+                                    className="text-[9px] font-black px-1.5 py-0.5 rounded flex items-center gap-1 shadow-sm"
                                     style={{
                                         backgroundColor: tier.color,
                                         color: tier.name === 'Gold' || tier.name === 'Bronze' ? '#000' : '#fff'
@@ -73,7 +73,7 @@ export const ProfileStatusCard: React.FC<ProfileStatusCardProps> = ({ player, on
                                     {tier.icon} LVL {level}
                                 </span>
                                 <span
-                                    className="text-[10px] font-bold px-2 py-0.5 rounded border opacity-80"
+                                    className="text-[9px] font-bold px-1.5 py-0.5 rounded border opacity-80"
                                     style={{
                                         backgroundColor: `${tier.color}10`,
                                         color: tier.color,
@@ -87,11 +87,11 @@ export const ProfileStatusCard: React.FC<ProfileStatusCardProps> = ({ player, on
 
                         {/* XP Progress Bar */}
                         <div className="relative w-full">
-                            <div className="flex items-center justify-between text-[10px] font-bold mb-1 opacity-60">
+                            <div className="flex items-center justify-between text-[9px] font-bold mb-0.5 opacity-60">
                                 <span>XP</span>
                                 <span>{Math.floor(progressPercent)}%</span>
                             </div>
-                            <div className="h-2.5 rounded-full overflow-hidden bg-black/40 border border-white/5">
+                            <div className="h-2 rounded-full overflow-hidden bg-black/40 border border-white/5">
                                 <div
                                     className="h-full transition-all duration-500 ease-out relative overflow-hidden"
                                     style={{
@@ -107,25 +107,25 @@ export const ProfileStatusCard: React.FC<ProfileStatusCardProps> = ({ player, on
                     </div>
 
                     {/* Cell 3: Stats Grid */}
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-1.5">
                         <div
-                            className="bg-black/20 rounded-xl p-2.5 border border-white/5 flex flex-col items-center justify-center text-center backdrop-blur-sm"
+                            className="bg-black/20 rounded-xl p-1.5 border border-white/5 flex flex-col items-center justify-center text-center backdrop-blur-sm"
                         >
-                            <span className="text-xl mb-0.5 filter drop-shadow-sm">🏆</span>
-                            <span className="text-sm font-black leading-none" style={{ color: 'var(--theme-text)' }}>
+                            <span className="text-lg mb-0.5 filter drop-shadow-sm">🏆</span>
+                            <span className="text-xs font-black leading-none" style={{ color: 'var(--theme-text)' }}>
                                 {stats.gamesWon}
                             </span>
-                            <span className="text-[9px] font-bold opacity-40 uppercase tracking-widest mt-0.5">Wins</span>
+                            <span className="text-[8px] font-bold opacity-40 uppercase tracking-widest mt-0.5">Wins</span>
                         </div>
 
                         <div
-                            className="bg-black/20 rounded-xl p-2.5 border border-white/5 flex flex-col items-center justify-center text-center backdrop-blur-sm"
+                            className="bg-black/20 rounded-xl p-1.5 border border-white/5 flex flex-col items-center justify-center text-center backdrop-blur-sm"
                         >
-                            <span className="text-xl mb-0.5 filter drop-shadow-sm">💰</span>
-                            <span className="text-sm font-black leading-none" style={{ color: 'var(--theme-text)' }}>
+                            <span className="text-lg mb-0.5 filter drop-shadow-sm">💰</span>
+                            <span className="text-xs font-black leading-none" style={{ color: 'var(--theme-text)' }}>
                                 {formatCurrency(balance).replace('$', '')}
                             </span>
-                            <span className="text-[9px] font-bold opacity-40 uppercase tracking-widest mt-0.5">Cash</span>
+                            <span className="text-[8px] font-bold opacity-40 uppercase tracking-widest mt-0.5">Cash</span>
                         </div>
                     </div>
 

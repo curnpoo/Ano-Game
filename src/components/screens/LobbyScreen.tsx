@@ -101,7 +101,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
     };
 
     return (
-        <div className="min-h-[100dvh] flex flex-col pb-safe overflow-y-auto px-4"
+        <div className="min-h-[100dvh] flex flex-col pb-safe px-4"
             style={{ paddingTop: 'max(1rem, env(safe-area-inset-top) + 0.5rem)' }}>
 
             <div className="w-full max-w-md mx-auto space-y-4 pb-8">
@@ -180,11 +180,12 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                     />
                 )}
 
-                {/* Players Card */}
-                <div className="p-6 rounded-[2rem] shadow-xl min-h-[200px] flex flex-col"
+                {/* Players Card - Independent Scrolling */}
+                <div className="p-6 rounded-[2rem] shadow-xl flex flex-col"
                     style={{
                         backgroundColor: 'var(--theme-card-bg)',
-                        border: '2px solid var(--theme-border)'
+                        border: '2px solid var(--theme-border)',
+                        maxHeight: '60vh'
                     }}>
                     <div className="flex items-center gap-3 mb-6">
                         <h3 className="text-2xl font-bold text-[var(--theme-text)]">👥 Players</h3>
@@ -193,7 +194,11 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                         </span>
                     </div>
 
-                    <div className="space-y-3 flex-1 overflow-y-auto max-h-[400px]">
+                    {/* Scrollable Player List */}
+                    <div className="space-y-3 flex-1 overflow-y-auto pr-2" style={{
+                        scrollbarWidth: 'thin',
+                        scrollbarColor: 'rgba(255, 215, 0, 0.3) transparent'
+                    }}>
 
                         {/* ... (existing imports, no changes there, handled by replacing block) */}
 
