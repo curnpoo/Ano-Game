@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AvatarDisplay } from './AvatarDisplay';
 import { ProfileCardModal } from './ProfileCardModal';
 import { FriendsService } from '../../services/friendsService';
+import { AuthService } from '../../services/auth';
 import { XPService } from '../../services/xp';
 import { BadgeService } from '../../services/badgeService';
 import type { UserAccount, Player, FriendRequest } from '../../types';
@@ -26,10 +27,13 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, onJ
     const [activeTab, setActiveTab] = useState<'friends' | 'requests'>('friends');
     const [selectedFriend, setSelectedFriend] = useState<UserAccount | null>(null);
     const [showSearch, setShowSearch] = useState(false);
+    const [browseMode, setBrowseMode] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchResult, setSearchResult] = useState<UserAccount | null>(null);
+    const [searchResults, setSearchResults] = useState<UserAccount[]>([]);
+    const [allUsers, setAllUsers] = useState<UserAccount[]>([]);
     const [searchError, setSearchError] = useState('');
     const [isSearching, setIsSearching] = useState(false);
+    const [isLoadingBrowse, setIsLoadingBrowse] = useState(false);
 
     const loadData = async (isInitial = false) => {
         if (isInitial) setIsLoading(true);
@@ -98,25 +102,54 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, onJ
     }, [friends, selectedFriend]);
 
     const handleSearch = async () => {
-        if (!searchQuery.trim()) return;
+        if (!searchQuery.trim() && !browseMode) return;
 
         setIsSearching(true);
         setSearchError('');
-        setSearchResult(null);
+        setSearchResults([]);
         vibrate();
 
-        const user = await FriendsService.searchUserByUsername(searchQuery.trim());
-
-        if (user) {
-            setSearchResult(user);
-            vibrate();
+        if (browseMode && !searchQuery.trim()) {
+            // Browse mode without search - show all users
+            const users = allUsers.filter(u => u.id !== currentUser?.id);
+            setSearchResults(users);
         } else {
-            setSearchError('User not found');
-            vibrate();
+            // Search mode - search by username
+            const users = await FriendsService.searchUsers(searchQuery.trim());
+            const filtered = users.filter(u => u.id !== currentUser?.id);
+
+            if (filtered.length > 0) {
+                setSearchResults(filtered);
+                vibrate();
+            } else {
+                setSearchError('No users found');
+                vibrate();
+            }
         }
 
         setIsSearching(false);
     };
+
+    const handleBrowseToggle = async () => {
+        vibrate();
+        const newBrowseMode = !browseMode;
+        setBrowseMode(newBrowseMode);
+
+        if (newBrowseMode && allUsers.length === 0) {
+            setIsLoadingBrowse(true);
+            const users = await FriendsService.getAllUsers();
+            setAllUsers(users);
+            setSearchResults(users.filter(u => u.id !== currentUser?.id));
+            setIsLoadingBrowse(false);
+        } else if (newBrowseMode) {
+            setSearchResults(allUsers.filter(u => u.id !== currentUser?.id));
+        } else {
+            setSearchResults([]);
+            setSearchQuery('');
+        }
+    };
+
+    const currentUser = AuthService.getCurrentUser();
 
     const handleFriendClick = (friend: UserAccount) => {
         vibrate();
@@ -125,7 +158,7 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, onJ
 
     const handleCloseProfile = () => {
         setSelectedFriend(null);
-        setSearchResult(null);
+        setSearchResults([]);
         loadData(false);
     };
 
@@ -241,11 +274,16 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, onJ
 
                             {/* Search Toggle */}
                             {activeTab === 'friends' && (
-                                <div className="px-3 pt-3">
+                                <div className="px-3 pt-3 space-y-2">
                                     <button
                                         onClick={() => {
                                             vibrate();
                                             setShowSearch(!showSearch);
+                                            if (showSearch) {
+                                                setBrowseMode(false);
+                                                setSearchResults([]);
+                                                setSearchQuery('');
+                                            }
                                         }}
                                         className={`w-full py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all border ${showSearch
                                             ? 'bg-white/5 border-white/10 text-white/70'
@@ -253,6 +291,19 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, onJ
                                     >
                                         {showSearch ? '✕ Close Search' : '➕ Add Friend'}
                                     </button>
+
+                                    {/* Browse Mode Toggle */}
+                                    {showSearch && (
+                                        <button
+                                            onClick={handleBrowseToggle}
+                                            disabled={isLoadingBrowse}
+                                            className={`w-full py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 font-bold transition-all border ${browseMode
+                                                ? 'bg-purple-500/20 border-purple-500/30 text-purple-300'
+                                                : 'bg-white/5 border-white/10 text-white/50 hover:bg-white/10'}`}
+                                        >
+                                            {isLoadingBrowse ? '⏳ Loading...' : browseMode ? '🔍 Switch to Search' : '👥 Browse All Players'}
+                                        </button>
+                                    )}
                                 </div>
                             )}
 
@@ -263,11 +314,13 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, onJ
                                         <input
                                             type="text"
                                             value={searchQuery}
-                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            onChange={(e) => {
+                                                setSearchQuery(e.target.value);
+                                                setSearchError('');
+                                            }}
                                             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                            placeholder="Enter username..."
+                                            placeholder={browseMode ? "Filter players..." : "Search by username..."}
                                             className="flex-1 px-4 py-3 rounded-xl bg-white/5 border border-white/10 focus:border-green-500/50 focus:outline-none font-bold text-white placeholder-white/20"
-                                            autoFocus
                                         />
                                         <button
                                             onClick={handleSearch}
@@ -282,29 +335,38 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, onJ
                                             ❌ {searchError}
                                         </div>
                                     )}
-                                    {/* Search Result */}
-                                    {searchResult && (
-                                        <button
-                                            onClick={() => handleFriendClick(searchResult)}
-                                            className="mt-2 w-full p-3 rounded-xl flex items-center gap-3 transition-colors bg-white/10 hover:bg-white/20 border border-white/10"
-                                        >
-                                            <AvatarDisplay
-                                                strokes={searchResult.avatarStrokes}
-                                                avatar={searchResult.avatar}
-                                                color={searchResult.color}
-                                                backgroundColor={searchResult.backgroundColor}
-                                                size={40}
-                                            />
-                                            <div className="flex-1 text-left">
-                                                <div className="font-bold text-white text-lg">
-                                                    {searchResult.username}
-                                                </div>
-                                                <div className="text-xs text-white/50 font-bold uppercase tracking-wider">
-                                                    Tap to view
-                                                </div>
+
+                                    {/* Search Results List */}
+                                    {searchResults.length > 0 && (
+                                        <div className="mt-3 space-y-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+                                            <div className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2 px-2">
+                                                {browseMode ? `${searchResults.length} Players` : `${searchResults.length} Result${searchResults.length !== 1 ? 's' : ''}`}
                                             </div>
-                                            <div className="text-white/30 text-xl">→</div>
-                                        </button>
+                                            {searchResults.map((user) => (
+                                                <button
+                                                    key={user.id}
+                                                    onClick={() => handleFriendClick(user)}
+                                                    className="w-full p-3 rounded-xl flex items-center gap-3 transition-colors bg-white/10 hover:bg-white/20 border border-white/10"
+                                                >
+                                                    <AvatarDisplay
+                                                        strokes={user.avatarStrokes}
+                                                        avatar={user.avatar}
+                                                        color={user.color}
+                                                        backgroundColor={user.backgroundColor}
+                                                        size={40}
+                                                    />
+                                                    <div className="flex-1 text-left">
+                                                        <div className="font-bold text-white text-base">
+                                                            @{user.username}
+                                                        </div>
+                                                        <div className="text-xs text-white/50 font-bold uppercase tracking-wider">
+                                                            Tap to view
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-white/30 text-xl">→</div>
+                                                </button>
+                                            ))}
+                                        </div>
                                     )}
                                 </div>
                             )}

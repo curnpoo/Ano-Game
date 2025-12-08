@@ -31,6 +31,79 @@ export const FriendsService = {
         }
     },
 
+    // Search for users by username OR display name (partial match)
+    async searchUsers(query: string, limit: number = 50): Promise<UserAccount[]> {
+        try {
+            const usersRef = ref(database, USERS_PATH);
+            const snapshot = await get(usersRef);
+
+            if (!snapshot.exists()) return [];
+
+            const users: UserAccount[] = [];
+            const searchLower = query.toLowerCase().trim();
+
+            snapshot.forEach((child) => {
+                const user = { ...child.val(), id: child.key } as UserAccount;
+                const username = user.username?.toLowerCase() || '';
+
+                // Search in username (from UserAccount - this is the unique @username)
+                // Note: Player.name is the display name, but it's not stored in UserAccount
+                // We need to check if there's a display name field we should search
+                if (username.includes(searchLower)) {
+                    users.push(user);
+                }
+            });
+
+            // Sort by relevance (exact matches first, then partial)
+            users.sort((a, b) => {
+                const aUsername = a.username?.toLowerCase() || '';
+                const bUsername = b.username?.toLowerCase() || '';
+
+                const aExact = aUsername === searchLower;
+                const bExact = bUsername === searchLower;
+
+                if (aExact && !bExact) return -1;
+                if (!aExact && bExact) return 1;
+
+                const aStarts = aUsername.startsWith(searchLower);
+                const bStarts = bUsername.startsWith(searchLower);
+
+                if (aStarts && !bStarts) return -1;
+                if (!aStarts && bStarts) return 1;
+
+                return aUsername.localeCompare(bUsername);
+            });
+
+            return users.slice(0, limit);
+        } catch (error) {
+            console.error('Error searching for users:', error);
+            return [];
+        }
+    },
+
+    // Get all users (for browsing), with optional limit
+    async getAllUsers(limit: number = 100): Promise<UserAccount[]> {
+        try {
+            const usersRef = ref(database, USERS_PATH);
+            const snapshot = await get(usersRef);
+
+            if (!snapshot.exists()) return [];
+
+            const users: UserAccount[] = [];
+            snapshot.forEach((child) => {
+                users.push({ ...child.val(), id: child.key });
+            });
+
+            // Sort by most recent activity
+            users.sort((a, b) => (b.lastLoginAt || 0) - (a.lastLoginAt || 0));
+
+            return users.slice(0, limit);
+        } catch (error) {
+            console.error('Error getting all users:', error);
+            return [];
+        }
+    },
+
     // Get a user by ID
     async getUserById(userId: string): Promise<UserAccount | null> {
         try {

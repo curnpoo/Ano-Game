@@ -50,13 +50,17 @@ export const InviteFriendsModal: React.FC<InviteFriendsModalProps> = ({
         setIsSearching(true);
         setSearchError('');
         setSearchResult(null);
+        // vibrate(); // Assuming vibrate() is defined elsewhere or needs to be added
 
-        const user = await FriendsService.searchUserByUsername(searchQuery.trim());
+        const users = await FriendsService.searchUsers(searchQuery.trim(), 1);
+        const user = users.length > 0 ? users[0] : null;
 
         if (user) {
             setSearchResult(user);
+            // vibrate(); // Assuming vibrate() is defined elsewhere or needs to be added
         } else {
             setSearchError('User not found');
+            // vibrate(); // Assuming vibrate() is defined elsewhere or needs to be added
         }
 
         setIsSearching(false);

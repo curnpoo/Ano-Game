@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useRegisterSW } from 'virtual:pwa-register/react';
 
 import { CasinoScreen } from './components/screens/CasinoScreen';
 
@@ -19,6 +20,7 @@ import { Toast } from './components/common/Toast';
 import { LoadingScreen } from './components/common/LoadingScreen';
 import { NotificationPromptModal } from './components/common/NotificationPromptModal';
 import { SettingsModal } from './components/common/SettingsModal';
+import { UpdateNotification } from './components/common/UpdateNotification';
 import { TunnelTransition, CasinoTransition, GlobalBlurTransition } from './components/common/ScreenTransition';
 import { MonogramBackground } from './components/common/MonogramBackground';
 import {
@@ -44,6 +46,27 @@ import type { LoadingStage, RoomHistoryEntry } from './types';
 
 
 const App = () => {
+  // --- PWA Update Detection ---
+  const {
+    needRefresh: [needRefresh, setNeedRefresh],
+    updateServiceWorker,
+  } = useRegisterSW({
+    onRegistered(r) {
+      console.log('SW Registered:', r);
+    },
+    onRegisterError(error) {
+      console.log('SW registration error', error);
+    },
+  });
+
+  const handleUpdateApp = () => {
+    updateServiceWorker(true);
+  };
+
+  const handleDismissUpdate = () => {
+    setNeedRefresh(false);
+  };
+
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
   const [lastGameDetails, setLastGameDetails] = useState<RoomHistoryEntry | null>(null);
 
@@ -1492,6 +1515,14 @@ const App = () => {
           setShowCasino(true);
         }}
       />
+
+      {/* Update Notification */}
+      {needRefresh && (
+        <UpdateNotification
+          onUpdate={handleUpdateApp}
+          onDismiss={handleDismissUpdate}
+        />
+      )}
 
     </div>
   );
