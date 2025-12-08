@@ -160,7 +160,7 @@ export const ProfileCardModal: React.FC<ProfileCardModalProps> = ({
 
     return ReactDOM.createPortal(
         <div
-            className="fixed inset-0 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in"
+            className="fixed inset-0 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
             style={{ zIndex: 9999 }}
             onClick={onClose}
         >

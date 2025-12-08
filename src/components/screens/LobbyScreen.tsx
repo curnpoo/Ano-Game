@@ -104,7 +104,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
         <div className="min-h-[100dvh] flex flex-col pb-safe px-4"
             style={{ paddingTop: 'max(0.5rem, env(safe-area-inset-top))' }}>
 
-            <div className="w-full max-w-md mx-auto space-y-3 pb-4">
+            <div className="w-full max-w-md mx-auto space-y-2 pb-2">
                 {/* Top Navigation Bar */}
                 <div className="flex justify-between gap-3">
                     <button
@@ -179,13 +179,13 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                 )}
 
                 {/* Players Card - Independent Scrolling */}
-                <div className="p-4 rounded-[1.5rem] shadow-xl flex flex-col"
+                <div className="p-3 rounded-[1.5rem] shadow-xl flex flex-col"
                     style={{
                         backgroundColor: 'var(--theme-card-bg)',
                         border: '2px solid var(--theme-border)',
-                        maxHeight: '40vh'
+                        maxHeight: '28vh'
                     }}>
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-2 mb-2">
                         <h3 className="text-xl font-bold text-[var(--theme-text)]">👥 Players</h3>
                         <span className="bg-white/10 px-2 py-0.5 rounded-full text-sm font-bold text-[var(--theme-text-secondary)]">
                             {room.players.length}
@@ -193,7 +193,7 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
                     </div>
 
                     {/* Scrollable Player List */}
-                    <div className="space-y-3 flex-1 overflow-y-auto pr-2" style={{
+                    <div className="space-y-2 flex-1 overflow-y-auto pr-2" style={{
                         scrollbarWidth: 'thin',
                         scrollbarColor: 'rgba(255, 215, 0, 0.3) transparent'
                     }}>
@@ -223,14 +223,14 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
 
                     <button
                         onClick={onLeave}
-                        className="w-full mt-3 font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95"
+                        className="w-full mt-2 font-bold py-2 rounded-xl transition-all flex items-center justify-center gap-1.5 hover:scale-[1.02] active:scale-95"
                         style={{
                             backgroundColor: '#FF0000',
                             color: 'white',
-                            boxShadow: '0 3px 0 #990000'
+                            boxShadow: '0 2px 0 #990000'
                         }}
                     >
-                        <span className="text-base">🚪</span> Leave Room
+                        <span className="text-sm">🚪</span> <span className="text-sm">Leave Room</span>
                     </button>
                 </div>
 

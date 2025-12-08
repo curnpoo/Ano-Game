@@ -149,7 +149,7 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, onJ
                     vibrate();
                     setIsExpanded(true);
                 }}
-                className={`flex flex-col items-center justify-center p-4 relative group overflow-hidden rounded-[2.5rem] transition-all duration-300 backdrop-blur-xl bg-black/60 border border-white/10 ${className || ''}`}
+                className={`flex flex-col items-center justify-center p-4 relative group overflow-hidden rounded-[2.5rem] transition-all duration-300 backdrop-blur-md bg-black/70 border border-white/10 ${className || ''}`}
                 style={{
                     boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5)',
                     ...style
@@ -185,7 +185,7 @@ export const FriendsPanel: React.FC<FriendsPanelProps> = ({ player: _player, onJ
             {isExpanded && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
                     <div
-                        className="absolute inset-0 bg-black/60 backdrop-blur-md"
+                        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
                         onClick={() => setIsExpanded(false)}
                     />
 
