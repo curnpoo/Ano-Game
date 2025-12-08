@@ -82,7 +82,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                             <FriendsPanel
                                 player={player}
                                 onJoinRoom={onRejoin}
-                                className="h-full !rounded-[2.5rem] !bg-black/40 border-2 !border-green-500/20 hover:!border-green-500/40 cursor-pointer active:scale-95"
+                                className="w-full h-full !rounded-[2.5rem] !bg-black/40 border-2 !border-green-500/20 hover:!border-green-500/40 cursor-pointer active:scale-95"
                                 style={{
                                     boxShadow: '0 0 20px rgba(34, 197, 94, 0.05)'
                                 }}
@@ -134,10 +134,10 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     {/* Secondary Actions Grid - Bento Style (Adjusted for Pro/Max Sizing) */}
                     <div className="grid grid-cols-2 gap-3 flex-1 min-h-[200px]">
                         {[
-                            { id: 'casino', label: 'CASINO', emoji: '🎰', onClick: onCasino, delay: '100ms', color: 'text-yellow-400' },
-                            { id: 'store', label: 'STORE', emoji: '🛒', onClick: onStore, delay: '200ms', color: 'text-purple-400' },
-                            { id: 'profile', label: 'PROFILE', emoji: '👤', onClick: onProfile, delay: '300ms', color: 'text-blue-400' },
-                            { id: 'settings', label: 'SETTINGS', emoji: '⚙️', onClick: onSettings, delay: '400ms', color: 'text-gray-400' }
+                            { id: 'casino', label: 'CASINO', emoji: '🎰', onClick: onCasino, delay: '100ms', color: 'text-yellow-400', glow: 'bg-yellow-500' },
+                            { id: 'store', label: 'STORE', emoji: '🛒', onClick: onStore, delay: '200ms', color: 'text-purple-400', glow: 'bg-purple-500' },
+                            { id: 'profile', label: 'PROFILE', emoji: '👤', onClick: onProfile, delay: '300ms', color: 'text-blue-400', glow: 'bg-blue-500' },
+                            { id: 'settings', label: 'SETTINGS', emoji: '⚙️', onClick: onSettings, delay: '400ms', color: 'text-gray-400', glow: 'bg-gray-500' }
                         ].map((card, i) => (
                             <button
                                 key={card.id}
@@ -152,9 +152,15 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                     animationDelay: card.delay
                                 }}
                             >
-                                <div className={`text-5xl group-hover:-translate-y-1 transition-transform duration-300 drop-shadow-md ${['settings', 'profile'].includes(card.id) ? '' : 'animate-[bounce_3s_infinite]'}`} style={{ animationDelay: `${i * 0.5}s` }}>{card.emoji}</div>
-                                <div className="text-sm font-black tracking-widest uppercase opacity-80 group-hover:opacity-100 transition-opacity" style={{ color: 'var(--theme-text)' }}>{card.label}</div>
-                                <div className={`absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl`}></div>
+                                {/* Breathing Glow Background */}
+                                <div
+                                    className={`absolute top-1/2 left-1/2 w-20 h-20 rounded-full blur-[25px] ${card.glow} animate-breathe`}
+                                    style={{ animationDelay: `${i * 0.5}s` }}
+                                />
+
+                                <div className={`text-5xl group-hover:-translate-y-1 transition-transform duration-300 drop-shadow-md z-10 relative`} style={{ animationDelay: `${i * 0.5}s` }}>{card.emoji}</div>
+                                <div className="text-sm font-black tracking-widest uppercase opacity-80 group-hover:opacity-100 transition-opacity z-10 relative" style={{ color: 'var(--theme-text)' }}>{card.label}</div>
+                                <div className={`absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl z-20`}></div>
                             </button>
                         ))}
                     </div>

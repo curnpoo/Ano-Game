@@ -735,3 +735,22 @@ input,
 .safe-area-bottom-padding {
   padding-bottom: env(safe-area-inset-bottom);
 }
+
+/* Breathing Glow Animation */
+@keyframes breathe {
+
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+
+  50% {
+    opacity: 0.5;
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+.animate-breathe {
+  animation: breathe 4s ease-in-out infinite;
+}
