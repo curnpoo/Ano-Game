@@ -47,15 +47,30 @@ import type { LoadingStage, RoomHistoryEntry } from './types';
 
 const App = () => {
   // --- PWA Update Detection ---
+  const intervalMs = 15 * 1000; // Check for updates every 15 seconds
+
   const {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
     onRegistered(r) {
       console.log('SW Registered:', r);
+      // Check for updates periodically
+      if (r) {
+        setInterval(() => {
+          console.log('Checking for SW updates...');
+          r.update();
+        }, intervalMs);
+      }
     },
     onRegisterError(error) {
       console.log('SW registration error', error);
+    },
+    onNeedRefresh() {
+      console.log('New content available, showing update notification');
+    },
+    onOfflineReady() {
+      console.log('App ready to work offline');
     },
   });
 
