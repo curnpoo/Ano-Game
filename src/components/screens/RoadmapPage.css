@@ -10,6 +10,16 @@
     padding-bottom: env(safe-area-inset-bottom);
 }
 
+.roadmap-page::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    z-index: -1;
+}
+
 /* Header */
 .roadmap-header {
     position: sticky;
@@ -101,10 +111,12 @@
 
 /* Column */
 .roadmap-column {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(0, 0, 0, 0.6);
     border-radius: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     overflow: hidden;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
 }
 
 .column-header {
@@ -148,15 +160,15 @@
 }
 
 .task-card {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.12);
     border-radius: 0.75rem;
     padding: 0.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.2s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .task-card:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.18);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }

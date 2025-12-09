@@ -497,8 +497,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         👋 Log Out
                     </button>
 
+                    {/* Roadmap Link */}
+                    <button
+                        onClick={() => window.location.href = '/roadmap'}
+                        className="w-full py-4 px-6 font-black rounded-2xl border-2 transition-all uppercase tracking-wide text-sm flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95"
+                        style={{
+                            background: 'linear-gradient(135deg, #FFD700, #FFA500)',
+                            borderColor: 'rgba(255, 215, 0, 0.5)',
+                            color: '#000',
+                            boxShadow: '0 0 20px rgba(255, 215, 0, 0.4), 0 0 40px rgba(255, 215, 0, 0.2)'
+                        }}
+                    >
+                        🗺️ View Roadmap
+                    </button>
+
                     {/* Danger Zone */}
-                    <div className="pt-8 mt-4 border-t border-white/5">
+                    <div className="pt-6 mt-4 border-t border-white/10">
+                        <div className="text-xs font-bold uppercase tracking-widest text-red-500/60 mb-3 text-center">⚠️ Danger Zone</div>
                         <div className="flex flex-col gap-3">
                             <button
                                 onClick={() => window.location.reload()}

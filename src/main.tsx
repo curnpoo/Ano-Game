@@ -8,7 +8,7 @@ import { ErrorBoundary } from './components/common/ErrorBoundary.tsx'
 
 // Simple path-based routing for static pages
 const getComponent = () => {
-  const path = window.location.pathname;
+  const path = window.location.pathname.replace(/\/$/, '') || '/'; // Remove trailing slash
 
   if (path === '/roadmap') {
     return <RoadmapPage />;
