@@ -237,6 +237,15 @@ export const AuthService = {
                     await set(userRef, user);
                 }
 
+                // MIGRATION: Add default backgroundColor for legacy users
+                if (!user.backgroundColor) {
+                    console.log('🎨 Migrating user: Adding default backgroundColor');
+                    user.backgroundColor = '#ffffff';
+
+                    // Save back to firebase
+                    await set(userRef, user);
+                }
+
                 localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(user));
 
                 // Sync Currency

@@ -6,13 +6,14 @@ interface GameCanvasProps {
     imageUrl: string;
     brushColor: string;
     brushSize: number;
-    brushType?: string; // Add prop
+    brushType?: string;
     isDrawingEnabled: boolean;
     strokes: DrawingStroke[];
     onStrokesChange: (strokes: DrawingStroke[]) => void;
     isEraser?: boolean;
     isEyedropper?: boolean;
     onColorPick?: (color: string) => void;
+    zoomScale?: number; // Current zoom level for coordinate compensation
 }
 
 export const GameCanvas: React.FC<GameCanvasProps> = ({
@@ -25,7 +26,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     onStrokesChange,
     isEraser = false,
     isEyedropper = false,
-    onColorPick
+    onColorPick,
+    zoomScale: _zoomScale = 1 // Available for future use; getBoundingClientRect handles transforms
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);

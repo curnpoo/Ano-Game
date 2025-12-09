@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { GameCanvas } from '../game/GameCanvas';
 import { Toolbar } from '../game/Toolbar';
+import { ZoomResetButton } from '../game/ZoomResetButton';
 import type { Player, DrawingStroke } from '../../types';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
 import { CosmeticsService } from '../../services/cosmetics';
 import { AvatarService } from '../../services/avatarService';
+import { useZoomPan } from '../../hooks/useZoomPan';
 
 interface AvatarEditorScreenProps {
     player: Player;
@@ -39,6 +41,13 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
     // Data from Cosmetics
     const availableBrushes = CosmeticsService.getAllBrushes();
     const availableColors = CosmeticsService.getAllColors();
+
+    // iOS-like pinch-to-zoom for canvas
+    const { scale, isZoomed, resetZoom, bindPinch, bindDrag, contentStyle } = useZoomPan({
+        minScale: 1,
+        maxScale: 4,
+        rubberBandFactor: 0.2
+    });
 
     const handleStrokesChange = (newStrokes: DrawingStroke[]) => {
         setStrokes(newStrokes);
@@ -103,27 +112,44 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
 
             {/* Canvas Area */}
             <div className="flex-1 relative bg-gray-800 flex items-center justify-center p-4">
+                {/* Zoom container with pinch gesture handlers */}
                 <div
-                    className="relative aspect-square w-full max-w-sm rounded-[2rem] overflow-hidden shadow-2xl"
-                    style={{ backgroundColor: player.backgroundColor || '#ffffff' }}
+                    {...bindPinch()}
+                    {...bindDrag()}
+                    className="relative aspect-square w-full max-w-sm"
+                    style={{ touchAction: 'none', overflow: 'hidden' }}
                 >
-                    <div className={`absolute inset-0 pointer-events-none z-10 rounded-[2rem] ${FRAMES.find(f => f.id === selectedFrame)?.class}`} style={{ color: brushColor }}></div>
-                    <GameCanvas
-                        imageUrl=""
-                        brushColor={brushColor}
-                        brushSize={brushSize}
-                        brushType={brushType}
-                        isDrawingEnabled={true}
-                        strokes={strokes}
-                        onStrokesChange={handleStrokesChange}
-                        isEraser={isEraser}
-                        isEyedropper={isEyedropper}
-                        onColorPick={(c) => {
-                            setBrushColor(c);
-                            setIsEraser(false);
-                            setIsEyedropper(false);
-                        }}
+                    {/* Zoom Reset Button */}
+                    <ZoomResetButton
+                        scale={scale}
+                        isVisible={isZoomed}
+                        onReset={resetZoom}
                     />
+
+                    {/* Zoomable content wrapper */}
+                    <div
+                        className="relative w-full h-full rounded-[2rem] overflow-hidden shadow-2xl"
+                        style={{ ...contentStyle, backgroundColor: player.backgroundColor || '#ffffff' }}
+                    >
+                        <div className={`absolute inset-0 pointer-events-none z-10 rounded-[2rem] ${FRAMES.find(f => f.id === selectedFrame)?.class}`} style={{ color: brushColor }}></div>
+                        <GameCanvas
+                            imageUrl=""
+                            brushColor={brushColor}
+                            brushSize={brushSize}
+                            brushType={brushType}
+                            isDrawingEnabled={true}
+                            strokes={strokes}
+                            onStrokesChange={handleStrokesChange}
+                            isEraser={isEraser}
+                            isEyedropper={isEyedropper}
+                            onColorPick={(c) => {
+                                setBrushColor(c);
+                                setIsEraser(false);
+                                setIsEyedropper(false);
+                            }}
+                            zoomScale={scale}
+                        />
+                    </div>
                 </div>
             </div>
 

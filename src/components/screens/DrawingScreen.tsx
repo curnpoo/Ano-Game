@@ -3,6 +3,8 @@ import type { GameRoom, Player } from '../../types';
 import { GameCanvas } from '../game/GameCanvas';
 import { BentoToolbar } from '../game/BentoToolbar';
 import { DrawingTimer } from '../game/DrawingTimer';
+import { ZoomResetButton } from '../game/ZoomResetButton';
+import { useZoomPan } from '../../hooks/useZoomPan';
 
 import { CosmeticsService } from '../../services/cosmetics';
 import type { DrawingStroke } from '../../types';
@@ -72,6 +74,13 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
     const playerState = room.playerStates?.[player.id];
     // Use prop if available (includes optimistic state), otherwise fall back to room state
     const hasSubmitted = propHasSubmitted ?? (playerState?.status === 'submitted' || false);
+
+    // iOS-like pinch-to-zoom for canvas
+    const { scale, isZoomed, resetZoom, bindPinch, bindDrag, contentStyle } = useZoomPan({
+        minScale: 1,
+        maxScale: 4,
+        rubberBandFactor: 0.2
+    });
 
     // Effect: Lock scrolling and gestures
     useEffect(() => {
@@ -235,86 +244,106 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
 
                 {/* Main Drawing Surface - Centered in remaining space */}
                 <div className="flex-1 w-full flex flex-col items-center justify-center py-2 min-h-0">
-                    <div className="relative w-[95%] aspect-square bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-white/20 ring-4 ring-black/5 transition-all duration-300">
-
-                        {/* Base Image */}
-                        {room.currentImage && (
-                            <img
-                                src={room.currentImage.url}
-                                alt="Round base"
-                                className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
-                            />
-                        )}
-
-                        {/* Block Overlay */}
-                        {room.block && (
-                            <div
-                                className="absolute pointer-events-none shadow-inner"
-                                style={{
-                                    left: `${room.block.x}%`,
-                                    top: `${room.block.y}%`,
-                                    width: `${room.block.size}%`,
-                                    height: `${room.block.size}%`,
-                                    borderRadius: room.block.type === 'circle' ? '50%' : '12px',
-                                    backgroundColor: '#ffffff',
-                                    zIndex: 10
-                                }}
-                            />
-                        )}
-
-                        <GameCanvas
-                            imageUrl={room.currentImage?.url || ''}
-                            isDrawingEnabled={isMyTimerRunning && !hasSubmitted}
-                            brushColor={brushColor}
-                            brushSize={brushSize}
-                            isEraser={isEraser}
-                            strokes={strokes}
-                            onStrokesChange={setStrokes}
-                            isEyedropper={isEyedropper}
-                            onColorPick={handleColorPick}
+                    {/* Zoom container with pinch gesture handlers */}
+                    <div
+                        {...bindPinch()}
+                        {...bindDrag()}
+                        className="relative w-[95%] aspect-square"
+                        style={{ touchAction: 'none', overflow: 'hidden' }}
+                    >
+                        {/* Zoom Reset Button */}
+                        <ZoomResetButton
+                            scale={scale}
+                            isVisible={isZoomed && showDrawingUI}
+                            onReset={resetZoom}
                         />
 
-                        {/* Submitted Overlay */}
-                        {hasSubmitted && (
-                            <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-30 animate-fade-in">
-                                <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 text-center max-w-xs mx-4 shadow-2xl animate-bounce-gentle border border-white/50 relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-green-400/10 to-transparent pointer-events-none"></div>
-                                    <div className="text-6xl mb-4 animate-pulse-slow drop-shadow-md">✅</div>
-                                    <h3 className="font-black text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-emerald-600 text-3xl mb-2">Done!</h3>
-                                    <p className="text-gray-500 font-bold mb-6">Waiting for others...</p>
+                        {/* Zoomable content wrapper */}
+                        <div
+                            className="relative w-full h-full bg-white rounded-3xl shadow-2xl overflow-hidden border-4 border-white/20 ring-4 ring-black/5"
+                            style={contentStyle}
+                        >
+                            {/* Base Image */}
+                            {room.currentImage && (
+                                <img
+                                    src={room.currentImage.url}
+                                    alt="Round base"
+                                    className="absolute inset-0 w-full h-full object-cover pointer-events-none select-none"
+                                />
+                            )}
 
-                                    {/* List unfinished players */}
-                                    {unfinishedPlayers.length > 0 && (
-                                        <div className="bg-amber-50 rounded-2xl p-4 border-2 border-amber-100 transition-all duration-300">
-                                            <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-3">Still Drawing</p>
-                                            <div className="flex flex-col gap-2 items-center">
-                                                <div className="flex flex-wrap justify-center gap-3">
-                                                    {unfinishedPlayers.slice(0, 3).map(p => (
-                                                        <div key={p.id} className="flex flex-col items-center animate-pulse" title={p.name}>
-                                                            <div className="w-10 h-10 rounded-full bg-amber-200 border-2 border-amber-300 flex items-center justify-center text-xl shadow-sm overflow-hidden mb-1 relative">
-                                                                {p.avatarImageUrl ? (
-                                                                    <img src={p.avatarImageUrl} alt={p.name} className="w-full h-full object-cover" />
-                                                                ) : (
-                                                                    <span>{p.avatar || '👤'}</span>
-                                                                )}
+                            {/* Block Overlay */}
+                            {room.block && (
+                                <div
+                                    className="absolute pointer-events-none shadow-inner"
+                                    style={{
+                                        left: `${room.block.x}%`,
+                                        top: `${room.block.y}%`,
+                                        width: `${room.block.size}%`,
+                                        height: `${room.block.size}%`,
+                                        borderRadius: room.block.type === 'circle' ? '50%' : '12px',
+                                        backgroundColor: '#ffffff',
+                                        zIndex: 10
+                                    }}
+                                />
+                            )}
+
+                            <GameCanvas
+                                imageUrl={room.currentImage?.url || ''}
+                                isDrawingEnabled={isMyTimerRunning && !hasSubmitted}
+                                brushColor={brushColor}
+                                brushSize={brushSize}
+                                brushType={brushType}
+                                isEraser={isEraser}
+                                strokes={strokes}
+                                onStrokesChange={setStrokes}
+                                isEyedropper={isEyedropper}
+                                onColorPick={handleColorPick}
+                                zoomScale={scale}
+                            />
+
+                            {/* Submitted Overlay */}
+                            {hasSubmitted && (
+                                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-30 animate-fade-in">
+                                    <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 text-center max-w-xs mx-4 shadow-2xl animate-bounce-gentle border border-white/50 relative overflow-hidden">
+                                        <div className="absolute inset-0 bg-gradient-to-tr from-green-400/10 to-transparent pointer-events-none"></div>
+                                        <div className="text-6xl mb-4 animate-pulse-slow drop-shadow-md">✅</div>
+                                        <h3 className="font-black text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-emerald-600 text-3xl mb-2">Done!</h3>
+                                        <p className="text-gray-500 font-bold mb-6">Waiting for others...</p>
+
+                                        {/* List unfinished players */}
+                                        {unfinishedPlayers.length > 0 && (
+                                            <div className="bg-amber-50 rounded-2xl p-4 border-2 border-amber-100 transition-all duration-300">
+                                                <p className="text-[10px] font-black text-amber-600 uppercase tracking-widest mb-3">Still Drawing</p>
+                                                <div className="flex flex-col gap-2 items-center">
+                                                    <div className="flex flex-wrap justify-center gap-3">
+                                                        {unfinishedPlayers.slice(0, 3).map(p => (
+                                                            <div key={p.id} className="flex flex-col items-center animate-pulse" title={p.name}>
+                                                                <div className="w-10 h-10 rounded-full bg-amber-200 border-2 border-amber-300 flex items-center justify-center text-xl shadow-sm overflow-hidden mb-1 relative">
+                                                                    {p.avatarImageUrl ? (
+                                                                        <img src={p.avatarImageUrl} alt={p.name} className="w-full h-full object-cover" />
+                                                                    ) : (
+                                                                        <span>{p.avatar || '👤'}</span>
+                                                                    )}
+                                                                </div>
+                                                                <span className="font-bold text-gray-600 text-[10px] bg-white/80 px-2 py-0.5 rounded-full backdrop-blur-sm border border-amber-100 shadow-sm max-w-[80px] truncate">
+                                                                    {p.name}
+                                                                </span>
                                                             </div>
-                                                            <span className="font-bold text-gray-600 text-[10px] bg-white/80 px-2 py-0.5 rounded-full backdrop-blur-sm border border-amber-100 shadow-sm max-w-[80px] truncate">
-                                                                {p.name}
-                                                            </span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                                {unfinishedPlayers.length > 3 && (
-                                                    <div className="text-xs font-bold text-amber-600/80 bg-amber-100/50 px-3 py-1 rounded-full mt-1">
-                                                        and {unfinishedPlayers.length - 3} more...
+                                                        ))}
                                                     </div>
-                                                )}
+                                                    {unfinishedPlayers.length > 3 && (
+                                                        <div className="text-xs font-bold text-amber-600/80 bg-amber-100/50 px-3 py-1 rounded-full mt-1">
+                                                            and {unfinishedPlayers.length - 3} more...
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
+                                    </div>
                                 </div>
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 </div>
 

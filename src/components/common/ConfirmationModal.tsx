@@ -1,4 +1,5 @@
 import React from 'react';
+import ReactDOM from 'react-dom';
 
 interface ConfirmationModalProps {
     isOpen: boolean;
@@ -30,8 +31,8 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         orange: 'from-orange-500 to-amber-600 hover:shadow-orange-500/30'
     };
 
-    return (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[10000] flex items-center justify-center p-4 animate-fade-in">
+    return ReactDOM.createPortal(
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in" style={{ zIndex: 99999 }}>
             <div className="bg-zinc-900 rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl border-4 border border-white/10 pop-in relative overflow-hidden">
                 {/* Content */}
                 <div className="relative z-10">
@@ -54,6 +55,7 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 };

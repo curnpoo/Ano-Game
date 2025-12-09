@@ -69,16 +69,6 @@ export const ColorWheel: React.FC<ColorWheelProps> = ({
                 }
             `}</style>
 
-            {/* Color Preview */}
-            <div
-                className="rounded-full shadow-lg border-4 border-white transition-colors"
-                style={{
-                    width: 80,
-                    height: 80,
-                    backgroundColor: `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`
-                }}
-            />
-
             {/* Sliders */}
             <div className="w-full space-y-3">
                 {/* Hue */}
