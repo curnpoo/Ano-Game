@@ -37,6 +37,7 @@ const roadmapData: RoadmapColumn[] = [
         tasks: [
             { id: 'w1', type: 'FIX', title: 'Remove Landscape mode', description: 'Enforcing portrait-only orientation' },
             { id: 'w2', type: 'FEAT', title: 'Add zooming to drawing canvas', description: 'Pinch-to-zoom with iOS-native feel' },
+            { id: 't4', type: 'ADD', title: 'Profile picture loading state', description: 'Universal loading indicator instead of default photo' },
         ]
     },
     {
@@ -48,7 +49,6 @@ const roadmapData: RoadmapColumn[] = [
             { id: 't1', type: 'FEAT', title: 'Add invites section', description: 'Shows invites from friends, clears after 5 hours, allows late acceptance' },
             { id: 't2', type: 'FIX', title: 'Loading screen transition', description: 'Show all green checks → 300ms delay → smooth fade with preloaded screen' },
             { id: 't3', type: 'FIX', title: 'Level 0 bug', description: 'Older accounts showing Level 0 in lobby' },
-            { id: 't4', type: 'ADD', title: 'Profile picture loading state', description: 'Universal loading indicator instead of default photo' },
             { id: 't5', type: 'FEAT', title: 'Friend request popups', description: 'In-game and out-of-app notifications for friend requests' },
         ]
     },

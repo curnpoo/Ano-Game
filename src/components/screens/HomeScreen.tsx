@@ -48,7 +48,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <div
             className={`fixed inset-0 overflow-y-auto overflow-x-hidden flex flex-col items-center select-none ${mounted ? 'pop-in' : 'opacity-0'}`}
             style={{
-                backgroundColor: 'var(--theme-bg)',
+                background: 'var(--theme-bg, #1a1a1a)',
                 paddingTop: 'max(1rem, env(safe-area-inset-top))',
                 paddingBottom: 'max(1rem, env(safe-area-inset-bottom))'
             }}

@@ -4,11 +4,13 @@ import type { DrawingStroke } from '../types';
 
 export const useAvatar = (playerId?: string) => {
     const [strokes, setStrokes] = useState<DrawingStroke[] | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    // Initialize loading to true if we have an ID to fetch, preventing flash of fallback
+    const [isLoading, setIsLoading] = useState(!!playerId);
 
     useEffect(() => {
         if (!playerId) {
             setStrokes(null);
+            setIsLoading(false);
             return;
         }
 
