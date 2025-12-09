@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { APP_VERSION } from '../../utils/version';
 import { MonogramBackground } from '../common/MonogramBackground';
 import './RoadmapPage.css';
 
@@ -117,7 +117,7 @@ export const RoadmapPage: React.FC = () => {
                     <button onClick={handleBackToGame} className="back-button">
                         ← Back
                     </button>
-                    <div className="version-badge">v0.7.3 Alpha</div>
+                    <div className="version-badge">v{APP_VERSION}</div>
                 </div>
                 <div className="header-content">
                     <h1>🗺️ Roadmap</h1>
