@@ -59,7 +59,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
             {/* Color Accents (decorative glow) */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 fixed">
                 <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/20 rounded-full blur-[120px] animate-[pulse_10s_ease-in-out_infinite]" />
-                <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-500/20 rounded-full blur-[120px] animate-[pulse_15s_ease-in-out_infinite_2s]" />
+                <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-500/20 rounded-full blur-[120px] animate-[pulse_15s_ease-in-out_infinite_-2s]" />
                 {/* Floating particles */}
                 <div className="absolute top-1/4 left-1/4 w-4 h-4 rounded-full bg-white/10 animate-[float_8s_ease-in-out_infinite]" />
                 <div className="absolute top-3/4 right-1/4 w-6 h-6 rounded-full bg-white/10 animate-[float_12s_ease-in-out_infinite_1s]" />
