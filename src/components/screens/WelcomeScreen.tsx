@@ -4,8 +4,6 @@ import React, { useState } from 'react';
 import { InstallPromptModal } from '../common/InstallPromptModal';
 import { ShareModal } from '../common/ShareModal';
 
-import { MonogramBackground } from '../common/MonogramBackground';
-
 interface WelcomeScreenProps {
     onPlay: () => void;
     onJoin: (code: string) => void;
@@ -27,8 +25,6 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
     return (
         <div className="relative w-full h-[100dvh] overflow-hidden flex flex-col items-center justify-between safe-area-padding">
-
-            <MonogramBackground />
 
             {/* Top Bar: About & Share */}
             <div

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { ProfileStatusCard } from '../common/ProfileStatusCard';
 import { FriendsPanel } from '../common/FriendsPanel';
 import { AdminModal } from '../common/AdminModal';
-import { MonogramBackground } from '../common/MonogramBackground';
 import type { Player } from '../../types';
 
 interface HomeScreenProps {
@@ -53,10 +52,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 paddingBottom: 'max(1rem, env(safe-area-inset-bottom))'
             }}
         >
-            {/* Monogram Pattern Background */}
-            <MonogramBackground speed="slow" opacity={0.15} />
-
-            {/* Color Accents (not the background, just decorative glow) */}
+            {/* Color Accents (decorative glow, not background) */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 fixed">
                 <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/20 rounded-full blur-[120px] animate-[pulse_10s_ease-in-out_infinite]" />
                 <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-500/20 rounded-full blur-[120px] animate-[pulse_15s_ease-in-out_infinite_2s]" />
