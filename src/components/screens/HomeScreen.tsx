@@ -91,9 +91,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         {/* Play Button - Right Side (Special & Glowing) */}
                         <button
                             onClick={onPlay}
-                            className="relative group overflow-hidden rounded-[2.5rem] shadow-2xl border-4 transform transition-all duration-300 hover:scale-[1.02] active:scale-95 flex flex-col items-center justify-center p-4 backdrop-blur-xl"
+                            className="relative group overflow-hidden rounded-[2.5rem] shadow-2xl border-4 transform transition-all duration-300 hover:scale-[1.02] active:scale-95 flex flex-col items-center justify-center p-4 glass-panel !bg-black/95"
                             style={{
-                                backgroundColor: 'rgba(0, 0, 0, 0.3)',
                                 borderColor: 'var(--theme-accent)',
                                 boxShadow: '0 0 50px -10px var(--theme-accent-glow), 0 20px 40px -10px rgba(0,0,0,0.6)'
                             }}
@@ -142,12 +141,12 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                 key={card.id}
                                 onClick={card.onClick}
                                 className={`
-                                    bg-white/[0.02] backdrop-blur-md rounded-3xl p-4 shadow-lg border border-white/10
+                                    glass-panel rounded-3xl p-4 shadow-lg
                                     transform transition-all duration-200 hover:scale-[1.02] active:scale-95
                                     flex flex-col items-center justify-center gap-3 group relative
+                                    !bg-black/95 !border-white/10
                                 `}
                                 style={{
-                                    backgroundColor: 'var(--theme-card-bg)',
                                     animationDelay: card.delay
                                 }}
                             >
@@ -170,7 +169,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     {/* Match History Button */}
                     <button
                         onClick={onGallery}
-                        className="w-full bg-white/5 hover:bg-white/10 rounded-2xl p-3 border border-white/10 flex items-center justify-between group active:scale-95 transition-all backdrop-blur-xl"
+                        className="w-full glass-panel !bg-black/95 hover:!bg-black/90 rounded-2xl p-3 !border-white/10 flex items-center justify-between group active:scale-95 transition-all"
                     >
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-pink-500/20 rounded-lg flex items-center justify-center text-sm group-hover:scale-110 transition-transform">

@@ -169,11 +169,13 @@ export const usePlayerSession = ({ setCurrentScreen, onProgress, onComplete }: U
 
         // Sync profile changes to Firebase auth (for persistence across logins)
         AuthService.updateUser(player.id, {
+            username: updatedPlayer.name,
             avatarStrokes: updatedPlayer.avatarStrokes,
             avatarImageUrl: updatedPlayer.avatarImageUrl,
             color: updatedPlayer.color,
             backgroundColor: updatedPlayer.backgroundColor,
-            frame: updatedPlayer.frame
+            frame: updatedPlayer.frame,
+            cosmetics: updatedPlayer.cosmetics
         });
 
         if (roomCode) {
