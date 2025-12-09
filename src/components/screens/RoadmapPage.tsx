@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MonogramBackground } from '../common/MonogramBackground';
 import './RoadmapPage.css';
 
@@ -7,6 +7,7 @@ interface RoadmapTask {
     type: 'FIX' | 'FEAT' | 'ADD' | 'REMOVE' | 'REFACTOR' | 'CONFIRMED';
     title: string;
     description?: string;
+    completedDate?: string;
 }
 
 interface RoadmapColumn {
@@ -17,21 +18,17 @@ interface RoadmapColumn {
     tasks: RoadmapTask[];
 }
 
+// Done items with completion dates
+const doneItems: RoadmapTask[] = [
+    { id: 'd1', type: 'CONFIRMED', title: 'Game Loop', description: 'Core game loop is working', completedDate: 'Dec 1' },
+    { id: 'd2', type: 'FIX', title: 'Player Profile picture in waiting for upload screen', description: 'Fixed visibility and text contrast on dark background', completedDate: 'Dec 7' },
+    { id: 'd3', type: 'FIX', title: 'Results screen scrolling', description: 'Results can now be scrolled', completedDate: 'Dec 8' },
+    { id: 'd4', type: 'FIX', title: 'Drawing round UI and UX', description: 'Timer aligned with canvas, Bento style toolbar, touch-friendly interface', completedDate: 'Dec 8' },
+    { id: 'd5', type: 'REMOVE', title: 'Circle above color picker', description: 'Removed preview circle, color reflects on profile photo directly', completedDate: 'Dec 8' },
+    { id: 'd6', type: 'FIX', title: 'Popup z-index issue', description: 'Leave/join popup is now front and foremost above all menus', completedDate: 'Dec 9' },
+];
+
 const roadmapData: RoadmapColumn[] = [
-    {
-        id: 'done',
-        title: 'Done',
-        emoji: '✅',
-        color: '#22c55e',
-        tasks: [
-            { id: 'd1', type: 'CONFIRMED', title: 'Game Loop', description: 'Core game loop is working' },
-            { id: 'd2', type: 'FIX', title: 'Player Profile picture in waiting for upload screen', description: 'Fixed visibility and text contrast on dark background' },
-            { id: 'd3', type: 'FIX', title: 'Results screen scrolling', description: 'Results can now be scrolled' },
-            { id: 'd4', type: 'FIX', title: 'Drawing round UI and UX', description: 'Timer aligned with canvas, Bento style toolbar, touch-friendly interface' },
-            { id: 'd5', type: 'REMOVE', title: 'Circle above color picker', description: 'Removed preview circle, color reflects on profile photo directly' },
-            { id: 'd6', type: 'FIX', title: 'Popup z-index issue', description: 'Leave/join popup is now front and foremost above all menus' },
-        ]
-    },
     {
         id: 'working',
         title: 'Working',
@@ -104,6 +101,8 @@ const typeColors: Record<string, { bg: string; text: string }> = {
 };
 
 export const RoadmapPage: React.FC = () => {
+    const [isDoneExpanded, setIsDoneExpanded] = useState(false);
+
     const handleBackToGame = () => {
         window.location.href = '/';
     };
@@ -123,8 +122,55 @@ export const RoadmapPage: React.FC = () => {
                 <div className="header-content">
                     <h1>🗺️ Roadmap</h1>
                     <p className="subtitle">What's coming to ANO</p>
+                    <p className="last-updated">Last updated: December 9, 2025</p>
                 </div>
             </header>
+
+            {/* Done Dropdown */}
+            <section className="done-dropdown">
+                <button
+                    className="done-dropdown-header"
+                    onClick={() => setIsDoneExpanded(!isDoneExpanded)}
+                >
+                    <div className="done-dropdown-left">
+                        <span className="done-emoji">✅</span>
+                        <span className="done-title">Done</span>
+                        <span className="done-count">{doneItems.length}</span>
+                    </div>
+                    <span className={`done-chevron ${isDoneExpanded ? 'expanded' : ''}`}>
+                        ▼
+                    </span>
+                </button>
+
+                {isDoneExpanded && (
+                    <div className="done-dropdown-content">
+                        {doneItems.map((task) => (
+                            <article key={task.id} className="task-card done-task-card">
+                                <div className="task-header">
+                                    <span
+                                        className="task-type"
+                                        style={{
+                                            backgroundColor: typeColors[task.type]?.bg,
+                                            color: typeColors[task.type]?.text
+                                        }}
+                                    >
+                                        {task.type}
+                                    </span>
+                                    {task.completedDate && (
+                                        <span className="task-completed-date">
+                                            {task.completedDate}
+                                        </span>
+                                    )}
+                                </div>
+                                <h3 className="task-title">{task.title}</h3>
+                                {task.description && (
+                                    <p className="task-description">{task.description}</p>
+                                )}
+                            </article>
+                        ))}
+                    </div>
+                )}
+            </section>
 
             {/* Roadmap Grid */}
             <main className="roadmap-grid">
