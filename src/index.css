@@ -83,10 +83,12 @@ body.light-mode {
 
 /* Semantic Glass Utilities */
 .glass-panel {
-  @apply backdrop-blur-2xl shadow-xl border;
+  @apply shadow-xl border;
   background-color: var(--glass-bg);
   border-color: var(--glass-border);
   color: var(--glass-text);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .glass-button {

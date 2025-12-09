@@ -10,16 +10,6 @@
     padding-bottom: env(safe-area-inset-bottom);
 }
 
-.roadmap-page::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.4);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    z-index: -1;
-}
-
 /* Header */
 .roadmap-header {
     position: sticky;
