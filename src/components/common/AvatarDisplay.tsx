@@ -39,11 +39,11 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
     // Loading state (optional: show spinner or just fallback emoji)
     // For now, we fall back to emoji while loading or if no strokes found
 
-    // If no strokes, render emoji fallback
+    // If no strokes, render emoji fallback (or loading spinner if fetching)
     if (!displayStrokes || displayStrokes.length === 0) {
         return (
             <div
-                className={`rounded-2xl flex items-center justify-center shadow-sm ${frame || ''} ${className} ${isLoading ? 'animate-pulse' : ''}`}
+                className={`rounded-2xl flex items-center justify-center shadow-sm relative overflow-hidden ${frame || ''} ${className}`}
                 style={{
                     color: color,
                     width: size,
@@ -52,7 +52,17 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
                     fontSize: size * 0.6
                 }}
             >
-                {avatar || '👤'}
+                {isLoading ? (
+                    // Loading spinner
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/30 backdrop-blur-[1px]">
+                        <div
+                            className="border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"
+                            style={{ width: size * 0.4, height: size * 0.4 }}
+                        />
+                    </div>
+                ) : (
+                    avatar || '👤'
+                )}
             </div>
         );
     }

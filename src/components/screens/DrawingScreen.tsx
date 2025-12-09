@@ -4,6 +4,7 @@ import { GameCanvas } from '../game/GameCanvas';
 import { BentoToolbar } from '../game/BentoToolbar';
 import { DrawingTimer } from '../game/DrawingTimer';
 import { ZoomResetButton } from '../game/ZoomResetButton';
+import { AvatarDisplay } from '../common/AvatarDisplay';
 import { useZoomPan } from '../../hooks/useZoomPan';
 
 import { CosmeticsService } from '../../services/cosmetics';
@@ -316,14 +317,16 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                                                 <div className="flex flex-col gap-2 items-center">
                                                     <div className="flex flex-wrap justify-center gap-3">
                                                         {unfinishedPlayers.slice(0, 3).map(p => (
-                                                            <div key={p.id} className="flex flex-col items-center animate-pulse" title={p.name}>
-                                                                <div className="w-10 h-10 rounded-full bg-amber-200 border-2 border-amber-300 flex items-center justify-center text-xl shadow-sm overflow-hidden mb-1 relative">
-                                                                    {p.avatarImageUrl ? (
-                                                                        <img src={p.avatarImageUrl} alt={p.name} className="w-full h-full object-cover" />
-                                                                    ) : (
-                                                                        <span>{p.avatar || '👤'}</span>
-                                                                    )}
-                                                                </div>
+                                                            <div key={p.id} className="flex flex-col items-center" title={p.name}>
+                                                                <AvatarDisplay
+                                                                    strokes={p.avatarStrokes}
+                                                                    avatar={p.avatar}
+                                                                    color={p.color}
+                                                                    backgroundColor={p.backgroundColor}
+                                                                    size={40}
+                                                                    className="border-2 border-amber-300 shadow-sm mb-1"
+                                                                    playerId={p.id}
+                                                                />
                                                                 <span className="font-bold text-gray-600 text-[10px] bg-white/80 px-2 py-0.5 rounded-full backdrop-blur-sm border border-amber-100 shadow-sm max-w-[80px] truncate">
                                                                     {p.name}
                                                                 </span>

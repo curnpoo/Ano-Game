@@ -147,7 +147,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                                     !border-white/10
                                 `}
                                 style={{
-                                    backgroundColor: 'color-mix(in srgb, var(--theme-card-bg) 70%, transparent)',
+                                    background: `linear-gradient(135deg, rgba(44, 36, 27, 0.85), rgba(30, 30, 30, 0.85))`,
                                     animationDelay: card.delay
                                 }}
                             >
@@ -171,7 +171,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     <button
                         onClick={onGallery}
                         className="w-full glass-panel rounded-2xl p-3 !border-white/10 flex items-center justify-between group active:scale-95 transition-all hover:brightness-110"
-                        style={{ backgroundColor: 'color-mix(in srgb, var(--theme-card-bg) 70%, transparent)' }}
+                        style={{ background: 'linear-gradient(135deg, rgba(44, 36, 27, 0.85), rgba(30, 30, 30, 0.85))' }}
                     >
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 bg-pink-500/20 rounded-lg flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
