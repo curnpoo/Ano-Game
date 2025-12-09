@@ -41,4 +41,4 @@ It's **Mobile-First Chaos**. The UI feels like a premium, vibrant toy—big butt
 
 ---
 
-*Built with ❤️ (and a lot of chaos) by the Antigravity Team.*
+*Built with ❤️ by Curren*

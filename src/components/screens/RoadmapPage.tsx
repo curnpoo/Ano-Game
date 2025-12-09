@@ -112,14 +112,16 @@ export const RoadmapPage: React.FC = () => {
 
             {/* Header */}
             <header className="roadmap-header">
-                <button onClick={handleBackToGame} className="back-button">
-                    ← Back to Game
-                </button>
-                <div className="header-content">
-                    <h1>ANO Roadmap</h1>
-                    <p className="subtitle">What we're building 🚀</p>
+                <div className="header-top-row">
+                    <button onClick={handleBackToGame} className="back-button">
+                        ← Back
+                    </button>
+                    <div className="version-badge">v0.7.3 Alpha</div>
                 </div>
-                <div className="version-badge">v0.7.3 Alpha</div>
+                <div className="header-content">
+                    <h1>🗺️ Roadmap</h1>
+                    <p className="subtitle">What's coming to ANO</p>
+                </div>
             </header>
 
             {/* Roadmap Grid */}
@@ -160,7 +162,7 @@ export const RoadmapPage: React.FC = () => {
             {/* Footer */}
             <footer className="roadmap-footer">
                 <p>Last updated: December 9, 2025</p>
-                <p className="footer-note">Built with ❤️ by Antigravity</p>
+                <p className="footer-note">Built with ❤️ by Curren</p>
             </footer>
         </div>
     );
