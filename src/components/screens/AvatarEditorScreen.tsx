@@ -43,10 +43,9 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
     const availableColors = CosmeticsService.getAllColors();
 
     // iOS-like pinch-to-zoom for canvas
-    const { scale, isZoomed, resetZoom, bindPinch, bindDrag, contentStyle } = useZoomPan({
+    const { scale, isZoomed, isPinching, resetZoom, bind, contentStyle } = useZoomPan({
         minScale: 1,
-        maxScale: 4,
-        rubberBandFactor: 0.2
+        maxScale: 4
     });
 
     const handleStrokesChange = (newStrokes: DrawingStroke[]) => {
@@ -114,8 +113,7 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
             <div className="flex-1 relative bg-gray-800 flex items-center justify-center p-4">
                 {/* Zoom container with pinch gesture handlers */}
                 <div
-                    {...bindPinch()}
-                    {...bindDrag()}
+                    {...bind()}
                     className="relative aspect-square w-full max-w-sm"
                     style={{ touchAction: 'none', overflow: 'hidden' }}
                 >
@@ -137,7 +135,7 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
                             brushColor={brushColor}
                             brushSize={brushSize}
                             brushType={brushType}
-                            isDrawingEnabled={true}
+                            isDrawingEnabled={!isPinching}
                             strokes={strokes}
                             onStrokesChange={handleStrokesChange}
                             isEraser={isEraser}

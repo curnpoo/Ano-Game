@@ -76,10 +76,9 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
     const hasSubmitted = propHasSubmitted ?? (playerState?.status === 'submitted' || false);
 
     // iOS-like pinch-to-zoom for canvas
-    const { scale, isZoomed, resetZoom, bindPinch, bindDrag, contentStyle } = useZoomPan({
+    const { scale, isZoomed, isPinching, resetZoom, bind, contentStyle } = useZoomPan({
         minScale: 1,
-        maxScale: 4,
-        rubberBandFactor: 0.2
+        maxScale: 4
     });
 
     // Effect: Lock scrolling and gestures
@@ -246,8 +245,7 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                 <div className="flex-1 w-full flex flex-col items-center justify-center py-2 min-h-0">
                     {/* Zoom container with pinch gesture handlers */}
                     <div
-                        {...bindPinch()}
-                        {...bindDrag()}
+                        {...bind()}
                         className="relative w-[95%] aspect-square"
                         style={{ touchAction: 'none', overflow: 'hidden' }}
                     >
@@ -290,7 +288,7 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
 
                             <GameCanvas
                                 imageUrl={room.currentImage?.url || ''}
-                                isDrawingEnabled={isMyTimerRunning && !hasSubmitted}
+                                isDrawingEnabled={isMyTimerRunning && !hasSubmitted && !isPinching}
                                 brushColor={brushColor}
                                 brushSize={brushSize}
                                 brushType={brushType}
