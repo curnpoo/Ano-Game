@@ -5,6 +5,7 @@ export interface UseLoadingProgressReturn {
     stages: LoadingStage[];
     isOnline: boolean;
     isSlow: boolean;
+    isAllComplete: boolean;
     addStage: (id: string, label: string) => void;
     updateStage: (id: string, status: LoadingStage['status'], error?: string) => void;
     completeCurrentStage: () => void;
@@ -183,10 +184,14 @@ export const useLoadingProgress = (): UseLoadingProgressReturn => {
         setStages(initializedStages);
     }, [clearStages]);
 
+    // Computed: all stages complete (and at least one stage exists)
+    const isAllComplete = stages.length > 0 && stages.every(s => s.status === 'completed');
+
     return {
         stages,
         isOnline,
         isSlow,
+        isAllComplete,
         addStage,
         updateStage,
         completeCurrentStage,

@@ -50,7 +50,11 @@ export const usePlayerSession = ({ setCurrentScreen, onProgress, onComplete }: U
                             color: authUser.color || session.color,
                             frame: authUser.frame || session.frame || 'none',
                             avatarStrokes: authUser.avatarStrokes || session.avatarStrokes,
-                            cosmetics: authUser.cosmetics || session.cosmetics
+                            cosmetics: authUser.cosmetics || session.cosmetics,
+                            // Always sync XP/level/stats from services (which are now synced from Firebase)
+                            xp: XPService.getXP(),
+                            level: XPService.getLevel(),
+                            stats: StatsService.getStats()
                         };
                         StorageService.saveSession(session);
                         setPlayer(session);

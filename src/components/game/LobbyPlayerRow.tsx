@@ -26,7 +26,9 @@ const LobbyPlayerRowBase: React.FC<LobbyPlayerRowProps> = ({
     onKickStart,
     showKickButton
 }) => {
-    const tier = XPService.getTierForLevel(player.level || 0);
+    // Calculate level from XP instead of using potentially stale player.level
+    const calculatedLevel = player.xp ? XPService.getLevelFromXP(player.xp) : (player.level || 0);
+    const tier = XPService.getTierForLevel(calculatedLevel);
     const activeBadgeInfo = player.cosmetics?.activeBadge ? BadgeService.getBadgeInfo(player.cosmetics.activeBadge) : null;
 
     // Determine status badge color and text
@@ -88,7 +90,7 @@ const LobbyPlayerRowBase: React.FC<LobbyPlayerRowProps> = ({
                         ) : (
                             <div className="flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-black/5 dark:bg-white/10" title={tier.name}>
                                 <span className="text-xs">{tier.icon}</span>
-                                <span className="text-[10px] font-black opacity-70 uppercase">Lvl {player.level || 0}</span>
+                                <span className="text-[10px] font-black opacity-70 uppercase">Lvl {calculatedLevel}</span>
                             </div>
                         )}
 

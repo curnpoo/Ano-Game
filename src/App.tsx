@@ -11,6 +11,7 @@ import { XPService } from './services/xp';
 import { StatsService } from './services/stats';
 import { BadgeService } from './services/badgeService';
 import { vibrate } from './utils/haptics';
+import { FriendsService } from './services/friendsService';
 import { useDrawingState } from './hooks/useDrawingState';
 import { useGameFlow } from './hooks/useGameFlow';
 import { useRoom } from './hooks/useRoom';
@@ -22,6 +23,7 @@ import { NotificationPromptModal } from './components/common/NotificationPromptM
 import { SettingsModal } from './components/common/SettingsModal';
 import { UpdateNotification } from './components/common/UpdateNotification';
 import { ConfirmationModal } from './components/common/ConfirmationModal';
+import { ProfileCardModal } from './components/common/ProfileCardModal';
 import { TunnelTransition, CasinoTransition, GlobalBlurTransition } from './components/common/ScreenTransition';
 import { MonogramBackground } from './components/common/MonogramBackground';
 import {
@@ -38,7 +40,8 @@ import { requestPushPermission, onForegroundMessage } from './services/pushNotif
 import { useNotifications } from './hooks/useNotifications';
 import { usePlayerSession } from './hooks/usePlayerSession';
 import { useLoadingProgress } from './hooks/useLoadingProgress';
-import type { Player, GameSettings, PlayerDrawing, GameRoom, Screen } from './types';
+import { useInAppNotifications } from './hooks/useInAppNotifications';
+import type { Player, GameSettings, PlayerDrawing, GameRoom, Screen, FriendRequest, GameInvite, UserAccount } from './types';
 
 
 // Extended Screen type to include the new joining screen
@@ -71,12 +74,37 @@ const App = () => {
       console.log('SW registration error', error);
     },
     onNeedRefresh() {
-      console.log('New content available, showing update notification');
+      console.log('New content available, validating version mismatch...');
+      // Validate that we actually have a different version before triggering
+      validateVersionMismatch();
     },
     onOfflineReady() {
       console.log('App ready to work offline');
     },
   });
+
+  // Helper to validate that the user is not already on the latest version
+  const validateVersionMismatch = useCallback(async () => {
+    try {
+      const response = await fetch('/version.json?t=' + Date.now(), {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' }
+      });
+      const data = await response.json();
+      
+      if (initialBuildTime.current && data.buildTime === initialBuildTime.current) {
+        // User is already on the latest version, don't show update popup
+        console.log('Already on latest version:', initialBuildTime.current);
+        setNeedRefresh(false);
+      } else if (data.buildTime && data.buildTime !== initialBuildTime.current) {
+        // Confirmed version mismatch, show update
+        console.log('Confirmed version mismatch:', initialBuildTime.current, '->', data.buildTime);
+        setUpdateAvailable(true);
+      }
+    } catch (error) {
+      console.log('Version validation failed:', error);
+    }
+  }, [setNeedRefresh]);
 
   // Fallback: Version check via fetch (for iOS Safari and browsers with restrictive SW behavior)
   useEffect(() => {
@@ -149,7 +177,7 @@ const App = () => {
   }, [startLoadingScenario]);
 
 
-  // Complete all remaining stages and dismiss loading with visible delay
+  // Complete all remaining stages and dismiss loading with 500ms pause
   const stopLoadingWithDelay = useCallback(() => {
     // First, mark ALL remaining stages as complete
     loadingStages.forEach(stage => {
@@ -158,14 +186,8 @@ const App = () => {
       }
     });
 
-    // Then wait 150ms so user sees all green checkmarks before dismissing
-    const elapsed = Date.now() - loadingStartTimeRef.current;
-    const minDelay = 300;
-    const completionDelay = 150; // Extra delay to show all green checks
-    const totalMinDelay = Math.max(minDelay, elapsed) + completionDelay;
-    const remaining = totalMinDelay - elapsed;
-
-    setTimeout(() => setIsLoading(false), remaining);
+    // Wait 500ms so user sees all green checkmarks before dismissing
+    setTimeout(() => setIsLoading(false), 500);
   }, [loadingStages, updateLoadingStage]);
 
   const {
@@ -191,6 +213,7 @@ const App = () => {
   // Pending Room Code from URL
   const [pendingRoomCode, setPendingRoomCode] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [viewProfileUser, setViewProfileUser] = useState<UserAccount | null>(null);
 
   // --- HOOKS: ORDER MATTERS ---
   // 1. Session & Player
@@ -750,6 +773,113 @@ const App = () => {
     return () => clearInterval(interval);
   }, [roomCode, player?.id]);
 
+  // --- In-App Notification System (Friend Requests & Game Invites) ---
+  // Memoize callbacks so useInAppNotifications doesn't re-subscribe constantly
+  const handleFriendRequestNotification = useCallback(async (request: FriendRequest) => {
+    vibrate();
+    showToast(`👋 ${request.fromUsername} wants to be friends!`, 'info', {
+      label: 'View',
+      onClick: async () => {
+        vibrate();
+        // Fetch user data and show their profile card
+        const user = await FriendsService.getUserById(request.fromUserId);
+        if (user) {
+          setViewProfileUser(user);
+        }
+      }
+    });
+  }, [showToast]);
+
+  const handleGameInviteNotification = useCallback((invite: GameInvite) => {
+    vibrate();
+    showToast(`🎮 ${invite.fromUsername} invited you to play!`, 'info', {
+      label: 'Join',
+      onClick: () => {
+        vibrate();
+        handleJoinRoom(invite.roomCode);
+      }
+    });
+  }, [showToast]);
+
+  // Use the in-app notifications hook
+  useInAppNotifications(player?.id || null, useMemo(() => ({
+    onFriendRequest: handleFriendRequestNotification,
+    onGameInvite: handleGameInviteNotification
+  }), [handleFriendRequestNotification, handleGameInviteNotification]));
+
+  // Foreground Push Notification Handler
+  useEffect(() => {
+    const unsubscribe = onForegroundMessage((payload) => {
+      const type = payload.data?.type;
+
+      // Only show toast if not already handled by real-time subscription
+      // (The real-time subscription usually handles it first, but push is a backup)
+      if (type === 'friend_request') {
+        // Friend request - show info toast
+        vibrate();
+        showToast(payload.notification?.body || '👋 New friend request!', 'info');
+      } else if (type === 'game_invite') {
+        // Game invite - show toast with join action
+        const inviteRoomCode = payload.data?.roomCode;
+        vibrate();
+        showToast(payload.notification?.body || '🎮 Game invite!', 'info', inviteRoomCode ? {
+          label: 'Join',
+          onClick: () => handleJoinRoom(inviteRoomCode)
+        } : undefined);
+      }
+    });
+
+    return () => unsubscribe();
+  }, [showToast]);
+
+  // Check for pending invites/requests on app open (runs once when player loads)
+  const hasCheckedPendingRef = useRef(false);
+  useEffect(() => {
+    if (!player?.id || hasCheckedPendingRef.current) return;
+    hasCheckedPendingRef.current = true;
+
+    const checkPendingNotifications = async () => {
+      // Check pending game invites
+      const invites = await FriendsService.getPendingInvites();
+      if (invites.length > 0) {
+        const latest = invites[0];
+        vibrate();
+        showToast(`🎮 ${latest.fromUsername} invited you to play!`, 'info', {
+          label: 'Join',
+          onClick: () => {
+            vibrate();
+            handleJoinRoom(latest.roomCode);
+          }
+        });
+      }
+
+      // Check pending friend requests
+      const requests = await FriendsService.getFriendRequests();
+      if (requests.length > 0) {
+        // Delay to avoid overlapping toasts
+        setTimeout(async () => {
+          vibrate();
+          if (requests.length === 1) {
+            const req = requests[0];
+            showToast(`👋 ${req.fromUsername} wants to be friends!`, 'info', {
+              label: 'View',
+              onClick: async () => {
+                vibrate();
+                const user = await FriendsService.getUserById(req.fromUserId);
+                if (user) setViewProfileUser(user);
+              }
+            });
+          } else {
+            showToast(`👋 You have ${requests.length} friend requests!`, 'info');
+          }
+        }, invites.length > 0 ? 4000 : 0);
+      }
+    };
+
+    // Small delay to let app settle after login
+    const timer = setTimeout(checkPendingNotifications, 1500);
+    return () => clearTimeout(timer);
+  }, [player?.id, showToast]);
 
 
   // --- XP & Stats Helpers ---
@@ -1511,14 +1641,6 @@ const App = () => {
         </div>
       )}
 
-      {/* Global Loading Screen with Smart Stages */}
-      {(isLoading || isInitialLoading) && (
-        <LoadingScreen
-          onGoHome={handleSafeReset}
-          stages={isInitialLoading ? loadingStages : undefined}
-        />
-      )}
-
       {/* Toast Notifications */}
       {toast && (
         <Toast
@@ -1705,6 +1827,15 @@ const App = () => {
         <UpdateNotification
           onUpdate={handleUpdateApp}
           onDismiss={handleDismissUpdate}
+        />
+      )}
+
+      {/* Profile Card Modal - Shown from notification View action */}
+      {viewProfileUser && (
+        <ProfileCardModal
+          user={viewProfileUser}
+          onClose={() => setViewProfileUser(null)}
+          onJoin={handleJoinRoom}
         />
       )}
 

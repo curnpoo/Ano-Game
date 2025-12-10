@@ -35,10 +35,10 @@ const roadmapData: RoadmapColumn[] = [
         emoji: '🔧',
         color: '#f59e0b',
         tasks: [
-            { id: 'w1', type: 'FIX', title: 'Remove Landscape mode', description: 'Enforcing portrait-only orientation' },
-            { id: 'w2', type: 'FEAT', title: 'Add zooming to drawing canvas', description: 'Pinch-to-zoom with iOS-native feel' },
-            { id: 't4', type: 'ADD', title: 'Profile picture loading state', description: 'Universal loading indicator instead of default photo' },
-            { id: 't3', type: 'FIX', title: 'Level 0 bug', description: 'Older accounts showing Level 0 in lobby' },
+            { id: 'w1', type: 'FIX', title: 'Remove Landscape mode', description: '[App.tsx, manifest.json] Lock app to portrait-only orientation, prevent rotation on all screens' },
+            { id: 'w2', type: 'FEAT', title: 'Add zooming to drawing canvas', description: '[DrawingScreen.tsx, DrawingCanvas component] Add pinch-to-zoom gesture with iOS-native spring physics, prevent drawing during zoom' },
+            { id: 't4', type: 'ADD', title: 'Profile picture loading state', description: '[AvatarDisplay component] Show universal loading spinner instead of default avatar when fetching profile pictures across all screens' },
+            { id: 't3', type: 'FIX', title: 'Level 0 bug', description: '[LobbyScreen.tsx, usePlayerSession] Older accounts display Level 0 - sync XP from Firebase to fix level calculation' },
         ]
     },
     {
@@ -47,9 +47,9 @@ const roadmapData: RoadmapColumn[] = [
         emoji: '📅',
         color: '#eab308',
         tasks: [
-            { id: 't1', type: 'FEAT', title: 'Add invites section', description: 'Shows invites from friends, clears after 5 hours, allows late acceptance' },
-            { id: 't2', type: 'FIX', title: 'Loading screen transition', description: 'Show all green checks → 300ms delay → smooth fade with preloaded screen' },
-            { id: 't5', type: 'FEAT', title: 'Friend request popups', description: 'In-game and out-of-app notifications for friend requests' },
+            { id: 't1', type: 'FEAT', title: 'Add invites section', description: '[HomeScreen.tsx, new InvitesPanel component] Add section showing game invites from friends, auto-clear after 5 hours, allow late join to active games' },
+            { id: 't2', type: 'FIX', title: 'Loading screen transition', description: '[LoadingScreen.tsx, useLoadingProgress hook] After all checks complete, add 300ms delay then smooth fade transition to preloaded HomeScreen' },
+            { id: 't5', type: 'FEAT', title: 'Friend request popups', description: '[NotificationSystem, FriendsScreen.tsx] Show in-app toast notifications and push notifications when receiving friend requests' },
         ]
     },
     {
@@ -58,13 +58,13 @@ const roadmapData: RoadmapColumn[] = [
         emoji: '📆',
         color: '#3b82f6',
         tasks: [
-            { id: 'tm1', type: 'FIX', title: 'Match history accuracy', description: 'Correct game count, dropdown for each round showing winner\'s drawing' },
-            { id: 'tm2', type: 'FIX', title: 'Empty game join prevention', description: 'Close out empty games, gray out "left" games with "rejoin" option' },
-            { id: 'tm3', type: 'FIX', title: 'Timer end screen flow', description: 'Controls should stay visible, blurred background when clicking ready' },
-            { id: 'tm4', type: 'FIX', title: 'Home from results = left game', description: 'Count as "left game", no rejoin button on homescreen' },
-            { id: 'tm5', type: 'REFACTOR', title: 'Host starts while player in menu', description: 'Save avatar edits, show idle state, in-app and external notifications' },
-            { id: 'tm6', type: 'FIX', title: 'Fix sabotage mechanic', description: 'Entire sabotage mechanic is broken and needs to be fixed' },
-            { id: 'tm7', type: 'FIX', title: 'Player card online status', description: 'Show correct online status throughout interface, accurate game info, clear status for offline players and closed games' },
+            { id: 'tm1', type: 'FIX', title: 'Match history accuracy', description: '[ProfileScreen.tsx, MatchHistory component] Fix incorrect game count, add dropdown per round showing winner\'s drawing' },
+            { id: 'tm2', type: 'FIX', title: 'Empty game join prevention', description: '[RoomSelectionScreen.tsx, GameService] Auto-close empty games in Firebase, gray out "left" games in room list with rejoin option' },
+            { id: 'tm3', type: 'FIX', title: 'Timer end screen flow', description: '[DrawingScreen.tsx, timer end state] Keep toolbar visible when timer ends, add blurred overlay when player clicks ready button' },
+            { id: 'tm4', type: 'FIX', title: 'Home from results = left game', description: '[FinalResultsScreen.tsx, HomeScreen.tsx] Clicking home marks player as "left game", remove rejoin button from HomeScreen current game section' },
+            { id: 'tm5', type: 'REFACTOR', title: 'Host starts while player in menu', description: '[AvatarEditorScreen.tsx, LobbyScreen.tsx] Auto-save avatar edits on game start, show idle overlay, send push notification if in other screen' },
+            { id: 'tm6', type: 'FIX', title: 'Fix sabotage mechanic', description: '[DrawingScreen.tsx, VotingScreen.tsx, GameService] Entire sabotage game mode is broken - fix saboteur assignment, voting logic, and reveal flow' },
+            { id: 'tm7', type: 'FIX', title: 'Player card online status', description: '[FriendsScreen.tsx, LobbyScreen.tsx, PlayerCard component] Cards show everyone online incorrectly - fix presence system, show accurate game status, clear status when offline or game closes' },
         ]
     },
     {
@@ -73,10 +73,10 @@ const roadmapData: RoadmapColumn[] = [
         emoji: '🔮',
         color: '#8b5cf6',
         tasks: [
-            { id: 'l1', type: 'FEAT', title: 'Replay mode', description: 'Watch strokes appear in playback' },
-            { id: 'l2', type: 'FEAT', title: 'Waiting room minigame', description: 'Activities while waiting for next round' },
-            { id: 'l3', type: 'FEAT', title: 'NEW GAME MODES!', description: 'Multiple game modes coming soon' },
-            { id: 'l4', type: 'FEAT', title: 'Dark and Light mode', description: 'Cohesive aesthetic design with theme options' },
+            { id: 'l1', type: 'FEAT', title: 'Replay mode', description: '[FinalResultsScreen.tsx, new ReplayPlayer component] Add playback feature that animates strokes appearing in real-time for each drawing' },
+            { id: 'l2', type: 'FEAT', title: 'Waiting room minigame', description: '[LobbyScreen.tsx, new WaitingMinigame component] Add interactive activities while waiting for other players between rounds' },
+            { id: 'l3', type: 'FEAT', title: 'NEW GAME MODES!', description: '[GameService, RoomSelectionScreen.tsx] Add new game mode options beyond standard drawing guessing' },
+            { id: 'l4', type: 'FEAT', title: 'Dark and Light mode', description: '[ThemeProvider, all screens] Add theme toggle with cohesive dark/light color schemes across entire app' },
         ]
     },
     {
@@ -85,10 +85,11 @@ const roadmapData: RoadmapColumn[] = [
         emoji: '📋',
         color: '#ec4899',
         tasks: [
-            { id: 'b1', type: 'FIX', title: 'Polish animations for iOS native feel', description: 'Research Apple HIG, implement spring physics, plan for future iOS app' },
-            { id: 'b2', type: 'FIX', title: 'Smooth transitions overhaul', description: 'Make all screen transitions butter-smooth' },
-            { id: 'b3', type: 'REFACTOR', title: 'Performance optimization', description: 'Fix lag on slow connections, optimize for all users' },
-            { id: 'b4', type: 'REFACTOR', title: 'Universal Button Components', description: 'Create reusable GlassButton, IconButton, ActionButton components for consistent styling' },
+            { id: 'b1', type: 'FIX', title: 'Polish animations for iOS native feel', description: '[All animation files, ScreenTransition.tsx] Apply Apple HIG spring physics, consistent easing curves, and gesture feedback across all interactions' },
+            { id: 'b2', type: 'FIX', title: 'Smooth transitions overhaul', description: '[App.tsx, ScreenTransition.tsx, transitions.css] Optimize all screen-to-screen transitions for 60fps with preloading and GPU acceleration' },
+            { id: 'b3', type: 'REFACTOR', title: 'Performance optimization', description: '[GameService, Firebase listeners, React components] Reduce network calls, optimize re-renders, fix lag on slow connections' },
+            { id: 'b4', type: 'REFACTOR', title: 'Universal Button Components', description: '[src/components/common/] Create reusable GlassButton, IconButton, ActionButton components with consistent styling and animations' },
+            { id: 'b5', type: 'FIX', title: 'iPhone haptic feedback', description: '[utils/haptics.ts] Haptic feedback only works on Android - investigate and implement iOS-compatible vibration using Web Vibration API or native bridges' },
         ]
     }
 ];

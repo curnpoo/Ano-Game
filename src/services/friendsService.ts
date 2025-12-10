@@ -138,42 +138,74 @@ export const FriendsService = {
         return friends;
     },
 
-    // Subscribe to friends list updates
+    // Subscribe to friends list updates (real-time, including bidirectional removals)
     subscribeToFriends(onUpdate: (friends: UserAccount[]) => void): () => void {
         const currentUser = AuthService.getCurrentUser();
-        if (!currentUser || !currentUser.friends || currentUser.friends.length === 0) {
+        if (!currentUser) {
             onUpdate([]);
             return () => { };
         }
 
         const friendsMap = new Map<string, UserAccount>();
-        const listeners: (() => void)[] = [];
+        const friendListeners: (() => void)[] = [];
+        let currentFriendIds: string[] = [];
 
         // Helper to trigger update
         const triggerUpdate = () => {
-            const friends = Array.from(friendsMap.values());
+            // Filter the map to only include current friends
+            const friends = currentFriendIds
+                .map(id => friendsMap.get(id))
+                .filter((f): f is UserAccount => f !== undefined);
             onUpdate(friends);
         };
 
-        // Set up listeners for each friend
-        currentUser.friends.forEach(friendId => {
-            const friendRef = ref(database, `${USERS_PATH}/${friendId}`);
+        // Helper to set up listeners for friend IDs
+        const setupFriendListeners = (friendIds: string[]) => {
+            // Unsubscribe from old listeners
+            friendListeners.forEach(unsub => unsub());
+            friendListeners.length = 0;
 
-            const unsubscribe = onValue(friendRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    friendsMap.set(friendId, { ...snapshot.val(), id: friendId });
-                } else {
-                    friendsMap.delete(friendId);
+            // Clear map entries for removed friends
+            for (const id of friendsMap.keys()) {
+                if (!friendIds.includes(id)) {
+                    friendsMap.delete(id);
                 }
-                triggerUpdate();
+            }
+
+            // Set up new listeners
+            friendIds.forEach(friendId => {
+                const friendRef = ref(database, `${USERS_PATH}/${friendId}`);
+
+                const unsubscribe = onValue(friendRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        friendsMap.set(friendId, { ...snapshot.val(), id: friendId });
+                    } else {
+                        friendsMap.delete(friendId);
+                    }
+                    triggerUpdate();
+                });
+
+                friendListeners.push(unsubscribe);
             });
 
-            listeners.push(unsubscribe);
+            // Trigger update immediately for empty lists
+            if (friendIds.length === 0) {
+                triggerUpdate();
+            }
+        };
+
+        // Subscribe to the current user's friends array in Firebase
+        const userRef = ref(database, `${USERS_PATH}/${currentUser.id}/friends`);
+        const userUnsubscribe = onValue(userRef, (snapshot) => {
+            const newFriendIds: string[] = snapshot.exists() ? snapshot.val() : [];
+            currentFriendIds = newFriendIds;
+            setupFriendListeners(newFriendIds);
         });
 
         // Return unsubscribe function
         return () => {
-            listeners.forEach(off => off());
+            userUnsubscribe();
+            friendListeners.forEach(off => off());
         };
     },
 
@@ -491,7 +523,7 @@ export const FriendsService = {
             snapshot.forEach((child) => {
                 const req = child.val() as FriendRequest;
                 if (req.status === 'pending') {
-                    requests.push(req);
+                    requests.push({ ...req, id: child.key! });
                 }
             });
 
@@ -657,5 +689,43 @@ export const FriendsService = {
             console.error('Error accepting friend request from user:', error);
             return { success: false, error: 'Failed' };
         }
+    },
+
+    // Subscribe to pending game invites (real-time updates)
+    subscribeToInvites(onUpdate: (invites: GameInvite[]) => void): () => void {
+        const currentUser = AuthService.getCurrentUser();
+        if (!currentUser) {
+            onUpdate([]);
+            return () => { };
+        }
+
+        const invitesRef = ref(database, INVITES_PATH);
+
+        const unsubscribe = onValue(invitesRef, (snapshot) => {
+            if (!snapshot.exists()) {
+                onUpdate([]);
+                return;
+            }
+
+            const invites: GameInvite[] = [];
+            const now = Date.now();
+            const INVITE_EXPIRY = 5 * 60 * 1000; // 5 minutes
+
+            snapshot.forEach((child) => {
+                const invite = child.val() as GameInvite;
+                // Only include pending invites TO the current user that haven't expired
+                if (invite.toUserId === currentUser.id &&
+                    invite.status === 'pending' &&
+                    now - invite.sentAt < INVITE_EXPIRY) {
+                    invites.push({ ...invite, id: child.key! });
+                }
+            });
+
+            // Sort by most recent first
+            invites.sort((a, b) => b.sentAt - a.sentAt);
+            onUpdate(invites);
+        });
+
+        return unsubscribe;
     }
 };

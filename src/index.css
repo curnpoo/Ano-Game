@@ -769,3 +769,74 @@ input,
   mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
   -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
 }
+
+/* ========================================
+   LANDSCAPE ORIENTATION BLOCKER
+   Forces portrait mode on mobile devices
+   ======================================== */
+
+/* The rotate overlay - hidden by default */
+.landscape-blocker {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+  z-index: 999999;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 1.5rem;
+  color: white;
+  text-align: center;
+  padding: 2rem;
+}
+
+.landscape-blocker-icon {
+  font-size: 4rem;
+  animation: rotate-phone 2s ease-in-out infinite;
+}
+
+@keyframes rotate-phone {
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(-90deg);
+  }
+
+  50% {
+    transform: rotate(-90deg);
+  }
+
+  75% {
+    transform: rotate(0deg);
+  }
+}
+
+.landscape-blocker-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  max-width: 280px;
+}
+
+.landscape-blocker-subtext {
+  font-size: 1rem;
+  opacity: 0.7;
+}
+
+/* Show the blocker ONLY in landscape on mobile-sized screens */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+  .landscape-blocker {
+    display: flex !important;
+  }
+
+  #root {
+    display: none !important;
+  }
+}
