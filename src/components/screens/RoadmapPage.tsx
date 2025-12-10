@@ -64,6 +64,7 @@ const roadmapData: RoadmapColumn[] = [
             { id: 'tm4', type: 'FIX', title: 'Home from results = left game', description: 'Count as "left game", no rejoin button on homescreen' },
             { id: 'tm5', type: 'REFACTOR', title: 'Host starts while player in menu', description: 'Save avatar edits, show idle state, in-app and external notifications' },
             { id: 'tm6', type: 'FIX', title: 'Fix sabotage mechanic', description: 'Entire sabotage mechanic is broken and needs to be fixed' },
+            { id: 'tm7', type: 'FIX', title: 'Player card online status', description: 'Show correct online status throughout interface, accurate game info, clear status for offline players and closed games' },
         ]
     },
     {
