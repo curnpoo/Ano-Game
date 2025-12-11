@@ -839,16 +839,22 @@ const App = () => {
   }, []);
 
   // Check for URL-based join or invite logic on mount
+  // Check for URL-based join or invite logic on mount
   useEffect(() => {
-    // Check for ?invite=CODE or ?join=CODE (legacy/direct link)
     const checkInviteParam = async () => {
+      // Params are captured at mount by entryIntent, but we check again here
       const params = new URLSearchParams(window.location.search);
-      // Treat 'join' as 'invite' to show modal first (User preference: "I think I wanted to see the modal first")
-      // This also fixes the issue if the Old Service Worker sends ?join=
       const inviteCode = params.get('invite') || params.get('join');
       
-      if (inviteCode && player) {
-        console.log('[App] Found invite/join param:', inviteCode);
+      console.log('[App] Checking invite param:', inviteCode, 'Player loaded:', !!player);
+
+      if (inviteCode) {
+        if (!player) {
+           console.log('[App] Player not ready, deferring invite processing...');
+           return;
+        }
+
+        console.log('[App] Found invite/join param and player ready:', inviteCode);
         
         // Show the modal card!
         const placeholderInvite: GameInvite = {
@@ -862,17 +868,13 @@ const App = () => {
         };
         setActiveInvite(placeholderInvite);
 
-        // Clean URL without refresh AFTER processing
-        // Delay slightly to ensure other hooks (like checkPendingNotifications) can see the param?
-        // Actually, we should set a Ref that we correspond to "joining via url"
-        // But cleaning it here is cleaner for UI.
+        // Clean URL
         window.history.replaceState({}, '', window.location.pathname);
       }
     };
     
-    if (player) {
-      checkInviteParam();
-    }
+    // Run whenever player loads OR if we just mounted
+    checkInviteParam();
   }, [player]);
 
   // Use the in-app notifications hook (keeps local storage sync'd but toasts are silenced)
