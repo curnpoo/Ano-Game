@@ -292,13 +292,21 @@ export const Toast: React.FC<ToastProps> = ({ messages, onClose, duration = 3000
                         </div>
                     )}
 
-                    {/* Subtle gradient accent at bottom */}
+                    {/* Timer progress bar - shrinks inward as time runs out */}
                     <div
                         className="h-[2px]"
                         style={{
-                            background: `linear-gradient(90deg, transparent, ${primaryConfig.accentColor}, transparent)`
+                            background: `linear-gradient(90deg, transparent, ${primaryConfig.accentColor}, transparent)`,
+                            transformOrigin: 'center',
+                            animation: `shrinkToCenter ${duration}ms linear forwards`
                         }}
                     />
+                    <style>{`
+                        @keyframes shrinkToCenter {
+                            from { transform: scaleX(1); opacity: 1; }
+                            to { transform: scaleX(0); opacity: 0.5; }
+                        }
+                    `}</style>
                 </div>
             </div>
         </div>

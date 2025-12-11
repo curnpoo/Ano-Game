@@ -834,10 +834,18 @@ const App = () => {
   }, [showToast]);
 
   // Check for pending invites/requests on app open (runs once when player loads)
+  // Skip if user is joining via URL (they clicked a push notification)
   const hasCheckedPendingRef = useRef(false);
   useEffect(() => {
     if (!player?.id || hasCheckedPendingRef.current) return;
     hasCheckedPendingRef.current = true;
+
+    // If user is joining via URL (from push notification), skip pending notification check
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('join')) {
+      console.log('Skipping pending notifications - user joining via URL');
+      return;
+    }
 
     const checkPendingNotifications = async () => {
       // Check pending game invites
