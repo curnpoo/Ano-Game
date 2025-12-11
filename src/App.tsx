@@ -2016,6 +2016,10 @@ const App = () => {
         />
       )}
 
+      {/* Version Indicator */}
+      <div className="fixed bottom-1 right-1 text-[10px] text-white/20 pointer-events-none z-[1000] font-mono">
+        v0.8
+      </div>
     </div>
   );
 }

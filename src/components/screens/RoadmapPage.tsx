@@ -75,6 +75,7 @@ const roadmapData: RoadmapColumn[] = [
             { id: 'tm8', type: 'FIX', title: 'Fix "Money Earned" stat', description: '[FinalResultsScreen.tsx, UserService] Ensure totalCurrencyEarned is correctly tracked and incremented' },
             { id: 'tm9', type: 'FEAT', title: 'Conditional Idle Refresh', description: '[App.tsx] Ensure auto-refresh only triggers when user is on homescreen and truly idle' },
             { id: 'tm10', type: 'FIX', title: 'Verify Database Cleanup', description: 'Run and verify the database cleanup script on production data' },
+            { id: 'tm11', type: 'FEAT', title: 'Finish Player Progression', description: 'Complete the player leveling system, ensure XP is consistently tracked, and finalize progression logic.' },
         ]
     },
     {
@@ -227,7 +228,7 @@ export const RoadmapPage: React.FC = () => {
 
             {/* Footer */}
             <footer className="roadmap-footer">
-                <p>Last updated: December 10, 2025</p>
+                <p>Last updated: December 11, 2025</p>
                 <p className="footer-note">Built with ❤️ by Curren</p>
             </footer>
         </div>
