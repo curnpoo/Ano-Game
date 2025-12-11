@@ -135,78 +135,91 @@ export const Toast: React.FC<ToastProps> = ({ messages, onClose, duration = 3000
                 >
                     {/* Single Message Layout */}
                     {isSingleMessage && (
-                        <div className="flex items-start gap-3 p-4">
-                            {/* Icon */}
-                            <div
-                                className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold"
-                                style={{
-                                    background: primaryConfig.iconBg,
-                                    color: primaryConfig.accentColor,
-                                    boxShadow: `inset 0 1px 0 rgba(255, 255, 255, 0.1)`
+                        <div className="flex">
+                            {/* Left dismiss pill */}
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDismiss();
+                                }}
+                                className="flex-shrink-0 w-8 flex items-center justify-center transition-all active:bg-white/10 rounded-l-[20px]"
+                                style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+                            >
+                                <div 
+                                    className="w-1 h-8 rounded-full"
+                                    style={{ background: 'rgba(255, 255, 255, 0.2)' }}
+                                />
+                            </button>
+
+                            {/* Main content - clickable for action */}
+                            <div 
+                                className={`flex-1 flex items-start gap-3 p-4 pl-2 ${messages[0].action ? 'cursor-pointer active:bg-white/5 transition-colors' : ''}`}
+                                onClick={() => {
+                                    if (messages[0].action) {
+                                        messages[0].action.onClick();
+                                        handleDismiss();
+                                    }
                                 }}
                             >
-                                {messages[0].type === 'success' ? (
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                ) : (
-                                    <span>{primaryConfig.icon}</span>
-                                )}
-                            </div>
-
-                            {/* Content */}
-                            <div className="flex-1 min-w-0 pt-0.5">
-                                <p
-                                    className="text-[15px] font-medium leading-snug"
+                                {/* Icon */}
+                                <div
+                                    className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold"
                                     style={{
-                                        color: 'rgba(255, 255, 255, 0.95)',
-                                        letterSpacing: '-0.01em'
+                                        background: primaryConfig.iconBg,
+                                        color: primaryConfig.accentColor,
+                                        boxShadow: `inset 0 1px 0 rgba(255, 255, 255, 0.1)`
                                     }}
                                 >
-                                    {messages[0].message}
-                                </p>
+                                    {messages[0].type === 'success' ? (
+                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                                        </svg>
+                                    ) : (
+                                        <span>{primaryConfig.icon}</span>
+                                    )}
+                                </div>
 
-                                {/* Action Button */}
-                                {messages[0].action && (
-                                    <button
-                                        onClick={() => {
-                                            messages[0].action!.onClick();
-                                            handleDismiss();
-                                        }}
-                                        className="mt-2 px-4 py-1.5 rounded-full text-[13px] font-semibold transition-all active:scale-95"
+                                {/* Content */}
+                                <div className="flex-1 min-w-0 pt-0.5">
+                                    <p
+                                        className="text-[15px] font-medium leading-snug"
                                         style={{
-                                            background: primaryConfig.accentColor,
-                                            color: 'white',
-                                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+                                            color: 'rgba(255, 255, 255, 0.95)',
+                                            letterSpacing: '-0.01em'
                                         }}
                                     >
-                                        {messages[0].action.label}
-                                    </button>
-                                )}
-                            </div>
+                                        {messages[0].message}
+                                    </p>
 
-                            {/* Dismiss Button */}
-                            <button
-                                onClick={handleDismiss}
-                                className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90"
-                                style={{
-                                    background: 'rgba(255, 255, 255, 0.1)',
-                                    color: 'rgba(255, 255, 255, 0.5)'
-                                }}
-                            >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
+                                    {/* Tap hint for actionable toasts */}
+                                    {messages[0].action && (
+                                        <p className="mt-1 text-xs text-white/40">
+                                            Tap to {messages[0].action.label.toLowerCase()} →
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     )}
 
-                    {/* Grouped Messages Layout */}
                     {!isSingleMessage && (
-                        <div className="p-4">
-                            {/* Header with dismiss */}
-                            <div className="flex items-center justify-between mb-3">
-                                <div className="flex items-center gap-2">
+                        <div className="flex">
+                            {/* Left dismiss pill */}
+                            <button
+                                onClick={handleDismiss}
+                                className="flex-shrink-0 w-8 flex items-center justify-center transition-all active:bg-white/10 rounded-l-[20px]"
+                                style={{ background: 'rgba(255, 255, 255, 0.03)' }}
+                            >
+                                <div 
+                                    className="w-1 h-10 rounded-full"
+                                    style={{ background: 'rgba(255, 255, 255, 0.2)' }}
+                                />
+                            </button>
+
+                            {/* Main content */}
+                            <div className="flex-1 p-4 pl-2">
+                                {/* Header */}
+                                <div className="flex items-center gap-2 mb-3">
                                     <div
                                         className="w-6 h-6 rounded-lg flex items-center justify-center text-sm"
                                         style={{
@@ -220,19 +233,6 @@ export const Toast: React.FC<ToastProps> = ({ messages, onClose, duration = 3000
                                         Notifications
                                     </span>
                                 </div>
-                                <button
-                                    onClick={handleDismiss}
-                                    className="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90"
-                                    style={{
-                                        background: 'rgba(255, 255, 255, 0.1)',
-                                        color: 'rgba(255, 255, 255, 0.5)'
-                                    }}
-                                >
-                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            </div>
 
                             {/* Stacked Messages */}
                             <div className="space-y-2">
@@ -241,9 +241,15 @@ export const Toast: React.FC<ToastProps> = ({ messages, onClose, duration = 3000
                                     return (
                                         <div
                                             key={msg.id}
-                                            className="flex items-center gap-3 p-2.5 rounded-xl"
+                                            className={`flex items-center gap-3 p-2.5 rounded-xl ${msg.action ? 'cursor-pointer active:bg-white/10 transition-colors' : ''}`}
                                             style={{
                                                 background: 'rgba(255, 255, 255, 0.05)'
+                                            }}
+                                            onClick={() => {
+                                                if (msg.action) {
+                                                    msg.action.onClick();
+                                                    handleDismiss();
+                                                }
                                             }}
                                         >
                                             {/* Small type indicator */}
@@ -257,33 +263,31 @@ export const Toast: React.FC<ToastProps> = ({ messages, onClose, duration = 3000
                                                 {getSmallIcon(msg.type)}
                                             </div>
 
-                                            {/* Message */}
-                                            <p
-                                                className="flex-1 text-[14px] font-medium leading-tight"
-                                                style={{ color: 'rgba(255, 255, 255, 0.9)' }}
-                                            >
-                                                {msg.message}
-                                            </p>
-
-                                            {/* Inline action if this specific message has one */}
-                                            {msg.action && (
-                                                <button
-                                                    onClick={() => {
-                                                        msg.action!.onClick();
-                                                        handleDismiss();
-                                                    }}
-                                                    className="flex-shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide transition-all active:scale-95"
-                                                    style={{
-                                                        background: msgConfig.accentColor,
-                                                        color: 'white'
-                                                    }}
+                                            {/* Message + tap hint */}
+                                            <div className="flex-1 min-w-0">
+                                                <p
+                                                    className="text-[14px] font-medium leading-tight"
+                                                    style={{ color: 'rgba(255, 255, 255, 0.9)' }}
                                                 >
-                                                    {msg.action.label}
-                                                </button>
+                                                    {msg.message}
+                                                </p>
+                                                {msg.action && (
+                                                    <p className="text-[11px] text-white/40 mt-0.5">
+                                                        Tap to {msg.action.label.toLowerCase()}
+                                                    </p>
+                                                )}
+                                            </div>
+
+                                            {/* Arrow indicator for actionable items */}
+                                            {msg.action && (
+                                                <svg className="w-4 h-4 text-white/30 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                                                </svg>
                                             )}
                                         </div>
                                     );
                                 })}
+                            </div>
                             </div>
                         </div>
                     )}

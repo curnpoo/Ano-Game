@@ -25,35 +25,49 @@ const getMessagingInstance = () => {
 // Request permission and get FCM token
 export const requestPushPermission = async (): Promise<string | null> => {
     try {
+        console.log('[Push] Requesting notification permission...');
         const permission = await Notification.requestPermission();
+        console.log('[Push] Permission result:', permission);
+        
         if (permission !== 'granted') {
-            console.log('Notification permission denied');
+            console.log('[Push] Notification permission denied');
             return null;
         }
 
-        // Register service worker
-        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-        console.log('Service Worker registered:', registration);
+        console.log('[Push] Waiting for service worker...');
+        
+        // Wait for the PWA service worker to be ready (it includes FCM handling)
+        // Add timeout to prevent hanging
+        const swReady = navigator.serviceWorker.ready;
+        const timeout = new Promise<null>((_, reject) => 
+            setTimeout(() => reject(new Error('Service worker timeout')), 10000)
+        );
+        
+        const registration = await Promise.race([swReady, timeout]) as ServiceWorkerRegistration;
+        console.log('[Push] Using PWA Service Worker for FCM:', registration);
 
         const messagingInstance = getMessagingInstance();
         if (!messagingInstance) {
-            console.warn('Messaging not available');
+            console.warn('[Push] Messaging not available');
             return null;
         }
 
-        // Get FCM token
+        console.log('[Push] Getting FCM token...');
+        // Get FCM token using the PWA service worker
         const token = await getToken(messagingInstance, {
             vapidKey: VAPID_KEY,
             serviceWorkerRegistration: registration
         });
 
-        console.log('FCM Token:', token);
+        console.log('[Push] FCM Token:', token);
         return token;
     } catch (error) {
-        console.error('Error getting FCM token:', error);
+        console.error('[Push] Error getting FCM token:', error);
         return null;
     }
 };
+
+
 
 // Store FCM token for a player
 export const storePushToken = async (playerId: string, token: string): Promise<void> => {

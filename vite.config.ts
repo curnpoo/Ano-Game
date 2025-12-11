@@ -15,31 +15,17 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
+      // Use custom source service worker with Firebase messaging
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       injectRegister: 'auto',
       devOptions: {
-        enabled: true, // Enable in dev mode for testing
+        enabled: true,
+        type: 'classic' // Use classic mode to support importScripts()
       },
-      workbox: {
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        // Skip waiting - activate new service worker immediately when update is found
-        skipWaiting: false,
-        clientsClaim: true,
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'google-fonts-cache',
-              expiration: {
-                maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365 // 1 year
-              },
-              cacheableResponse: {
-                statuses: [0, 200]
-              }
-            }
-          }
-        ]
       },
       manifest: {
         name: 'ANO Draw',
@@ -61,3 +47,4 @@ export default defineConfig({
     })
   ],
 })
+
