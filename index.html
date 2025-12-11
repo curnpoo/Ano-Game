@@ -1,40 +1,59 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    >
+    <meta
+      name="description"
+      content="The party game where you fill in the blank. Complete the scene, annotate photos, and vote for the funniest masterpiece. Instant, mobile-first chaos."
+    />
+    <meta
+      name="keywords"
+      content="fill in the blank, party game, online drawing game, play with friends, ano game, scribble game, draw with friends, mobile canvas, social drawing, io games, browser party game, casual game, multiplayer drawing"
+    />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href="https://anogame.xyz/" />
 
-<head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/png" href="/favicon.png" />
-  <meta name="viewport"
-    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta property="og:title" content="ANO: The Party Drawing Game" />
-  <meta property="og:description"
-    content="A fun, chaotic party drawing game where you annotate photos and vote for the best! Created by Bored at Work." />
-  <meta property="og:image" content="/og-image.png" />
-  <meta property="og:type" content="website" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <link rel="manifest" href="/manifest.json" />
-  <link rel="apple-touch-icon" href="/pwa-icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="theme-color" content="#000000">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Comic+Neue:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=VT323&display=swap"
-    rel="stylesheet">
-  <title>ANO: The Party Drawing Game</title>
-</head>
+    <meta property="og:title" content="ANO: The Fill-in-the-Blank Party Game" />
+    <meta
+      property="og:description"
+      content="The party game where you fill in the blank. Complete the scene and vote for the funniest masterpiece."
+    />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/pwa-icon.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    >
+    <meta name="theme-color" content="#000000">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Comic+Neue:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=VT323&display=swap"
+      rel="stylesheet"
+    >
+    <title>ANO: The Party Drawing Game</title>
+  </head>
 
-<body>
-  <!-- Landscape orientation blocker - shown via CSS media query -->
-  <div class="landscape-blocker">
-    <div class="landscape-blocker-icon">📱</div>
-    <div class="landscape-blocker-text">Please rotate your device</div>
-    <div class="landscape-blocker-subtext">ANO works best in portrait mode</div>
-  </div>
-  
-  <div id="root"></div>
-  <script type="module" src="/src/main.tsx"></script>
-</body>
+  <body>
+    <!-- Landscape orientation blocker - shown via CSS media query -->
+    <div class="landscape-blocker">
+      <div class="landscape-blocker-icon">📱</div>
+      <div class="landscape-blocker-text">Please rotate your device</div>
+      <div class="landscape-blocker-subtext">
+        ANO works best in portrait mode
+      </div>
+    </div>
 
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 </html>
