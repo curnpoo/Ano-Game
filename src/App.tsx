@@ -908,9 +908,20 @@ const App = () => {
              });
            }
         }
-        // Fallback for generic "join" clicks
+        // Fallback for generic "join" clicks or legacy notifications
         else if (data?.roomCode) {
-           handleJoinRoom(data.roomCode);
+           console.log('[App] Fallback notification click - treating as invite:', data.roomCode);
+           // Do NOT auto-join. Show modal instead.
+           const fallbackInvite: GameInvite = {
+              id: data.id || 'fallback-invite',
+              fromUserId: 'unknown',
+              fromUsername: 'Game Invitation',
+              toUserId: player?.id || '',
+              roomCode: data.roomCode,
+              sentAt: Date.now(),
+              status: 'pending'
+           };
+           setActiveInvite(fallbackInvite);
         }
       }
     };
