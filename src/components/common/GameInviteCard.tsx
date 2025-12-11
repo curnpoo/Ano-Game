@@ -17,7 +17,7 @@ export const GameInviteCard: React.FC<GameInviteCardProps> = ({ invite, onJoin, 
   }, []);
 
   return (
-    <div className={`fixed inset-0 z-[1000] flex items-center justify-center p-5 transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
+    <div className={`fixed inset-0 z-[3000] flex items-center justify-center p-5 transition-opacity duration-300 ${isVisible ? 'opacity-100' : 'opacity-0'}`}>
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onDecline} />
       

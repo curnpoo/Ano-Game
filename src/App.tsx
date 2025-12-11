@@ -348,7 +348,13 @@ const App = () => {
   }, [room?.roundNumber]);
 
   // Auto-join effect
+  // Auto-join effect
   useEffect(() => {
+    // If we have an entry intent (invite/join url), DO NOT auto-join.
+    // Ideally this shouldn't even start because attemptPendingJoin handles logic, but this effect is a safety net?
+    // Let's block it too.
+    if (entryIntent.current) return;
+
     if (player && pendingRoomCode && !isLoading && !roomCode) {
       setCurrentScreen('joining-game');
       const timer = setTimeout(() => {
@@ -2017,7 +2023,7 @@ const App = () => {
       )}
 
       {/* Version Indicator */}
-      <div className="fixed bottom-1 right-1 text-[10px] text-white/20 pointer-events-none z-[1000] font-mono">
+      <div className="fixed bottom-8 right-6 text-[10px] text-white/20 pointer-events-none z-[1000] font-mono">
         v0.8
       </div>
     </div>
