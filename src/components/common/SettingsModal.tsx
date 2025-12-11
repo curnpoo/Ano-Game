@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import type { Player } from '../../types';
-import { requestPushPermission, storePushToken, isPushSupported } from '../../services/pushNotifications';
+import { requestPushPermission, storePushToken, isPushSupported, deletePushToken } from '../../services/pushNotifications';
 import { AuthService } from '../../services/auth';
 import { StorageService } from '../../services/storage';
 import './transitions.css';
@@ -131,11 +131,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         }
     };
 
-    const toggleNotifications = () => {
+    const toggleNotifications = async () => {
         vibrate();
         if (notificationsEnabled) {
+            // Delete token from Firebase and unregister from FCM
+            await deletePushToken(player.id);
             localStorage.setItem('notificationsDisabled', 'true');
             setNotificationsEnabled(false);
+            console.log('Notifications disabled, token deleted');
         } else {
             localStorage.setItem('notificationsDisabled', 'false');
             requestNotifications();

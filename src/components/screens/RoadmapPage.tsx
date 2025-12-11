@@ -29,6 +29,10 @@ const doneItems: RoadmapTask[] = [
     { id: 'd7', type: 'FIX', title: 'Remove Landscape mode', description: 'App locked to portrait-only orientation with landscape blocker overlay', completedDate: 'Dec 10' },
     { id: 'd8', type: 'ADD', title: 'Profile picture loading state', description: 'Universal loading spinner shown when fetching profile pictures', completedDate: 'Dec 10' },
     { id: 'd9', type: 'FIX', title: 'Level 0 bug', description: 'XP synced from Firebase to fix level calculation for older accounts', completedDate: 'Dec 10' },
+    { id: 'd10', type: 'FEAT', title: 'Pinch-to-zoom on drawing canvas', description: 'iOS-native spring physics, two-finger pan, drawing disabled during gestures', completedDate: 'Dec 10' },
+    { id: 'd11', type: 'FEAT', title: 'iOS-style toast notifications', description: 'Redesigned toasts with glassmorphism, spring animations, and action buttons', completedDate: 'Dec 10' },
+    { id: 'd12', type: 'FEAT', title: 'Grouped notifications', description: 'Multiple notifications batch together with dynamic sizing', completedDate: 'Dec 10' },
+    { id: 'd13', type: 'ADD', title: 'Database cleanup script', description: 'Script to clear stale rooms, drawings, presence, invites, and friendRequests', completedDate: 'Dec 10' },
 ];
 
 const roadmapData: RoadmapColumn[] = [
@@ -38,9 +42,7 @@ const roadmapData: RoadmapColumn[] = [
         emoji: '🔧',
         color: '#f59e0b',
         tasks: [
-            { id: 'w1', type: 'FEAT', title: 'Add zooming to drawing canvas', description: '[DrawingScreen.tsx, useZoomPan hook] Pinch-to-zoom with iOS-native spring physics, drawing disabled during zoom' },
             { id: 'w2', type: 'FIX', title: 'Loading screen transition', description: '[LoadingScreen.tsx, useLoadingProgress hook] Smooth transition with 500ms delay after all checks complete' },
-            { id: 'w3', type: 'FEAT', title: 'In-app friend request notifications', description: '[useInAppNotifications hook, Toast.tsx] Real-time toast notifications when receiving friend requests' },
             { id: 'w4', type: 'FEAT', title: 'Push notifications for friend requests', description: '[FCM, NotificationService] Send push notifications when receiving friend requests while app is closed' },
         ]
     },

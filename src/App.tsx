@@ -225,6 +225,7 @@ const App = () => {
   // 3. Notifications
   const {
     toast,
+    toastDuration,
     showToast,
     showError,
     hideToast,
@@ -1644,9 +1645,8 @@ const App = () => {
       {/* Toast Notifications */}
       {toast && (
         <Toast
-          message={toast.message}
-          type={toast.type}
-          action={toast.action}
+          messages={toast.messages}
+          duration={toastDuration}
           onClose={hideToast}
         />
       )}

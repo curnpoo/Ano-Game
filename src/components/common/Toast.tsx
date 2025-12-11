@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import type { ToastMessage } from '../../types';
 
 interface ToastProps {
-    message: string;
-    type?: 'error' | 'success' | 'info';
+    messages: ToastMessage[];
     onClose: () => void;
     duration?: number;
-    action?: {
-        label: string;
-        onClick: () => void;
-    };
 }
 
-export const Toast: React.FC<ToastProps> = ({ message, type = 'error', onClose, duration = 3000, action }) => {
+export const Toast: React.FC<ToastProps> = ({ messages, onClose, duration = 3000 }) => {
     const [animationState, setAnimationState] = useState<'entering' | 'visible' | 'leaving'>('entering');
 
     useEffect(() => {
@@ -37,7 +33,14 @@ export const Toast: React.FC<ToastProps> = ({ message, type = 'error', onClose, 
         setTimeout(onClose, 400);
     };
 
-    const getTypeConfig = () => {
+    // Determine the primary type (error > info > success) for accent color
+    const getPrimaryType = (): 'error' | 'success' | 'info' => {
+        if (messages.some(m => m.type === 'error')) return 'error';
+        if (messages.some(m => m.type === 'info')) return 'info';
+        return 'success';
+    };
+
+    const getTypeConfig = (type: 'error' | 'success' | 'info') => {
         switch (type) {
             case 'error':
                 return {
@@ -66,7 +69,25 @@ export const Toast: React.FC<ToastProps> = ({ message, type = 'error', onClose, 
         }
     };
 
-    const config = getTypeConfig();
+    // Get small inline icon for each message type
+    const getSmallIcon = (type: 'error' | 'success' | 'info') => {
+        switch (type) {
+            case 'success':
+                return (
+                    <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                    </svg>
+                );
+            case 'error':
+                return <span className="text-sm">⚠️</span>;
+            case 'info':
+                return <span className="text-sm">ℹ️</span>;
+        }
+    };
+
+    const primaryType = getPrimaryType();
+    const primaryConfig = getTypeConfig(primaryType);
+    const isSingleMessage = messages.length === 1;
 
     // iOS-style spring animation
     const getTransform = () => {
@@ -112,76 +133,166 @@ export const Toast: React.FC<ToastProps> = ({ message, type = 'error', onClose, 
                         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)'
                     }}
                 >
-                    <div className="flex items-start gap-3 p-4">
-                        {/* Icon */}
-                        <div
-                            className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold"
-                            style={{
-                                background: config.iconBg,
-                                color: config.accentColor,
-                                boxShadow: `inset 0 1px 0 rgba(255, 255, 255, 0.1)`
-                            }}
-                        >
-                            {type === 'success' ? (
-                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
-                                </svg>
-                            ) : (
-                                <span>{config.icon}</span>
-                            )}
-                        </div>
-
-                        {/* Content */}
-                        <div className="flex-1 min-w-0 pt-0.5">
-                            <p
-                                className="text-[15px] font-medium leading-snug"
+                    {/* Single Message Layout */}
+                    {isSingleMessage && (
+                        <div className="flex items-start gap-3 p-4">
+                            {/* Icon */}
+                            <div
+                                className="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-lg font-bold"
                                 style={{
-                                    color: 'rgba(255, 255, 255, 0.95)',
-                                    letterSpacing: '-0.01em'
+                                    background: primaryConfig.iconBg,
+                                    color: primaryConfig.accentColor,
+                                    boxShadow: `inset 0 1px 0 rgba(255, 255, 255, 0.1)`
                                 }}
                             >
-                                {message}
-                            </p>
+                                {messages[0].type === 'success' ? (
+                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                ) : (
+                                    <span>{primaryConfig.icon}</span>
+                                )}
+                            </div>
 
-                            {/* Action Button */}
-                            {action && (
-                                <button
-                                    onClick={() => {
-                                        action.onClick();
-                                        handleDismiss();
-                                    }}
-                                    className="mt-2 px-4 py-1.5 rounded-full text-[13px] font-semibold transition-all active:scale-95"
+                            {/* Content */}
+                            <div className="flex-1 min-w-0 pt-0.5">
+                                <p
+                                    className="text-[15px] font-medium leading-snug"
                                     style={{
-                                        background: config.accentColor,
-                                        color: 'white',
-                                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+                                        color: 'rgba(255, 255, 255, 0.95)',
+                                        letterSpacing: '-0.01em'
                                     }}
                                 >
-                                    {action.label}
-                                </button>
-                            )}
-                        </div>
+                                    {messages[0].message}
+                                </p>
 
-                        {/* Dismiss Button */}
-                        <button
-                            onClick={handleDismiss}
-                            className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90"
-                            style={{
-                                background: 'rgba(255, 255, 255, 0.1)',
-                                color: 'rgba(255, 255, 255, 0.5)'
-                            }}
-                        >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
+                                {/* Action Button */}
+                                {messages[0].action && (
+                                    <button
+                                        onClick={() => {
+                                            messages[0].action!.onClick();
+                                            handleDismiss();
+                                        }}
+                                        className="mt-2 px-4 py-1.5 rounded-full text-[13px] font-semibold transition-all active:scale-95"
+                                        style={{
+                                            background: primaryConfig.accentColor,
+                                            color: 'white',
+                                            boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)'
+                                        }}
+                                    >
+                                        {messages[0].action.label}
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Dismiss Button */}
+                            <button
+                                onClick={handleDismiss}
+                                className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90"
+                                style={{
+                                    background: 'rgba(255, 255, 255, 0.1)',
+                                    color: 'rgba(255, 255, 255, 0.5)'
+                                }}
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Grouped Messages Layout */}
+                    {!isSingleMessage && (
+                        <div className="p-4">
+                            {/* Header with dismiss */}
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                    <div
+                                        className="w-6 h-6 rounded-lg flex items-center justify-center text-sm"
+                                        style={{
+                                            background: primaryConfig.iconBg,
+                                            color: primaryConfig.accentColor
+                                        }}
+                                    >
+                                        {messages.length}
+                                    </div>
+                                    <span className="text-xs font-medium text-white/50 uppercase tracking-wide">
+                                        Notifications
+                                    </span>
+                                </div>
+                                <button
+                                    onClick={handleDismiss}
+                                    className="w-7 h-7 rounded-full flex items-center justify-center transition-all active:scale-90"
+                                    style={{
+                                        background: 'rgba(255, 255, 255, 0.1)',
+                                        color: 'rgba(255, 255, 255, 0.5)'
+                                    }}
+                                >
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </div>
+
+                            {/* Stacked Messages */}
+                            <div className="space-y-2">
+                                {messages.map((msg) => {
+                                    const msgConfig = getTypeConfig(msg.type);
+                                    return (
+                                        <div
+                                            key={msg.id}
+                                            className="flex items-center gap-3 p-2.5 rounded-xl"
+                                            style={{
+                                                background: 'rgba(255, 255, 255, 0.05)'
+                                            }}
+                                        >
+                                            {/* Small type indicator */}
+                                            <div
+                                                className="flex-shrink-0 w-6 h-6 rounded-lg flex items-center justify-center"
+                                                style={{
+                                                    background: msgConfig.iconBg,
+                                                    color: msgConfig.accentColor
+                                                }}
+                                            >
+                                                {getSmallIcon(msg.type)}
+                                            </div>
+
+                                            {/* Message */}
+                                            <p
+                                                className="flex-1 text-[14px] font-medium leading-tight"
+                                                style={{ color: 'rgba(255, 255, 255, 0.9)' }}
+                                            >
+                                                {msg.message}
+                                            </p>
+
+                                            {/* Inline action if this specific message has one */}
+                                            {msg.action && (
+                                                <button
+                                                    onClick={() => {
+                                                        msg.action!.onClick();
+                                                        handleDismiss();
+                                                    }}
+                                                    className="flex-shrink-0 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wide transition-all active:scale-95"
+                                                    style={{
+                                                        background: msgConfig.accentColor,
+                                                        color: 'white'
+                                                    }}
+                                                >
+                                                    {msg.action.label}
+                                                </button>
+                                            )}
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    )}
 
                     {/* Subtle gradient accent at bottom */}
                     <div
                         className="h-[2px]"
                         style={{
-                            background: `linear-gradient(90deg, transparent, ${config.accentColor}, transparent)`
+                            background: `linear-gradient(90deg, transparent, ${primaryConfig.accentColor}, transparent)`
                         }}
                     />
                 </div>

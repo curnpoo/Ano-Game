@@ -279,13 +279,20 @@ export interface RoomHistoryEntry {
     endReason?: 'finished' | 'early' | 'cancelled' | 'left';
     leaderName?: string;
 }
-export interface ToastState {
+// Individual toast message for grouping
+export interface ToastMessage {
+    id: string;
     message: string;
     type: 'error' | 'success' | 'info';
     action?: {
         label: string;
         onClick: () => void;
     };
+}
+
+// Grouped toast state - displays multiple messages in one card
+export interface ToastState {
+    messages: ToastMessage[];
 }
 
 export type Screen = 'welcome' | 'login' | 'name-entry' | 'home' | 'room-selection' | 'store' | 'profile' | 'avatar-editor' | 'lobby' | 'waiting' | 'joining-game' | 'uploading' | 'sabotage-selection' | 'drawing' | 'voting' | 'results' | 'final' | 'stats' | 'level-progress' | 'gallery';

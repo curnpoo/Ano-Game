@@ -1,7 +1,7 @@
 // Push Notification Service using Firebase Cloud Messaging
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { getMessaging, getToken, onMessage, deleteToken } from 'firebase/messaging';
 import app from '../firebase';
-import { ref, set, get } from 'firebase/database';
+import { ref, set, get, remove } from 'firebase/database';
 import { database } from '../firebase';
 
 // IMPORTANT: Replace this with your VAPID key from Firebase Console
@@ -69,6 +69,44 @@ export const storePushToken = async (playerId: string, token: string): Promise<v
     }
 };
 
+// Delete FCM token for a player (when disabling notifications)
+export const deletePushToken = async (playerId: string): Promise<void> => {
+    try {
+        // Delete from Firebase database
+        const tokenRef = ref(database, `pushTokens/${playerId}`);
+        await remove(tokenRef);
+        console.log('Push token deleted for player:', playerId);
+
+        // Also unregister the token from FCM
+        const messagingInstance = getMessagingInstance();
+        if (messagingInstance) {
+            await deleteToken(messagingInstance);
+            console.log('FCM token unregistered');
+        }
+    } catch (error) {
+        console.error('Error deleting push token:', error);
+    }
+};
+
+// Refresh FCM token (delete and re-register)
+export const refreshPushToken = async (playerId: string): Promise<string | null> => {
+    try {
+        // Delete old token
+        await deletePushToken(playerId);
+        
+        // Get new token
+        const newToken = await requestPushPermission();
+        if (newToken) {
+            await storePushToken(playerId, newToken);
+            console.log('Push token refreshed for player:', playerId);
+        }
+        return newToken;
+    } catch (error) {
+        console.error('Error refreshing push token:', error);
+        return null;
+    }
+};
+
 // Get all push tokens (for broadcasting)
 export const getAllPushTokens = async (): Promise<string[]> => {
     try {
@@ -107,3 +145,4 @@ export const isPushSupported = (): boolean => {
         'PushManager' in window &&
         'Notification' in window;
 };
+
