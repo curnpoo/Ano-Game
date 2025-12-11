@@ -33,6 +33,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     const containerRef = useRef<HTMLDivElement>(null);
     const [isDrawing, setIsDrawing] = useState(false);
     const [currentStroke, setCurrentStroke] = useState<DrawingStroke | null>(null);
+    
+    // Track active touch count to prevent drawing during multi-touch gestures
+    const touchCountRef = useRef(0);
 
     // No internal image canvas needed for display, only for eyedropper color picking
     // But we still need to load the image into a hidden canvas if we want to pick colors from it.
@@ -320,6 +323,20 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     };
 
     const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+        // Track touch count for multi-touch detection
+        if ('touches' in e) {
+            touchCountRef.current = e.touches.length;
+            // Don't start drawing if multiple fingers are touching
+            if (e.touches.length > 1) {
+                // Cancel any in-progress drawing
+                if (isDrawing) {
+                    setIsDrawing(false);
+                    setCurrentStroke(null);
+                }
+                return;
+            }
+        }
+        
         if (!isDrawingEnabled && !isEyedropper) return;
         if ('touches' in e) e.preventDefault();
         vibrate(HapticPatterns.soft);
@@ -375,6 +392,19 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     };
 
     const draw = (e: React.MouseEvent | React.TouchEvent) => {
+        // Update touch count and cancel drawing if multi-touch detected
+        if ('touches' in e) {
+            touchCountRef.current = e.touches.length;
+            if (e.touches.length > 1) {
+                // Cancel in-progress drawing when second finger touches
+                if (isDrawing) {
+                    setIsDrawing(false);
+                    setCurrentStroke(null);
+                }
+                return;
+            }
+        }
+        
         if (!isDrawing || !currentStroke) return;
         e.preventDefault();
         const point = getPoint(e);
@@ -384,13 +414,18 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         } : null);
     };
 
-    const stopDrawing = () => {
+    const stopDrawing = (e?: React.MouseEvent | React.TouchEvent) => {
+        // Update touch count
+        if (e && 'touches' in e) {
+            touchCountRef.current = e.touches.length;
+        }
+        
         if (!isDrawing) return;
         setIsDrawing(false);
-        if (currentStroke) {
+        if (currentStroke && currentStroke.points.length > 0) {
             onStrokesChange([...strokes, currentStroke]);
-            setCurrentStroke(null);
         }
+        setCurrentStroke(null);
     };
 
     return (
@@ -414,6 +449,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
                 onTouchStart={startDrawing}
                 onTouchMove={draw}
                 onTouchEnd={stopDrawing}
+                onTouchCancel={stopDrawing}
             />
         </div>
     );
