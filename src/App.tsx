@@ -832,6 +832,49 @@ const App = () => {
     */
   }, []);
 
+  // Check for URL-based join or invite logic on mount
+  useEffect(() => {
+    // Check for ?invite=CODE (from background notification)
+    const checkInviteParam = async () => {
+      const params = new URLSearchParams(window.location.search);
+      const inviteCode = params.get('invite');
+      
+      if (inviteCode && player) {
+        console.log('[App] Found invite param from notification:', inviteCode);
+        // Clean URL without refresh
+        window.history.replaceState({}, '', window.location.pathname);
+        
+        // Show the modal card!
+        // We need to fetch basic info or just show the code.
+        // For now, construct a placeholder invite
+        const placeholderInvite: GameInvite = {
+           id: 'url-invite',
+           fromUserId: 'unknown',
+           fromUsername: 'A Friend', // We don't have this from URL, but could fetch room info??
+           toUserId: player.id,
+           roomCode: inviteCode,
+           sentAt: Date.now(),
+           status: 'pending'
+        };
+        
+        // Try to fetch room info to get host name?
+        try {
+           // Optional: Fetch room details to show correct inviter name
+           // storageService.getRoom(inviteCode)...
+        } catch (e) {
+           console.warn('Could not fetch room details for invite card');
+        }
+
+        setActiveInvite(placeholderInvite);
+      }
+    };
+    
+    // Slight delay to let player load? 
+    if (player) {
+      checkInviteParam();
+    }
+  }, [player]);
+
   // Use the in-app notifications hook (keeps local storage sync'd but toasts are silenced)
   useInAppNotifications(player?.id || null, useMemo(() => ({
     onFriendRequest: handleFriendRequestNotification,
@@ -900,8 +943,8 @@ const App = () => {
 
     // If user is joining via URL (from push notification), skip pending notification check
     const params = new URLSearchParams(window.location.search);
-    if (params.has('join')) {
-      console.log('Skipping pending notifications - user joining via URL');
+    if (params.has('join') || params.has('invite')) {
+      console.log('Skipping pending notifications - user joining via URL/Invite');
       return;
     }
 

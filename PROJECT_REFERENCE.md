@@ -1,40 +1,75 @@
 # 📖 ANO Game — Project Reference
 
-> **Master reference document for all agents and contributors.**  
+> **Master reference document for all agents and contributors.**\
 > Keep this document updated as the project evolves.
 
 ---
 
 ## 🎮 Project Overview
 
-**ANO** is a real-time, mobile-first party drawing game where players annotate images and vote for the best additions.
+**ANO** is a real-time, mobile-first party drawing game where players annotate
+images and vote for the best additions.
 
-| Attribute | Value |
-|-----------|-------|
-| **URL** | [anogame.xyz](https://anogame.xyz) |
-| **Version** | 0.8 Alpha |
-| **Platform** | Mobile-first PWA (Portrait only) |
-| **Tech Stack** | React 19, TypeScript, Firebase Realtime DB, Tailwind CSS |
-| **Target Feel** | **Native iOS app** — fluid, responsive, premium |
+| Attribute       | Value                                                    |
+| --------------- | -------------------------------------------------------- |
+| **URL**         | [anogame.xyz](https://anogame.xyz)                       |
+| **Version**     | 0.8 Alpha                                                |
+| **Platform**    | Mobile-first PWA (Portrait only)                         |
+| **Tech Stack**  | React 19, TypeScript, Firebase Realtime DB, Tailwind CSS |
+| **Target Feel** | **Native iOS app** — fluid, responsive, premium          |
+
+---
+
+## 👁️ Product Vision & Strategy
+
+### Core Philosophy
+
+> **"Connecting busy friends."**
+
+Ano Game is built for the moment you miss your friends but don't have time for a
+30-minute commitment. It is optimized for **laughter per minute**.
+
+- **No Friction:** The game you can play _right now_. Click a link -> In the
+  lobby -> Drawing in 15 seconds.
+- **Async-Friendly:** Play when you have a second. Short, punchy sessions (5-10
+  mins).
+- **The Angle:** "I made this for us." A premium, private feel for friend
+  groups.
+
+### Growth Strategy (Organic & Viral)
+
+Since we are not chasing paid acquisition, we rely on **"The Souvenir"**:
+
+1. **Watermarked Shareability:** Every "Match History" or result card must be
+   beautiful and watermarked with `anogame.xyz`.
+2. **The "WTF" Factor:** The Sabotage mechanic generates "Why did you do that??"
+   conversations in group chats, driving curiosity.
+3. **Instant Join:** Invite links MUST drop users directly into the specific
+   game lobby with a single tap.
+4. **Conversion:** After the laughter, _then_ we prompt for account creation to
+   "save your stats" or "host your own".
 
 ---
 
 ## 🍎 iOS 26 Native Experience Guidelines
 
-The app must feel like a **native iOS 26 application**. All animations, transitions, and interactions should follow Apple's Human Interface Guidelines.
+The app must feel like a **native iOS 26 application**. All animations,
+transitions, and interactions should follow Apple's Human Interface Guidelines.
 
 ### Core Principles
 
-| Principle | Description |
-|-----------|-------------|
-| **Clarity** | Content is paramount. UI elements should never compete with content. |
-| **Deference** | The interface helps people understand and interact without competing. |
-| **Depth** | Visual layers and realistic motion convey hierarchy and facilitate understanding. |
+| Principle     | Description                                                                       |
+| ------------- | --------------------------------------------------------------------------------- |
+| **Clarity**   | Content is paramount. UI elements should never compete with content.              |
+| **Deference** | The interface helps people understand and interact without competing.             |
+| **Depth**     | Visual layers and realistic motion convey hierarchy and facilitate understanding. |
 
 ### Animation Requirements
 
 #### Spring Physics (Default for all animations)
-iOS uses **spring animations** as the default. All motion should feel organic, not mechanical.
+
+iOS uses **spring animations** as the default. All motion should feel organic,
+not mechanical.
 
 ```css
 /* iOS-like spring curve */
@@ -45,14 +80,14 @@ cubic-bezier(0.34, 1.56, 0.64, 1) /* Bouncy popup */
 
 #### Animation Timing Guidelines
 
-| Animation Type | Duration | Easing |
-|----------------|----------|--------|
-| **Button press** | 100-150ms | `ease-out` or spring |
-| **Modal slide up** | 250-300ms | `cubic-bezier(0.32, 0.72, 0, 1)` |
-| **Modal dismiss** | 200ms | `ease-in` |
-| **Screen transition** | 300-400ms | Spring physics |
-| **Popup scale** | 200ms | `cubic-bezier(0.34, 1.56, 0.64, 1)` |
-| **Fade** | 150-200ms | `ease-out` |
+| Animation Type        | Duration  | Easing                              |
+| --------------------- | --------- | ----------------------------------- |
+| **Button press**      | 100-150ms | `ease-out` or spring                |
+| **Modal slide up**    | 250-300ms | `cubic-bezier(0.32, 0.72, 0, 1)`    |
+| **Modal dismiss**     | 200ms     | `ease-in`                           |
+| **Screen transition** | 300-400ms | Spring physics                      |
+| **Popup scale**       | 200ms     | `cubic-bezier(0.34, 1.56, 0.64, 1)` |
+| **Fade**              | 150-200ms | `ease-out`                          |
 
 #### Key Behaviors to Implement
 
@@ -64,12 +99,12 @@ cubic-bezier(0.34, 1.56, 0.64, 1) /* Bouncy popup */
 
 ### Gesture Patterns
 
-| Gesture | Expected Behavior |
-|---------|-------------------|
-| **Swipe down** | Dismiss modals/sheets |
-| **Pinch** | Zoom with elastic boundaries |
-| **Long press** | Show context menu with haptic |
-| **Tap** | Immediate response (< 100ms visual feedback) |
+| Gesture        | Expected Behavior                            |
+| -------------- | -------------------------------------------- |
+| **Swipe down** | Dismiss modals/sheets                        |
+| **Pinch**      | Zoom with elastic boundaries                 |
+| **Long press** | Show context menu with haptic                |
+| **Tap**        | Immediate response (< 100ms visual feedback) |
 
 ### Performance Rules
 
@@ -86,23 +121,20 @@ cubic-bezier(0.34, 1.56, 0.64, 1) /* Bouncy popup */
 ### Color Palette (90s Bubbly Theme)
 
 ```css
---bubble-pink: #FF69B4
---bubble-purple: #9B59B6
---bubble-cyan: #00D9FF
---bubble-yellow: #FFE135
---bubble-lime: #32CD32
---bubble-orange: #FF8C00
---bubble-blue: #4169E1
---bubble-teal: #20B2AA
+--bubble-pink: #ff69b4 --bubble-purple: #9b59b6 --bubble-cyan: #00d9ff
+    --bubble-yellow: #ffe135 --bubble-lime: #32cd32 --bubble-orange: #ff8c00
+    --bubble-blue: #4169e1 --bubble-teal: #20b2aa;
 ```
 
 ### Gradients
 
 ```css
---gradient-90s: linear-gradient(135deg, #FF69B4 0%, #9B59B6 25%, #4169E1 50%, #00D9FF 75%, #32CD32 100%)
---gradient-sunset: linear-gradient(135deg, #FF8C00 0%, #FF69B4 50%, #9B59B6 100%)
---gradient-ocean: linear-gradient(135deg, #00D9FF 0%, #4169E1 50%, #9B59B6 100%)
---gradient-candy: linear-gradient(135deg, #FF69B4 0%, #FFE135 50%, #00D9FF 100%)
+--gradient-90s: linear-gradient(135deg, #ff69b4 0%, #9b59b6 25%, #4169e1 50%,
+    #00d9ff 75%, #32cd32 100%) --gradient-sunset: linear-gradient(135deg,
+    #ff8c00 0%, #ff69b4 50%, #9b59b6 100%) --gradient-ocean:
+    linear-gradient(135deg, #00d9ff 0%, #4169e1 50%, #9b59b6 100%)
+    --gradient-candy: linear-gradient(135deg, #ff69b4 0%, #ffe135 50%, #00d9ff
+    100%);
 ```
 
 ### Glass Panels (Dark Mode Default)
@@ -121,8 +153,8 @@ border: 1px solid rgba(255, 255, 255, 0.15);
 ### Border Radius
 
 ```css
---radius-main: 1.5rem  /* 24px - Cards, buttons */
---radius-full: 9999px  /* Pills, circular buttons */
+--radius-main: 1.5rem /* 24px - Cards, buttons */ --radius-full:
+    9999px; /* Pills, circular buttons */
 ```
 
 ---
@@ -144,12 +176,12 @@ src/
 
 ### Key Files
 
-| File | Purpose |
-|------|---------|
-| `src/index.css` | Design system, CSS variables, animations |
-| `src/components/common/transitions.css` | Screen/modal transition animations |
-| `src/services/storage.ts` | Firebase data layer |
-| `src/App.tsx` | Main state machine & screen routing |
+| File                                    | Purpose                                  |
+| --------------------------------------- | ---------------------------------------- |
+| `src/index.css`                         | Design system, CSS variables, animations |
+| `src/components/common/transitions.css` | Screen/modal transition animations       |
+| `src/services/storage.ts`               | Firebase data layer                      |
+| `src/App.tsx`                           | Main state machine & screen routing      |
 
 ---
 
@@ -157,6 +189,7 @@ src/
 
 > [!IMPORTANT]
 > **When completing tasks:** Always update BOTH:
+>
 > 1. `TODAY_ROADMAP.md` — Mark task complete with checkbox
 > 2. `src/components/screens/RoadmapPage.tsx` — Move task to Done column
 >
@@ -164,13 +197,13 @@ src/
 
 ### December 9, 2025 — TODAY
 
-| # | Type | Task | Status |
-|:-:|:----:|------|:------:|
-| 1 | 🛠️ FIX | Loading screen: show all checks → 300ms delay → smooth fade | ⬜ |
-| 2 | 🛠️ FIX | Level 0 showing for older accounts in lobby | ⬜ |
-| 3 | ➕ ADD | Universal loading indicator for profile pictures | ⬜ |
-| 4 | ➖ REMOVE | Circle above color picker in profile customization | ✅ |
-| 5 | ✨ FEAT | Invites section (5-hour expiration) | ⬜ |
+|  #  |   Type    | Task                                                        | Status |
+| :-: | :-------: | ----------------------------------------------------------- | :----: |
+|  1  |  🛠️ FIX   | Loading screen: show all checks → 300ms delay → smooth fade |   ⬜   |
+|  2  |  🛠️ FIX   | Level 0 showing for older accounts in lobby                 |   ⬜   |
+|  3  |  ➕ ADD   | Universal loading indicator for profile pictures            |   ⬜   |
+|  4  | ➖ REMOVE | Circle above color picker in profile customization          |   ✅   |
+|  5  |  ✨ FEAT  | Invites section (5-hour expiration)                         |   ⬜   |
 
 > See [TODAY_ROADMAP.md](./TODAY_ROADMAP.md) for detailed task breakdowns.
 
@@ -180,35 +213,42 @@ src/
 
 <!-- Add future tasks here as they come -->
 
-| Target | Task | Status |
-|--------|------|:------:|
-| — | *Awaiting user input* | — |
+| Target    | Task                                                                                                   | Status |
+| --------- | ------------------------------------------------------------------------------------------------------ | :----: |
+| **Admin** | **Data Dashboard:** Secret desktop URL for detailed analytics (active users, rounds played, retention) |   ⬜   |
+| —         | _Awaiting user input_                                                                                  |   —    |
 
 ---
 
 ## 🔧 iOS Native Animation Plan
 
 ### Current State
-The app has good visual transitions in `transitions.css` but needs refinement for true iOS-native feel.
+
+The app has good visual transitions in `transitions.css` but needs refinement
+for true iOS-native feel.
 
 ### Priority Improvements
 
 #### Phase 1: Spring Physics Everywhere
+
 - [ ] Replace all `ease-in-out` with spring curves
 - [ ] Add velocity-based animation continuity
 - [ ] Implement rubber-banding on scroll boundaries
 
 #### Phase 2: Gesture Polish
+
 - [ ] Swipe-to-dismiss for all modals
 - [ ] Pinch-to-zoom with elastic bounds
 - [ ] Pan gestures with momentum
 
 #### Phase 3: Micro-interactions
+
 - [ ] Button press animations (scale down on press)
 - [ ] Haptic feedback integration
 - [ ] Loading state shimmer effects
 
 #### Phase 4: Screen Transitions
+
 - [ ] Unified transition system
 - [ ] Preload screens during transition
 - [ ] No "pop" or flash between screens
@@ -216,6 +256,7 @@ The app has good visual transitions in `transitions.css` but needs refinement fo
 ### Animation Library Recommendations
 
 For complex gestures, consider:
+
 - **Framer Motion** (already in stack) — Spring animations, gestures
 - **use-gesture** — React hook for complex gestures
 - **react-spring** — Physics-based animations
@@ -249,10 +290,10 @@ For complex gestures, consider:
 
 ## 🏷️ Version History
 
-| Version | Date | Notes |
-|---------|------|-------|
+| Version   | Date     | Notes   |
+| --------- | -------- | ------- |
 | 0.8 Alpha | Dec 2025 | Current |
 
 ---
 
-*Last updated: December 9, 2025*
+_Last updated: December 9, 2025_

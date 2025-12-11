@@ -93,9 +93,10 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
         );
     };
 
-    const hasStages = stages.length > 0;
-    const visibleStages = stages.slice(0, 5);
-    const hasMoreStages = stages.length > 5;
+    const hasStages = true; // FORCE 'Smart' look always
+    const effectiveStages = stages.length > 0 ? stages : [{ id: 'default-load', label: 'Loading...', status: 'loading' } as LoadingStage];
+    const visibleStages = effectiveStages.slice(0, 5);
+    const hasMoreStages = effectiveStages.length > 5;
 
     return (
         <div

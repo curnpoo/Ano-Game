@@ -2,7 +2,7 @@
   "name": "ano-game",
   "private": true,
   "version": "1.0.0",
-  "description": "ANO: The Party Drawing Game",
+  "description": "ANO: The Game for Busy Friends",
   "type": "module",
   "scripts": {
     "dev": "vite",

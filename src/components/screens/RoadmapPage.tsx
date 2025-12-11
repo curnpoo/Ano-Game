@@ -101,6 +101,10 @@ const roadmapData: RoadmapColumn[] = [
             { id: 'b3', type: 'REFACTOR', title: 'Performance optimization', description: '[GameService, Firebase listeners, React components] Reduce network calls, optimize re-renders, fix lag on slow connections' },
             { id: 'b4', type: 'REFACTOR', title: 'Universal Button Components', description: '[src/components/common/] Create reusable GlassButton, IconButton, ActionButton components with consistent styling and animations' },
             { id: 'b5', type: 'FIX', title: 'iPhone haptic feedback', description: '[utils/haptics.ts] Haptic feedback only works on Android - investigate and implement iOS-compatible vibration using Web Vibration API or native bridges' },
+            { id: 'b6', type: 'FEAT', title: 'Viral Match History', description: 'Match history images auto-generated with "anogame.xyz" watermark to drive organic growth' },
+            { id: 'b7', type: 'FEAT', title: 'Deep Linking', description: 'Invite links that bypass the home screen and drop users directly into the specific game lobby' },
+            { id: 'b8', type: 'FEAT', title: 'Post-game Account Prompt', description: 'After a game ends, friendly prompt to create account to save stats/drawings' },
+            { id: 'b9', type: 'ADD', title: 'Admin Stats Dashboard', description: 'Secret desktop-only URL to view high-fidelity game analytics (DAU, rounds played, retention, economy stats)' },
         ]
     }
 ];

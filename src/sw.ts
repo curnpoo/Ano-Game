@@ -68,7 +68,7 @@ messaging.onBackgroundMessage((payload: any) => {
 
     const notificationTitle = payload.data?.title || 'ANO Game';
     const roomCode = payload.data?.roomCode;
-    const clickUrl = payload.data?.click_action || (roomCode ? `/?join=${roomCode}` : '/');
+    const clickUrl = payload.data?.click_action || (roomCode ? `/?invite=${roomCode}` : '/');
     
     const notificationOptions = {
         body: payload.data?.body || 'You have a new notification!',
@@ -124,7 +124,7 @@ self.addEventListener('notificationclick', (event: NotificationEvent) => {
             // No window open - open a new one with the join URL
             if (self.clients.openWindow && roomCode) {
                 console.log('[SW] Opening new window with join URL');
-                return self.clients.openWindow(`/?join=${roomCode}`);
+                return self.clients.openWindow(`/?invite=${roomCode}`);
             } else if (self.clients.openWindow) {
                 return self.clients.openWindow('/');
             }
