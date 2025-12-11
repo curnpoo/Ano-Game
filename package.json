@@ -1,7 +1,7 @@
 {
   "name": "ano-game",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.8.0.1",
   "description": "ANO: The Game for Busy Friends",
   "type": "module",
   "scripts": {

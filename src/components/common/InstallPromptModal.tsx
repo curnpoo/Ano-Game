@@ -86,14 +86,42 @@ export const InstallPromptModal: React.FC<InstallPromptModalProps> = ({ onClose 
                             </p>
 
                             {isIOS ? (
-                                <div className="bg-gray-50 rounded-xl p-3 text-sm space-y-2 text-gray-700 border border-gray-100">
-                                    <div className="flex items-center gap-3">
-                                        <span className="font-bold text-lg text-purple-500">1</span>
-                                        <span>Tap the <span className="font-bold">Share</span> button <span className="text-blue-500 text-lg align-middle">⎋</span></span>
+                                <div className="space-y-4">
+                                    {/* Step 1: Share */}
+                                    <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                                        <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center text-blue-600">
+                                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"></path>
+                                                <polyline points="16 6 12 2 8 6"></polyline>
+                                                <line x1="12" y1="2" x2="12" y2="15"></line>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-gray-900">1. Tap Share</div>
+                                            <div className="text-xs text-gray-500">In the bottom bar</div>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        <span className="font-bold text-lg text-purple-500">2</span>
-                                        <span>Scroll & tap <span className="font-bold">Add to Home Screen</span> ➕</span>
+
+                                    {/* Step 2: Add to Home */}
+                                    <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                                        <div className="w-10 h-10 bg-gray-200 rounded-xl flex items-center justify-center text-gray-600 font-bold text-xl leading-none pt-1">
+                                            +
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-gray-900">2. Add to Home Screen</div>
+                                            <div className="text-xs text-gray-500">Scroll down to find it</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Step 3: Add */}
+                                    <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-2xl border border-gray-100">
+                                        <div className="w-10 h-10 bg-transparent rounded-xl flex items-center justify-center text-blue-600 font-bold text-sm">
+                                            Add
+                                        </div>
+                                        <div>
+                                            <div className="font-bold text-gray-900">3. Tap "Add"</div>
+                                            <div className="text-xs text-gray-500">Top right corner</div>
+                                        </div>
                                     </div>
                                 </div>
                             ) : (

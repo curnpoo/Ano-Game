@@ -136,7 +136,7 @@ export const RoadmapPage: React.FC = () => {
                     <button onClick={handleBackToGame} className="back-button">
                         ← Back
                     </button>
-                    <div className="version-badge">v0.8 Alpha</div>
+                    <div className="version-badge">v0.8.0.1</div>
                 </div>
                 <div className="header-content">
                     <h1>🗺️ Roadmap</h1>

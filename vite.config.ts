@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite'
+import fs from 'fs'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
@@ -13,7 +14,7 @@ export default defineConfig({
   },
 
   define: {
-    '__BUILD_TIME__': JSON.stringify(new Date().toISOString())
+    '__BUILD_TIME__': JSON.stringify(JSON.parse(fs.readFileSync('public/version.json', 'utf-8')).buildTime)
   },
   plugins: [
     react(),

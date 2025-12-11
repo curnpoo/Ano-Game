@@ -65,7 +65,7 @@ export const ShareDropdown: React.FC<ShareDropdownProps> = ({
             try {
                 await navigator.share({
                     title: 'Join my Ano Draw game!',
-                    text: `Join my game with code: ${roomCode}`,
+                    text: `Come play Ano Draw! Room: ${roomCode}`,
                     url: shareUrl
                 });
                 vibrate(HapticPatterns.success);

@@ -1255,7 +1255,11 @@ const App = () => {
       console.log('[App] Player not loaded yet, queuing join for:', code);
       setPendingRoomCode(code);
       // Ensure we are on a screen where we can process this
-      if (currentScreen === 'welcome' || currentScreen === 'login') {
+      if (currentScreen === 'welcome') {
+         // User clicked "Jump In" but isn't logged in. Send to name entry!
+         console.log('[App] Redirecting to name-entry for auth...');
+         setCurrentScreen('name-entry');
+      } else if (currentScreen === 'login') {
          // Do nothing, wait for login
       } else {
          setCurrentScreen('joining-game');
