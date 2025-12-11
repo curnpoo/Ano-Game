@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
+import { SpeedInsights } from "@vercel/speed-insights/react";
+
 
 import { CasinoScreen } from './components/screens/CasinoScreen';
 
@@ -1722,6 +1724,7 @@ const App = () => {
 
   return (
     <div className="fixed inset-0 overflow-hidden bg-black text-white select-none touch-none">
+      <SpeedInsights />
 
       {/* Global Background - Applied to all screens */}
       {/* Note: User requested safe storage of this background with subtle settings for screens */}
