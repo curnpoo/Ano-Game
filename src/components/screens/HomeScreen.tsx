@@ -204,20 +204,36 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                 <HelpGuideOverlay onClose={() => setShowHelpGuide(false)} />
             )}
 
-            {/* Help Button - Bottom Left Corner */}
+            {/* Help Button - Adaptive Corner/Pill */}
             <button
                 onClick={() => setShowHelpGuide(true)}
-                className="fixed bottom-0 left-0 z-50 px-4 py-2.5 bg-white/10 backdrop-blur-xl text-white/70 font-bold text-sm border-t border-r border-white/20 hover:bg-white/20 hover:text-white active:scale-95 transition-all"
-                style={{
-                    borderTopRightRadius: '1.25rem',
-                    paddingBottom: 'calc(0.625rem + env(safe-area-inset-bottom))',
-                    paddingLeft: 'calc(1rem + env(safe-area-inset-left))',
-                }}
+                className="
+                    fixed z-50 
+                    bg-white/10 backdrop-blur-xl 
+                    text-white/90 font-bold text-sm 
+                    border-white/10
+                    hover:bg-white/20 hover:text-white 
+                    active:scale-95 transition-all
+                    
+                    /* Mobile: Corner Hugging */
+                    bottom-0 left-0
+                    border-t border-r
+                    rounded-tr-[2rem]
+                    pt-4 pr-6
+                    pb-[max(1rem,env(safe-area-inset-bottom))]
+                    pl-[max(1.5rem,env(safe-area-inset-left))]
+                    
+                    /* Desktop: Floating Pill */
+                    md:bottom-6 md:left-6
+                    md:rounded-full
+                    md:border
+                    md:pt-3 md:pr-6 md:pb-3 md:pl-6
+                "
             >
-                <span className="flex items-center gap-1.5">
-                    <span>❓</span>
-                    <span>Help</span>
-                </span>
+                <div className="flex items-center gap-2">
+                    <span className="text-lg text-purple-400 font-black">?</span>
+                    <span className="tracking-wide">Help</span>
+                </div>
             </button>
 
             {/* Hidden admin trigger */}

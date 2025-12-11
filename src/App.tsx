@@ -94,14 +94,13 @@ const App = () => {
       });
       const data = await response.json();
       
-      if (initialBuildTime.current && data.buildTime === initialBuildTime.current) {
-        // User is already on the latest version, don't show update popup
-        console.log('Already on latest version:', initialBuildTime.current);
-        setNeedRefresh(false);
-      } else if (data.buildTime && data.buildTime !== initialBuildTime.current) {
-        // Confirmed version mismatch, show update
-        console.log('Confirmed version mismatch:', initialBuildTime.current, '->', data.buildTime);
+      // Compare with compile-time constant
+      if (data.buildTime && data.buildTime !== __BUILD_TIME__) {
+        console.log('Confirmed version mismatch:', __BUILD_TIME__, '->', data.buildTime);
         setUpdateAvailable(true);
+      } else {
+        console.log('Already on latest version:', __BUILD_TIME__);
+        setNeedRefresh(false);
       }
     } catch (error) {
       console.log('Version validation failed:', error);
@@ -1170,11 +1169,25 @@ const App = () => {
   };
 
   async function handleJoinRoom(code: string, force: boolean = false) {
-    if (!player) return;
+    console.log('[App] handleJoinRoom called with:', code, 'Force:', force);
+    
+    // If player is not loaded yet (race condition on wake), queue the join
+    if (!player) {
+      console.log('[App] Player not loaded yet, queuing join for:', code);
+      setPendingRoomCode(code);
+      // Ensure we are on a screen where we can process this
+      if (currentScreen === 'welcome' || currentScreen === 'login') {
+         // Do nothing, wait for login
+      } else {
+         setCurrentScreen('joining-game');
+      }
+      return;
+    }
 
     // SINGLE GAME RESTRICTION: Join Check
     // If we are already in a room (and it's not the same one we are re-joining)
     if (!force && roomCode && room && roomCode !== code) {
+      console.log('[App] Already in a room, asking for confirmation');
       setPendingConfirmation({ type: 'join', data: code });
       return;
     }

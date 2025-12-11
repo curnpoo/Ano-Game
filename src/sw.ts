@@ -54,15 +54,24 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 // Handle background push messages
+// Handle background push messages
 messaging.onBackgroundMessage((payload: any) => {
     console.log('[SW] Received background message:', payload);
 
-    const notificationTitle = payload.notification?.title || 'ANO Game';
+    // CRITICAL FIX: iOS & Android automatically display notifications if the payload
+    // contains a "notification" block.
+    // We only need to manually show a notification if it's a "data-only" message.
+    if (payload.notification) {
+        console.log('[SW] Payload has "notification" block - letting OS handle display to prevent duplicates.');
+        return;
+    }
+
+    const notificationTitle = payload.data?.title || 'ANO Game';
     const roomCode = payload.data?.roomCode;
     const clickUrl = payload.data?.click_action || (roomCode ? `/?join=${roomCode}` : '/');
     
     const notificationOptions = {
-        body: payload.notification?.body || 'You have a new notification!',
+        body: payload.data?.body || 'You have a new notification!',
         icon: '/pwa-icon.png',
         badge: '/pwa-icon.png',
         tag: payload.data?.type || 'game-notification',
@@ -75,7 +84,7 @@ messaging.onBackgroundMessage((payload: any) => {
         requireInteraction: true
     } as NotificationOptions;
 
-    console.log('[SW] Showing notification with data:', notificationOptions.data);
+    console.log('[SW] Showing manual notification for data-only payload:', notificationOptions.data);
     self.registration.showNotification(notificationTitle, notificationOptions);
 });
 

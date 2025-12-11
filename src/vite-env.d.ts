@@ -1,5 +1,7 @@
 /// <reference types="vite-plugin-pwa/client" />
 
+declare const __BUILD_TIME__: string;
+
 declare module 'virtual:pwa-register/react' {
     import type { Ref } from 'react';
 
