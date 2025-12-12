@@ -17,10 +17,24 @@ export class ErrorBoundary extends Component<Props, State> {
     };
 
     public static getDerivedStateFromError(error: Error): State {
+        // Chunk Load Error Handling (Lazy Loading)
+        if (error.message.includes('Failed to fetch dynamically imported module') || error.message.includes('Importing a module script failed')) {
+            // Check if we already tried reloading
+            const hasReloaded = sessionStorage.getItem('chunk_reload');
+            if (!hasReloaded) {
+                sessionStorage.setItem('chunk_reload', 'true');
+                window.location.reload();
+                return { hasError: false, error: null };
+            }
+        }
         return { hasError: true, error };
     }
 
     public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+        // Clear reload flag if it was a different error or success
+        if (!error.message.includes('Failed to fetch')) {
+             sessionStorage.removeItem('chunk_reload');
+        }
         console.error('Uncaught error:', error, errorInfo);
     }
 

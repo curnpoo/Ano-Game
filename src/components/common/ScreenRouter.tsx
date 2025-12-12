@@ -1,24 +1,27 @@
-import React from 'react';
+import { Suspense, lazy } from 'react';
 import type { Screen, Player, GameRoom, GameSettings, RoomHistoryEntry } from '../../types';
-import { WelcomeScreen } from '../screens/WelcomeScreen';
-import { LoginScreen } from '../screens/LoginScreen';
-import { ProfileSetupScreen } from '../screens/ProfileSetupScreen';
-import { HomeScreen } from '../screens/HomeScreen';
-import { StoreScreen } from '../screens/StoreScreen';
-import { ProfileScreen } from '../screens/ProfileScreen';
-import { AvatarEditorScreen } from '../screens/AvatarEditorScreen';
-import { RoomSelectionScreen } from '../screens/RoomSelectionScreen';
-import { LobbyScreen } from '../screens/LobbyScreen';
-import { WaitingRoomScreen } from '../screens/WaitingRoomScreen';
-import { UploadScreen } from '../screens/UploadScreen';
-import { DrawingScreen } from '../screens/DrawingScreen';
-import { VotingScreen } from '../screens/VotingScreen';
-import { ResultsScreen } from '../screens/ResultsScreen';
-import { FinalResultsScreen } from '../screens/FinalResultsScreen';
-import { StatsScreen } from '../screens/StatsScreen';
-import { SabotageSelectionScreen } from '../screens/SabotageSelectionScreen';
-import { LevelProgressScreen } from '../screens/LevelProgressScreen';
-import { GalleryScreen } from '../screens/GalleryScreen';
+import { LoadingScreen } from './LoadingScreen';
+
+// Lazy Load Screens
+const WelcomeScreen = lazy(() => import('../screens/WelcomeScreen').then(module => ({ default: module.WelcomeScreen })));
+const LoginScreen = lazy(() => import('../screens/LoginScreen').then(module => ({ default: module.LoginScreen })));
+const ProfileSetupScreen = lazy(() => import('../screens/ProfileSetupScreen').then(module => ({ default: module.ProfileSetupScreen })));
+const HomeScreen = lazy(() => import('../screens/HomeScreen').then(module => ({ default: module.HomeScreen })));
+const StoreScreen = lazy(() => import('../screens/StoreScreen').then(module => ({ default: module.StoreScreen })));
+const ProfileScreen = lazy(() => import('../screens/ProfileScreen').then(module => ({ default: module.ProfileScreen })));
+const AvatarEditorScreen = lazy(() => import('../screens/AvatarEditorScreen').then(module => ({ default: module.AvatarEditorScreen })));
+const RoomSelectionScreen = lazy(() => import('../screens/RoomSelectionScreen').then(module => ({ default: module.RoomSelectionScreen })));
+const LobbyScreen = lazy(() => import('../screens/LobbyScreen').then(module => ({ default: module.LobbyScreen })));
+const WaitingRoomScreen = lazy(() => import('../screens/WaitingRoomScreen').then(module => ({ default: module.WaitingRoomScreen })));
+const UploadScreen = lazy(() => import('../screens/UploadScreen').then(module => ({ default: module.UploadScreen })));
+const DrawingScreen = lazy(() => import('../screens/DrawingScreen').then(module => ({ default: module.DrawingScreen })));
+const VotingScreen = lazy(() => import('../screens/VotingScreen').then(module => ({ default: module.VotingScreen })));
+const ResultsScreen = lazy(() => import('../screens/ResultsScreen').then(module => ({ default: module.ResultsScreen })));
+const FinalResultsScreen = lazy(() => import('../screens/FinalResultsScreen').then(module => ({ default: module.FinalResultsScreen })));
+const StatsScreen = lazy(() => import('../screens/StatsScreen').then(module => ({ default: module.StatsScreen })));
+const SabotageSelectionScreen = lazy(() => import('../screens/SabotageSelectionScreen').then(module => ({ default: module.SabotageSelectionScreen })));
+const LevelProgressScreen = lazy(() => import('../screens/LevelProgressScreen').then(module => ({ default: module.LevelProgressScreen })));
+const GalleryScreen = lazy(() => import('../screens/GalleryScreen').then(module => ({ default: module.GalleryScreen })));
 
 
 import type { SabotageEffect } from '../../types';
@@ -259,26 +262,30 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
     };
 
     // Main Switch
+    let screenContent = null;
     switch (currentScreen) {
         case 'welcome':
-            return <WelcomeScreen onPlay={onPlayNow} onJoin={onJoinRoom} joiningRoomCode={joiningRoomCode} />;
+            screenContent = <WelcomeScreen onPlay={onPlayNow} onJoin={onJoinRoom} joiningRoomCode={joiningRoomCode} />;
+            break;
 
         case 'login':
-            return <LoginScreen onLogin={onLoginComplete} joiningRoomCode={joiningRoomCode} />;
+            screenContent = <LoginScreen onLogin={onLoginComplete} joiningRoomCode={joiningRoomCode} />;
+            break;
 
         case 'name-entry':
             // Need AuthService? No, ProfileSetupScreen just returns data
             // onProfileComplete in App.tsx checks AuthService
-            return <ProfileSetupScreen
+            screenContent = <ProfileSetupScreen
                 onComplete={onProfileComplete}
                 initialName="" // We could pass this if we had it, but App.tsx handles sourcing it. 
             // Wait, App.tsx passes AuthService.getCurrentUser()?.username.
             // We might need to pass initialName as prop?
             />;
+            break;
 
         case 'home':
             if (!player) return null;
-            return <HomeScreen
+            screenContent = <HomeScreen
                 player={player}
                 onPlay={onPlayWithTransition}
                 onCasino={onShowCasino}
@@ -294,55 +301,61 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                 } : null}
                 onRejoin={onRejoin}
             />;
+            break;
 
         case 'gallery':
-            return <GalleryScreen
+            screenContent = <GalleryScreen
                 onBack={onBackToHome}
                 showToast={showToast}
             />;
+            break;
 
         case 'store':
-            return <StoreScreen
+            screenContent = <StoreScreen
                 onBack={onStoreBack}
                 onFontChange={onEquipTheme}
             />;
+            break;
 
 
         case 'profile':
             if (!player) return null;
-            return <ProfileScreen
+            screenContent = <ProfileScreen
                 player={player}
                 onBack={onBackToHome}
                 onUpdateProfile={onUpdateProfile}
                 onEditAvatar={() => onNavigate('avatar-editor')}
                 onShowStats={() => onNavigate('stats')}
             />;
+            break;
 
         case 'avatar-editor':
             if (!player) return null;
-            return <AvatarEditorScreen
+            screenContent = <AvatarEditorScreen
                 player={player}
                 onCancel={() => onNavigate('profile')}
-                onSave={(strokes, color, frame, avatarImageUrl) => {
-                    onUpdateProfile({ avatarStrokes: strokes, color, frame, avatarImageUrl });
+                onSave={(strokes, color, backgroundColor, frame, avatarImageUrl) => {
+                    onUpdateProfile({ avatarStrokes: strokes, color, backgroundColor, frame, avatarImageUrl });
                     onNavigate('profile');
                 }}
             />;
+            break;
 
 
         case 'room-selection':
             if (!player) return null;
-            return <RoomSelectionScreen
+            screenContent = <RoomSelectionScreen
                 playerName={player.name}
                 currentRoomCode={room?.roomCode || null}
                 onCreateRoom={onCreateRoom}
                 onJoinRoom={onJoinRoom}
                 onBack={onBackToHome}
             />;
+            break;
 
         case 'lobby':
             if (!room || !player) return null;
-            return <LobbyScreen
+            screenContent = <LobbyScreen
                 room={room}
                 currentPlayerId={player.id}
                 onStartGame={onStartGame}
@@ -352,23 +365,26 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                 onJoinGame={onJoinCurrentRound}
                 onBack={onMinimizeGame}
             />;
+            break;
 
         case 'waiting':
             if (!room || !player) return null;
-            return <WaitingRoomScreen
+            screenContent = <WaitingRoomScreen
                 room={room}
                 currentPlayerId={player.id}
                 onJoinGame={onJoinCurrentRound}
             />;
+            break;
 
         case 'uploading':
             if (!room || !player) return null;
-            return <UploadScreen
+            screenContent = <UploadScreen
                 room={room}
                 currentPlayerId={player.id}
                 onUploadImage={onUploadImage}
                 onShowSettings={onShowSettings}
             />;
+            break;
 
         case 'drawing':
             // The complex one
@@ -376,57 +392,67 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
             // App.tsx logic: (currentScreen === 'drawing' || (room && room.status === 'drawing'))
             // We rely on currentScreen passed to us.
             if (!room || !player) return null;
-            return renderDrawingLayout();
+            screenContent = renderDrawingLayout();
+            break;
 
         case 'voting':
             if (!room || !player) return null;
-            return <VotingScreen
+            screenContent = <VotingScreen
                 room={room}
                 currentPlayerId={player.id}
                 onVote={onVote}
                 showToast={showToast}
                 onShowSettings={onShowSettings}
             />;
+            break;
 
         case 'results':
             if (!room || !player) return null;
-            return <ResultsScreen
+            screenContent = <ResultsScreen
                 room={room}
                 currentPlayerId={player.id}
                 player={player}
                 onNextRound={onNextRound}
                 showToast={showToast}
             />;
+            break;
 
         case 'final':
             if (!room || !player) return null;
-            return <FinalResultsScreen
+            screenContent = <FinalResultsScreen
                 room={room}
                 currentPlayerId={player.id}
                 showToast={showToast}
                 onShowRewards={onShowRewards}
             />;
+            break;
 
         case 'sabotage-selection':
             if (!room || !player) return null;
-            return <SabotageSelectionScreen
+            screenContent = <SabotageSelectionScreen
                 players={room.players}
                 saboteurId={room.saboteurId || ''}
                 currentPlayerId={player.id}
                 onSelect={onSabotageSelect}
             />;
+            break;
 
         case 'stats':
-            return <StatsScreen onBack={onBackToHome} />;
+            screenContent = <StatsScreen onBack={onBackToHome} />;
+            break;
 
         case 'level-progress':
             if (!player) return null;
-            return <LevelProgressScreen
+            screenContent = <LevelProgressScreen
                 player={player}
                 onBack={onBackToHome}
             />;
-
-        default:
-            return null;
+            break;
     }
+
+    return (
+        <Suspense fallback={<LoadingScreen />}>
+            {screenContent}
+        </Suspense>
+    );
 };

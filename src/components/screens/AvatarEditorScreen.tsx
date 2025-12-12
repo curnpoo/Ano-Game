@@ -10,7 +10,7 @@ import { useZoomPan } from '../../hooks/useZoomPan';
 
 interface AvatarEditorScreenProps {
     player: Player;
-    onSave: (strokes: DrawingStroke[], color: string, frame: string, avatarImageUrl?: string) => void;
+    onSave: (strokes: DrawingStroke[], color: string, backgroundColor: string, frame: string, avatarImageUrl?: string) => void;
     onCancel: () => void;
 }
 
@@ -30,12 +30,16 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
 }) => {
     const [strokes, setStrokes] = useState<DrawingStroke[]>(player.avatarStrokes || []);
     const [brushColor, setBrushColor] = useState(player.color || '#FF69B4');
+    // New state for background color
+    const [backgroundColor, setBackgroundColor] = useState(player.backgroundColor || '#ffffff');
     const [selectedFrame, setSelectedFrame] = useState(FRAMES.find(f => f.class === player.frame)?.id || 'none');
     const [brushSize, setBrushSize] = useState(8);
     const [brushType, setBrushType] = useState('default');
     const [isEraser, setIsEraser] = useState(false);
     const [isEyedropper, setIsEyedropper] = useState(false);
     const [history, setHistory] = useState<DrawingStroke[][]>([player.avatarStrokes || []]);
+    // Toggle for color picker mode (brush vs background)
+    const [colorMode, setColorMode] = useState<'brush' | 'background'>('brush');
 
 
     // Data from Cosmetics
@@ -79,11 +83,12 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
         // Render avatar to image for display with proper brush effects
         const avatarImageUrl = AvatarService.renderToDataUrl(
             strokes,
-            player.backgroundColor || '#ffffff',
+            backgroundColor, // Use selected background color
             200
         );
 
-        onSave(strokes, brushColor, frameClass, avatarImageUrl);
+        // Pass background color to save
+        onSave(strokes, brushColor, backgroundColor, frameClass, avatarImageUrl);
         vibrate(HapticPatterns.success);
     };
 
@@ -127,7 +132,7 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
                     {/* Zoomable content wrapper */}
                     <div
                         className="relative w-full h-full rounded-[2rem] overflow-hidden shadow-2xl"
-                        style={{ ...contentStyle, backgroundColor: player.backgroundColor || '#ffffff' }}
+                        style={{ ...contentStyle, backgroundColor: backgroundColor }}
                     >
                         <div className={`absolute inset-0 pointer-events-none z-10 rounded-[2rem] ${FRAMES.find(f => f.id === selectedFrame)?.class}`} style={{ color: brushColor }}></div>
                         <GameCanvas
@@ -153,6 +158,22 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
 
             {/* Tools Area using Toolbar */}
             <div className="bg-gray-800 px-4 pb-8 safe-area-inset-bottom space-y-4">
+                
+                {/* Mode Switcher (Brush / Background) */}
+                <div className="flex justify-center gap-4">
+                     <button
+                        onClick={() => setColorMode('brush')}
+                        className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${colorMode === 'brush' ? 'bg-blue-500 text-white shadow-lg' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                    >
+                        🖌️ Brush
+                    </button>
+                    <button
+                        onClick={() => setColorMode('background')}
+                        className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${colorMode === 'background' ? 'bg-blue-500 text-white shadow-lg' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                    >
+                        🎨 Background
+                    </button>
+                </div>
 
                 {/* Frames - Unique to Avatar Editor, kept separate */}
                 <div className="overflow-x-auto no-scrollbar">
@@ -169,36 +190,65 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
                     </div>
                 </div>
 
-                <Toolbar
-                    brushColor={brushColor}
-                    brushSize={brushSize}
-                    brushType={brushType}
-                    isEraser={isEraser}
-                    isEyedropper={isEyedropper}
-                    onColorChange={(c) => {
-                        setBrushColor(c);
-                        setIsEraser(false);
-                        setIsEyedropper(false);
-                    }}
-                    onSizeChange={setBrushSize}
-                    onTypeChange={(t) => {
-                        setBrushType(t);
-                        setIsEraser(false);
-                        setIsEyedropper(false);
-                    }}
-                    onEraserToggle={() => {
-                        setIsEraser(!isEraser);
-                        setIsEyedropper(false);
-                    }}
-                    onEyedropperToggle={() => {
-                        setIsEyedropper(!isEyedropper);
-                        setIsEraser(false);
-                    }}
-                    onUndo={handleUndo}
-                    onClear={handleClear}
-                    availableColors={availableColors}
-                    availableBrushes={availableBrushes}
-                />
+                <div className={colorMode === 'background' ? 'pointer-events-none opacity-50 blur-sm transition-all' : 'transition-all'}>
+                    <Toolbar
+                        brushColor={brushColor}
+                        brushSize={brushSize}
+                        brushType={brushType}
+                        isEraser={isEraser}
+                        isEyedropper={isEyedropper}
+                        onColorChange={(c) => {
+                             setBrushColor(c);
+                             setIsEraser(false);
+                             setIsEyedropper(false);
+                        }}
+                        onSizeChange={setBrushSize}
+                        onTypeChange={(t) => {
+                            setBrushType(t);
+                            setIsEraser(false);
+                            setIsEyedropper(false);
+                        }}
+                        onEraserToggle={() => {
+                            setIsEraser(!isEraser);
+                            setIsEyedropper(false);
+                        }}
+                        onEyedropperToggle={() => {
+                            setIsEyedropper(!isEyedropper);
+                            setIsEraser(false);
+                        }}
+                        onUndo={handleUndo}
+                        onClear={handleClear}
+                        availableColors={availableColors}
+                        availableBrushes={availableBrushes}
+                    />
+                </div>
+
+                     {/* Background Color Picker (Overlay when mode is background) */}
+                 {colorMode === 'background' && (
+                     <div className="absolute bottom-8 left-4 right-4 bg-gray-800 p-4 rounded-2xl shadow-xl border border-white/10 animate-fade-in z-20">
+                         <h3 className="text-white font-bold mb-3 text-center">Choose Background Color</h3>
+                         <div className="flex flex-wrap gap-3 justify-center">
+                             {availableColors.map(color => (
+                                 <button
+                                     key={color.id}
+                                     onClick={() => setBackgroundColor(color.id)}
+                                     className={`w-10 h-10 rounded-full border-4 transition-all ${backgroundColor === color.id ? 'border-white scale-110' : 'border-transparent hover:scale-105'}`}
+                                     style={{ backgroundColor: color.id }}
+                                     aria-label={color.name}
+                                 />
+                             ))}
+                             {/* White option explicitly if not in list */}
+                             {availableColors.find(c => c.id === '#ffffff') ? null : (
+                                  <button
+                                     onClick={() => setBackgroundColor('#ffffff')}
+                                     className={`w-10 h-10 rounded-full border-4 transition-all ${backgroundColor === '#ffffff' ? 'border-white scale-110' : 'border-transparent hover:scale-105'}`}
+                                     style={{ backgroundColor: '#ffffff' }}
+                                     aria-label="White"
+                                 />
+                             )}
+                         </div>
+                     </div>
+                 )}
             </div>
         </div>
     );

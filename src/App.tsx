@@ -1,11 +1,11 @@
-import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo, Suspense, lazy } from 'react';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { SpeedInsights } from "@vercel/speed-insights/react";
 
 
-import { CasinoScreen } from './components/screens/CasinoScreen';
-
-import { JoiningGameScreen } from './components/screens/JoiningGameScreen';
+// Lazy Load these less critical screens
+const CasinoScreen = lazy(() => import('./components/screens/CasinoScreen').then(module => ({ default: module.CasinoScreen })));
+const JoiningGameScreen = lazy(() => import('./components/screens/JoiningGameScreen').then(module => ({ default: module.JoiningGameScreen })));
 import { AuthService } from './services/auth';
 import { StorageService } from './services/storage';
 import { ImageService } from './services/image';
@@ -18,7 +18,7 @@ import { useDrawingState } from './hooks/useDrawingState';
 import { useGameFlow } from './hooks/useGameFlow';
 import { useRoom } from './hooks/useRoom';
 import { ScreenRouter } from './components/common/ScreenRouter';
-import { HowToPlayModal } from './components/game/HowToPlayModal';
+const HowToPlayModal = lazy(() => import('./components/game/HowToPlayModal').then(module => ({ default: module.HowToPlayModal })));
 import { Toast } from './components/common/Toast';
 import { LoadingScreen } from './components/common/LoadingScreen';
 import { NotificationPromptModal } from './components/common/NotificationPromptModal';
@@ -1181,6 +1181,7 @@ const App = () => {
       const updates = {
         avatarStrokes: profileData.avatarStrokes,
         color: profileData.color,
+        backgroundColor: profileData.backgroundColor,
         frame: profileData.frame,
         // We usually keep the username from auth, but if they changed it here?
         // ProfileSetup allows changing name. Let's update it.
@@ -1801,10 +1802,12 @@ const App = () => {
       {/* Legacy Join Screen Overlay - if stuck in join flow? */}
       {currentScreen === 'joining-game' && pendingRoomCode && (
         <div className="absolute inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">
+        <Suspense fallback={null}>
           <JoiningGameScreen
             roomCode={pendingRoomCode}
             onCancel={handleCancelJoin}
           />
+        </Suspense>
         </div>
       )}
 
@@ -1834,10 +1837,12 @@ const App = () => {
       )}
 
       {showHowToPlay && (
-        <HowToPlayModal
+        <Suspense fallback={null}>
+          <HowToPlayModal
           isOpen={showHowToPlay}
           onClose={handleCloseHowToPlay}
         />
+        </Suspense>
       )}
 
       <NotificationPromptModal
@@ -1851,9 +1856,11 @@ const App = () => {
 
       {/* Casino Overlay */}
       {showCasino && player && (
+      <Suspense fallback={null}>
         <CasinoScreen
-          onClose={() => setShowCasino(false)}
+          onClose={() => setShowCasinoTransition(false)}
         />
+      </Suspense>
       )}
 
       {/* Game Ended & Kicked Modals */}
@@ -1887,21 +1894,23 @@ const App = () => {
 
       {/* Session Confirmation Modal */}
       {pendingConfirmation && (
-        <ConfirmationModal
-          isOpen={!!pendingConfirmation}
-          title={pendingConfirmation.type === 'host' ? (room?.hostId === player?.id ? "End Current Game?" : "Leave Current Game?") : "Leave Current Game?"}
-          message={
-            pendingConfirmation.type === 'host'
-              ? (room?.hostId === player?.id
-                ? "You are hosting a game. Starting a new one will end the current game for everyone."
-                : "You are in a game. Hosting a new one will remove you from the current game.")
-              : "You are already in a game. Joining this new room will remove you from the current one."
-          }
-          confirmLabel={pendingConfirmation.type === 'host' ? (room?.hostId === player?.id ? "End & Host New" : "Leave & Host") : "Leave & Join"}
-          confirmColor={pendingConfirmation.type === 'host' && room?.hostId === player?.id ? 'red' : 'blue'}
-          onConfirm={handleConfirmSessionSwitch}
-          onCancel={() => setPendingConfirmation(null)}
-        />
+        <Suspense fallback={null}>
+          <ConfirmationModal
+            isOpen={!!pendingConfirmation}
+            title={pendingConfirmation.type === 'host' ? (room?.hostId === player?.id ? "End Current Game?" : "Leave Current Game?") : "Leave Current Game?"}
+            message={
+              pendingConfirmation.type === 'host'
+                ? (room?.hostId === player?.id
+                  ? "You are hosting a game. Starting a new one will end the current game for everyone."
+                  : "You are in a game. Hosting a new one will remove you from the current game.")
+                : "You are already in a game. Joining this new room will remove you from the current one."
+            }
+            confirmLabel={pendingConfirmation.type === 'host' ? (room?.hostId === player?.id ? "End & Host New" : "Leave & Host") : "Leave & Join"}
+            confirmColor={pendingConfirmation.type === 'host' && room?.hostId === player?.id ? 'red' : 'blue'}
+            onConfirm={handleConfirmSessionSwitch}
+            onCancel={() => setPendingConfirmation(null)}
+          />
+        </Suspense>
       )}
 
       {/* Game Rewards Modal */}

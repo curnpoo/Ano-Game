@@ -10,6 +10,13 @@ export default defineConfig({
       input: {
         main: './index.html',
       },
+      output: {
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom'],
+          'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/database', 'firebase/storage', 'firebase/analytics', 'firebase/functions'],
+          'vendor-ui': ['@use-gesture/react', 'recharts'],
+        }
+      }
     },
   },
 
