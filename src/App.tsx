@@ -55,6 +55,8 @@ import type { RoomHistoryEntry } from './types';
 
 
 const App = () => {
+  const isBetaBuild = Boolean(import.meta.env.BASE_URL?.startsWith('/beta'));
+
   // --- PWA Update Detection ---
   const intervalMs = 60 * 1000; // Check for updates every 60 seconds
   const [updateAvailable, setUpdateAvailable] = useState(false);
@@ -2042,7 +2044,7 @@ const App = () => {
 
       {/* Version Indicator */}
       <div className="fixed bottom-8 right-6 text-[10px] text-white/20 pointer-events-none z-[1000] font-mono">
-        v0.8
+        v0.8{isBetaBuild ? ' beta' : ''}
       </div>
     </div>
   );
