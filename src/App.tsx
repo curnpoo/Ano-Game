@@ -6,6 +6,18 @@ import { SpeedInsights } from "@vercel/speed-insights/react";
 // Lazy Load these less critical screens
 const CasinoScreen = lazy(() => import('./components/screens/CasinoScreen').then(module => ({ default: module.CasinoScreen })));
 const JoiningGameScreen = lazy(() => import('./components/screens/JoiningGameScreen').then(module => ({ default: module.JoiningGameScreen })));
+
+// Lazy Load Modals & Non-Critical Components
+const HowToPlayModal = lazy(() => import('./components/game/HowToPlayModal').then(module => ({ default: module.HowToPlayModal })));
+const SettingsModal = lazy(() => import('./components/common/SettingsModal').then(module => ({ default: module.SettingsModal })));
+const UpdateNotification = lazy(() => import('./components/common/UpdateNotification').then(module => ({ default: module.UpdateNotification })));
+const ConfirmationModal = lazy(() => import('./components/common/ConfirmationModal').then(module => ({ default: module.ConfirmationModal })));
+const ProfileCardModal = lazy(() => import('./components/common/ProfileCardModal').then(module => ({ default: module.ProfileCardModal })));
+const GameInviteCard = lazy(() => import('./components/common/GameInviteCard').then(module => ({ default: module.GameInviteCard })));
+const TurnReminderCard = lazy(() => import('./components/common/TurnReminderCard').then(module => ({ default: module.TurnReminderCard })));
+const NotificationPromptModal = lazy(() => import('./components/common/NotificationPromptModal').then(module => ({ default: module.NotificationPromptModal })));
+
+import { FontLoader } from './components/common/FontLoader';
 import { AuthService } from './services/auth';
 import { StorageService } from './services/storage';
 import { ImageService } from './services/image';
@@ -18,18 +30,11 @@ import { useDrawingState } from './hooks/useDrawingState';
 import { useGameFlow } from './hooks/useGameFlow';
 import { useRoom } from './hooks/useRoom';
 import { ScreenRouter } from './components/common/ScreenRouter';
-const HowToPlayModal = lazy(() => import('./components/game/HowToPlayModal').then(module => ({ default: module.HowToPlayModal })));
 import { Toast } from './components/common/Toast';
 import { LoadingScreen } from './components/common/LoadingScreen';
-import { NotificationPromptModal } from './components/common/NotificationPromptModal';
-import { SettingsModal } from './components/common/SettingsModal';
-import { UpdateNotification } from './components/common/UpdateNotification';
-import { ConfirmationModal } from './components/common/ConfirmationModal';
-import { ProfileCardModal } from './components/common/ProfileCardModal';
 import { TunnelTransition, CasinoTransition, GlobalBlurTransition } from './components/common/ScreenTransition';
 import { MonogramBackground } from './components/common/MonogramBackground';
-import { GameInviteCard } from './components/common/GameInviteCard';
-import { TurnReminderCard } from './components/common/TurnReminderCard';
+
 import {
   notifyYourTurnToUpload,
   notifyDrawingPhaseStarted,
@@ -1724,10 +1729,10 @@ const App = () => {
   };
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-black text-white select-none touch-none">
+    <div className="min-h-screen w-full bg-black text-white touch-none select-none overflow-hidden relative" style={{ colorScheme: 'dark' }}>
+      <FontLoader />
       <SpeedInsights />
-
-      {/* Global Background - Applied to all screens */}
+      {/* Background (Persists across some routes) */}
       {/* Note: User requested safe storage of this background with subtle settings for screens */}
       <MonogramBackground speed="slow" blur="none" opacity={0.15} />
 
@@ -1822,18 +1827,20 @@ const App = () => {
 
       {/* Modals & Overlays */}
       {showSettings && player && (
-        <SettingsModal
-          player={player}
-          players={room?.players}
-          roomCode={roomCode}
-          isHost={room?.hostId === player?.id}
-          onClose={() => setShowSettings(false)}
-          onUpdateProfile={handleUpdateProfile}
-          onLeaveGame={roomCode ? () => handleLeaveGame('room-selection') : undefined}
-          onEndGame={room?.hostId === player?.id ? handleEndGame : undefined}
-          onGoHome={roomCode ? handleMinimizeGame : undefined}
-          onKick={handleKickPlayer}
-        />
+        <Suspense fallback={null}>
+          <SettingsModal
+            player={player}
+            players={room?.players}
+            roomCode={roomCode}
+            isHost={room?.hostId === player?.id}
+            onClose={() => setShowSettings(false)}
+            onUpdateProfile={handleUpdateProfile}
+            onLeaveGame={roomCode ? () => handleLeaveGame('room-selection') : undefined}
+            onEndGame={room?.hostId === player?.id ? handleEndGame : undefined}
+            onGoHome={roomCode ? handleMinimizeGame : undefined}
+            onKick={handleKickPlayer}
+          />
+        </Suspense>
       )}
 
       {showHowToPlay && (
@@ -1845,14 +1852,16 @@ const App = () => {
         </Suspense>
       )}
 
-      <NotificationPromptModal
-        isOpen={showNotificationPrompt}
-        onEnable={() => {
-          setShowNotificationPrompt(false);
-          requestPushPermission();
-        }}
-        onLater={() => setShowNotificationPrompt(false)}
-      />
+      <Suspense fallback={null}>
+        <NotificationPromptModal
+          isOpen={showNotificationPrompt}
+          onEnable={() => {
+            setShowNotificationPrompt(false);
+            requestPushPermission();
+          }}
+          onLater={() => setShowNotificationPrompt(false)}
+        />
+      </Suspense>
 
       {/* Casino Overlay */}
       {showCasino && player && (
@@ -1999,45 +2008,53 @@ const App = () => {
 
       {/* Update Notification - Hidden during critical gameplay screens */}
       {showUpdateNotification && !['drawing', 'voting', 'uploading', 'sabotage-selection'].includes(currentScreen) && (
-        <UpdateNotification
-          onUpdate={handleUpdateApp}
-          onDismiss={handleDismissUpdate}
-        />
+        <Suspense fallback={null}>
+          <UpdateNotification
+            onUpdate={handleUpdateApp}
+            onDismiss={handleDismissUpdate}
+          />
+        </Suspense>
       )}
 
       {/* Profile Card Modal - Shown from notification View action */}
       {viewProfileUser && (
-        <ProfileCardModal
-          user={viewProfileUser}
-          onClose={() => setViewProfileUser(null)}
-          onJoin={handleJoinRoom}
-        />
+        <Suspense fallback={null}>
+          <ProfileCardModal
+            user={viewProfileUser}
+            onClose={() => setViewProfileUser(null)}
+            onJoin={handleJoinRoom}
+          />
+        </Suspense>
       )}
 
       {/* Game Invite Modal - Shown from background notification click */}
       {activeInvite && (
-        <GameInviteCard
-          invite={activeInvite}
-          onJoin={(code) => {
-            setActiveInvite(null);
-            handleJoinRoom(code);
-          }}
-          onDecline={() => setActiveInvite(null)}
-        />
+        <Suspense fallback={null}>
+          <GameInviteCard
+            invite={activeInvite}
+            onJoin={(code) => {
+              setActiveInvite(null);
+              handleJoinRoom(code);
+            }}
+            onDecline={() => setActiveInvite(null)}
+          />
+        </Suspense>
       )}
 
       {/* Turn Reminder Modal - Shown from background notification click */}
       {activeTurnReminder && (
-        <TurnReminderCard
-          roomCode={activeTurnReminder.roomCode}
-          onGoToGame={() => {
-             setActiveTurnReminder(null);
-             if (activeTurnReminder.roomCode) {
-               handleJoinRoom(activeTurnReminder.roomCode);
-             }
-          }}
-          onDismiss={() => setActiveTurnReminder(null)}
-        />
+        <Suspense fallback={null}>
+          <TurnReminderCard
+            roomCode={activeTurnReminder.roomCode}
+            onGoToGame={() => {
+               setActiveTurnReminder(null);
+               if (activeTurnReminder.roomCode) {
+                 handleJoinRoom(activeTurnReminder.roomCode);
+               }
+            }}
+            onDismiss={() => setActiveTurnReminder(null)}
+          />
+        </Suspense>
       )}
 
       {/* Version Indicator */}
