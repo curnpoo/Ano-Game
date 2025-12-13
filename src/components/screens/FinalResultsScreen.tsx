@@ -6,6 +6,7 @@ import { StatsHistoryService } from '../../services/statsHistory';
 import { GalleryService } from '../../services/galleryService';
 import type { GameRoom } from '../../types';
 import { Confetti } from '../common/Confetti';
+import { AvatarDisplay } from '../common/AvatarDisplay';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
 
 
@@ -185,11 +186,17 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                 {second && (
                     <div className="flex flex-col items-center pop-in" style={{ animationDelay: '0.3s' }}>
                         <div className="text-5xl mb-2">🥈</div>
-                        <div
-                            className="w-24 h-24 rounded-full flex items-center justify-center text-3xl font-bold text-white mb-2 border-4 border-white shadow-xl"
-                            style={{ backgroundColor: second.color }}
-                        >
-                            {second.name.charAt(0).toUpperCase()}
+                        <div className="mb-2 relative">
+                             <AvatarDisplay
+                                avatar={second.avatar}
+                                strokes={second.avatarStrokes}
+                                backgroundColor={second.color}
+                                size={96} // w-24 = 96px
+                                className="border-4 border-white shadow-xl"
+                            />
+                            <div className="absolute -bottom-2 -right-2 bg-gray-400 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold border-2 border-white shadow-sm">
+                                2
+                            </div>
                         </div>
                         <div className="bg-gradient-to-b from-gray-300 to-gray-400 w-28 h-28 rounded-t-2xl flex flex-col items-center justify-center border-t border-white/30"
                             style={{ boxShadow: '0 6px 0 rgba(0,0,0,0.2)' }}>
@@ -205,14 +212,17 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                 {first && (
                     <div className="flex flex-col items-center pop-in" style={{ animationDelay: '0.1s' }}>
                         <div className="text-6xl mb-2 animate-bounce">👑</div>
-                        <div
-                            className="w-32 h-32 rounded-full flex items-center justify-center text-4xl font-bold text-white mb-2 border-4 border-yellow-300 shadow-xl"
-                            style={{
-                                backgroundColor: first.color,
-                                boxShadow: '0 8px 0 rgba(0,0,0,0.2), 0 0 30px rgba(255, 215, 0, 0.5)'
-                            }}
-                        >
-                            {first.name.charAt(0).toUpperCase()}
+                        <div className="mb-2 relative">
+                            <AvatarDisplay
+                                avatar={first.avatar}
+                                strokes={first.avatarStrokes}
+                                backgroundColor={first.color}
+                                size={128} // w-32 = 128px
+                                className="border-4 border-yellow-300 shadow-xl"
+                            />
+                            <div className="absolute -bottom-3 -right-2 bg-yellow-400 text-white w-10 h-10 rounded-full flex items-center justify-center font-bold text-xl border-2 border-white shadow-sm">
+                                1
+                            </div>
                         </div>
                         <div className="bg-gradient-to-b from-yellow-400 to-yellow-500 w-36 h-36 rounded-t-2xl flex flex-col items-center justify-center border-t border-white/30"
                             style={{ boxShadow: '0 6px 0 rgba(0,0,0,0.2)' }}>
@@ -228,11 +238,17 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                 {third && (
                     <div className="flex flex-col items-center pop-in" style={{ animationDelay: '0.5s' }}>
                         <div className="text-4xl mb-2">🥉</div>
-                        <div
-                            className="w-20 h-20 rounded-full flex items-center justify-center text-2xl font-bold text-white mb-2 border-4 border-white shadow-xl"
-                            style={{ backgroundColor: third.color }}
-                        >
-                            {third.name.charAt(0).toUpperCase()}
+                        <div className="mb-2 relative">
+                            <AvatarDisplay
+                                avatar={third.avatar}
+                                strokes={third.avatarStrokes}
+                                backgroundColor={third.color}
+                                size={80} // w-20 = 80px
+                                className="border-4 border-white shadow-xl"
+                            />
+                            <div className="absolute -bottom-2 -right-2 bg-orange-400 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm font-bold border-2 border-white shadow-sm">
+                                3
+                            </div>
                         </div>
                         <div className="bg-gradient-to-b from-orange-300 to-orange-400 w-24 h-20 rounded-t-2xl flex flex-col items-center justify-center border-t border-white/30"
                             style={{ boxShadow: '0 6px 0 rgba(0,0,0,0.2)' }}>
@@ -264,12 +280,13 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                         >
                             <div className="flex items-center gap-3">
                                 <span className="font-bold w-6" style={{ color: 'var(--theme-text-secondary)' }}>#{i + 1}</span>
-                                <div
-                                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-bold shadow-sm"
-                                    style={{ backgroundColor: player.color }}
-                                >
-                                    {player.name.charAt(0).toUpperCase()}
-                                </div>
+                                <AvatarDisplay
+                                    avatar={player.avatar}
+                                    strokes={player.avatarStrokes}
+                                    backgroundColor={player.color}
+                                    size={32}
+                                    className="shadow-sm"
+                                />
                                 <span className="font-bold" style={{ color: 'var(--theme-text)' }}>{player.name}</span>
                                 {player.id === currentPlayerId && (
                                     <span className="text-xs opacity-60 font-bold" style={{ color: 'var(--theme-text)' }}>(You)</span>

@@ -1,6 +1,6 @@
 import { Suspense, lazy } from 'react';
 import type { Screen, Player, GameRoom, GameSettings, RoomHistoryEntry } from '../../types';
-import { LoadingScreen } from './LoadingScreen';
+
 
 // Lazy Load Screens
 const WelcomeScreen = lazy(() => import('../screens/WelcomeScreen').then(module => ({ default: module.WelcomeScreen })));
@@ -451,7 +451,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
     }
 
     return (
-        <Suspense fallback={<LoadingScreen />}>
+        <Suspense fallback={null}>
             {screenContent}
         </Suspense>
     );
