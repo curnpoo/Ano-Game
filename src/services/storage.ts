@@ -615,7 +615,12 @@ export const StorageService = {
         // Check if already in players
         const existingPlayerIndex = room.players.findIndex(p => p.id === player.id);
         if (existingPlayerIndex >= 0) {
-            room.players[existingPlayerIndex] = { ...player, lastSeen: Date.now() };
+            // Keep stats/states, but update profile info
+            room.players[existingPlayerIndex] = { 
+                ...room.players[existingPlayerIndex],
+                ...player, 
+                lastSeen: Date.now() 
+            };
             await StorageService.saveRoom(room);
             StorageService.saveRoomToHistory(room);
             // Ensure status is updated (might have been cleared if they were kicked)
@@ -626,7 +631,11 @@ export const StorageService = {
         // Check if already in waitingPlayers
         const existingWaitingIndex = room.waitingPlayers?.findIndex(p => p.id === player.id) ?? -1;
         if (existingWaitingIndex >= 0 && room.waitingPlayers) {
-            room.waitingPlayers[existingWaitingIndex] = { ...player, lastSeen: Date.now() };
+            room.waitingPlayers[existingWaitingIndex] = {
+                 ...room.waitingPlayers[existingWaitingIndex],
+                 ...player,
+                 lastSeen: Date.now() 
+            };
             await StorageService.saveRoom(room);
             StorageService.saveRoomToHistory(room);
             if (currentUser) await AuthService.updateUser(player.id, { currentRoomCode: roomCode });
@@ -657,6 +666,18 @@ export const StorageService = {
         if (currentUser) await AuthService.updateUser(player.id, { currentRoomCode: roomCode });
 
         return room;
+    },
+
+    // Update specific player stats in the room (e.g. after game end)
+    updatePlayerStats: async (roomCode: string, playerId: string, updates: Partial<Player>): Promise<void> => {
+        await StorageService.updateRoom(roomCode, (r) => {
+            const playerIndex = r.players.findIndex(p => p.id === playerId);
+            if (playerIndex >= 0) {
+                const current = r.players[playerIndex];
+                r.players[playerIndex] = { ...current, ...updates };
+            }
+            return r;
+        });
     },
 
     removePlayerFromRoom: async (roomCode: string, playerId: string): Promise<void> => {

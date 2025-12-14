@@ -188,9 +188,11 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                         <div className="text-5xl mb-2">🥈</div>
                         <div className="mb-2 relative">
                              <AvatarDisplay
+                                playerId={second.id}
                                 avatar={second.avatar}
                                 strokes={second.avatarStrokes}
-                                backgroundColor={second.color}
+                                color={second.color}
+                                backgroundColor={second.backgroundColor || '#ffffff'}
                                 size={96} // w-24 = 96px
                                 className="border-4 border-white shadow-xl"
                             />
@@ -214,9 +216,11 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                         <div className="text-6xl mb-2 animate-bounce">👑</div>
                         <div className="mb-2 relative">
                             <AvatarDisplay
+                                playerId={first.id}
                                 avatar={first.avatar}
                                 strokes={first.avatarStrokes}
-                                backgroundColor={first.color}
+                                color={first.color}
+                                backgroundColor={first.backgroundColor || '#ffffff'}
                                 size={128} // w-32 = 128px
                                 className="border-4 border-yellow-300 shadow-xl"
                             />
@@ -240,9 +244,11 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                         <div className="text-4xl mb-2">🥉</div>
                         <div className="mb-2 relative">
                             <AvatarDisplay
+                                playerId={third.id}
                                 avatar={third.avatar}
                                 strokes={third.avatarStrokes}
-                                backgroundColor={third.color}
+                                color={third.color}
+                                backgroundColor={third.backgroundColor || '#ffffff'}
                                 size={80} // w-20 = 80px
                                 className="border-4 border-white shadow-xl"
                             />
@@ -281,9 +287,11 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                             <div className="flex items-center gap-3">
                                 <span className="font-bold w-6" style={{ color: 'var(--theme-text-secondary)' }}>#{i + 1}</span>
                                 <AvatarDisplay
+                                    playerId={player.id}
                                     avatar={player.avatar}
                                     strokes={player.avatarStrokes}
-                                    backgroundColor={player.color}
+                                    color={player.color}
+                                    backgroundColor={player.backgroundColor || '#ffffff'}
                                     size={32}
                                     className="shadow-sm"
                                 />

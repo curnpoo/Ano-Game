@@ -54,7 +54,7 @@ const LobbyPlayerRowBase: React.FC<LobbyPlayerRowProps> = ({
                         strokes={player.avatarStrokes}
                         avatar={player.avatar}
                         color={player.color}
-                        backgroundColor={player.backgroundColor}
+                        backgroundColor={player.backgroundColor || '#ffffff'}
                         size={56}
                         playerId={player.id}
                     />

@@ -27,8 +27,8 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
     className = '',
     playerId
 }) => {
-    // If strokes are NOT provided, try to fetch them
-    const { strokes: fetchedStrokes, isLoading } = useAvatar(strokes ? undefined : playerId);
+    // If strokes are NOT provided (undefined OR empty array), try to fetch them
+    const { strokes: fetchedStrokes, isLoading } = useAvatar((!strokes || strokes.length === 0) ? playerId : undefined);
 
     // Ensure backgroundColor has a valid default (handles undefined, null, empty string)
     const bgColor = backgroundColor || '#ffffff';

@@ -1074,6 +1074,13 @@ const App = () => {
     if (AuthService.isLoggedIn()) {
       await AuthService.updateUser(player.id, { xp: XPService.getXP() });
     }
+
+    // 5. Update Player Stats in Room (for Lobby Display)
+    // This ensures that if they level up during the game, it shows immediately in lobby/results
+    await StorageService.updatePlayerStats(currentRoom.roomCode, player.id, {
+      xp: XPService.getXP(),
+      level: XPService.getLevel()
+    });
   };
 
   async function handleGameEndRewards(currentRoom: GameRoom) {
@@ -1113,6 +1120,12 @@ const App = () => {
     if (AuthService.isLoggedIn()) {
       await AuthService.updateUser(player.id, { xp: XPService.getXP() });
     }
+
+    // 5. Update Player Stats in Room (for Lobby Display)
+    await StorageService.updatePlayerStats(currentRoom.roomCode, player.id, {
+      xp: XPService.getXP(),
+      level: XPService.getLevel()
+    });
   };
 
   function handlePlayNow() {
