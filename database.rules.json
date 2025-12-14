@@ -1,6 +1,18 @@
 {
     "rules": {
         ".read": true,
-        ".write": true
+        ".write": true,
+        "users": {
+            ".indexOn": ["username"]
+        },
+        "rooms": {
+            ".indexOn": ["status"]
+        },
+        "invites": {
+             ".indexOn": ["toUserId", "sentAt"]
+        },
+        "friendRequests": {
+            ".indexOn": ["fromUserId", "toUserId"]
+        }
     }
 }
