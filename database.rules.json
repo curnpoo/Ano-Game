@@ -1,56 +1,6 @@
 {
     "rules": {
         ".read": true,
-        ".write": true,
-        "rooms": {
-            "$room_id": {
-                ".validate": "newData.hasChildren(['status', 'hostId'])",
-                "status": {
-                    ".validate": "newData.isString()"
-                },
-                "roundNumber": {
-                    ".validate": "newData.isNumber()"
-                },
-                "players": {
-                    "$player_index": {
-                        ".validate": "newData.hasChildren(['id', 'name'])"
-                    }
-                }
-            },
-            ".indexOn": [
-                "status"
-            ]
-        },
-        "users": {
-            "$user_id": {
-                ".validate": "newData.hasChild('username')",
-                "username": {
-                    ".validate": "newData.isString() && newData.val().length < 30"
-                }
-            },
-            ".indexOn": [
-                "username"
-            ]
-        },
-        "invites": {
-            "$invite_id": {
-                ".validate": "newData.hasChildren(['fromUserId', 'toUserId', 'roomCode', 'sentAt', 'status'])"
-            },
-            ".indexOn": [
-                "toUserId",
-                "sentAt"
-            ]
-        },
-        "friendRequests": {
-            ".indexOn": [
-                "fromUserId",
-                "toUserId"
-            ]
-        },
-        "pushTokens": {
-            "$user_id": {
-                ".validate": "newData.hasChild('token')"
-            }
-        }
+        ".write": true
     }
 }
