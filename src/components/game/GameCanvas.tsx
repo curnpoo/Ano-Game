@@ -13,7 +13,8 @@ interface GameCanvasProps {
     isEraser?: boolean;
     isEyedropper?: boolean;
     onColorPick?: (color: string) => void;
-    zoomScale?: number; // Current zoom level for coordinate compensation
+    zoomScale?: number;
+    sabotageType?: string;
 }
 
 export const GameCanvas: React.FC<GameCanvasProps> = ({
@@ -27,7 +28,8 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     isEraser = false,
     isEyedropper = false,
     onColorPick,
-    zoomScale: _zoomScale = 1 // Available for future use; getBoundingClientRect handles transforms
+    zoomScale: _zoomScale = 1,
+    sabotageType
 }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -316,10 +318,18 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         const rect = canvas.getBoundingClientRect();
         const clientX = 'touches' in e ? e.touches[0].clientX : (e as React.MouseEvent).clientX;
         const clientY = 'touches' in e ? e.touches[0].clientY : (e as React.MouseEvent).clientY;
-        return {
-            x: ((clientX - rect.left) / rect.width) * 100,
-            y: ((clientY - rect.top) / rect.height) * 100
-        };
+        
+        let x = ((clientX - rect.left) / rect.width) * 100;
+        let y = ((clientY - rect.top) / rect.height) * 100;
+
+        // Apply Sabotage: Visual Distortion (Shake & Blur)
+        if (sabotageType === 'visual_distortion') {
+            const jitterAmount = 1.5; // % of canvas size
+            x += (Math.random() - 0.5) * jitterAmount;
+            y += (Math.random() - 0.5) * jitterAmount;
+        }
+
+        return { x, y };
     };
 
     const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {

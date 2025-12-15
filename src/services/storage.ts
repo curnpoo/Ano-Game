@@ -904,6 +904,16 @@ export const StorageService = {
         }));
     },
 
+    // Saboteur skips (or time runs out)
+    skipSabotage: async (roomCode: string): Promise<GameRoom | null> => {
+        return StorageService.updateRoom(roomCode, (r) => ({
+            ...r,
+            sabotageTargetId: null,
+            sabotageEffect: null as any,
+            status: 'drawing'
+        }));
+    },
+
     // Trigger sabotage effect when target starts drawing
     triggerSabotage: async (roomCode: string): Promise<GameRoom | null> => {
         return StorageService.updateRoom(roomCode, (r) => ({

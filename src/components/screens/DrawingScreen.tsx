@@ -233,8 +233,7 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                 <div className="bubble bg-purple-500/10 w-96 h-96 right-0 bottom-0 animation-delay-2000 blur-3xl rounded-full absolute animate-float-slow"></div>
             </div>
 
-            {/* Sabotage Overlay */}
-            <SabotageOverlay isActive={!!isSabotaged} />
+
 
             {/* Canvas Area - Maximized */}
             <div className="relative w-full h-full max-w-lg mx-auto flex flex-col p-4 pt-32 safe-area-padding">
@@ -304,20 +303,20 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                                     }}
                                 />
                             )}
-
                             <GameCanvas
-                                imageUrl={room.currentImage?.url || ''}
-                                isDrawingEnabled={isMyTimerRunning && !hasSubmitted && !isPinching}
-                                brushColor={brushColor}
-                                brushSize={brushSize}
-                                brushType={brushType}
-                                isEraser={isEraser}
-                                strokes={strokes}
-                                onStrokesChange={setStrokes}
-                                isEyedropper={isEyedropper}
-                                onColorPick={handleColorPick}
-                                zoomScale={scale}
-                            />
+                                    imageUrl={room.currentImage?.url || ''}
+                                    brushColor={brushColor}
+                                    brushSize={brushSize}
+                                    brushType={brushType}
+                                    isDrawingEnabled={showDrawingUI && transitionState === 'drawing' && !isPinching}
+                                    strokes={strokes}
+                                    onStrokesChange={setStrokes}
+                                    isEraser={isEraser}
+                                    isEyedropper={isEyedropper}
+                                    onColorPick={handleColorPick}
+                                    zoomScale={scale}
+                                    sabotageType={isSabotaged ? sabotageEffect?.type : undefined}
+                                />
 
                             {/* Submitted Overlay */}
                             {hasSubmitted && (
@@ -442,8 +441,11 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
             {/* GO! State */}
             {(transitionState === 'go' || transitionState === 'fading') && (
                 <div
-                    className="absolute inset-0 bg-gradient-to-br from-lime-400/90 to-emerald-600/90 backdrop-blur-md flex items-center justify-center z-50 transition-opacity duration-500"
-                    style={{ opacity: transitionState === 'fading' ? 0 : 1 }}
+                    className={`absolute inset-0 bg-gradient-to-br from-lime-400/90 to-emerald-600/90 backdrop-blur-md flex items-center justify-center z-50 transition-opacity duration-500 ${transitionState === 'fading' ? 'backdrop-blur-none' : ''}`}
+                    style={{ 
+                        opacity: transitionState === 'fading' ? 0 : 1,
+                        pointerEvents: transitionState === 'fading' ? 'none' : 'auto'
+                    }}
                 >
                     <div
                         className="text-9xl font-black text-white drop-shadow-2xl transition-all duration-500 animate-bounce-gentle"
@@ -456,6 +458,16 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                     </div>
                 </div>
             )}
+            {/* Sabotage Overlay - Placed last to ensure it overlays everything */}
+            <SabotageOverlay 
+                isActive={!!isSabotaged} 
+                effectName={
+                    isSabotaged && sabotageEffect?.type === 'reduce_colors' ? 'Monochrome Madness' :
+                    isSabotaged && sabotageEffect?.type === 'visual_distortion' ? 'Shake & Blur' :
+                    isSabotaged && sabotageEffect?.type === 'subtract_time' ? 'Time Thief' :
+                    undefined
+                }
+            />
         </div>
     );
 };

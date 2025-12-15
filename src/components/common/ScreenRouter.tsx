@@ -74,6 +74,7 @@ interface ScreenRouterProps {
 
     // Sabotage
     onSabotageSelect: (targetId: string, effect: SabotageEffect) => void;
+    onSabotageSkip: () => void;
 
     // Drawing Specifics
     isMyTimerRunning: boolean;
@@ -140,6 +141,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
     onShowRewards,
     onEquipTheme,
     onSabotageSelect,
+    onSabotageSkip,
     isMyTimerRunning,
     isReadying,
     onReady,
@@ -435,6 +437,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                 saboteurId={room.saboteurId || ''}
                 currentPlayerId={player.id}
                 onSelect={onSabotageSelect}
+                onSkip={onSabotageSkip}
             />;
             break;
 

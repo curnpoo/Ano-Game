@@ -1570,6 +1570,16 @@ const App = () => {
     }
   };
 
+  const handleSabotageSkip = async () => {
+    if (!roomCode) return;
+    try {
+      await StorageService.skipSabotage(roomCode);
+    } catch (err) {
+      console.error('Failed to skip sabotage:', err);
+      showError(err);
+    }
+  };
+
   const handleLeaveGame = async (targetScreen: Screen = 'room-selection') => {
     // 1. Capture state needed for cleanup
     const roomCodeToLeave = roomCode;
@@ -1812,6 +1822,7 @@ const App = () => {
           onShowRewards={showGameRewards}
           onEquipTheme={handleEquipTheme}
           onSabotageSelect={handleSabotageSelect}
+          onSabotageSkip={handleSabotageSkip}
           isMyTimerRunning={isMyTimerRunning}
           isReadying={isReadying}
           onReady={handleReady}
