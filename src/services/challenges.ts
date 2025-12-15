@@ -2,7 +2,7 @@ import { AuthService } from './auth';
 import type { Challenge, PlayerChallengeState, ChallengeAction } from '../types';
 import { CurrencyService } from './currency';
 import { XPService } from './xp';
-import type { UserAccount } from '../types';
+
 
 const CHALLENGE_POOL: Omit<Challenge, 'id' | 'type'>[] = [
     {
@@ -103,7 +103,7 @@ export const ChallengeService = {
         // Let's rely on the action string encoded in the ID or just matching content.
         // REAL IMPLEMENTATION: The pool should have stable IDs.
         // Let's fix this by finding a matching template based on the ID prefix we set.
-        const action = state.challengeId.split('_')[0] + (state.challengeId.split('_').length > 3 ? '_' + state.challengeId.split('_')[1] : ''); 
+
         
         // Try to find by action matching corresponding pool item
         // This logic is fragile. Let's make the pool items have IDs.

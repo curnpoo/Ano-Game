@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ChallengeService } from '../../services/challenges';
-import { CurrencyService, formatCurrency } from '../../services/currency';
-import { XPService } from '../../services/xp';
+
 import type { PlayerChallengeState, Challenge } from '../../types';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
 
