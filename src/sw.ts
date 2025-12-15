@@ -62,16 +62,17 @@ messaging.onBackgroundMessage((payload: any) => {
     // contains a "notification" block.
     // We only need to manually show a notification if it's a "data-only" message.
     if (payload.notification) {
-        console.log('[SW] Payload has "notification" block - letting OS handle display to prevent duplicates.');
-        return;
+        console.log('[SW] Payload has "notification" block. forcing manual display to ensure visibility.');
+        // console.log('[SW] Payload has "notification" block - letting OS handle display to prevent duplicates.');
+        // return;
     }
 
-    const notificationTitle = payload.data?.title || 'ANO Game';
+    const notificationTitle = payload.data?.title || payload.notification?.title || 'ANO Game';
     const roomCode = payload.data?.roomCode;
     const clickUrl = payload.data?.click_action || (roomCode ? `/?invite=${roomCode}` : '/');
     
     const notificationOptions = {
-        body: payload.data?.body || 'You have a new notification!',
+        body: payload.data?.body || payload.notification?.body || 'You have a new notification!',
         icon: '/pwa-icon.png',
         badge: '/pwa-icon.png',
         tag: payload.data?.type || 'game-notification',

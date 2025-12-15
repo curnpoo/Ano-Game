@@ -40,16 +40,16 @@ export const SabotageOverlay: React.FC<SabotageOverlayProps> = ({ isActive, effe
                 }
             `}</style>
 
-            {/* Warning banner */}
-            <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[100] animate-bounce w-full max-w-sm text-center px-4">
-                <div className="bg-red-600 text-white px-6 py-3 rounded-full font-bold shadow-lg border-2 border-red-400">
-                    <div className="flex items-center justifying-center gap-2 mb-1 justify-center text-lg">
+            {/* Warning banner - Compact & Stationary */}
+            <div className="fixed top-20 left-0 right-0 z-[100] flex justify-center pointer-events-none">
+                <div className="bg-red-600/90 backdrop-blur-sm text-white px-4 py-2 rounded-full font-bold shadow-xl border border-red-400/50 flex flex-col items-center justify-center transform hover:scale-105 transition-transform">
+                    <div className="flex items-center gap-2 text-sm leading-none">
                         <span className="animate-pulse">⚠️</span>
                         SABOTAGED!
                         <span className="animate-pulse">⚠️</span>
                     </div>
                     {effectName && (
-                        <div className="text-sm text-red-100 font-normal uppercase tracking-wider">
+                        <div className="text-[10px] text-red-100 font-medium uppercase tracking-widest mt-0.5">
                             {effectName}
                         </div>
                     )}
