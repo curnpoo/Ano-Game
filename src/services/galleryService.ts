@@ -6,7 +6,7 @@ import type { GalleryGame, GalleryRound, GalleryDrawing, DrawingStroke, GameRoom
 
 
 const GALLERY_PATH = 'gallery';
-const MAX_GALLERY_GAMES = 3;
+const MAX_GALLERY_GAMES = 10;
 
 export const GalleryService = {
     /**
@@ -86,15 +86,19 @@ export const GalleryService = {
             }
         };
 
-        // Save to ALL participants' galleries (server-side for everyone)
-        const savePromises = playerIds.map(async (playerId) => {
-            const galleryRef = ref(database, `${GALLERY_PATH}/${playerId}/${gameId}`);
+        // Save ONLY to the current user's gallery
+        // Each player's client handles their own saving
+        try {
+            const galleryRef = ref(database, `${GALLERY_PATH}/${currentUser.id}/${gameId}`);
             await set(galleryRef, galleryGame);
-            // Prune old games for each player (keep only last 3)
-            await GalleryService.pruneOldGames(playerId);
-        });
-
-        await Promise.all(savePromises);
+            
+            // Prune old games for current user
+            await GalleryService.pruneOldGames(currentUser.id);
+            console.log('Game saved to gallery successfully');
+        } catch (error) {
+            console.error('Error saving game to gallery:', error);
+            // Don't throw, just log. We don't want to break the UI.
+        }
     },
 
 
