@@ -3,6 +3,7 @@ import type { GameRoom, Player } from '../../types';
 import { GameCanvas } from '../game/GameCanvas';
 import { BentoToolbar } from '../game/BentoToolbar';
 import { DrawingTimer } from '../game/DrawingTimer';
+import { SabotageOverlay } from '../game/SabotageOverlay';
 import { ZoomResetButton } from '../game/ZoomResetButton';
 import { AvatarDisplay } from '../common/AvatarDisplay';
 import { useZoomPan } from '../../hooks/useZoomPan';
@@ -187,18 +188,32 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
         }
     }, [transitionState, countdownValue, onReady]);
 
-    // Effect: Reduce Colors
+    // Effect: Reduce Colors (Monochrome Madness)
     const effectiveAvailableColors = useMemo(() => {
         if (isSabotaged && sabotageEffect?.type === 'reduce_colors') {
             return [
                 { id: '#000000', name: 'Black', price: 0 },
                 { id: '#FFFFFF', name: 'White', price: 0 },
-                { id: '#FF0000', name: 'Red', price: 0 },
-                { id: '#555555', name: 'Gray', price: 0 }
+                { id: '#333333', name: 'Dark Gray', price: 0 },
+                { id: '#888888', name: 'Gray', price: 0 },
+                { id: '#CCCCCC', name: 'Light Gray', price: 0 }
             ];
         }
         return CosmeticsService.getAvailableColors();
     }, [isSabotaged, sabotageEffect]);
+
+    // Effect: Sabotage Notification
+    useEffect(() => {
+        if (isSabotaged) {
+             // Dispatch a custom event or use a toast if available via props (not available here directly?)
+             // DrawingScreen doesn't have showToast prop, but we can standard alerts or just rely on the visual overlay.
+             // Actually, the overlay already says "SABOTAGED!" in SabotageOverlay.tsx which is likely rendered by GameCanvas or above?
+             // Wait, SabotageOverlay.tsx is NOT used in DrawingScreen.tsx yet. I need to check where it is used.
+             // It seems I need to add SabotageOverlay to DrawingScreen.tsx or verify if it's there.
+             // Looking at previous file view of DrawingScreen.tsx, it DOES NOT import SabotageOverlay.
+             // I should add it.
+        }
+    }, [isSabotaged]);
 
     // Effect: Visual Distortion & Animation
     const baseContainerClass = "fixed inset-0 w-full h-[100dvh] overflow-hidden flex flex-col items-center justify-center bg-black/5"; // Added bg for depth
@@ -217,6 +232,9 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                 <div className="bubble bg-white/10 w-64 h-64 -left-10 -top-10 animation-delay-0 blur-xl rounded-full absolute animate-float"></div>
                 <div className="bubble bg-purple-500/10 w-96 h-96 right-0 bottom-0 animation-delay-2000 blur-3xl rounded-full absolute animate-float-slow"></div>
             </div>
+
+            {/* Sabotage Overlay */}
+            <SabotageOverlay isActive={!!isSabotaged} />
 
             {/* Canvas Area - Maximized */}
             <div className="relative w-full h-full max-w-lg mx-auto flex flex-col p-4 pt-32 safe-area-padding">

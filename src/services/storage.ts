@@ -833,16 +833,33 @@ export const StorageService = {
             // Check if this is the sabotage round
             const nextRoundNumber = r.roundNumber + 1;
             const isSabotageRound = r.sabotageRound === nextRoundNumber;
+            let saboteurId: string | null = null;
+            let nextStatus: 'drawing' | 'sabotage-selection' = 'drawing';
 
-            // Pick a random saboteur (not the uploader) for sabotage round
-            const eligibleSaboteurs = r.players.filter(p => p.id !== uploadedBy);
-            const saboteurId = isSabotageRound && eligibleSaboteurs.length > 0
-                ? eligibleSaboteurs[Math.floor(Math.random() * eligibleSaboteurs.length)].id
-                : null;
+            if (isSabotageRound) {
+                const eligibleSaboteurs = r.players.filter(p => p.id !== uploadedBy);
+                
+                if (eligibleSaboteurs.length > 0) {
+                    if (r.players.length > 3 && nextRoundNumber > 1) {
+                         // > 3 Players: Lowest ranked player gets to sabotage
+                         // Sort by score (ascending)
+                         const sortedByScore = [...eligibleSaboteurs].sort((a, b) => (r.scores[a.id] || 0) - (r.scores[b.id] || 0));
+                         // Take the first one (lowest score)
+                         saboteurId = sortedByScore[0].id;
+                    } else {
+                        // <= 3 Players or Round 1: Random saboteur
+                        saboteurId = eligibleSaboteurs[Math.floor(Math.random() * eligibleSaboteurs.length)].id;
+                    }
+
+                    if (saboteurId) {
+                        nextStatus = 'sabotage-selection';
+                    }
+                }
+            }
 
             return {
                 ...r,
-                status: 'drawing',
+                status: nextStatus,
                 roundNumber: nextRoundNumber,
                 currentImage: {
                     url: imageUrl,
@@ -855,7 +872,7 @@ export const StorageService = {
                 isDoublePoints,
                 timeBonusPlayerId: timeBonusPlayerId || null,
                 // Sabotage state
-                saboteurId: isSabotageRound && saboteurId ? saboteurId : null,
+                saboteurId,
                 sabotageTargetId: null, // Saboteur picks this
                 sabotageTriggered: false
             };
@@ -882,7 +899,8 @@ export const StorageService = {
         return StorageService.updateRoom(roomCode, (r) => ({
             ...r,
             sabotageTargetId: targetId,
-            sabotageEffect: effect
+            sabotageEffect: effect,
+            status: 'drawing' // Move to drawing phase
         }));
     },
 

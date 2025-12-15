@@ -18,9 +18,9 @@ const SABOTAGE_TYPES: { type: SabotageType; label: string; icon: string; descrip
     },
     {
         type: 'reduce_colors',
-        label: 'Color Blind',
-        icon: '🎨',
-        description: 'Restrict their color palette!'
+        label: 'Monochrome Madness',
+        icon: '🏴',
+        description: 'Turn their world black & white!'
     },
     {
         type: 'visual_distortion',
@@ -40,7 +40,6 @@ export const SabotageSelectionScreen: React.FC<SabotageSelectionScreenProps> = (
     const [selectedType, setSelectedType] = useState<SabotageType | null>(null);
 
     const isSaboteur = currentPlayerId === saboteurId;
-    const saboteur = players.find(p => p.id === saboteurId);
 
     // Filter out potential targets (everyone except saboteur)
     const targets = players.filter(p => p.id !== saboteurId);
@@ -55,9 +54,9 @@ export const SabotageSelectionScreen: React.FC<SabotageSelectionScreenProps> = (
         return (
             <div className="flex flex-col items-center justify-center min-h-[50vh] p-8 text-center animate-pulse">
                 <div className="text-6xl mb-4">🤫</div>
-                <h2 className="text-3xl font-bold text-white mb-2">Shhh...</h2>
+                <h2 className="text-3xl font-bold text-white mb-2">Shhhh...</h2>
                 <p className="text-xl text-purple-200">
-                    <span className="font-bold text-yellow-400">{saboteur?.name}</span> is picking a victim...
+                    <span className="font-bold text-yellow-400">Someone</span> is about to be sabotaged...
                 </p>
                 <div className="mt-8 text-sm opacity-60">Be afraid. Be very afraid.</div>
             </div>
@@ -65,7 +64,7 @@ export const SabotageSelectionScreen: React.FC<SabotageSelectionScreenProps> = (
     }
 
     return (
-        <div className="flex flex-col h-full max-w-4xl mx-auto p-4 space-y-6">
+        <div className="flex flex-col h-full max-w-4xl mx-auto p-4 space-y-6 safe-area-padding">
             <header className="text-center">
                 <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-purple-600 mb-2">
                     REVENGE TIME 😈
@@ -130,7 +129,7 @@ export const SabotageSelectionScreen: React.FC<SabotageSelectionScreenProps> = (
                 </div>
             </div>
 
-            <div className="pt-4 border-t border-white/10">
+            <div className="pt-4 border-t border-white/10 safe-area-bottom-padding">
                 <button
                     onClick={handleConfirm}
                     disabled={!selectedTargetId || !selectedType}
