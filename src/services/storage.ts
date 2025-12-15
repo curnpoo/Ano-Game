@@ -481,9 +481,18 @@ export const StorageService = {
         const roomCode = StorageService.generateRoomCode();
         const roomRef = ref(database, `rooms/${roomCode}`);
 
-        // Pick a random sabotage round (1 to totalRounds)
-        const totalRounds = 3; // Default rounds
-        const sabotageRound = Math.floor(Math.random() * totalRounds) + 1;
+        // Default Settings
+        const settings: GameSettings = {
+            timerDuration: 20,
+            totalRounds: 3,
+            enableSabotage: true // Default to true or false? Let's say true for fun, or false if safer.
+        };
+
+        // Pick a random sabotage round (1 to totalRounds) if enabled
+        let sabotageRound: number | undefined;
+        if (settings.enableSabotage) {
+             sabotageRound = Math.floor(Math.random() * settings.totalRounds) + 1;
+        }
 
         const newRoom: GameRoom = {
             roomCode: roomCode,
@@ -493,10 +502,7 @@ export const StorageService = {
             currentUploaderId: hostPlayer.id,
             status: 'lobby',
             createdAt: Date.now(),
-            settings: {
-                timerDuration: 20,
-                totalRounds: 3
-            },
+            settings,
             roundNumber: 0,
             playerStates: {},
             votes: {},
@@ -801,10 +807,32 @@ export const StorageService = {
 
     // Game Settings
     updateSettings: async (roomCode: string, settings: Partial<GameSettings>): Promise<GameRoom | null> => {
-        return StorageService.updateRoom(roomCode, (r) => ({
-            ...r,
-            settings: { ...r.settings, ...settings }
-        }));
+        return StorageService.updateRoom(roomCode, (r) => {
+            const newSettings = { ...r.settings, ...settings };
+            
+            // Recalculate Sabotage Round if settings change
+            let newSabotageRound = r.sabotageRound;
+            
+            // If toggling sabotage or changing round count, reset sabotage round
+            if (settings.enableSabotage !== undefined || settings.totalRounds !== undefined) {
+                if (newSettings.enableSabotage) {
+                    // Pick new random round
+                    // If round count changed, ensure it's within bounds
+                    // If we're already past round 1, try to pick a future round if possible? 
+                    // For simplicity, just pick any random round for now. 
+                    // Ideally: Math.max(r.roundNumber + 1, random...)
+                    newSabotageRound = Math.floor(Math.random() * newSettings.totalRounds) + 1;
+                } else {
+                    newSabotageRound = undefined; // Disabled
+                }
+            }
+
+            return {
+                ...r,
+                settings: newSettings,
+                sabotageRound: newSabotageRound
+            };
+        });
     },
 
     // Start a new round

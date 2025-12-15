@@ -97,18 +97,39 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
 
                 // Record stats snapshot for history/trends
                 StatsHistoryService.recordSnapshot();
-
-                // Save game to gallery
-                try {
-                    await GalleryService.saveGameToGallery(room);
-                } catch (err) {
-                    console.error('Failed to save game to gallery:', err);
-                }
             }
         };
 
+
+
         processFinalStats();
     }, [room.roomCode, currentPlayerId, room.players, room.scores, showToast]);
+
+    // Save to Gallery (Separate Effect to ensure robustness even if rewards processed)
+    useEffect(() => {
+        const saveToGallery = async () => {
+            // Prevent spamming save on re-renders, but allow retry if page refreshed
+            // We use a separate key for gallery to decouple from rewards
+            const galleryKey = `saved_gallery_${room.roomCode}`;
+            if (sessionStorage.getItem(galleryKey)) return;
+
+            try {
+                await GalleryService.saveGameToGallery(room);
+                sessionStorage.setItem(galleryKey, 'true');
+                console.log('Game saved to gallery');
+            } catch (err) {
+                console.error('Failed to save game to gallery:', err);
+                // Don't set session key if failed, so it might retry?
+                // Or maybe just let it be.
+            }
+        };
+        
+        // Only save if we are a player in the game
+        const isPlayer = room.playerStates[currentPlayerId];
+        if (isPlayer) {
+            saveToGallery();
+        }
+    }, [room, currentPlayerId]);
 
     const handleGoHome = () => {
         onShowRewards('home');
