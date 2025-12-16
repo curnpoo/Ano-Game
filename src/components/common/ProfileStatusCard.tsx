@@ -66,16 +66,25 @@ export const ProfileStatusCard: React.FC<ProfileStatusCardProps> = ({ player, on
                      onClick?.();
                      if (!onClick) handleChallengesClick();
                 }}
-                className="glass-panel rounded-[2rem] p-3 shadow-xl relative overflow-hidden transition-all hover:scale-[1.01] cursor-pointer !border-white/10 group"
+                className="rounded-[2rem] p-3 shadow-xl relative overflow-hidden transition-all hover:scale-[1.01] cursor-pointer group"
                 style={{
-                    background: 'linear-gradient(135deg, rgba(44, 36, 27, 0.4), rgba(30, 30, 30, 0.4))',
+                    background: 'var(--theme-glass-bg)',
                     boxShadow: `0 4px 20px -5px ${tier.color}40`,
-                    borderColor: `${tier.color}40`
+                    border: `2px solid ${tier.color}`,
+                    borderColor: tier.color
                 }}
             >
+                {/* Backdrop blur for frosted glass effect */}
+                <div className="absolute inset-0 backdrop-blur-md rounded-[2rem] z-0" />
+                {/* Theme color tint overlay */}
+                <div 
+                    className="absolute inset-0 z-0 opacity-20 mix-blend-overlay"
+                    style={{ backgroundColor: tier.color }} 
+                />
+                
                 {/* Tier glow effect */}
                 <div
-                    className="absolute inset-0 opacity-20 pointer-events-none transition-opacity duration-500 group-hover:opacity-30"
+                    className="absolute inset-0 opacity-20 pointer-events-none transition-opacity duration-500 group-hover:opacity-30 z-[1]"
                     style={{
                         background: `radial-gradient(circle at top right, ${tier.color}, transparent 70%)`
                     }}
@@ -91,6 +100,7 @@ export const ProfileStatusCard: React.FC<ProfileStatusCardProps> = ({ player, on
                             frame={player.frame}
                             color={player.color}
                             backgroundColor={player.backgroundColor}
+                            cosmetics={player.cosmetics}
                             size={95}
                             className="!rounded-3xl"
                             imageUrl={player.avatarImageUrl}

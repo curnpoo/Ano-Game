@@ -71,7 +71,7 @@ interface ScreenRouterProps {
 
 
     // Store
-    onEquipTheme: (themeId?: string) => void;
+    onEquipCosmetic: (type: 'font' | 'theme' | 'frame', id: string, value?: string) => void;
 
     // Sabotage
     onSabotageSelect: (targetId: string, effect: SabotageEffect) => void;
@@ -140,7 +140,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
     onVote,
     onNextRound,
     onShowRewards,
-    onEquipTheme,
+    onEquipCosmetic,
     onSabotageSelect,
     onSabotageSkip,
     isMyTimerRunning,
@@ -189,42 +189,11 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                 <div
                     className="h-full w-full flex flex-col p-4"
                     style={{
-                        paddingTop: 'max(1rem, env(safe-area-inset-top) + 0.5rem)',
+                        paddingTop: 0,
                         paddingBottom: 'max(1rem, env(safe-area-inset-bottom))'
                     }}
                 >
-                    {/* Top Bar: Settings + Round Info */}
-                    <div className="w-full flex items-center justify-between px-2 z-20 mb-3 shrink-0">
-                        {/* Settings Button */}
-                        <button
-                            onClick={onShowSettings}
-                            className="bg-white p-3 rounded-2xl shadow-lg hover:scale-105 active:scale-95 transition-all w-12 h-12 flex items-center justify-center border-2 border-gray-100"
-                        >
-                            ⚙️
-                        </button>
 
-                        {/* Status Badge */}
-                        {hasSubmitted ? (
-                            <div className="bg-green-500 text-white px-4 py-2 rounded-xl font-bold shadow-lg">
-                                ✓ Submitted!
-                            </div>
-                        ) : (
-                            <div className="bg-white/95 backdrop-blur-sm px-4 py-2 rounded-xl flex items-center gap-2 shadow-lg border-2 border-purple-200">
-                                <span className="font-bold text-purple-600 text-sm whitespace-nowrap">
-                                    Round {room.roundNumber}/{room.settings.totalRounds}
-                                </span>
-                                {room.isDoublePoints && (
-                                    <span className="bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full text-xs font-bold animate-pulse whitespace-nowrap">
-                                        2X!
-                                    </span>
-                                )}
-                                <span className="text-gray-400 text-xs">|</span>
-                                <span className="text-gray-500 text-sm whitespace-nowrap">
-                                    {submittedCount}/{totalPlayers} done
-                                </span>
-                            </div>
-                        )}
-                    </div>
 
 
 
@@ -257,6 +226,9 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
                             handleEyedropperToggle={handleEyedropperToggle}
                             handleColorPick={handleColorPick}
                             strokes={strokes}
+                            onShowSettings={onShowSettings}
+                            submittedCount={submittedCount}
+                            totalPlayers={totalPlayers}
                         />
                     </div>
                 </div>
@@ -317,7 +289,8 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
         case 'store':
             screenContent = <StoreScreen
                 onBack={onStoreBack}
-                onFontChange={onEquipTheme}
+                onEquip={onEquipCosmetic}
+                player={player}
             />;
             break;
 

@@ -184,13 +184,22 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
 
                 {/* Stuck Button */}
                 {showStuckButton && onGoHome && (
-                    <button
-                        onClick={onGoHome}
-                        className="mt-6 py-2 px-6 rounded-full backdrop-blur-md border border-white/10 text-white/40 hover:text-red-400 hover:border-red-500/30 text-xs font-bold uppercase tracking-wider transition-all active:scale-95"
-                        style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
-                    >
-                        Stuck? Reload App
-                    </button>
+                    <div className="flex flex-col items-center gap-2 mt-6 animate-fade-in">
+                        <button
+                            onClick={onGoHome}
+                            className="py-2 px-6 rounded-full backdrop-blur-md border border-white/10 text-white/40 hover:text-red-400 hover:border-red-500/30 text-xs font-bold uppercase tracking-wider transition-all active:scale-95"
+                            style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
+                        >
+                            Stuck? Reload App
+                        </button>
+                        
+                        {/* Only show install tip if NOT in standalone mode */}
+                        {!window.matchMedia('(display-mode: standalone)').matches && (
+                            <p className="text-[10px] text-white/20 text-center max-w-[200px]">
+                                Tip: Install to Home Screen for better stability whenever loading freezes!
+                            </p>
+                        )}
+                    </div>
                 )}
             </div>
         </div>

@@ -84,6 +84,10 @@ export interface UserAccount {
     lastInviteTimes?: { [userId: string]: number }; // Track invite cooldowns per user
     currentRoomCode?: string; // Code of the room the user is currently in (One Room Policy)
     challenges?: PlayerChallengeState[]; // Active player challenges
+    
+    // Powerup System
+    inventory?: { [itemId: string]: number }; // Consumables count
+    permanentPowerups?: string[]; // IDs of unlocked permanent powerups
 }
 
 
@@ -97,6 +101,7 @@ export interface PlayerCosmetics {
     activeCardColor?: string; // Color for player card in lobby
     activeBadge?: string; // Currently displayed badge
     activeTheme?: string; // light/dark mode preference
+    matchAvatarToTheme?: boolean; // If true, equipping a Global Theme also updates avatar background color
     activeFont?: string;  // purchased font
     activeStat?: string; // Stat to display on card (level, wins, earnings, etc)
     purchasedItems?: string[]; // Items bought with currency
@@ -145,6 +150,8 @@ export interface Player {
     lastSeen: number; // timestamp for heartbeat
     stats?: PlayerStats; // Stats for display in lobby
     cosmetics?: PlayerCosmetics;
+    activePowerups?: string[]; // IDs of powerups brought into the game (max 3)
+    permanentPowerups?: string[]; // IDs of owned permanent powerups
 }
 
 
@@ -183,6 +190,7 @@ export type PlayerStatus = 'waiting' | 'ready' | 'drawing' | 'submitted';
 export interface PlayerState {
     status: PlayerStatus;
     timerStartedAt?: number;
+    extraTime?: number; // Added via powerups
     drawing?: PlayerDrawing;
 }
 
@@ -261,7 +269,20 @@ export interface GameRoom {
     // Time Bonus (random player gets extra time)
     timeBonusPlayerId?: string | null; // Player with extra time this round
 
+    // Powerup Effects (Active)
+    activeEffects?: ActiveEffect[];
+
     createdAt: number;
+}
+
+export interface ActiveEffect {
+    id: string; // unique effect id
+    type: 'flash_bang' | 'reveal_votes' | 'double_vote';
+    triggeredBy: string; // playerId
+    triggeredAt: number;
+    expiresAt?: number;
+    targetId?: string; // if targeted
+    data?: any;
 }
 
 export type SabotageType = 'subtract_time' | 'reduce_colors' | 'visual_distortion';

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import type { DrawingStroke } from '../../types';
+import type { DrawingStroke, PlayerCosmetics } from '../../types';
 import { useAvatar } from '../../hooks/useAvatar';
-import { FRAMES } from '../../constants/cosmetics';
+import { FRAMES, THEMES } from '../../constants/cosmetics';
 
 interface AvatarDisplayProps {
     strokes?: DrawingStroke[];
@@ -13,6 +13,7 @@ interface AvatarDisplayProps {
     // backgroundColor?: string; // Avatar background fill
     // Check usage in ProfileScreen: player.color passed to color prop.
     backgroundColor?: string;
+    cosmetics?: PlayerCosmetics; // NEW: Pass cosmetics to check for theme match
     size?: number; // pixel size (e.g. 48 for w-12)
     className?: string;
     playerId?: string; // NEW: ID to fetch avatar for
@@ -25,6 +26,7 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
     frame,
     color, // Used for border/text color usually
     backgroundColor,
+    cosmetics,
     size = 48,
     className = '',
     playerId,
@@ -40,7 +42,16 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
     const { strokes: fetchedStrokes, isLoading } = useAvatar((!strokes || strokes.length === 0) ? playerId : undefined);
 
     // Ensure backgroundColor has a valid default (handles undefined, null, empty string)
-    const bgColor = backgroundColor || '#ffffff';
+    let bgColor = backgroundColor || '#ffffff';
+
+    // Apply "Match Avatar to Theme" logic ONLY if explicitly enabled (must be exactly true, not undefined/null)
+    // User complained that even with toggle OFF, avatar was still matching theme
+    if (cosmetics?.matchAvatarToTheme === true && cosmetics.activeTheme) {
+        const theme = THEMES.find(t => t.id === cosmetics.activeTheme);
+        if (theme?.value) {
+            bgColor = theme.value;
+        }
+    }
 
     // Helper to resolve frame class from ID (or use raw string if legacy/direct)
     const resolveFrameClass = (frameId?: string) => {

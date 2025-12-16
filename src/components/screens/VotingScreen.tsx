@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { GameRoom } from '../../types';
 import { StorageService } from '../../services/storage';
 import { XPService } from '../../services/xp';
+import { PowerupHUD } from '../game/PowerupHUD';
 import { AvatarDisplay } from '../common/AvatarDisplay';
 import { GameCanvas } from '../game/GameCanvas';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
@@ -25,6 +26,43 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
 }) => {
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [hasVoted, setHasVoted] = useState(false);
+    const [peepedVote, setPeepedVote] = useState<{ voterName: string; votedForName: string } | null>(null);
+
+    const player = room.players.find(p => p.id === currentPlayerId);
+    
+    // Vote Peep Logic
+    useEffect(() => {
+        if (!player) return;
+
+        const peepEffect = room.activeEffects?.find(e => 
+            e.type === 'reveal_votes' && 
+            e.triggeredBy === currentPlayerId &&
+            (e.expiresAt || 0) > Date.now()
+        );
+
+        if (peepEffect && !peepedVote && Object.keys(room.votes).length > 0) {
+             // Pick a random vote to reveal
+            const voterIds = Object.keys(room.votes);
+            const otherVoterIds = voterIds.filter(id => id !== currentPlayerId);
+            const pool = otherVoterIds.length > 0 ? otherVoterIds : voterIds;
+            
+            if (pool.length > 0) {
+                const randomVoterId = pool[Math.floor(Math.random() * pool.length)];
+                const votedForId = room.votes[randomVoterId];
+                
+                const voter = room.players.find(p => p.id === randomVoterId);
+                const votedFor = room.players.find(p => p.id === votedForId);
+                
+                if (voter && votedFor) {
+                    setPeepedVote({
+                        voterName: voter.name,
+                        votedForName: votedFor.name
+                    });
+                }
+            }
+        }
+    }, [room.activeEffects, room.votes, currentPlayerId, peepedVote, player]);
+
     // Fetch drawings from separate path (optimized)
     const { drawings: drawingsMap, loading: drawingsLoading } = useDrawings(room.roomCode, room.roundNumber);
 
@@ -53,6 +91,7 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
 
 
     const isHost = room.hostId === currentPlayerId;
+    const canVote = room.status === 'voting';
     const waitingForVotes = room.players.filter(p => !room.votes[p.id]).map(p => p.name);
 
     const handleVote = async () => {
@@ -252,6 +291,31 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                 </div>
             </div>
 
+            {/* Powerup HUD - Top Right (Absolute) */}
+            <div className="absolute top-24 right-4 z-50">
+                <PowerupHUD 
+                    roomCode={room.roomCode}
+                    playerId={currentPlayerId}
+                    activePowerups={player?.activePowerups || []}
+                    isDrawing={false}
+                />
+            </div>
+
+            {/* Vote Peep UI - Centered */}
+            {peepedVote && (
+                 <div className="absolute top-40 left-1/2 -translate-x-1/2 z-50 bg-black/80 backdrop-blur-md px-6 py-4 rounded-xl border border-purple-500/50 shadow-2xl animate-fade-in-up pointer-events-none">
+                    <div className="flex items-center gap-3">
+                        <div className="text-3xl">👁️</div>
+                        <div>
+                            <div className="text-xs text-purple-300 font-bold uppercase tracking-wider">Vote Revealed</div>
+                            <div className="text-white">
+                                <span className="font-bold text-yellow-400">{peepedVote.voterName}</span> voted for <span className="font-bold text-red-400">{peepedVote.votedForName}</span>
+                            </div>
+                        </div>
+                    </div>
+                 </div>
+            )}
+
             {/* Bottom Controls Area */}
             <div className="w-full pb-6 px-4 z-20 safe-area-bottom-padding">
                 <div className="max-w-md mx-auto flex items-center justify-between gap-4">
@@ -267,7 +331,7 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                         ←
                     </button>
 
-                    {/* Action Button */}
+                    {/* Voting Action Button */}
                     <div className="flex-1 flex justify-center h-16">
                         {hasVoted ? (
                             <div className="w-full h-full rounded-2xl bg-green-500/20 backdrop-blur-md border border-green-500/50 flex items-center justify-center gap-2 animate-bounce-gentle shadow-lg shadow-green-500/10">
@@ -278,14 +342,18 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                             <div className="w-full h-full rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/50 font-bold uppercase tracking-widest text-sm italic">
                                 Your Masterpiece
                             </div>
-                        ) : (
-                            <button
+                        ) : canVote && currentDrawing ? (
+                             <button
                                 onClick={handleVote}
                                 className="w-full h-full rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 border border-white/20 text-white font-black text-xl uppercase tracking-wider shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/50 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2 group"
                             >
                                 <span className="text-2xl group-hover:rotate-12 transition-transform">⭐</span>
                                 Vote
                             </button>
+                        ) : (
+                            <div className="w-full h-full rounded-2xl bg-white/5 backdrop-blur-md border border-white/10 flex items-center justify-center text-white/50 font-bold uppercase tracking-widest text-sm">
+                                Voting Closed
+                            </div>
                         )}
                     </div>
 

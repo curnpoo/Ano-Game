@@ -267,7 +267,7 @@ export const HelpGuideOverlay: React.FC<HelpGuideOverlayProps> = ({ onClose }) =
             <div
                 className={`
                     fixed bottom-8 left-0 right-0
-                    flex justify-center
+                    flex flex-col items-center gap-4
                     transition-all duration-700
                     z-[10000]
                     ${showDismiss ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}
@@ -276,6 +276,16 @@ export const HelpGuideOverlay: React.FC<HelpGuideOverlayProps> = ({ onClose }) =
                     paddingBottom: 'env(safe-area-inset-bottom)',
                 }}
             >
+                {/* Alpha Warning */}
+                <div className="bg-yellow-500/10 backdrop-blur-md border border-yellow-500/30 p-3 rounded-xl max-w-xs text-center">
+                    <p className="text-yellow-200 font-bold text-xs uppercase tracking-wider mb-1">
+                        ⚠️ Alpha Version (v0.9)
+                    </p>
+                    <p className="text-white/80 text-xs">
+                        Expect glitches! If you get stuck, the <span className="font-bold text-white">"Reload App"</span> button in Settings is your best friend.
+                    </p>
+                </div>
+
                 <div className="relative group">
                     {/* Glow blur behind */}
                     <div className="absolute inset-0.5 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 rounded-full blur-[20px] opacity-40 group-hover:opacity-70 transition-opacity duration-500" />

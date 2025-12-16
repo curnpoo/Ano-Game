@@ -1,7 +1,7 @@
 import { ref, set, get, onValue, runTransaction, remove } from 'firebase/database';
 import { database } from '../firebase';
 import { ImageService } from './image';
-import type { GameRoom, Player, GameSettings, BlockInfo, PlayerState, PlayerDrawing, RoundResult, RoomHistoryEntry, PlayerCosmetics } from '../types';
+import type { GameRoom, Player, GameSettings, BlockInfo, PlayerState, PlayerDrawing, RoundResult, RoomHistoryEntry, PlayerCosmetics, ActiveEffect } from '../types';
 import { AuthService } from './auth';
 import { AvatarService } from './avatarService';
 
@@ -119,8 +119,17 @@ export const StorageService = {
 
                 const voteCounts: { [playerId: string]: number } = {};
                 room.players.forEach(p => { voteCounts[p.id] = 0; });
-                Object.values(room.votes).forEach(votedFor => {
-                    voteCounts[votedFor] = (voteCounts[votedFor] || 0) + 1;
+                
+                Object.entries(room.votes).forEach(([voterId, votedFor]) => {
+                    let weight = 1;
+                    // Check Double Vote Effect
+                    const doubleVote = room.activeEffects?.find(e => 
+                        e.type === 'double_vote' && 
+                        e.triggeredBy === voterId
+                    );
+                    if (doubleVote) weight = 2;
+
+                    voteCounts[votedFor] = (voteCounts[votedFor] || 0) + weight;
                 });
 
                 const rankings = room.players
@@ -197,8 +206,17 @@ export const StorageService = {
                 // Calculate results with existing votes
                 const voteCounts: { [playerId: string]: number } = {};
                 r.players.forEach(p => { voteCounts[p.id] = 0; });
-                Object.values(r.votes).forEach(votedFor => {
-                    voteCounts[votedFor] = (voteCounts[votedFor] || 0) + 1;
+                
+                Object.entries(r.votes).forEach(([voterId, votedFor]) => {
+                    let weight = 1;
+                    // Check Double Vote Effect
+                    const doubleVote = r.activeEffects?.find(e => 
+                        e.type === 'double_vote' && 
+                        e.triggeredBy === voterId
+                    );
+                    if (doubleVote) weight = 2;
+
+                    voteCounts[votedFor] = (voteCounts[votedFor] || 0) + weight;
                 });
 
                 const rankings = r.players
@@ -497,7 +515,8 @@ export const StorageService = {
         };
 
         // Pick a random sabotage round (1 to totalRounds) if enabled
-        let sabotageRound: number | undefined;
+        // Pick a random sabotage round (1 to totalRounds) if enabled
+        let sabotageRound: number | null = null;
         if (settings.enableSabotage) {
              sabotageRound = Math.floor(Math.random() * settings.totalRounds) + 1;
         }
@@ -703,6 +722,61 @@ export const StorageService = {
                 const current = r.players[playerIndex];
                 r.players[playerIndex] = { ...current, ...updates };
             }
+            return r;
+        });
+    },
+
+    // --- Powerups ---
+    triggerPowerup: async (roomCode: string, playerId: string, powerupId: string): Promise<void> => {
+        await StorageService.updateRoom(roomCode, (r) => {
+            // Extra Time: Add 15s to player's timer
+            if (powerupId === 'extra_time') {
+                const currentState = r.playerStates[playerId] || { status: 'drawing' };
+                const currentExtra = currentState.extraTime || 0;
+                r.playerStates[playerId] = {
+                    ...currentState,
+                    extraTime: currentExtra + 15
+                };
+            }
+            // Flash Bang: Add active effect
+            else if (powerupId === 'flash_bang') {
+                const effect: ActiveEffect = {
+                    id: Date.now().toString() + Math.random().toString().slice(2, 6),
+                    type: 'flash_bang',
+                    triggeredBy: playerId,
+                    triggeredAt: Date.now(),
+                    expiresAt: Date.now() + 3000 // 3 seconds
+                };
+                r.activeEffects = [...(r.activeEffects || []), effect];
+            }
+
+            // Double Vote
+            else if (powerupId === 'double_vote') {
+                 const effect: ActiveEffect = {
+                    id: Date.now().toString() + Math.random().toString().slice(2, 6),
+                    type: 'double_vote',
+                    triggeredBy: playerId,
+                    triggeredAt: Date.now(),
+                    expiresAt: Date.now() + 60000 // Active for 60s (Voting phase)
+                };
+                r.activeEffects = [...(r.activeEffects || []), effect];
+            }
+            // Vote Peep (Reveal)
+            else if (powerupId === 'vote_peep') {
+                 const effect: ActiveEffect = {
+                    id: Date.now().toString() + Math.random().toString().slice(2, 6),
+                    type: 'reveal_votes',
+                    triggeredBy: playerId,
+                    triggeredAt: Date.now(),
+                    expiresAt: Date.now() + 60000 
+                };
+                r.activeEffects = [...(r.activeEffects || []), effect];
+            }
+            // Reveal Saboteur (if implemented)
+            else if (powerupId === 'reveal') {
+                 // Classic "Reveal Saboteur" - maybe client side or separate effect
+            }
+            
             return r;
         });
     },

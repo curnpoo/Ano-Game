@@ -88,7 +88,14 @@ export const GalleryScreen: React.FC<GalleryScreenProps> = ({ onBack, showToast,
     };
 
     return (
-        <div className="fixed inset-0 z-0 bg-black text-white overflow-hidden flex flex-col font-sans">
+        <div 
+            className="fixed inset-0 z-0 overflow-hidden flex flex-col font-sans"
+            style={{
+                background: 'transparent',
+                color: 'var(--theme-text)',
+                isolation: 'isolate'
+            }}
+        >
             <MonogramBackground opacity={0.1} />
 
             {/* Header */}

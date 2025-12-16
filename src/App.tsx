@@ -36,6 +36,7 @@ import { Toast } from './components/common/Toast';
 import { LoadingScreen } from './components/common/LoadingScreen';
 import { TunnelTransition, CasinoTransition, GlobalBlurTransition } from './components/common/ScreenTransition';
 import { MonogramBackground } from './components/common/MonogramBackground';
+import { GlobalBackground } from './components/common/GlobalBackground';
 
 import {
   notifyYourTurnToUpload,
@@ -477,41 +478,50 @@ const App = () => {
 
   const amWaiting = room?.playerStates?.[player?.id || '']?.status === 'waiting' || false;
 
-  const handleEquipTheme = (fontId?: string) => {
+  const handleEquipCosmetic = (type: 'font' | 'theme' | 'frame', id: string, value?: string) => {
+    if (!player) return;
+
     // Immediate local update for visual responsiveness
-    if (fontId && player) {
-      setPlayer(prev => {
-        if (!prev) return prev;
+    setPlayer(prev => {
+      if (!prev) return prev;
 
-        // Ensure defaults for required fields if cosmetics is undefined or partial
-        const currentCosmetics = prev.cosmetics || {
-          brushesUnlocked: [],
-          colorsUnlocked: [],
-          badges: [],
-          purchasedItems: []
-        };
+      // Ensure defaults
+      const currentCosmetics = prev.cosmetics || {
+        brushesUnlocked: [],
+        colorsUnlocked: [],
+        badges: [],
+        purchasedItems: []
+      };
 
-        return {
-          ...prev,
-          cosmetics: {
-            ...currentCosmetics,
-            activeFont: fontId,
-            // Fallbacks for safety during partial updates
-            brushesUnlocked: currentCosmetics.brushesUnlocked || [],
-            colorsUnlocked: currentCosmetics.colorsUnlocked || [],
-            badges: currentCosmetics.badges || []
-          }
-        };
-      });
-    }
+      const updates: Partial<Player> = { ...prev };
+
+      if (type === 'font') {
+        updates.cosmetics = { ...currentCosmetics, activeFont: id };
+      } else if (type === 'theme') {
+        updates.cosmetics = { ...currentCosmetics, activeTheme: id };
+        // We no longer sync theme to backgroundColor (Avatar BG)
+        // if (value) updates.backgroundColor = value; 
+      } else if (type === 'frame') {
+        updates.frame = id === 'none' ? undefined : id;
+      }
+
+      return { ...prev, ...updates } as Player;
+    });
 
     // Explicitly refresh player state to ensure full sync (DB source of truth)
-    setTimeout(() => {
-      const freshUser = AuthService.getCurrentUser();
-      if (freshUser) {
-        setPlayer(prev => prev ? { ...prev, cosmetics: freshUser.cosmetics } : prev);
-      }
-    }, 100);
+    // We delay slightly to let the optimistic update settle, then re-fetch
+    if (player?.id) {
+       // Note: The child component (StoreScreen) is responsible for the actual DB update via AuthService
+       // We just want to make sure we eventually sync up if something drifts, 
+       // but for now, rely on standard sync. 
+       // Actually, to be safe, let's re-fetch after a short bit.
+       setTimeout(() => {
+         const freshUser = AuthService.getCurrentUser();
+         if (freshUser) {
+           setPlayer(prev => prev ? { ...prev, ...freshUser } : prev);
+         }
+       }, 500); 
+    }
   };
 
   // Derived State
@@ -526,8 +536,12 @@ const App = () => {
 
     // Calculate penalty (20% of total time, rounded up)
     const penalty = Math.ceil(totalDuration * 0.20);
-    // REMOVED: Level-based time bonus to ensure fairness
-    const bonusTime = (hasTimeBonus ? 5 : 0) - (isTimeSabotaged ? penalty : 0);
+    
+    // Powerup Bonuses
+    const powerupExtra = myState?.extraTime || 0;
+    const timekeeperBonus = player?.activePowerups?.includes('timekeeper') ? 5 : 0;
+
+    const bonusTime = (hasTimeBonus ? 5 : 0) + powerupExtra + timekeeperBonus - (isTimeSabotaged ? penalty : 0);
 
     const effectiveStartedAt = myState?.timerStartedAt || optimisticTimerStart;
 
@@ -1834,12 +1848,10 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen w-full bg-black text-white touch-none select-none overflow-hidden relative" style={{ colorScheme: 'dark' }}>
+    <div className="min-h-screen w-full bg-transparent text-white touch-none select-none overflow-hidden relative" style={{ colorScheme: 'dark' }}>
 
       <SpeedInsights />
-      {/* Background (Persists across some routes) */}
-      {/* Note: User requested safe storage of this background with subtle settings for screens */}
-      <MonogramBackground speed="slow" blur="none" opacity={0.15} />
+      <GlobalBackground player={player} />
 
       {/* Main Router with Transitions */}
       <GlobalBlurTransition screenKey={currentScreen}>
@@ -1876,7 +1888,7 @@ const App = () => {
           onNextRound={handleNextRound}
           onPlayAgain={handlePlayAgain}
           onShowRewards={showGameRewards}
-          onEquipTheme={handleEquipTheme}
+          onEquipCosmetic={handleEquipCosmetic}
           onSabotageSelect={handleSabotageSelect}
           onSabotageSkip={handleSabotageSkip}
           isMyTimerRunning={isMyTimerRunning}

@@ -52,11 +52,16 @@ export const usePlayerSession = ({ setCurrentScreen, onProgress, onComplete }: U
                             frame: authUser.frame || session.frame || 'none',
                             avatarStrokes: authUser.avatarStrokes || session.avatarStrokes,
                             cosmetics: authUser.cosmetics || session.cosmetics,
+                            activePowerups: session.activePowerups || [], // Local session data
+                            permanentPowerups: authUser.permanentPowerups || [], // Synced from account
                             // Always sync XP/level/stats from services (which are now synced from Firebase)
                             xp: XPService.getXP(),
                             level: XPService.getLevel(),
                             stats: StatsService.getStats()
                         };
+
+
+
                         StorageService.saveSession(session);
                         setPlayer(session);
                     }
@@ -75,8 +80,12 @@ export const usePlayerSession = ({ setCurrentScreen, onProgress, onComplete }: U
                                 cosmetics: authUser.cosmetics,
                                 level: XPService.getLevel(),
                                 xp: XPService.getXP(),
-                                stats: StatsService.getStats()
+                                stats: StatsService.getStats(),
+                                permanentPowerups: authUser.permanentPowerups || []
                             };
+
+
+
                             StorageService.saveSession(session);
                             setPlayer(session);
                         }
@@ -147,7 +156,8 @@ export const usePlayerSession = ({ setCurrentScreen, onProgress, onComplete }: U
                         frame: authUser.frame || player.frame,
                         avatarStrokes: authUser.avatarStrokes || player.avatarStrokes,
                         backgroundColor: authUser.backgroundColor || player.backgroundColor,
-                        cosmetics: authUser.cosmetics || player.cosmetics
+                        cosmetics: authUser.cosmetics || player.cosmetics,
+                        permanentPowerups: authUser.permanentPowerups || player.permanentPowerups
                     };
 
                     if (JSON.stringify(updatedSession) !== JSON.stringify(player)) {

@@ -5,6 +5,8 @@ import type { UserAccount } from '../types';
 
 const CURRENCY_KEY = 'player_currency';
 const PURCHASED_ITEMS_KEY = 'player_purchased_items';
+const INVENTORY_KEY = 'player_inventory';
+const PERMANENT_POWERUPS_KEY = 'player_permanent_powerups';
 const LOCAL_USER_KEY = 'logged_in_user';
 
 import { XPService } from './xp';
@@ -108,11 +110,98 @@ export const CurrencyService = {
     },
 
     // Purchase an item (checks balance and deducts)
-    purchaseItem(itemId: string, price: number): boolean {
-        if (this.isItemPurchased(itemId)) return true; // Already owned
+    purchaseItem(itemId: string, price: number, type: 'consumable' | 'permanent' = 'permanent'): boolean {
+        // For permanent items, check if already owned
+        if (type === 'permanent' && this.isItemPurchased(itemId)) return true;
+        
         if (!this.spendCurrency(price)) return false;
-        this.addPurchasedItem(itemId);
+
+        if (type === 'consumable') {
+            this.addToInventory(itemId, 1);
+        } else {
+            this.addPurchasedItem(itemId);
+        }
         return true;
+    },
+
+    // === Inventory Management (Consumables) ===
+
+    getInventory(): { [itemId: string]: number } {
+        const stored = localStorage.getItem(INVENTORY_KEY);
+        return stored ? JSON.parse(stored) : {};
+    },
+
+    addToInventory(itemId: string, count: number): void {
+        const inventory = this.getInventory();
+        inventory[itemId] = (inventory[itemId] || 0) + count;
+        localStorage.setItem(INVENTORY_KEY, JSON.stringify(inventory));
+        this.syncInventory();
+    },
+
+    consumeItem(itemId: string): boolean {
+        const inventory = this.getInventory();
+        if (!inventory[itemId] || inventory[itemId] <= 0) return false;
+
+        inventory[itemId]--;
+        if (inventory[itemId] === 0) delete inventory[itemId];
+        
+        localStorage.setItem(INVENTORY_KEY, JSON.stringify(inventory));
+        this.syncInventory();
+        return true;
+    },
+
+    getItemCount(itemId: string): number {
+        const inventory = this.getInventory();
+        return inventory[itemId] || 0;
+    },
+
+    syncInventory(): void {
+        try {
+            const storedUser = localStorage.getItem(LOCAL_USER_KEY);
+            const inventory = this.getInventory();
+            
+            if (storedUser) {
+                const user = JSON.parse(storedUser) as UserAccount;
+                user.inventory = inventory;
+                localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(user));
+
+                const userRef = ref(database, `users/${user.id}`);
+                update(userRef, { inventory }).catch(console.error);
+            }
+        } catch (e) {
+            console.error('Error syncing inventory:', e);
+        }
+    },
+    
+    // === Permanent Powerups ===
+    // We treat them like normal purchased items, but store/sync them specifically if needed.
+    // For now, they can live in 'purchasedItems' OR we can add specific handling if we want separate validaton.
+    // The current implementation of purchaseItem adds them to 'purchasedItems' which is fine.
+    // But we should ensure we can distinguishing them.
+    // The UserAccount type has 'permanentPowerups', so let's sync that too if we want to be strict,
+    // or just rely on purchasedItems containing the ID.
+    // Let's rely on purchasedItems for now for simplicity, OR update purchasedItems to be the master list.
+    // Actually, let's explicitly support the new 'permanentPowerups' field for clarity.
+
+    addPermanentPowerup(itemId: string): void {
+        this.addPurchasedItem(itemId); // Keep in general purchased list for ease
+        
+        // Also sync to specific field if we want
+        try {
+            const storedUser = localStorage.getItem(LOCAL_USER_KEY);
+            if (storedUser) {
+                const user = JSON.parse(storedUser) as UserAccount;
+                const perms = user.permanentPowerups || [];
+                if (!perms.includes(itemId)) {
+                    perms.push(itemId);
+                    user.permanentPowerups = perms;
+                    localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(user));
+                    
+                    const userRef = ref(database, `users/${user.id}`);
+                    update(userRef, { permanentPowerups: perms }).catch(console.error);
+                }
+            }
+        } catch(e) { console.error(e); }
     },
 
     // Reset all currency data (for testing)

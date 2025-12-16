@@ -3,9 +3,10 @@ import React from 'react';
 interface SabotageOverlayProps {
     isActive: boolean;
     effectName?: string;
+    showBanner?: boolean;
 }
 
-export const SabotageOverlay: React.FC<SabotageOverlayProps> = ({ isActive, effectName }) => {
+export const SabotageOverlay: React.FC<SabotageOverlayProps> = ({ isActive, effectName, showBanner = true }) => {
     // No state needed for constant effects
     // The shaking of the screen is handled by parent or CSS classes
 
@@ -41,6 +42,7 @@ export const SabotageOverlay: React.FC<SabotageOverlayProps> = ({ isActive, effe
             `}</style>
 
             {/* Warning banner - Compact & Stationary */}
+            {showBanner && (
             <div className="fixed top-20 left-0 right-0 z-[100] flex justify-center pointer-events-none">
                 <div className="bg-red-600/90 backdrop-blur-sm text-white px-4 py-2 rounded-full font-bold shadow-xl border border-red-400/50 flex flex-col items-center justify-center transform hover:scale-105 transition-transform">
                     <div className="flex items-center gap-2 text-sm leading-none">
@@ -55,6 +57,7 @@ export const SabotageOverlay: React.FC<SabotageOverlayProps> = ({ isActive, effe
                     )}
                 </div>
             </div>
+            )}
 
             {/* Random glitch overlay */}
             <div

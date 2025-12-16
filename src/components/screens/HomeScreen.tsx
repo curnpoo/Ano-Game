@@ -3,7 +3,6 @@ import { ProfileStatusCard } from '../common/ProfileStatusCard';
 import { FriendsPanel } from '../common/FriendsPanel';
 import { AdminModal } from '../common/AdminModal';
 import { HelpGuideOverlay } from '../common/HelpGuideOverlay';
-import { MonogramBackground } from '../common/MonogramBackground';
 import { GuestSignUpModal } from '../common/GuestSignUpModal';
 import { AuthService } from '../../services/auth';
 import type { Player } from '../../types';
@@ -64,24 +63,18 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         <div
             className={`fixed inset-0 overflow-y-auto overflow-x-hidden flex flex-col items-center select-none ${mounted ? 'pop-in' : 'opacity-0'}`}
             style={{
-                background: 'var(--theme-bg, #1a1a1a)',
+                background: 'transparent',
                 paddingTop: 'max(1rem, env(safe-area-inset-top))',
-                paddingBottom: 'max(1rem, env(safe-area-inset-bottom))'
+                paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
             }}
         >
-            {/* Monogram Pattern - MUST be child element for backdrop-filter to blur it */}
-            <MonogramBackground speed="slow" opacity={0.15} />
-
             {/* Color Accents (decorative glow) */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 fixed">
+            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
                 <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-purple-500/20 rounded-full blur-[120px] animate-[pulse_10s_ease-in-out_infinite]" />
                 <div className="absolute bottom-[-10%] left-[-10%] w-[60%] h-[60%] bg-blue-500/20 rounded-full blur-[120px] animate-[pulse_15s_ease-in-out_infinite_-2s]" />
-                {/* Floating particles */}
-                <div className="absolute top-1/4 left-1/4 w-4 h-4 rounded-full bg-white/10 animate-[float_8s_ease-in-out_infinite]" />
-                <div className="absolute top-3/4 right-1/4 w-6 h-6 rounded-full bg-white/10 animate-[float_12s_ease-in-out_infinite_1s]" />
             </div>
 
-            {/* Content Container - Flex Column with careful spacing */}
+            {/* Content Container */}
             <div className="flex-1 w-full max-w-md flex flex-col z-10 p-5 gap-4 min-h-full relative justify-center">
 
                 {/* Top Section: Profile Only */}
@@ -123,19 +116,25 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     <div className="grid grid-cols-2 gap-3 h-[170px] shrink-0">
                         {/* Friends Panel - Left Side */}
                         <div 
-                            className={`min-w-0 transition-all duration-300 relative ${isGuest ? 'grayscale opacity-70' : ''}`}
+                            className={`min-w-0 transition-all duration-300 relative rounded-[2.5rem] overflow-hidden ${isGuest ? 'grayscale opacity-70' : ''}`}
                             onClick={(e) => {
                                 if (isGuest) {
                                     e.stopPropagation();
                                     setShowGuestModal(true);
                                 }
                             }}
+                            style={{ 
+                                background: 'var(--theme-glass-bg)',
+                                border: '1px solid var(--theme-glass-border)'
+                            }}
                         >
+                            {/* Backdrop blur for frosted glass effect */}
+                            <div className="absolute inset-0 backdrop-blur-md rounded-[2.5rem] z-0" />
                             {isGuest && <div className="absolute top-2 right-2 z-20 text-sm opacity-60">🔒</div>}
                             <FriendsPanel
                                 player={player}
                                 onJoinRoom={isGuest ? undefined : onRejoin}
-                                className={`w-full h-full !rounded-[2.5rem] !bg-black/30 border-2 !border-green-500/20 hover:!border-green-500/40 cursor-pointer active:scale-95 !backdrop-blur-3xl ${isGuest ? 'pointer-events-none' : ''}`}
+                                className={`w-full h-full !rounded-[2.5rem] border-2 !border-green-500/20 hover:!border-green-500/40 cursor-pointer active:scale-95 !bg-transparent relative z-[1] ${isGuest ? 'pointer-events-none' : ''}`}
                                 style={{
                                     boxShadow: '0 0 20px rgba(34, 197, 94, 0.05)'
                                 }}
@@ -145,19 +144,22 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                         {/* Play Button - Right Side (Special & Glowing) */}
                         <button
                             onClick={onPlay}
-                            className="relative group overflow-hidden rounded-[2.5rem] shadow-2xl border-4 transform transition-all duration-300 hover:scale-[1.02] active:scale-95 flex flex-col items-center justify-center p-4 glass-panel !bg-black/40"
+                            className="relative group overflow-hidden rounded-[2.5rem] shadow-2xl border-4 transform transition-all duration-300 hover:scale-[1.02] active:scale-95 flex flex-col items-center justify-center p-4"
                             style={{
                                 borderColor: 'var(--theme-accent)',
-                                boxShadow: '0 0 50px -10px var(--theme-accent-glow), 0 20px 40px -10px rgba(0,0,0,0.6)'
+                                boxShadow: '0 0 50px -10px var(--theme-accent), 0 20px 40px -10px rgba(0,0,0,0.3)',
+                                background: 'var(--theme-glass-bg)',
                             }}
                         >
-                            <div className="absolute inset-0 bg-gradient-to-br from-[var(--theme-accent)]/20 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity" />
-                            <div className="absolute inset-0 bg-[var(--theme-accent)]/5 animate-pulse" />
+                            {/* Backdrop blur for frosted glass effect */}
+                            <div className="absolute inset-0 backdrop-blur-md rounded-[2.5rem] z-0" />
+                            <div className="absolute inset-0 bg-gradient-to-br from-[var(--theme-accent)]/20 via-transparent to-transparent opacity-60 group-hover:opacity-100 transition-opacity z-[1]" />
+                            <div className="absolute inset-0 bg-[var(--theme-accent)]/5 animate-pulse z-[1]" />
 
                             <div className="relative z-10 flex flex-col items-center justify-center gap-1">
                                 <div className="text-5xl mb-1 group-hover:rotate-12 group-hover:scale-110 transition-transform duration-300 drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]">🎮</div>
-                                <div className="text-3xl font-black text-[var(--theme-text)] drop-shadow-md tracking-tight">PLAY</div>
-                                <div className="text-[var(--theme-text-secondary)] font-bold text-[9px] tracking-[0.2em] uppercase opacity-80 group-hover:opacity-100 bg-black/20 px-2 py-1 rounded-full border border-white/5">
+                                <div className="text-3xl font-black drop-shadow-md tracking-tight" style={{ color: 'var(--theme-text)' }}>PLAY</div>
+                                <div className="font-bold text-[9px] tracking-[0.2em] uppercase opacity-80 group-hover:opacity-100 px-2 py-1 rounded-full" style={{ background: 'var(--theme-glass-bg)', color: 'var(--theme-text-secondary)' }}>
                                     Start
                                 </div>
                             </div>
@@ -168,59 +170,71 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     {lastGameDetails && onRejoin && (
                         <button
                             onClick={() => onRejoin(lastGameDetails.roomCode)}
-                            className="w-full bg-orange-500/10 backdrop-blur-xl rounded-2xl p-3 border-2 border-orange-500/30 flex items-center justify-between group active:scale-95 transition-all shrink-0"
+                            className="w-full rounded-2xl p-3 flex items-center justify-between group active:scale-95 transition-all shrink-0 relative overflow-hidden"
+                            style={{
+                                background: 'var(--theme-glass-bg)',
+                                border: '2px solid var(--theme-accent)',
+                            }}
                         >
-                            <div className="flex items-center gap-3">
+                            {/* Backdrop blur for frosted glass effect */}
+                            <div className="absolute inset-0 backdrop-blur-md rounded-2xl z-0" />
+                            {/* Theme color tint overlay */}
+                            <div className="absolute inset-0 z-0 bg-[var(--theme-accent)] opacity-10 mix-blend-overlay" />
+                            <div className="flex items-center gap-3 relative z-10">
                                 <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center text-xl group-hover:rotate-12 transition-transform shadow-lg">
                                     🔙
                                 </div>
                                 <div className="text-left">
                                     <div className="text-[10px] font-black text-orange-400 uppercase tracking-wider">Back to Game</div>
-                                    <div className="text-[var(--theme-text)] font-bold truncate max-w-[120px]">{lastGameDetails.hostName}'s Room</div>
+                                    <div className="font-bold truncate max-w-[120px]" style={{ color: 'var(--theme-text)' }}>{lastGameDetails.hostName}'s Room</div>
                                 </div>
                             </div>
-                            <div className="bg-orange-500 text-black font-black text-xs px-3 py-1.5 rounded-full uppercase tracking-wide">Join</div>
+                            <div className="bg-orange-500 text-black font-black text-xs px-3 py-1.5 rounded-full uppercase tracking-wide relative z-10">Join</div>
                         </button>
                     )}
 
-                    {/* Secondary Actions Grid - Bento Style (Adjusted for Pro/Max Sizing) */}
+                    {/* Secondary Actions Grid - Bento Style */}
                     <div className="grid grid-cols-2 gap-3 flex-1 min-h-[200px]">
                         {[
-                            { id: 'casino', label: 'CASINO', emoji: '🎰', onClick: () => handleRestrictedAction(onCasino), delay: '100ms', color: 'text-yellow-400', glow: 'bg-yellow-500' },
-                            { id: 'store', label: 'STORE', emoji: '🛒', onClick: () => handleRestrictedAction(onStore), delay: '200ms', color: 'text-purple-400', glow: 'bg-purple-500' },
-                            { id: 'profile', label: 'PROFILE', emoji: '👤', onClick: () => handleRestrictedAction(onProfile), delay: '300ms', color: 'text-blue-400', glow: 'bg-blue-500' },
-                            { id: 'settings', label: 'SETTINGS', emoji: '⚙️', onClick: onSettings, delay: '400ms', color: 'text-gray-400', glow: 'bg-gray-500' }
+                            { id: 'casino', label: 'CASINO', emoji: '🎰', onClick: () => handleRestrictedAction(onCasino), delay: '100ms', glow: 'bg-yellow-500' },
+                            { id: 'store', label: 'STORE', emoji: '🛒', onClick: () => handleRestrictedAction(onStore), delay: '200ms', glow: 'bg-purple-500' },
+                            { id: 'profile', label: 'PROFILE', emoji: '👤', onClick: () => handleRestrictedAction(onProfile), delay: '300ms', glow: 'bg-blue-500' },
+                            { id: 'settings', label: 'SETTINGS', emoji: '⚙️', onClick: onSettings, delay: '400ms', glow: 'bg-gray-500' }
                         ].map((card, i) => (
                             <button
                                 key={card.id}
                                 onClick={card.onClick}
                                 className={`
-                                    glass-panel rounded-3xl p-4 shadow-lg
+                                    rounded-3xl p-4 shadow-lg overflow-hidden
                                     transform transition-all duration-200 hover:scale-[1.02] active:scale-95
                                     flex flex-col items-center justify-center gap-3 group relative
-                                    !border-white/10
                                     ${isGuest && card.id !== 'settings' ? 'grayscale opacity-80' : ''}
                                 `}
                                 style={{
-                                    background: `linear-gradient(135deg, rgba(44, 36, 27, 0.4), rgba(30, 30, 30, 0.4))`,
+                                    background: 'var(--theme-glass-bg)',
+                                    border: '2px solid var(--theme-accent)',
                                     animationDelay: card.delay
                                 }}
                             >
+                                {/* Backdrop blur for frosted glass effect */}
+                                <div className="absolute inset-0 backdrop-blur-md rounded-3xl z-0" />
+                                {/* Theme color tint overlay */}
+                                <div className="absolute inset-0 z-[1] bg-[var(--theme-accent)] opacity-10 mix-blend-overlay" />
+
                                 {/* Breathing Glow Background (Hidden for Guest) */}
                                 {!isGuest && (
                                     <div
-                                        className={`absolute top-1/2 left-1/2 w-20 h-20 rounded-full blur-[25px] ${card.glow} animate-breathe -translate-x-1/2 -translate-y-1/2`}
+                                        className={`absolute top-1/2 left-1/2 w-20 h-20 rounded-full blur-[25px] ${card.glow} animate-breathe -translate-x-1/2 -translate-y-1/2 z-[1] opacity-30`}
                                         style={{ animationDelay: `${i * 0.5}s`, animationFillMode: 'both' }}
                                     />
                                 )}
 
                                 {isGuest && card.id !== 'settings' && (
-                                    <div className="absolute top-2 right-2 text-xs opacity-50">🔒</div>
+                                    <div className="absolute top-2 right-2 text-xs opacity-50 z-20">🔒</div>
                                 )}
 
                                 <div className={`text-5xl group-hover:-translate-y-1 transition-transform duration-300 drop-shadow-md z-10 relative`} style={{ animationDelay: `${i * 0.5}s` }}>{card.emoji}</div>
                                 <div className="text-sm font-black tracking-widest uppercase opacity-80 group-hover:opacity-100 transition-opacity z-10 relative" style={{ color: 'var(--theme-text)' }}>{card.label}</div>
-                                <div className={`absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl z-20`}></div>
                             </button>
                         ))}
                     </div>
@@ -231,20 +245,27 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                     {/* Match History Button */}
                     <button
                         onClick={() => handleRestrictedAction(onGallery)}
-                        className={`w-full glass-panel rounded-2xl p-3 !border-white/10 flex items-center justify-between group active:scale-95 transition-all hover:brightness-110 relative ${isGuest ? 'grayscale opacity-70' : ''}`}
-                        style={{ background: 'linear-gradient(135deg, rgba(44, 36, 27, 0.4), rgba(30, 30, 30, 0.4))' }}
+                        className={`w-full rounded-2xl p-3 flex items-center justify-between group active:scale-95 transition-all hover:brightness-110 relative overflow-hidden ${isGuest ? 'grayscale opacity-70' : ''}`}
+                        style={{ 
+                            background: 'var(--theme-glass-bg)',
+                            border: '2px solid var(--theme-accent)',
+                        }}
                     >
+                        {/* Backdrop blur for frosted glass effect */}
+                        <div className="absolute inset-0 backdrop-blur-md rounded-2xl z-0" />
+                        {/* Theme color tint overlay */}
+                        <div className="absolute inset-0 z-[1] bg-[var(--theme-accent)] opacity-10 mix-blend-overlay" />
                         {isGuest && <div className="absolute top-2 right-2 z-20 text-xs opacity-50">🔒</div>}
-                        <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-3 relative z-10">
                             <div className="w-8 h-8 bg-pink-500/20 rounded-lg flex items-center justify-center text-sm group-hover:scale-110 transition-transform">
                                 📊
                             </div>
-                            <div className="text-[var(--theme-text)] font-bold text-sm">View Match History</div>
+                            <div className="font-bold text-sm" style={{ color: 'var(--theme-text)' }}>View Match History</div>
                         </div>
-                        <div className="text-[var(--theme-text-secondary)] text-lg opacity-50 group-hover:translate-x-1 transition-transform">→</div>
+                        <div className="text-lg opacity-50 group-hover:translate-x-1 transition-transform relative z-10" style={{ color: 'var(--theme-text-secondary)' }}>→</div>
                     </button>
 
-                    <div className="text-[var(--theme-text-secondary)] text-[10px] font-bold tracking-[0.2em] opacity-30">
+                    <div className="text-[10px] font-bold tracking-[0.2em] opacity-30" style={{ color: 'var(--theme-text-secondary)' }}>
                         BORED AT WORK GAMES
                     </div>
                 </div>

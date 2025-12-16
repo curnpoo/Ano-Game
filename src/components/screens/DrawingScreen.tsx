@@ -2,13 +2,14 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import type { GameRoom, Player } from '../../types';
 import { GameCanvas } from '../game/GameCanvas';
 import { BentoToolbar } from '../game/BentoToolbar';
-import { DrawingTimer } from '../game/DrawingTimer';
+import { DrawingHeader } from '../game/DrawingHeader';
 import { SabotageOverlay } from '../game/SabotageOverlay';
 import { ZoomResetButton } from '../game/ZoomResetButton';
 import { AvatarDisplay } from '../common/AvatarDisplay';
 import { useZoomPan } from '../../hooks/useZoomPan';
 
 import { CosmeticsService } from '../../services/cosmetics';
+import { PowerupHUD } from '../game/PowerupHUD';
 import type { DrawingStroke } from '../../types';
 
 interface DrawingScreenProps {
@@ -20,6 +21,9 @@ interface DrawingScreenProps {
     timerEndsAt: number | null;
     onTimeUp: () => void;
     timerDuration: number;
+    onShowSettings: () => void;
+    submittedCount?: number;
+    totalPlayers?: number;
 
     // Drawing props
     brushColor: string;
@@ -54,6 +58,9 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
     timerEndsAt,
     onTimeUp,
     timerDuration,
+    onShowSettings,
+    submittedCount = 0,
+    totalPlayers = 0,
     brushColor,
     brushSize,
     brushType = 'default',
@@ -220,7 +227,17 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
     const sabotageClass = (isSabotaged && sabotageEffect?.type === 'visual_distortion')
         ? "animate-shake-hard"
         : "";
+    const sabotageClass = (isSabotaged && sabotageEffect?.type === 'visual_distortion')
+        ? "animate-shake-hard"
+        : "";
     const containerClass = `${baseContainerClass} ${sabotageClass}`;
+
+    // Active Powerup Effects
+    const flashBangEffect = room.activeEffects?.find(e => 
+        e.type === 'flash_bang' && 
+        (e.expiresAt || 0) > Date.now() &&
+        e.triggeredBy !== player.id
+    );
 
     // Determine if we should show UI elements (timer/toolbar)
     const showDrawingUI = isMyTimerRunning && !hasSubmitted;
@@ -238,24 +255,22 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
             {/* Canvas Area - Maximized */}
             <div className="relative w-full h-full max-w-lg mx-auto flex flex-col p-4 pt-32 safe-area-padding">
 
-                {/* Timer - Floating Top */}
-                <div
-                    className="flex-none w-full mb-4 z-40 transition-all duration-500 ease-out"
-                    style={{
-                        transform: showDrawingUI && transitionState === 'drawing' ? 'translateY(0)' : 'translateY(-20px)',
-                        opacity: showDrawingUI && transitionState === 'drawing' ? 1 : 0,
-                        height: showDrawingUI && transitionState === 'drawing' ? 'auto' : 0,
-                        overflow: 'visible'
-                    }}
-                >
-                    {showDrawingUI && (
-                        <DrawingTimer
-                            endsAt={timerEndsAt || Date.now() + 10000}
-                            onTimeUp={onTimeUp}
-                            totalDuration={timerDuration}
-                        />
-                    )}
-                </div>
+                {/* Header - Fixed Top (Bento Style) */}
+                <DrawingHeader
+                    room={room}
+                    player={player}
+                    onSettings={onShowSettings}
+                    onDone={onTimeUp}
+                    timerEndsAt={timerEndsAt || Date.now() + 10000}
+                    timerDuration={timerDuration}
+                    onTimeUp={onTimeUp}
+                    hasSubmitted={hasSubmitted}
+                    submittedCount={submittedCount}
+                    totalPlayers={totalPlayers}
+                />
+                
+                {/* Spacer to push content down (approx height of header + padding) */}
+                <div className="h-32 w-full flex-none"></div>
 
                 {/* Spacer for vertical center alignment if needed, or just let flex-1 do it */}
 
@@ -467,7 +482,23 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                     isSabotaged && sabotageEffect?.type === 'subtract_time' ? 'Time Thief' :
                     undefined
                 }
+                showBanner={false}
             />
+
+            {/* Flash Bang Effect */}
+            {flashBangEffect && (
+                <div className="absolute inset-0 z-[60] bg-white animate-pulse pointer-events-none mix-blend-hard-light duration-75" />
+            )}
+
+            {/* Powerup HUD - Top Right below header */}
+            <div className="absolute top-28 right-4 z-40">
+                <PowerupHUD 
+                    roomCode={room.roomCode}
+                    playerId={player.id}
+                    activePowerups={player.activePowerups || []}
+                    isDrawing={true}
+                />
+            </div>
         </div>
     );
 };

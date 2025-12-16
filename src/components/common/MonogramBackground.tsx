@@ -1,35 +1,25 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
 interface MonogramBackgroundProps {
     speed?: 'normal' | 'slow';
     blur?: 'none' | 'sm' | 'md' | 'lg';
     opacity?: number;
+    /** If true, uses fixed positioning to match global background alignment */
+    fixed?: boolean;
 }
 
 export const MonogramBackground: React.FC<MonogramBackgroundProps> = ({
     speed = 'normal',
     blur = 'none',
-    opacity = 0.2
+    opacity = 0.2,
+    fixed = false
 }) => {
-    const [style, setStyle] = useState<React.CSSProperties>({});
-
-    useEffect(() => {
-        // Distance to move (must match pattern size for perfect seamless loop)
-        const patternSize = 240;
-
-        // Use random integer multipliers for seamless looping directions
-        const possibleMultipliers = [-3, -2, -1, 1, 2, 3];
-        const xMult = possibleMultipliers[Math.floor(Math.random() * possibleMultipliers.length)];
-        const yMult = possibleMultipliers[Math.floor(Math.random() * possibleMultipliers.length)];
-
-        const x = xMult * patternSize;
-        const y = yMult * patternSize;
-
-        setStyle({
-            '--pan-x': `${x}px`,
-            '--pan-y': `${y}px`,
-        } as React.CSSProperties);
-    }, []);
+    // Use FIXED animation direction so all instances sync together
+    const patternSize = 240;
+    const style = {
+        '--pan-x': `${1 * patternSize}px`,
+        '--pan-y': `${1 * patternSize}px`,
+    } as React.CSSProperties;
 
     const svgPattern = useMemo(() => {
         const icons = [
@@ -59,9 +49,17 @@ export const MonogramBackground: React.FC<MonogramBackgroundProps> = ({
         return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
     }, []);
 
-    // Animation duration based on speed prop
-    const animationDuration = speed === 'slow' ? '60s' : '30s';
-    const panDuration = speed === 'slow' ? '240s' : '120s';
+    // Sync animations by calculating a negative delay based on absolute time
+    // This ensures that regardless of when this component mounts, it joins the animation
+    // at the exact same frame as every other instance.
+    const animationDurationSeconds = speed === 'slow' ? 60 : 30;
+    const panDurationSeconds = speed === 'slow' ? 240 : 120;
+    
+    // We use a fixed epoch so all clients sync somewhat similarly (optional, but good for consistency)
+    // Using Date.now() ensures we get the current progress within the cycle.
+    const now = Date.now();
+    const cycle1Delay = -((now / 1000) % animationDurationSeconds);
+    const cycle2Delay = -((now / 1000) % panDurationSeconds);
 
     // Blur class based on prop
     const blurClass = {
@@ -71,13 +69,19 @@ export const MonogramBackground: React.FC<MonogramBackgroundProps> = ({
         'lg': 'blur-lg'
     }[blur];
 
+    // Animation string - include the calculated delays
+    const animationString = `pastel-cycle ${animationDurationSeconds}s infinite linear ${cycle1Delay}s, mask-pan ${panDurationSeconds}s infinite linear ${cycle2Delay}s`;
+
+    // Position class - 'fixed' makes it align with global background
+    const positionClass = fixed ? 'fixed' : 'absolute';
+
     return (
         <div
-            className={`absolute inset-0 pointer-events-none z-0 overflow-hidden ${blurClass}`}
+            className={`${positionClass} inset-0 pointer-events-none z-0 overflow-hidden ${blurClass}`}
             style={{ ...style, opacity }}
         >
             <div
-                className="absolute inset-0 w-full h-full"
+                className={`${positionClass} inset-0 w-full h-full`}
                 style={{
                     backgroundColor: 'currentColor',
                     maskImage: `url('${svgPattern}')`,
@@ -86,8 +90,7 @@ export const MonogramBackground: React.FC<MonogramBackgroundProps> = ({
                     WebkitMaskRepeat: 'repeat',
                     maskSize: '240px 240px',
                     WebkitMaskSize: '240px 240px',
-                    // Use a long duration for "very slow"
-                    animation: `pastel-cycle ${animationDuration} infinite linear, mask-pan ${panDuration} infinite linear`
+                    animation: animationString
                 }}
             />
         </div>

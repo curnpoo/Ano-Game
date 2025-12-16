@@ -46,13 +46,20 @@ export const BADGES = [
     { id: 'level_100', name: 'Legendary Illustrator', emoji: '👑', description: 'The ultimate artist at Level 100', price: 0, levelRequired: 100 }
 ];
 
-// Purchasable powerups (consumable items)
+// Powerups (Consumables & Permanent)
 export const POWERUPS = [
-    { id: 'extra_time', name: 'Extra Time', emoji: '⏰', description: '+10 seconds drawing time', price: 50, consumable: true },
-    { id: 'double_vote', name: 'Double Vote', emoji: '✌️', description: 'Your vote counts twice', price: 75, consumable: true },
-    { id: 'shield', name: 'Anti-Sabotage', emoji: '🛡️', description: 'Block sabotage effects', price: 100, consumable: true },
-    { id: 'reveal', name: 'Reveal Saboteur', emoji: '👁️', description: 'See who the saboteur is', price: 125, consumable: true },
-    { id: 'steal', name: 'Vote Steal', emoji: '🎭', description: 'Steal 1 vote from leader', price: 150, consumable: true }
+    // Consumables
+    { id: 'extra_time', name: 'Extra Time', emoji: '⏰', description: '+10s drawing time', price: 50, type: 'consumable' },
+    { id: 'flash_bang', name: 'Flash Bang', emoji: '💥', description: 'Blind opponents for 3s', price: 100, type: 'consumable' },
+    { id: 'vote_peep', name: 'Vote Peep', emoji: '👁️', description: 'Reveal 1 random vote', price: 75, type: 'consumable' },
+    { id: 'double_vote', name: 'Double Vote', emoji: '✌️', description: 'Your vote counts x2', price: 75, type: 'consumable' },
+    { id: 'shield', name: 'Anti-Sabotage', emoji: '🛡️', description: 'Block 1 sabotage', price: 100, type: 'consumable' },
+    { id: 'reveal', name: 'Reveal Saboteur', emoji: '🔦', description: 'Expose the saboteur', price: 125, type: 'consumable' },
+    { id: 'steal', name: 'Vote Steal', emoji: '🎭', description: 'Steal 1 vote from leader', price: 150, type: 'consumable' },
+
+    // Permanent
+    { id: 'timekeeper', name: 'Timekeeper', emoji: '⏳', description: 'Passive +5s to every round', price: 2500, type: 'permanent' },
+    { id: 'mirror_shield', name: 'Mirror Shield', emoji: '🪞', description: '30% chance to reflect sabotage', price: 5000, type: 'permanent' }
 ];
 
 // Purchasable fonts (permanent unlocks)
@@ -85,9 +92,36 @@ export const FRAMES = [
 
 // Avatar Background Themes (New) - CSS gradients
 export const THEMES = [
-    { id: 'default', name: 'Dark', preview: '⚫', description: 'Classic Dark', price: 0, value: '#1a1a1a' },
-    { id: 'sunset', name: 'Sunset', preview: '🌅', description: 'Warm vibes', price: 300, value: 'linear-gradient(to bottom right, #ff512f, #dd2476)' },
-    { id: 'ocean', name: 'Ocean', preview: '🌊', description: 'Cool breeze', price: 300, value: 'linear-gradient(to bottom right, #2193b0, #6dd5ed)' },
-    { id: 'forest', name: 'Forest', preview: '🌲', description: 'Nature', price: 300, value: 'linear-gradient(to bottom right, #11998e, #38ef7d)' },
-    { id: 'galaxy', name: 'Galaxy', preview: '🌌', description: 'Far out', price: 500, value: 'linear-gradient(to bottom right, #654ea3, #eaafc8)' }
+    // --- Basic Solids (Cheap) ---
+    { id: 'default', name: 'Dark Mode', preview: '⚫', description: 'Classic Darkness', price: 0, value: '#121212' },
+    { id: 'light', name: 'Clean White', preview: '⚪', description: 'Blindingly Bright', price: 0, value: '#f5f5f5' },
+    { id: 'midnight', name: 'Midnight', preview: '🌙', description: 'Deep Blue Black', price: 50, value: '#0f172a' },
+    { id: 'forest_dark', name: 'Deep Forest', preview: '🌲', description: 'Dark Green', price: 50, value: '#064e3b' },
+    { id: 'coffee', name: 'Espresso', preview: '☕', description: 'Dark Brown', price: 50, value: '#271c19' },
+    { id: 'slate', name: 'Slate', preview: '🪨', description: 'Professional Grey', price: 50, value: '#334155' },
+
+    // --- Simple Gradients (Affordable) ---
+    { id: 'twilight', name: 'Twilight', preview: '🌆', description: 'Purple Haze', price: 100, value: 'linear-gradient(to bottom, #2e1065, #0f172a)' },
+    { id: 'sunrise', name: 'Sunrise', preview: '🌅', description: 'Morning Glow', price: 100, value: 'linear-gradient(to top, #fdba74, #fcd34d)' },
+    { id: 'ocean', name: 'Ocean', preview: '🌊', description: 'Deep Sea', price: 100, value: 'linear-gradient(to bottom, #0ea5e9, #1e40af)' },
+    { id: 'mint', name: 'Fresh Mint', preview: '🌿', description: 'Cool Green', price: 100, value: 'linear-gradient(135deg, #86efac, #3b82f6)' },
+    { id: 'lavender', name: 'Lavender', preview: '🌸', description: 'Soft Purple', price: 100, value: 'linear-gradient(to right, #e9d5ff, #c084fc)' },
+
+    // --- Premium Gradients (Pricey) ---
+    { id: 'sunset', name: 'Sunset Vibe', preview: '🌇', description: 'Pink & Orange', price: 300, value: 'linear-gradient(to bottom right, #ff512f, #dd2476)' },
+    { id: 'neon_city', name: 'Neon City', preview: '🌃', description: 'Cyberpunk', price: 400, value: 'linear-gradient(to bottom, #0f0c29, #302b63, #24243e)' },
+    { id: 'northern_lights', name: 'Aurora', preview: '🌌', description: 'Magical', price: 500, value: 'linear-gradient(to right, #43cea2, #185a9d)' },
+    { id: 'galaxy', name: 'Galaxy', preview: '✨', description: 'Far Far Away', price: 500, value: 'linear-gradient(to bottom right, #654ea3, #eaafc8)' },
+    { id: 'fire', name: 'Inferno', preview: '🔥', description: 'Hot Stuff', price: 400, value: 'linear-gradient(to top, #f83600, #f9d423)' },
+
+    // --- "Ugly" / Bold / Weird (Fun) ---
+    { id: 'mustard', name: 'Old Mustard', preview: '🌭', description: 'Why?', price: 200, value: '#ca8a04' },
+    { id: 'clown', name: 'Clown Vomit', preview: '🤡', description: 'Too many colors', price: 250, value: 'conic-gradient(red, orange, yellow, green, blue, purple, red)' },
+    { id: 'hacker', name: 'Matrix', preview: '💻', description: 'Green Code', price: 300, value: 'linear-gradient(0deg, #000 0%, #003300 100%)' }, // Noise overlay acts as code?
+    { id: 'barbie', name: 'Plastic', preview: '💅', description: 'Life is plastic', price: 300, value: '#ec4899' },
+    { id: 'rainbow_road', name: 'Rainbow Rd', preview: '🌈', description: 'Don\'t fall off', price: 600, value: 'linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3)' },
+    
+    // --- Special ---
+    { id: 'gold', name: 'Pure Gold', preview: '🏆', description: 'You are rich', price: 1000, value: 'radial-gradient(ellipse at center, #ffd700 0%, #b8860b 100%)' },
+    { id: 'void', name: 'The Void', preview: '🕳️', description: 'Absorb light', price: 666, value: '#000000' }
 ];

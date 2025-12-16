@@ -50,7 +50,31 @@ export const SabotageSelectionScreen: React.FC<SabotageSelectionScreenProps> = (
     const handleConfirm = () => {
         if (selectedTargetId && selectedType && !isSubmitting) {
             setIsSubmitting(true);
-            onSelect(selectedTargetId, { type: selectedType, intensity: 5 });
+            
+            let finalTargetId = selectedTargetId;
+            const targetPlayer = players.find(p => p.id === selectedTargetId);
+
+            // Mirror Shield Check (30% chance to reflect)
+            if (targetPlayer?.permanentPowerups?.includes('mirror_shield')) {
+                const roll = Math.random();
+                console.log('[Mirror Shield] Checking reflection...', roll);
+                if (roll < 0.3) {
+                    console.log(`[Mirror Shield] REFLECTED! Saboteur ${saboteurId} is now the target.`);
+                    finalTargetId = saboteurId;
+                    // TODO: Show visual feedback of reflection?
+                }
+            }
+
+            // Shield Check (Consumable)
+            // If target has 'shield' equipped, block the sabotage (reduce intensity to 0)
+            if (targetPlayer?.activePowerups?.includes('shield')) {
+                console.log(`[Shield] Sabotage blocked by Shield check on ${finalTargetId}`);
+                // We send intensity 0 to indicate blocked
+                onSelect(finalTargetId, { type: selectedType, intensity: 0 });
+                return;
+            }
+
+            onSelect(finalTargetId, { type: selectedType, intensity: 5 });
         }
     };
 

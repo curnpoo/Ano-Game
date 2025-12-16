@@ -8,6 +8,7 @@ import { CosmeticsService } from '../../services/cosmetics';
 import { useZoomPan } from '../../hooks/useZoomPan';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
 import { FRAMES, THEMES } from '../../constants/cosmetics';
+import { MonogramBackground } from '../common/MonogramBackground';
 
 interface ProfileSetupScreenProps {
     onComplete: (player: Omit<Player, 'id' | 'joinedAt' | 'lastSeen'>) => void;
@@ -102,13 +103,27 @@ export const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ onComple
     };
 
     return (
-        <div className="fixed inset-0 bg-gray-900 overflow-hidden flex flex-col items-center justify-center safe-area-padding">
-            {/* Background */}
-            <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-gray-900 to-black z-0">
-                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-overlay"></div>
+        <div 
+            className="fixed inset-0 overflow-hidden flex flex-col items-center justify-center safe-area-padding"
+            style={{ 
+                background: 'transparent',
+                isolation: 'isolate'
+            }}
+        >
+            {/* Monogram Pattern Background with blur - shows through from GlobalBackground */}
+            <div className="absolute inset-0 z-[-1]">
+                <MonogramBackground speed="slow" opacity={0.15} />
             </div>
 
-            <div className="z-10 w-full max-w-md h-full flex flex-col p-4 animate-slide-up">
+            {/* Frosted Glass Container */}
+            <div 
+                className="z-10 w-full max-w-md h-full flex flex-col p-4 animate-slide-up"
+                style={{
+                    background: 'var(--theme-glass-bg)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                }}
+            >
                 
                 {/* Header Section */}
                 <div className="relative text-center mb-4 shrink-0 flex items-center justify-center">
@@ -118,14 +133,19 @@ export const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ onComple
                                 vibrate(HapticPatterns.light);
                                 onBack();
                             }}
-                            className="absolute left-0 p-2 rounded-full glass-panel hover:bg-white/10 active:scale-95 transition-all text-white"
+                            className="absolute left-0 p-2 rounded-full hover:bg-white/10 active:scale-95 transition-all"
+                            style={{ 
+                                background: 'var(--theme-glass-bg)',
+                                border: '1px solid var(--theme-glass-border)',
+                                color: 'var(--theme-text)'
+                            }}
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
                             </svg>
                         </button>
                     )}
-                    <h1 className="text-3xl font-black text-white drop-shadow-md rainbow-text">
+                    <h1 className="text-3xl font-black drop-shadow-md rainbow-text" style={{ color: 'var(--theme-text)' }}>
                         Create Profile
                     </h1>
                 </div>
@@ -138,7 +158,12 @@ export const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ onComple
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Your Name"
                         maxLength={12}
-                        className="w-full px-6 py-4 bg-white/10 border border-white/20 rounded-2xl focus:border-white/50 focus:bg-white/20 focus:outline-none font-bold text-center text-2xl text-white placeholder-white/30 transition-all shadow-lg"
+                        className="w-full px-6 py-4 rounded-2xl focus:outline-none font-bold text-center text-2xl transition-all shadow-lg"
+                        style={{
+                            background: 'var(--theme-glass-bg)',
+                            border: '1px solid var(--theme-glass-border)',
+                            color: 'var(--theme-text)',
+                        }}
                         autoCapitalize="words"
                         autoCorrect="off"
                         autoComplete="off"

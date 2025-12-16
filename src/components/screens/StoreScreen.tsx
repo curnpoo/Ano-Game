@@ -1,27 +1,46 @@
+
 import React, { useState } from 'react';
 import { CurrencyService, formatCurrency } from '../../services/currency';
 import { AuthService } from '../../services/auth';
 import { UNLOCKABLE_BRUSHES, POWERUPS, FONTS, FRAMES, THEMES } from '../../constants/cosmetics';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
+import type { Player } from '../../types';
+
 
 interface StoreScreenProps {
     onBack: () => void;
-    onFontChange?: (fontId: string) => void;
+    onEquip: (type: 'font' | 'theme' | 'frame', id: string, value?: string) => void;
+    player?: Player | null; // Accept parent state
 }
 
 type Tab = 'brushes' | 'powerups' | 'fonts' | 'frames' | 'themes';
 
-export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onFontChange }) => {
+interface StoreSection {
+    title?: string;
+    items: any[];
+}
+
+export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onEquip, player }) => {
     const [balance, setBalance] = useState(CurrencyService.getCurrency());
     const [activeTab, setActiveTab] = useState<Tab>('brushes');
     const [purchaseMessage, setPurchaseMessage] = useState<string | null>(null);
     const purchasedItems = CurrencyService.getPurchasedItems();
+    const inventory = CurrencyService.getInventory();
+    
+    // Local state for "Match Avatar to Theme" toggle (optimistic UI)
+    const [matchAvatarToTheme, setMatchAvatarToTheme] = useState(player?.cosmetics?.matchAvatarToTheme ?? false);
 
-    const isOwned = (itemId: string, price: number) =>
-        price === 0 || purchasedItems.includes(itemId);
+    const isOwned = (itemId: string, price: number, type?: 'consumable' | 'permanent') => {
+        if (price === 0) return true;
+        if (type === 'consumable') return false; // Consumables are never "fully owned"
+        return purchasedItems.includes(itemId);
+    };
 
+    const getInventoryCount = (itemId: string) => inventory[itemId] || 0;
+
+    // Use passed player prop for immediate optimistic UI update
     const isEquipped = (item: any) => {
-        const currentUser = AuthService.getCurrentUser();
+        const currentUser = player || AuthService.getCurrentUser();
         if (!currentUser) return false;
 
         if (activeTab === 'fonts') return currentUser.cosmetics?.activeFont === item.id;
@@ -32,10 +51,14 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onFontChange }
     };
 
     const handleAction = (item: any) => {
-        const owned = isOwned(item.id, item.price);
+        const owned = isOwned(item.id, item.price, item.type);
 
         // Equip Logic (for cosmetic types)
         if (['fonts', 'frames', 'themes'].includes(activeTab) && owned) {
+            if (activeTab === 'fonts') onEquip('font', item.id);
+            else if (activeTab === 'frames') onEquip('frame', item.id);
+            else if (activeTab === 'themes') onEquip('theme', item.id, item.value);
+
             const currentUser = AuthService.getCurrentUser();
             if (currentUser) {
                 let updates: any = {};
@@ -43,21 +66,21 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onFontChange }
 
                 if (activeTab === 'fonts') {
                     updates = { cosmetics: { ...currentUser.cosmetics, activeFont: item.id } };
-                    onFontChange?.(item.id);
                     message = `✏️ ${message}`;
                 } else if (activeTab === 'frames') {
                     updates = { frame: item.id === 'none' ? null : item.id };
                     message = `🖼️ ${message}`;
                 } else if (activeTab === 'themes') {
+                    // Only update avatar backgroundColor if matchAvatarToTheme is enabled
+                    const shouldUpdateBg = currentUser.cosmetics?.matchAvatarToTheme === true;
                     updates = { 
-                        backgroundColor: item.value, // Set visual background
-                        cosmetics: { ...currentUser.cosmetics, activeTheme: item.id } // Set logical theme ID
+                        ...(shouldUpdateBg ? { backgroundColor: item.value } : {}),
+                        cosmetics: { ...currentUser.cosmetics, activeTheme: item.id } 
                     };
                     message = `🎨 ${message}`;
                 }
-
                 AuthService.updateUser(currentUser.id, updates);
-
+                
                 try {
                     vibrate(HapticPatterns.light);
                 } catch (err) {
@@ -73,10 +96,14 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onFontChange }
         // Purchase Logic
         if (item.price === 0) return;
 
-        if (CurrencyService.purchaseItem(item.id, item.price)) {
+        if (CurrencyService.purchaseItem(item.id, item.price, item.type)) {
             vibrate(HapticPatterns.success);
             setBalance(CurrencyService.getCurrency());
-            setPurchaseMessage(`✅ Purchased ${item.name}!`);
+            const isConsumable = item.type === 'consumable';
+            setPurchaseMessage(isConsumable 
+                ? `✅ +1 ${item.name} (${CurrencyService.getItemCount(item.id)})` 
+                : `✅ Purchased ${item.name}!`
+            );
             setTimeout(() => setPurchaseMessage(null), 2000);
         } else {
             vibrate(HapticPatterns.error);
@@ -86,27 +113,48 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onFontChange }
     };
 
     const tabs = [
-        { id: 'brushes' as Tab, label: 'BRUSHES', icon: '🖌️', items: UNLOCKABLE_BRUSHES.filter(b => b.price > 0) },
-        { id: 'powerups' as Tab, label: 'POWERUPS', icon: '⚡', items: POWERUPS },
-        { id: 'fonts' as Tab, label: 'FONTS', icon: '✏️', items: FONTS },
-        { id: 'frames' as Tab, label: 'FRAMES', icon: '🖼️', items: FRAMES },
-        { id: 'themes' as Tab, label: 'THEMES', icon: '🎨', items: THEMES }
+        { id: 'brushes' as Tab, label: 'BRUSHES', icon: '🖌️' },
+        { id: 'powerups' as Tab, label: 'POWERUPS', icon: '⚡' },
+        { id: 'frames' as Tab, label: 'FRAMES', icon: '🖼️' },
+        { id: 'themes' as Tab, label: 'THEMES', icon: '🎨' },
+        { id: 'fonts' as Tab, label: 'FONTS', icon: '✏️' }
     ];
 
-    const currentItems = tabs.find(t => t.id === activeTab)?.items || [];
+    const getSections = (): StoreSection[] => {
+        switch (activeTab) {
+            case 'powerups':
+                return [
+                    { title: 'Consumables (One-time use)', items: POWERUPS.filter(p => p.type === 'consumable') },
+                    { title: 'Permanent Upgrades', items: POWERUPS.filter(p => p.type === 'permanent') }
+                ];
+            case 'frames':
+                return [
+                    { title: 'Basic Frames', items: FRAMES.filter(f => f.price < 200 && f.id !== 'none') },
+                    { title: 'Premium Frames', items: FRAMES.filter(f => f.price >= 200) }
+                ];
+            case 'brushes':
+                return [{ items: UNLOCKABLE_BRUSHES.filter(b => b.price > 0) }];
+            case 'fonts':
+                return [{ items: FONTS }];
+            case 'themes':
+                return [{ items: THEMES }];
+            default:
+                return [];
+        }
+    };
+
+    const sections = getSections();
 
     return (
         <div
-            className="fixed inset-0 overflow-hidden flex flex-col bg-gray-950"
-            style={{
-                height: '100dvh'
+            className="fixed inset-0 overflow-hidden flex flex-col"
+            style={{ 
+                height: '100dvh',
+                background: 'transparent',
+                isolation: 'isolate'
             }}
         >
-            {/* Background Gradients */}
-            <div className="absolute inset-0 pointer-events-none">
-                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-purple-900/20 rounded-full blur-[100px] opacity-50" />
-                <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-blue-900/20 rounded-full blur-[100px] opacity-50" />
-            </div>
+            {/* Background accent glows - Removed to prevent dirty look on light themes */}
 
             {/* Header safe area */}
             <div className="pt-[max(1rem,env(safe-area-inset-top))] px-4 pb-2 z-10">
@@ -116,7 +164,12 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onFontChange }
                             vibrate();
                             onBack();
                         }}
-                        className="w-12 h-12 rounded-full glass-panel flex items-center justify-center text-xl active:scale-90 transition-transform bg-white/5 border border-white/10 text-white shadow-lg"
+                        className="w-12 h-12 rounded-full glass-panel flex items-center justify-center text-xl active:scale-90 transition-transform shadow-lg"
+                        style={{ 
+                            background: 'var(--theme-card-bg)', 
+                            border: '1px solid var(--theme-border)',
+                            color: 'var(--theme-text)'
+                        }}
                     >
                         ←
                     </button>
@@ -130,7 +183,6 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onFontChange }
                 </h1>
 
                 {/* Floating Tabs */}
-                {/* Horizontal scroll for tabs on mobile */}
                 <div className="flex overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4">
                     <div className="flex p-1 bg-black/40 backdrop-blur-md rounded-2xl border border-white/10 shadow-inner min-w-max mx-auto">
                         {tabs.map(tab => (
@@ -162,93 +214,153 @@ export const StoreScreen: React.FC<StoreScreenProps> = ({ onBack, onFontChange }
                 </div>
             )}
 
-            {/* Scrollable Grid */}
+            {/* Scrollable List */}
             <div className="flex-1 overflow-y-auto px-4 pb-[max(2rem,env(safe-area-inset-bottom))] scrollbar-hide z-10">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 max-w-2xl mx-auto pt-2">
-                    {currentItems.map((item: any) => {
-                        const owned = isOwned(item.id, item.price);
-                        const isEquippable = ['fonts', 'frames', 'themes'].includes(activeTab);
-                        const equipped = isEquippable && isEquipped(item);
-
-                        return (
-                            <button
-                                key={item.id}
-                                onClick={() => handleAction(item)}
-                                disabled={isEquippable ? false : owned}
-                                className={`relative group flex flex-col items-center p-4 rounded-3xl transition-all duration-300 border
-                                    ${equipped
-                                        ? 'bg-green-500/20 border-green-500/50 shadow-[0_0_30px_rgba(74,222,128,0.2)]'
-                                        : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 hover:scale-[1.02] active:scale-95'
-                                    }
-                                    ${!owned && balance < item.price ? 'opacity-70 grayscale-[0.5]' : ''}
-                                `}
-                            >
-                                {/* Preview */}
-                                <div 
-                                    className={`w-full aspect-square mb-3 rounded-2xl flex items-center justify-center text-5xl shadow-inner relative overflow-hidden
-                                        ${activeTab === 'fonts' ? 'aspect-video bg-black/20' : 'bg-black/20'}
-                                    `}
-                                    style={activeTab === 'themes' ? { background: item.value } : undefined}
-                                >
-                                    {activeTab === 'fonts' ? (
-                                        <span style={{ fontFamily: item.fontFamily }} className="text-white text-3xl">Aa</span>
-                                    ) : activeTab === 'frames' ? (
-                                        <div className="relative flex items-center justify-center w-full h-full">
-                                             {/* Avatar placeholder with frame */}
-                                             <div className={`w-16 h-16 rounded-full bg-white/20 ${item.className || ''}`}>
-                                                 <div className="w-full h-full flex items-center justify-center text-2xl">👤</div>
-                                             </div>
-                                        </div>
-                                    ) : activeTab === 'themes' ? (
-                                        // Empty content, background is set
-                                        null
-                                    ) : (
-                                        <span className="filter drop-shadow-lg">{item.emoji || item.preview || '🎁'}</span>
-                                    )}
-                                </div>
-
-                                {/* Info */}
-                                <div className="text-center w-full mb-3">
-                                    <h3
-                                        className="font-bold text-white text-sm mb-1 line-clamp-1"
-                                        style={activeTab === 'fonts' ? { fontFamily: item.fontFamily } : undefined}
-                                    >
-                                        {item.name}
+                <div className="max-w-2xl mx-auto pt-2 space-y-6">
+                    {sections.map((section, idx) => (
+                        <div key={idx} className="space-y-3">
+                            {section.title && (
+                                <div className="flex items-center justify-between sticky top-0 bg-gray-950/80 backdrop-blur-md py-2 z-10 w-full pr-2">
+                                    <h3 className="text-white/50 font-bold uppercase tracking-widest text-xs pl-2">
+                                        {section.title}
                                     </h3>
-                                    {item.description && (
-                                        <p className="text-[10px] text-white/50 line-clamp-2 leading-tight h-[2.5em]">
-                                            {item.description}
-                                        </p>
-                                    )}
+                                    
+                                    {/* Match Avatar Toggle (Only shows in relevant section, e.g. solid colors or just once at top if easier) */}
+                                    {/* Better placement: If activeTab is themes, show it at the very top of list or section */}
                                 </div>
+                            )}
+                            {activeTab === 'themes' && idx === 0 && (
+                                <div className="mb-4 px-2">
+                                    <div className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/10">
+                                        <div className="flex flex-col">
+                                            <span className="text-white font-bold text-sm">Match Avatar</span>
+                                            <span className="text-white/40 text-[10px]">Sync avatar background to theme</span>
+                                        </div>
+                                        <button
+                                            onClick={async () => {
+                                                vibrate();
+                                                if (!player?.cosmetics) return;
+                                                
+                                                // Toggle local state immediately (optimistic)
+                                                const newState = !matchAvatarToTheme;
+                                                setMatchAvatarToTheme(newState);
+                                                
+                                                // Persist to server
+                                                await AuthService.updateUser(player.id, {
+                                                    cosmetics: {
+                                                        ...player.cosmetics,
+                                                        matchAvatarToTheme: newState
+                                                    }
+                                                });
+                                            }}
+                                            className={`w-12 h-6 rounded-full relative transition-colors duration-300 ${matchAvatarToTheme ? 'bg-green-500' : 'bg-white/20'}`}
+                                        >
+                                            <div className={`absolute top-1 w-4 h-4 rounded-full bg-white transition-transform duration-300 ${matchAvatarToTheme ? 'left-7' : 'left-1'}`} />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                            <div className="space-y-3">
+                                {section.items.map((item: any) => {
+                                    const owned = isOwned(item.id, item.price, item.type);
+                                    const isEquippable = ['fonts', 'frames', 'themes'].includes(activeTab);
+                                    const quantity = item.type === 'consumable' ? getInventoryCount(item.id) : 0;
+                                    const equipped = isEquippable && isEquipped(item);
 
-                                {/* Action Button / Price */}
-                                <div className={`w-full py-2 px-3 rounded-xl font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-1 transition-colors
-                                    ${isEquippable && owned
-                                        ? equipped ? 'bg-green-500 text-white' : 'bg-white/10 text-white group-hover:bg-white/20'
-                                        : owned
-                                            ? 'bg-white/10 text-white/50 cursor-default'
-                                            : (balance >= item.price ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' : 'bg-red-500/20 text-red-400')
-                                    }
-                                `}>
-                                    {isEquippable && owned
-                                        ? equipped ? 'Selected' : 'Equip'
-                                        : owned
-                                            ? 'Owned'
-                                            : formatCurrency(item.price)
-                                    }
-                                </div>
-                            </button>
-                        );
-                    })}
+                                    return (
+                                        <button
+                                            key={item.id}
+                                            onClick={() => handleAction(item)}
+                                            disabled={isEquippable ? false : owned}
+                                            className={`w-full group flex items-center p-3 rounded-2xl transition-all duration-300 border relative overflow-hidden
+                                                ${equipped
+                                                    ? 'bg-gradient-to-r from-green-500/20 to-green-600/10 border-green-500/50'
+                                                    : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 active:scale-[0.98]'
+                                                }
+                                                ${!owned && balance < item.price ? 'opacity-70 grayscale-[0.5]' : ''}
+                                            `}
+                                        >
+                                            {/* Left: Icon/Preview */}
+                                            <div className="flex-shrink-0 mr-4">
+                                                <div 
+                                                    className={`w-16 h-16 rounded-xl flex items-center justify-center text-3xl shadow-inner relative overflow-hidden bg-black/30
+                                                        ${activeTab === 'themes' ? 'border border-white/10' : ''}
+                                                    `}
+                                                    style={activeTab === 'themes' ? { background: item.value } : undefined}
+                                                >
+                                                    {activeTab === 'fonts' ? (
+                                                        <span style={{ fontFamily: item.fontFamily }} className="text-white">Aa</span>
+                                                    ) : activeTab === 'frames' ? (
+                                                        <div className={`w-12 h-12 rounded-full bg-white/10 flex items-center justify-center ${item.className || ''}`}>
+                                                            <span className="text-xl">👤</span>
+                                                        </div>
+                                                    ) : activeTab === 'themes' ? (
+                                                        null
+                                                    ) : (
+                                                        <span className="filter drop-shadow-lg scale-110">{item.emoji || item.preview || '🎁'}</span>
+                                                    )}
+
+                                                     {/* Quantity Badge */}
+                                                    {item.type === 'consumable' && quantity > 0 && (
+                                                        <div className="absolute top-1 right-1 bg-black/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full border border-white/20">
+                                                            x{quantity}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Middle: Info */}
+                                            <div className="flex-1 text-left min-w-0">
+                                                <div className="flex items-baseline gap-2">
+                                                    <h3 
+                                                        className="font-bold text-white text-base truncate"
+                                                        style={activeTab === 'fonts' ? { fontFamily: item.fontFamily } : undefined}
+                                                    >
+                                                        {item.name}
+                                                    </h3>
+                                                    {equipped && <span className="text-[10px] text-green-400 font-bold uppercase tracking-wider bg-green-500/20 px-1.5 rounded">Active</span>}
+                                                </div>
+                                                <p className="text-xs text-white/50 line-clamp-1 mt-0.5">
+                                                    {item.description}
+                                                </p>
+                                            </div>
+
+                                            {/* Right: Action/Price */}
+                                            <div className="flex-shrink-0 ml-4">
+                                                <div className={`px-4 py-2 rounded-xl font-bold text-xs uppercase tracking-wider transition-colors
+                                                    ${isEquippable && owned
+                                                        ? equipped 
+                                                            ? 'bg-transparent text-green-400 border border-green-500/30' 
+                                                            : 'bg-white/10 text-white hover:bg-white/20'
+                                                        : owned
+                                                            ? 'bg-white/5 text-white/30 cursor-default'
+                                                            : (balance >= item.price 
+                                                                ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/30' 
+                                                                : 'bg-red-500/10 text-red-400 border border-red-500/20')
+                                                    }
+                                                `}>
+                                                    {isEquippable && owned
+                                                        ? equipped ? 'Selected' : 'Equip'
+                                                        : owned && item.type !== 'consumable'
+                                                            ? 'Owned'
+                                                            : formatCurrency(item.price)
+                                                    }
+                                                </div>
+                                            </div>
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+                    ))}
+
+                    {sections.every(s => s.items.length === 0) && (
+                        <div className="flex flex-col items-center justify-center py-20 opacity-50">
+                            <div className="text-6xl mb-4 grayscale">📭</div>
+                            <p className="text-white font-bold">Coming Soon</p>
+                        </div>
+                    )}
                 </div>
-
-                {currentItems.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-20 opacity-50">
-                        <div className="text-6xl mb-4 grayscale">📭</div>
-                        <p className="text-white font-bold">Coming Soon</p>
-                    </div>
-                )}
             </div>
         </div>
     );
