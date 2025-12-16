@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 
 import { InstallPromptModal } from '../common/InstallPromptModal';
-import { ShareModal } from '../common/ShareModal';
+
+const ShareModal = React.lazy(() => import('../common/ShareModal').then(module => ({ default: module.ShareModal })));
 
 interface WelcomeScreenProps {
     onPlay: () => void;
@@ -131,7 +132,9 @@ export const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
 
             {/* Modals */}
             {showInstallModal && <InstallPromptModal onClose={() => setShowInstallModal(false)} />}
-            {showShareModal && <ShareModal onClose={() => setShowShareModal(false)} isOpen={showShareModal} />}
+            <React.Suspense fallback={null}>
+                {showShareModal && <ShareModal onClose={() => setShowShareModal(false)} isOpen={showShareModal} />}
+            </React.Suspense>
 
             {/* About Modal - Inline for simplicity */}
             {

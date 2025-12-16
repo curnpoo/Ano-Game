@@ -15,6 +15,7 @@ export default defineConfig({
           'vendor-react': ['react', 'react-dom'],
           'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/database', 'firebase/storage', 'firebase/analytics', 'firebase/functions'],
           'vendor-ui': ['@use-gesture/react'],
+          'vendor-utils': ['react-qr-code'],
         }
       }
     },

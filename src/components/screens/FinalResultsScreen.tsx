@@ -111,15 +111,21 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
         processFinalStats();
     }, [room.roomCode, currentPlayerId, room.players, room.scores, showToast]);
 
+    const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+    const [saveError, setSaveError] = useState<string>('');
+
     // Save to Gallery (Separate Effect to ensure robustness even if rewards processed)
     useEffect(() => {
         const saveToGallery = async () => {
             console.log('[FinalResults] Attempting to save to gallery...');
+            setSaveStatus('saving');
+            
             // Prevent spamming save on re-renders, but allow retry if page refreshed
             // We use a separate key for gallery to decouple from rewards
             const galleryKey = `saved_gallery_${room.roomCode}`;
             if (sessionStorage.getItem(galleryKey)) {
                 console.log('[FinalResults] Game already saved in this session (skipped).');
+                setSaveStatus('success');
                 return;
             }
 
@@ -127,21 +133,38 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                 await GalleryService.saveGameToGallery(room, currentPlayerId);
                 sessionStorage.setItem(galleryKey, 'true');
                 console.log('[FinalResults] Game saved to gallery successfully, marking session.');
-            } catch (err) {
+                setSaveStatus('success');
+            } catch (err: any) {
                 console.error('[FinalResults] Failed to save game to gallery:', err);
-                // Don't set session key if failed, so it might retry?
-                // Or maybe just let it be.
+                setSaveStatus('error');
+                setSaveError(err.message || 'Unknown error');
             }
         };
         
-        // Only save if we are a player in the game
+        // Only save if we are a player in the game and status is idle (first run)
         const isPlayer = room.playerStates[currentPlayerId];
-        if (isPlayer) {
+        if (isPlayer && saveStatus === 'idle') {
             saveToGallery();
-        } else {
+        } else if (!isPlayer) {
              console.warn('[FinalResults] Not a player in this game, skipping gallery save.', { currentPlayerId });
         }
-    }, [room, currentPlayerId]);
+    }, [room, currentPlayerId]); // Warning: logic ensures single run via status check
+
+    const handleRetrySave = async () => {
+        setSaveStatus('saving');
+        setSaveError('');
+        try {
+            await GalleryService.saveGameToGallery(room, currentPlayerId);
+            sessionStorage.setItem(`saved_gallery_${room.roomCode}`, 'true');
+            setSaveStatus('success');
+            showToast('Saved to gallery!', 'success');
+        } catch (err: any) {
+            console.error('Retry failed:', err);
+            setSaveStatus('error');
+            setSaveError(err.message || 'Retry failed');
+            showToast('Save failed', 'error');
+        }
+    };
 
     const handleGoHome = () => {
         onShowRewards('home');
@@ -343,6 +366,36 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                         </div>
                     ))}
                 </div>
+            </div>
+
+            {/* Gallery Save Status - Debug/Feedback */}
+            <div className="mt-4 flex flex-col items-center gap-2">
+                <div className="flex items-center gap-2 text-sm text-white/50">
+                    {saveStatus === 'saving' && <span className="animate-pulse">Saving to Gallery...</span>}
+                    {saveStatus === 'success' && <span className="text-green-400">✓ Saved to History</span>}
+                    {saveStatus === 'error' && (
+                        <div className="flex flex-col items-center gap-1">
+                            <span className="text-red-400">⚠ Save Failed</span>
+                            {saveError && <span className="text-xs text-red-300/70">{saveError}</span>}
+                            <button
+                                onClick={handleRetrySave}
+                                className="px-3 py-1 bg-white/10 hover:bg-white/20 rounded-full text-xs text-white transition-colors"
+                            >
+                                Retry Save
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
+
+            <div className="flex gap-4 w-full max-w-sm z-10 pt-4 pb-safe-bottom">
+                <button
+                    onClick={handleGoHome}
+                    className="flex-1 py-4 px-6 bg-white/10 hover:bg-white/20 backdrop-blur-md rounded-2xl border border-white/20 text-white font-bold text-lg transition-all active:scale-95"
+                >
+                    Home
+                </button>
+                <div className="flex-1" /> {/* Spacer or Play Again button spot */}
             </div>
 
             {/* Play Again Button */}
