@@ -26,7 +26,7 @@ export const BetSelector: React.FC<BetSelectorProps> = ({
 
     const handleMax = () => {
         if (disabled || maxBet < 1) return;
-        onChange(Math.min(maxBet, 500));
+        onChange(maxBet);
         vibrate(HapticPatterns.medium);
     };
 
@@ -95,7 +95,7 @@ export const BetSelector: React.FC<BetSelectorProps> = ({
                     className={`
                         px-4 py-2 rounded-full font-black text-sm transition-all
                         border-2 active:scale-95 uppercase tracking-wider
-                        ${value === Math.min(maxBet, 500)
+                        ${value === maxBet
                             ? 'bg-gradient-to-b from-purple-500 to-purple-700 border-purple-400 text-white shadow-[0_0_15px_rgba(168,85,247,0.5)]'
                             : maxBet < 1
                                 ? 'bg-gray-800/50 border-gray-700 text-gray-600 cursor-not-allowed'

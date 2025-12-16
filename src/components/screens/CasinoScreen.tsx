@@ -51,7 +51,7 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
     // Clamp bet to balance if balance changes
     useEffect(() => {
         if (bet > balance && balance >= 1) {
-            setBet(Math.max(1, Math.min(balance, 500)));
+            setBet(Math.max(1, balance));
         }
     }, [balance, bet]);
 
@@ -278,7 +278,7 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
                     <BetSelector
                         value={bet}
                         onChange={setBet}
-                        maxBet={Math.min(balance, 500)}
+                        maxBet={balance}
                         disabled={spinning}
                     />
                 </div>
