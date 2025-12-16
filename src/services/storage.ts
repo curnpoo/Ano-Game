@@ -493,7 +493,7 @@ export const StorageService = {
         const settings: GameSettings = {
             timerDuration: 20,
             totalRounds: 3,
-            enableSabotage: true // Default to true or false? Let's say true for fun, or false if safer.
+            enableSabotage: false // Default OFF, host must explicitly enable
         };
 
         // Pick a random sabotage round (1 to totalRounds) if enabled
