@@ -129,6 +129,11 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
                     background: frameNeedsPadding ? 'transparent' : bgColor
                 }}
             >
+                {/* Non-glow Frame Layer - rendered OUTSIDE to avoid z-index issues */}
+                {frameClass && !isGlowFrame && (
+                    <div className={`absolute inset-0 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
+                )}
+                
                 {/* Special Frame Background (rainbow/wood) */}
                 {renderSpecialFrameBackground()}
                 
@@ -149,20 +154,14 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
                         />
                     </div>
                 ) : (
-                    <>
-                        {/* Non-glow Frame Layer */}
-                        {frameClass && !isGlowFrame && (
-                            <div className={`absolute inset-0 z-20 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
-                        )}
-                        <div className="absolute inset-0 rounded-[inherit] overflow-hidden">
-                            <img 
-                                src={imageUrl} 
-                                alt="Avatar" 
-                                className="w-full h-full object-contain pointer-events-none select-none relative z-10"
-                                loading="lazy" 
-                            />
-                        </div>
-                    </>
+                    <div className="absolute inset-0 rounded-[inherit] overflow-hidden">
+                        <img 
+                            src={imageUrl} 
+                            alt="Avatar" 
+                            className="w-full h-full object-contain pointer-events-none select-none"
+                            loading="lazy" 
+                        />
+                    </div>
                 )}
             </div>
         );
@@ -187,6 +186,11 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
                     fontSize: size * 0.6
                 }}
             >
+                {/* Non-glow Frame Layer - rendered OUTSIDE to avoid z-index issues */}
+                {frameClass && !isGlowFrame && (
+                    <div className={`absolute inset-0 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
+                )}
+                
                 {/* Special Frame Background (rainbow/wood) */}
                 {renderSpecialFrameBackground()}
                 
@@ -212,24 +216,18 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
                         )}
                     </div>
                 ) : (
-                    <>
-                        {/* Non-glow Frame Layer */}
-                        {frameClass && !isGlowFrame && (
-                            <div className={`absolute inset-0 z-20 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
+                    <div className="absolute inset-0 rounded-[inherit] overflow-hidden flex items-center justify-center">
+                        {isLoading ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-white/30 backdrop-blur-[1px]">
+                                <div
+                                    className="border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"
+                                    style={{ width: size * 0.4, height: size * 0.4 }}
+                                />
+                            </div>
+                        ) : (
+                            <span style={{ fontSize: size * 0.6 }}>{avatar || '👤'}</span>
                         )}
-                        <div className="absolute inset-0 rounded-[inherit] overflow-hidden flex items-center justify-center">
-                            {isLoading ? (
-                                <div className="absolute inset-0 flex items-center justify-center bg-white/30 backdrop-blur-[1px] z-10">
-                                    <div
-                                        className="border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"
-                                        style={{ width: size * 0.4, height: size * 0.4 }}
-                                    />
-                                </div>
-                            ) : (
-                                <span className="relative z-10" style={{ fontSize: size * 0.6 }}>{avatar || '👤'}</span>
-                            )}
-                        </div>
-                    </>
+                    </div>
                 )}
             </div>
         );
@@ -295,6 +293,11 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
                 border: (frameClass || frameType) ? undefined : `2px solid ${color || '#000000'}`,
             }}
         >
+            {/* Non-glow Frame Layer - rendered OUTSIDE to avoid z-index issues */}
+            {frameClass && !isGlowFrame && (
+                <div className={`absolute inset-0 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
+            )}
+            
             {/* Special Frame Background (rainbow/wood) */}
             {renderSpecialFrameBackground()}
             
@@ -344,51 +347,44 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
                     </svg>
                 </div>
             ) : (
-                <>
-                    {/* Non-glow Frame Layer */}
-                    {frameClass && !isGlowFrame && (
-                        <div className={`absolute inset-0 z-20 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
-                    )}
+                <div className="absolute inset-0 rounded-[inherit] overflow-hidden">
+                    <svg
+                        viewBox="0 0 100 100"
+                        className="w-full h-full absolute inset-0"
+                        style={{ pointerEvents: 'none' }}
+                    >
+                        {displayStrokes.map((stroke, i) => {
+                            if (!stroke || !stroke.points || stroke.points.length === 0) return null;
 
-                    <div className="absolute inset-0 rounded-[inherit] overflow-hidden">
-                        <svg
-                            viewBox="0 0 100 100"
-                            className="w-full h-full absolute inset-0 z-10"
-                            style={{ pointerEvents: 'none' }}
-                        >
-                            {displayStrokes.map((stroke, i) => {
-                                if (!stroke || !stroke.points || stroke.points.length === 0) return null;
-
-                                if (stroke.points.length === 1) {
-                                    const p = stroke.points[0];
-                                    return (
-                                        <circle
-                                            key={i}
-                                            cx={p.x}
-                                            cy={p.y}
-                                            r={(stroke.size / 3) / 2}
-                                            fill={stroke.color}
-                                        />
-                                    );
-                                }
-
+                            if (stroke.points.length === 1) {
+                                const p = stroke.points[0];
                                 return (
-                                    <path
+                                    <circle
                                         key={i}
-                                        d={stroke.points.map((p, j) =>
-                                            p ? `${j === 0 ? 'M' : 'L'} ${p.x} ${p.y}` : ''
-                                        ).join(' ')}
-                                        stroke={stroke.color}
-                                        strokeWidth={stroke.size / 3}
-                                        fill="none"
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
+                                        cx={p.x}
+                                        cy={p.y}
+                                        r={(stroke.size / 3) / 2}
+                                        fill={stroke.color}
                                     />
                                 );
-                            })}
-                        </svg>
-                    </div>
-                </>
+                            }
+
+                            return (
+                                <path
+                                    key={i}
+                                    d={stroke.points.map((p, j) =>
+                                        p ? `${j === 0 ? 'M' : 'L'} ${p.x} ${p.y}` : ''
+                                    ).join(' ')}
+                                    stroke={stroke.color}
+                                    strokeWidth={stroke.size / 3}
+                                    fill="none"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            );
+                        })}
+                    </svg>
+                </div>
             )}
         </div>
     );
