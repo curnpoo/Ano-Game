@@ -322,3 +322,121 @@ export const onFriendRequestStatusChanged = functions.database
             return null;
         }
     });
+
+/**
+ * Cloud Function triggered when room status changes
+ * Sends push notifications to all players when game starts
+ */
+export const onGameStart = functions.database
+    .ref('/rooms/{roomCode}/status')
+    .onUpdate(async (change, context) => {
+        const beforeStatus = change.before.val();
+        const afterStatus = change.after.val();
+        const roomCode = context.params.roomCode;
+
+        // Only trigger when status changes from 'lobby' to 'uploading' (game start)
+        if (beforeStatus !== 'lobby' || afterStatus !== 'uploading') {
+            return null;
+        }
+
+        console.log(`Game started in room ${roomCode}`);
+
+        try {
+            // Get room data for player list and host info
+            const roomSnapshot = await db.ref(`/rooms/${roomCode}`).once('value');
+            if (!roomSnapshot.exists()) {
+                console.log('Room not found');
+                return null;
+            }
+
+            const room = roomSnapshot.val();
+            const hostId = room.hostId;
+            const players = room.players || [];
+            
+            // Get host name
+            const host = players.find((p: any) => p.id === hostId);
+            const hostName = host?.name || 'Host';
+
+            // Get all player IDs except the host
+            const otherPlayerIds = players
+                .filter((p: any) => p.id !== hostId)
+                .map((p: any) => p.id);
+
+            if (otherPlayerIds.length === 0) {
+                console.log('No other players to notify');
+                return null;
+            }
+
+            // Get FCM tokens for all other players
+            const tokenPromises = otherPlayerIds.map(async (playerId: string) => {
+                const tokenSnapshot = await db.ref(`/pushTokens/${playerId}`).once('value');
+                if (tokenSnapshot.exists()) {
+                    const tokenData = tokenSnapshot.val() as PushTokenData;
+                    return { playerId, token: tokenData.token };
+                }
+                return null;
+            });
+
+            const tokens = (await Promise.all(tokenPromises)).filter(t => t !== null);
+
+            if (tokens.length === 0) {
+                console.log('No valid tokens found for players');
+                return null;
+            }
+
+            const linkUrl = `https://ano-game.vercel.app/?join=${roomCode}`;
+
+            // Send notification to each player
+            const sendPromises = tokens.map(async (tokenInfo) => {
+                if (!tokenInfo) return null;
+                
+                const message: admin.messaging.Message = {
+                    token: tokenInfo.token,
+                    notification: {
+                        title: '🎮 Game Started!',
+                        body: `${hostName} started the game! Jump in now!`
+                    },
+                    data: {
+                        type: 'game_start',
+                        roomCode: roomCode,
+                        hostName: hostName,
+                        click_action: linkUrl
+                    },
+                    webpush: {
+                        fcmOptions: {
+                            link: linkUrl
+                        },
+                        notification: {
+                            icon: '/icons/icon-192x192.png',
+                            badge: '/icons/badge-72x72.png',
+                            vibrate: [100, 50, 100],
+                            requireInteraction: true
+                        }
+                    }
+                };
+
+                try {
+                    const response = await messaging.send(message);
+                    console.log(`Sent game start notification to ${tokenInfo.playerId}:`, response);
+                    return response;
+                } catch (error) {
+                    console.error(`Failed to send to ${tokenInfo.playerId}:`, error);
+                    
+                    // Clean up invalid tokens
+                    if ((error as any).code === 'messaging/invalid-registration-token' ||
+                        (error as any).code === 'messaging/registration-token-not-registered') {
+                        await db.ref(`/pushTokens/${tokenInfo.playerId}`).remove();
+                    }
+                    return null;
+                }
+            });
+
+            await Promise.all(sendPromises);
+            console.log(`Sent game start notifications to ${tokens.length} players`);
+
+            return null;
+        } catch (error) {
+            console.error('Error sending game start notifications:', error);
+            return null;
+        }
+    });

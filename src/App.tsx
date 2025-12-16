@@ -14,6 +14,7 @@ const UpdateNotification = lazy(() => import('./components/common/UpdateNotifica
 const ConfirmationModal = lazy(() => import('./components/common/ConfirmationModal').then(module => ({ default: module.ConfirmationModal })));
 const ProfileCardModal = lazy(() => import('./components/common/ProfileCardModal').then(module => ({ default: module.ProfileCardModal })));
 const GameInviteCard = lazy(() => import('./components/common/GameInviteCard').then(module => ({ default: module.GameInviteCard })));
+const GameStartModal = lazy(() => import('./components/common/GameStartModal').then(module => ({ default: module.GameStartModal })));
 const TurnReminderCard = lazy(() => import('./components/common/TurnReminderCard').then(module => ({ default: module.TurnReminderCard })));
 const NotificationPromptModal = lazy(() => import('./components/common/NotificationPromptModal').then(module => ({ default: module.NotificationPromptModal })));
 
@@ -301,6 +302,7 @@ const App = () => {
   const [isTransitionActive, setIsTransitionActive] = useState(false);
   const [isLoadingTransition, setIsLoadingTransition] = useState(false);
   const [isBrowsing, setIsBrowsing] = useState(false);
+  const [showGameStartModal, setShowGameStartModal] = useState(false);
 
   const lastStatusRef = useRef<string | null>(null);
   const lastRoundRef = useRef<number | null>(null);
@@ -688,6 +690,15 @@ const App = () => {
     }
   }, [player?.id, roomCode, room, isBrowsing, currentScreen]);
 
+  // Effect: Game Started While Browsing - Show Modal
+  useEffect(() => {
+    // Only trigger if we're browsing AND room status changed from lobby to a game state
+    if (isBrowsing && room && lastStatusRef.current === 'lobby' && 
+        ['uploading', 'sabotage-selection', 'drawing'].includes(room.status)) {
+      setShowGameStartModal(true);
+    }
+  }, [room?.status, isBrowsing]);
+
   // Effect: Kicked / Removed check
   useEffect(() => {
     // Only run check if we have a room, player, and data is fully loaded
@@ -939,6 +950,18 @@ const App = () => {
         }
         else if (notificationType === 'turn_reminder' || data?.type === 'turn_reminder') {
           setActiveTurnReminder({ roomCode: data.roomCode });
+        }
+        else if (notificationType === 'game_start' || data?.type === 'game_start') {
+          // Game started - go straight to the game (no modal for push notification clicks)
+          console.log('[App] Game start notification clicked, joining game:', data?.roomCode);
+          if (roomCode && room) {
+            // Already in this room, just resume
+            setIsBrowsing(false);
+            handleResumeGame();
+          } else if (data?.roomCode) {
+            // Not in room, join it
+            handleJoinRoom(data.roomCode);
+          }
         }
         else if (notificationType === 'friend-request' || data?.type === 'friend_request') {
            // For friend requests, we can open the profile modal directly
@@ -2134,6 +2157,22 @@ const App = () => {
                }
             }}
             onDismiss={() => setActiveTurnReminder(null)}
+          />
+        </Suspense>
+      )}
+
+      {/* Game Start Modal - Shown when host starts game while player is browsing */}
+      {showGameStartModal && room && (
+        <Suspense fallback={null}>
+          <GameStartModal
+            hostName={room.players.find(p => p.id === room.hostId)?.name || 'Host'}
+            roomCode={room.roomCode}
+            onJumpIn={() => {
+              setShowGameStartModal(false);
+              setIsBrowsing(false);
+              handleResumeGame();
+            }}
+            onDismiss={() => setShowGameStartModal(false)}
           />
         </Suspense>
       )}

@@ -202,13 +202,16 @@ export const GalleryService = {
             watermark?: boolean;
         } = {}
     ): Promise<string> => {
-        const { canvasSize = 600, block, watermark } = options;
+        const { canvasSize = 1080, block, watermark } = options;
+        const borderWidth = watermark ? 10 : 0; // Fixed 10px border
+        const totalSize = canvasSize + (borderWidth * 2);
+        const cornerRadius = 16;
 
         return new Promise((resolve, reject) => {
-            // Create offscreen canvas
+            // Create main canvas
             const canvas = document.createElement('canvas');
-            canvas.width = canvasSize;
-            canvas.height = canvasSize; // Square canvas
+            canvas.width = totalSize;
+            canvas.height = totalSize;
             const ctx = canvas.getContext('2d');
 
             if (!ctx) {
@@ -221,41 +224,61 @@ export const GalleryService = {
             img.crossOrigin = 'anonymous';
 
             img.onload = () => {
-                // 1. Draw base image
-                ctx.drawImage(img, 0, 0, canvasSize, canvasSize);
+                // === STEP 1: Draw gradient border ===
+                if (watermark) {
+                    // Iridescent gradient border
+                    const borderGradient = ctx.createLinearGradient(0, 0, totalSize, totalSize);
+                    borderGradient.addColorStop(0, '#9370DB');    // Purple
+                    borderGradient.addColorStop(0.3, '#64B5F6');  // Blue
+                    borderGradient.addColorStop(0.6, '#4DB6AC');  // Teal
+                    borderGradient.addColorStop(1, '#BA68C8');    // Orchid
+                    
+                    ctx.beginPath();
+                    ctx.roundRect(0, 0, totalSize, totalSize, cornerRadius);
+                    ctx.fillStyle = borderGradient;
+                    ctx.fill();
+                }
+                
+                // === STEP 2: Draw base image (inside border) ===
+                ctx.save();
+                if (watermark) {
+                    ctx.beginPath();
+                    ctx.roundRect(borderWidth, borderWidth, canvasSize, canvasSize, cornerRadius - borderWidth);
+                    ctx.clip();
+                }
+                ctx.drawImage(img, borderWidth, borderWidth, canvasSize, canvasSize);
+                ctx.restore();
 
-                // 2. Draw Block (if present) - "The White Block"
+                // === STEP 3: Draw Block (if present) ===
                 if (block) {
                     ctx.fillStyle = '#ffffff';
                     
-                    const bx = (block.x / 100) * canvasSize;
-                    const by = (block.y / 100) * canvasSize;
-                    const bSize = (block.size / 100) * canvasSize; // Usually 50%
+                    const bx = borderWidth + (block.x / 100) * canvasSize;
+                    const by = borderWidth + (block.y / 100) * canvasSize;
+                    const bSize = (block.size / 100) * canvasSize;
 
                     if (block.type === 'circle') {
                         ctx.beginPath();
                         ctx.arc(bx + bSize / 2, by + bSize / 2, bSize / 2, 0, Math.PI * 2);
                         ctx.fill();
                     } else {
-                        // Square
                         ctx.fillRect(bx, by, bSize, bSize);
                     }
                 }
 
-                // 3. Replay strokes
+                // === STEP 4: Replay strokes ===
                 for (const stroke of strokes) {
                     if (!stroke.points || stroke.points.length === 0) continue;
 
                     ctx.beginPath();
                     ctx.strokeStyle = stroke.isEraser ? '#ffffff' : stroke.color;
-                    ctx.lineWidth = stroke.size || 4;
+                    ctx.lineWidth = (stroke.size || 4) * (canvasSize / 600) * 1.5;
                     ctx.lineCap = 'round';
                     ctx.lineJoin = 'round';
 
-                    // Scale points from percentage to canvas size
                     const points = stroke.points.map(p => ({
-                        x: (p.x / 100) * canvasSize,
-                        y: (p.y / 100) * canvasSize
+                        x: borderWidth + (p.x / 100) * canvasSize,
+                        y: borderWidth + (p.y / 100) * canvasSize
                     }));
 
                     ctx.moveTo(points[0].x, points[0].y);
@@ -265,53 +288,100 @@ export const GalleryService = {
                     ctx.stroke();
                 }
 
-                // 4. Draw Watermark (if requested)
+                // === STEP 5: Draw frosted glass pill with blur (if watermark enabled) ===
                 if (watermark) {
-                    const watermarkImg = new Image();
-                    watermarkImg.src = '/watermark.png'; // Access from public folder
+                    const pillWidth = canvasSize * 0.35;
+                    const pillHeight = canvasSize * 0.06;
+                    const pillPadding = canvasSize * 0.03;
+                    const pillX = borderWidth + canvasSize - pillWidth - pillPadding;
+                    const pillY = borderWidth + canvasSize - pillHeight - pillPadding;
+                    const pillRadius = pillHeight / 2;
                     
-                    watermarkImg.onload = () => {
-                        const wmWidth = canvasSize * 0.3; // 30% width
-                        const wmHeight = (watermarkImg.height / watermarkImg.width) * wmWidth;
-                        const padding = canvasSize * 0.05;
-
-                        ctx.globalAlpha = 0.8;
-                        // Bottom right
-                        ctx.drawImage(
-                            watermarkImg, 
-                            canvasSize - wmWidth - padding, 
-                            canvasSize - wmHeight - padding, 
-                            wmWidth, 
-                            wmHeight
+                    // Get the area behind the pill and blur it
+                    const blurCanvas = document.createElement('canvas');
+                    blurCanvas.width = pillWidth + 20;
+                    blurCanvas.height = pillHeight + 20;
+                    const blurCtx = blurCanvas.getContext('2d');
+                    
+                    if (blurCtx) {
+                        // Copy the pill area from main canvas
+                        blurCtx.drawImage(
+                            canvas,
+                            pillX - 10, pillY - 10, pillWidth + 20, pillHeight + 20,
+                            0, 0, pillWidth + 20, pillHeight + 20
                         );
                         
-                        // Text: anogame.xyz
-                        ctx.globalAlpha = 1.0;
-                        ctx.font = `bold ${canvasSize * 0.04}px Inter, sans-serif`;
-                        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
-                        ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                        ctx.shadowBlur = 4;
-                        ctx.textAlign = 'right';
-                        ctx.fillText('anogame.xyz', canvasSize - padding, canvasSize - padding - wmHeight - 10);
+                        // Apply blur using CSS filter
+                        blurCtx.filter = 'blur(15px)';
+                        blurCtx.drawImage(blurCanvas, 0, 0);
+                        blurCtx.filter = 'none';
                         
-                        resolve(canvas.toDataURL('image/png'));
-                    };
-
-                    watermarkImg.onerror = () => {
-                         // Fallback text if image fails
-                        ctx.globalAlpha = 1.0;
-                        ctx.font = `bold ${canvasSize * 0.05}px sans-serif`;
-                        ctx.fillStyle = '#ffffff';
-                        ctx.shadowColor = 'rgba(0,0,0,0.5)';
-                        ctx.shadowBlur = 4;
-                        ctx.textAlign = 'right';
-                        ctx.fillText('anogame.xyz', canvasSize - 20, canvasSize - 20);
-                        resolve(canvas.toDataURL('image/png'));
-                    };
-                } else {
-                    // Export as PNG data URL
-                    resolve(canvas.toDataURL('image/png'));
+                        // Draw blurred area back, clipped to pill shape
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.roundRect(pillX, pillY, pillWidth, pillHeight, pillRadius);
+                        ctx.clip();
+                        ctx.drawImage(blurCanvas, pillX - 10, pillY - 10);
+                        ctx.restore();
+                    }
+                    
+                    // Draw frosted glass overlay
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.roundRect(pillX, pillY, pillWidth, pillHeight, pillRadius);
+                    
+                    // Semi-transparent white overlay (frosted effect)
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
+                    ctx.fill();
+                    
+                    // Inner glow (S-curve effect - brighter at top)
+                    const innerGlow = ctx.createLinearGradient(pillX, pillY, pillX, pillY + pillHeight);
+                    innerGlow.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
+                    innerGlow.addColorStop(0.3, 'rgba(255, 255, 255, 0.15)');
+                    innerGlow.addColorStop(0.7, 'rgba(255, 255, 255, 0.05)');
+                    innerGlow.addColorStop(1, 'rgba(255, 255, 255, 0.2)');
+                    ctx.fillStyle = innerGlow;
+                    ctx.fill();
+                    
+                    // White border stroke
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                    
+                    // Inner shadow (subtle)
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.2)';
+                    ctx.shadowBlur = 4;
+                    ctx.shadowOffsetY = 2;
+                    ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+                    ctx.lineWidth = 1;
+                    ctx.stroke();
+                    ctx.restore();
+                    
+                    // Draw bold white text with black outline
+                    const fontSize = pillHeight * 0.55;
+                    ctx.font = `bold ${fontSize}px Inter, system-ui, -apple-system, sans-serif`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    
+                    const textX = pillX + pillWidth / 2;
+                    const textY = pillY + pillHeight / 2;
+                    
+                    // Black outline for visibility on white backgrounds
+                    ctx.strokeStyle = 'rgba(0, 0, 0, 0.5)';
+                    ctx.lineWidth = 3;
+                    ctx.lineJoin = 'round';
+                    ctx.strokeText('ANOGAME.XYZ', textX, textY);
+                    
+                    // White fill
+                    ctx.fillStyle = '#FFFFFF';
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                    ctx.shadowBlur = 2;
+                    ctx.shadowOffsetY = 1;
+                    ctx.fillText('ANOGAME.XYZ', textX, textY);
+                    ctx.shadowBlur = 0;
                 }
+                
+                resolve(canvas.toDataURL('image/png'));
             };
 
             img.onerror = () => {

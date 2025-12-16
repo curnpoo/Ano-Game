@@ -37,6 +37,24 @@ const doneItems: RoadmapTask[] = [
     { id: 'd15', type: 'ADD', title: 'Notification timer progress bar', description: 'Gradient line shrinks inward showing time remaining before auto-dismiss', completedDate: 'Dec 10' },
     { id: 'd16', type: 'FIX', title: 'Loading screen transition', description: 'Smooth transition with 500ms delay after all checks complete', completedDate: 'Dec 10' },
     { id: 'd17', type: 'FIX', title: 'Help overlay animation polish', description: 'Refined animation timing and line endpoints for help guide', completedDate: 'Dec 11' },
+    { id: 'd18', type: 'FIX', title: 'Double loading screen', description: 'Removed janky secondary loading screen, only smart loader visible', completedDate: 'Dec 13' },
+    { id: 'd19', type: 'FEAT', title: 'Avatars on Final Results', description: 'Player avatars now display on Game Over and Final Scores screens', completedDate: 'Dec 13' },
+    { id: 'd20', type: 'FIX', title: 'Casino navigation bug', description: 'Fixed back button navigation from casino screen', completedDate: 'Dec 13' },
+    { id: 'd21', type: 'FEAT', title: 'Realtime presence system', description: 'Accurate Online/Offline/Playing statuses for friends', completedDate: 'Dec 14' },
+    { id: 'd22', type: 'FIX', title: 'Avatar rendering consistency', description: 'Pre-rendered avatarImageUrl used across all screens with stroke fallback', completedDate: 'Dec 14' },
+    { id: 'd23', type: 'FIX', title: 'Push notifications', description: 'Fixed external push notifications for background messaging', completedDate: 'Dec 15' },
+    { id: 'd24', type: 'FEAT', title: 'Challenges system', description: 'Challenges panel with progress tracking and completion logic', completedDate: 'Dec 15' },
+    { id: 'd25', type: 'REFACTOR', title: 'Profile setup screen', description: 'Added back button, purchased-only items, legacy borders in store', completedDate: 'Dec 15' },
+    { id: 'd26', type: 'FIX', title: 'Gallery block overlay', description: 'Block data correctly captured and visible in Match History', completedDate: 'Dec 16' },
+    { id: 'd27', type: 'FEAT', title: 'Guest account restrictions', description: 'Guest status indicator, grayed out features, account creation prompts', completedDate: 'Dec 16' },
+    { id: 'd28', type: 'REFACTOR', title: 'Bundle size optimization', description: 'Lazy loading for RoadmapPage/ShareModal, vendor chunk splitting', completedDate: 'Dec 16' },
+    { id: 'd29', type: 'FIX', title: 'CLS performance', description: 'Font loading moved to index.html, user preferences applied inline', completedDate: 'Dec 16' },
+    { id: 'd30', type: 'FIX', title: 'Empty game join prevention', description: 'Auto-close empty games in Firebase, gray out left games in room list', completedDate: 'Dec 16' },
+    { id: 'd31', type: 'FIX', title: 'Timer end screen flow', description: 'Toolbar stays visible when timer ends, blurred overlay on ready', completedDate: 'Dec 16' },
+    { id: 'd32', type: 'FIX', title: 'Home from results = left game', description: 'Clicking home marks player as left, no rejoin button on HomeScreen', completedDate: 'Dec 16' },
+    { id: 'd33', type: 'FEAT', title: 'Game start notifications', description: 'In-app modal + push notification when host starts game, deep link to jump into round', completedDate: 'Dec 16' },
+    { id: 'd34', type: 'FEAT', title: 'Deep Linking', description: 'Invite links bypass home screen and drop users directly into specific game lobby', completedDate: 'Dec 16' },
+    { id: 'd35', type: 'FEAT', title: 'Post-game Account Prompt', description: 'Guest restrictions with prompts to create account to save stats/drawings', completedDate: 'Dec 16' },
 ];
 
 const roadmapData: RoadmapColumn[] = [
@@ -46,10 +64,8 @@ const roadmapData: RoadmapColumn[] = [
         emoji: '🔧',
         color: '#f59e0b',
         tasks: [
-            { id: 'w4', type: 'FEAT', title: 'Push notifications for friend requests', description: '[FCM, NotificationService] Send push notifications when receiving friend requests while app is closed' },
-            { id: 'w5', type: 'FIX', title: 'Match history accuracy', description: '[ProfileScreen.tsx, MatchHistory component] Fix incorrect game count, add dropdown per round showing winner\'s drawing' },
-            { id: 'w6', type: 'FEAT', title: 'Update/Version Popup Logic', description: '[App.tsx, UpdateNotification.tsx] Check version.json vs running version to show "Update Available" only when needed' },
-            { id: 'w7', type: 'FEAT', title: 'Add invites section', description: '[HomeScreen.tsx, new InvitesPanel component] Add section showing game invites from friends, auto-clear after 5 hours, allow late join' },
+            { id: 'w1', type: 'FIX', title: 'Fix sabotage mechanic', description: '[DrawingScreen.tsx, VotingScreen.tsx, GameService] Sabotage game mode needs work - fix saboteur assignment, voting logic, random round selection, and reveal flow' },
+            { id: 'w2', type: 'FIX', title: 'Service worker MIME errors', description: '[sw.ts, vite.config.ts] Fix intermittent text/html MIME type errors on app restart' },
         ]
     },
     {
@@ -58,12 +74,9 @@ const roadmapData: RoadmapColumn[] = [
         emoji: '📅',
         color: '#eab308',
         tasks: [
-            { id: 't2', type: 'FIX', title: 'Fix sabotage mechanic', description: '[DrawingScreen.tsx, VotingScreen.tsx, GameService] Entire sabotage game mode is broken - fix saboteur assignment, voting logic, and reveal flow' },
-            { id: 't3', type: 'FIX', title: 'Player card online status', description: '[FriendsScreen.tsx, LobbyScreen.tsx] Fix presence system, show accurate game status, clear status when offline' },
-            { id: 't4', type: 'FIX', title: 'Empty game join prevention', description: '[RoomSelectionScreen.tsx, GameService] Auto-close empty games in Firebase, gray out "left" games in room list' },
-            { id: 't5', type: 'FIX', title: 'Timer end screen flow', description: '[DrawingScreen.tsx] Keep toolbar visible when timer ends, add blurred overlay when player clicks ready button' },
-            { id: 't6', type: 'FIX', title: 'Home from results = left game', description: '[FinalResultsScreen.tsx, HomeScreen.tsx] Clicking home marks player as "left game", remove rejoin button from HomeScreen current game section' },
-            { id: 't7', type: 'REFACTOR', title: 'Host starts while player in menu', description: '[AvatarEditorScreen.tsx, LobbyScreen.tsx] Auto-save avatar edits on game start, show idle overlay' },
+            { id: 't1', type: 'FIX', title: 'Verify Database Cleanup', description: 'Run and verify the database cleanup script on production data' },
+            { id: 't2', type: 'FIX', title: 'Fix "Money Earned" stat', description: '[FinalResultsScreen.tsx, UserService] Ensure totalCurrencyEarned is correctly tracked and incremented' },
+            { id: 't3', type: 'FIX', title: 'iPhone haptic feedback', description: '[utils/haptics.ts] Investigate why haptic feedback only works on Android, implement iOS-compatible solution' },
         ]
     },
     {
@@ -72,10 +85,9 @@ const roadmapData: RoadmapColumn[] = [
         emoji: '📆',
         color: '#3b82f6',
         tasks: [
-            { id: 'tm8', type: 'FIX', title: 'Fix "Money Earned" stat', description: '[FinalResultsScreen.tsx, UserService] Ensure totalCurrencyEarned is correctly tracked and incremented' },
-            { id: 'tm9', type: 'FEAT', title: 'Conditional Idle Refresh', description: '[App.tsx] Ensure auto-refresh only triggers when user is on homescreen and truly idle' },
-            { id: 'tm10', type: 'FIX', title: 'Verify Database Cleanup', description: 'Run and verify the database cleanup script on production data' },
-            { id: 'tm11', type: 'FEAT', title: 'Finish Player Progression', description: 'Complete the player leveling system, ensure XP is consistently tracked, and finalize progression logic.' },
+            { id: 'tm1', type: 'FEAT', title: 'Conditional Idle Refresh', description: '[App.tsx] Ensure auto-refresh only triggers when user is on homescreen and truly idle' },
+            { id: 'tm2', type: 'FEAT', title: 'Add invites section', description: '[HomeScreen.tsx, new InvitesPanel component] Add section showing game invites from friends, auto-clear after 5 hours, allow late join' },
+            { id: 'tm3', type: 'FEAT', title: 'Update/Version Popup Logic', description: '[App.tsx, UpdateNotification.tsx] Check version.json vs running version to show "Update Available" only when needed' },
         ]
     },
     {
@@ -101,11 +113,8 @@ const roadmapData: RoadmapColumn[] = [
             { id: 'b2', type: 'FIX', title: 'Smooth transitions overhaul', description: '[App.tsx, ScreenTransition.tsx, transitions.css] Optimize all screen-to-screen transitions for 60fps with preloading and GPU acceleration' },
             { id: 'b3', type: 'REFACTOR', title: 'Performance optimization', description: '[GameService, Firebase listeners, React components] Reduce network calls, optimize re-renders, fix lag on slow connections' },
             { id: 'b4', type: 'REFACTOR', title: 'Universal Button Components', description: '[src/components/common/] Create reusable GlassButton, IconButton, ActionButton components with consistent styling and animations' },
-            { id: 'b5', type: 'FIX', title: 'iPhone haptic feedback', description: '[utils/haptics.ts] Haptic feedback only works on Android - investigate and implement iOS-compatible vibration using Web Vibration API or native bridges' },
-            { id: 'b6', type: 'FEAT', title: 'Viral Match History', description: 'Match history images auto-generated with "anogame.xyz" watermark to drive organic growth' },
-            { id: 'b7', type: 'FEAT', title: 'Deep Linking', description: 'Invite links that bypass the home screen and drop users directly into the specific game lobby' },
-            { id: 'b8', type: 'FEAT', title: 'Post-game Account Prompt', description: 'After a game ends, friendly prompt to create account to save stats/drawings' },
-            { id: 'b9', type: 'ADD', title: 'Admin Stats Dashboard', description: 'Secret desktop-only URL to view high-fidelity game analytics (DAU, rounds played, retention, economy stats)' },
+            { id: 'b5', type: 'FEAT', title: 'Viral Match History', description: 'Match history images auto-generated with "anogame.xyz" watermark to drive organic growth' },
+            { id: 'b6', type: 'ADD', title: 'Admin Stats Dashboard', description: 'Secret desktop-only URL to view high-fidelity game analytics (DAU, rounds played, retention, economy stats)' },
         ]
     }
 ];
@@ -136,12 +145,12 @@ export const RoadmapPage: React.FC = () => {
                     <button onClick={handleBackToGame} className="back-button">
                         ← Back
                     </button>
-                    <div className="version-badge">v0.8.0.1</div>
+                    <div className="version-badge">v0.9.0</div>
                 </div>
                 <div className="header-content">
                     <h1>🗺️ Roadmap</h1>
                     <p className="subtitle">What's coming to ANO</p>
-                    <p className="last-updated">Last updated: December 11, 2025</p>
+                    <p className="last-updated">Last updated: December 16, 2025</p>
                 </div>
             </header>
 
@@ -228,7 +237,7 @@ export const RoadmapPage: React.FC = () => {
 
             {/* Footer */}
             <footer className="roadmap-footer">
-                <p>Last updated: December 11, 2025</p>
+                <p>Last updated: December 16, 2025</p>
                 <p className="footer-note">Built with ❤️ by Curren</p>
             </footer>
         </div>
