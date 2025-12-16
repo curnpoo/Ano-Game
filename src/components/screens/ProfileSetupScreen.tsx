@@ -185,13 +185,13 @@ export const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ onComple
                             onReset={resetZoom} 
                         />
 
-                        {/* Avatar Circle */}
+                        {/* Avatar Canvas */}
                         <div 
-                            className="w-full h-full rounded-full overflow-hidden shadow-2xl ring-4 ring-white/10 relative"
+                            className="w-full h-full rounded-3xl overflow-hidden shadow-2xl ring-4 ring-white/10 relative"
                             style={{ ...contentStyle, background: backgroundColor }}
                         >
                             {/* Frame Overlay */}
-                            <div className={`absolute inset-0 pointer-events-none z-10 rounded-full ${FRAMES.find(f => f.id === selectedFrame)?.className || ''}`}></div>
+                            <div className={`absolute inset-0 pointer-events-none z-10 rounded-3xl ${FRAMES.find(f => f.id === selectedFrame)?.className || ''}`}></div>
 
                             <GameCanvas
                                 imageUrl="" // Empty for new avatar

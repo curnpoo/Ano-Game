@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -7,23 +7,46 @@
 /* 90s Bubbly Fun Design System */
 :root {
   /* 90s Color Palette - Bright, Fun, Nostalgic */
-  --bubble-pink: #FF69B4;
-  --bubble-purple: #9B59B6;
-  --bubble-cyan: #00D9FF;
-  --bubble-yellow: #FFE135;
-  --bubble-lime: #32CD32;
-  --bubble-orange: #FF8C00;
-  --bubble-blue: #4169E1;
-  --bubble-teal: #20B2AA;
+  --bubble-pink: #ff69b4;
+  --bubble-purple: #9b59b6;
+  --bubble-cyan: #00d9ff;
+  --bubble-yellow: #ffe135;
+  --bubble-lime: #32cd32;
+  --bubble-orange: #ff8c00;
+  --bubble-blue: #4169e1;
+  --bubble-teal: #20b2aa;
 
   /* Gradients */
-  --gradient-90s: linear-gradient(135deg, #FF69B4 0%, #9B59B6 25%, #4169E1 50%, #00D9FF 75%, #32CD32 100%);
-  --gradient-sunset: linear-gradient(135deg, #FF8C00 0%, #FF69B4 50%, #9B59B6 100%);
-  --gradient-ocean: linear-gradient(135deg, #00D9FF 0%, #4169E1 50%, #9B59B6 100%);
-  --gradient-candy: linear-gradient(135deg, #FF69B4 0%, #FFE135 50%, #00D9FF 100%);
+  --gradient-90s: linear-gradient(
+    135deg,
+    #ff69b4 0%,
+    #9b59b6 25%,
+    #4169e1 50%,
+    #00d9ff 75%,
+    #32cd32 100%
+  );
+  --gradient-sunset: linear-gradient(
+    135deg,
+    #ff8c00 0%,
+    #ff69b4 50%,
+    #9b59b6 100%
+  );
+  --gradient-ocean: linear-gradient(
+    135deg,
+    #00d9ff 0%,
+    #4169e1 50%,
+    #9b59b6 100%
+  );
+  --gradient-candy: linear-gradient(
+    135deg,
+    #ff69b4 0%,
+    #ffe135 50%,
+    #00d9ff 100%
+  );
 
   /* Typography */
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   scrollbar-gutter: stable;
 }
 
@@ -31,7 +54,8 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -43,15 +67,15 @@ body {
   --bg-secondary: var(--theme-bg-secondary, #f3f4f6);
   --text-primary: var(--theme-text, #ffffff);
   --text-secondary: var(--theme-text-secondary, #6b7280);
-  --accent-color: var(--theme-accent, #9B59B6);
+  --accent-color: var(--theme-accent, #9b59b6);
   --border-color: var(--theme-border, transparent);
-  --button-bg: var(--theme-button-bg, #9B59B6);
+  --button-bg: var(--theme-button-bg, #9b59b6);
   --button-text: var(--theme-button-text, #ffffff);
   --button-text: var(--theme-button-text, #ffffff);
   --card-bg: var(--theme-card-bg, rgba(255, 255, 255, 0.9));
   --card-text: var(--theme-card-text, var(--text-primary));
   --card-border: var(--theme-border, transparent);
-  --font-main: var(--theme-font, 'Inter', sans-serif);
+  --font-main: var(--theme-font, "Inter", sans-serif);
   --radius-main: var(--theme-radius, 1.5rem);
 }
 
@@ -96,7 +120,8 @@ body.light-mode {
   background-color: var(--glass-bg);
   border-color: var(--glass-border);
   color: var(--glass-text);
-  transition: background-color 0.2s ease,
+  transition:
+    background-color 0.2s ease,
     border-color 0.2s ease,
     transform 0.2s ease;
   will-change: transform;
@@ -114,7 +139,9 @@ body.light-mode {
   color: var(--card-text);
   border: var(--card-border) !important;
   border-radius: var(--radius-main);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 
 /* Button Override */
@@ -132,7 +159,6 @@ input,
   font-family: var(--font-main);
 }
 
-
 .theme-bg-neon {
   background-color: #000000;
   background-image:
@@ -143,17 +169,27 @@ input,
 }
 
 .theme-bg-gold {
-  background: radial-gradient(ellipse at center, #fceabb 0%, #fccd4d 50%, #f8b500 51%, #fbdf93 100%);
+  background: radial-gradient(
+    ellipse at center,
+    #fceabb 0%,
+    #fccd4d 50%,
+    #f8b500 51%,
+    #fbdf93 100%
+  );
   color: #422006;
 }
 
 .theme-bg-galaxy {
   background: #090a0f;
   background-image:
-    radial-gradient(white, rgba(255, 255, 255, .2) 2px, transparent 40px),
-    radial-gradient(white, rgba(255, 255, 255, .15) 1px, transparent 30px),
-    radial-gradient(white, rgba(255, 255, 255, .1) 2px, transparent 40px),
-    radial-gradient(rgba(255, 255, 255, .4), rgba(255, 255, 255, .1) 2px, transparent 30px);
+    radial-gradient(white, rgba(255, 255, 255, 0.2) 2px, transparent 40px),
+    radial-gradient(white, rgba(255, 255, 255, 0.15) 1px, transparent 30px),
+    radial-gradient(white, rgba(255, 255, 255, 0.1) 2px, transparent 40px),
+    radial-gradient(
+    rgba(255, 255, 255, 0.4),
+    rgba(255, 255, 255, 0.1) 2px,
+    transparent 30px
+  );
   background-size: 550px 550px, 350px 350px, 250px 250px, 150px 150px;
   background-position: 0 0, 40px 60px, 130px 270px, 70px 100px;
   color: #e0e7ff;
@@ -176,33 +212,33 @@ input,
 
 @keyframes pastel-cycle {
   0% {
-    color: #FFB3BA;
-    fill: #FFB3BA;
+    color: #ffb3ba;
+    fill: #ffb3ba;
   }
 
   20% {
-    color: #FFDFBA;
-    fill: #FFDFBA;
+    color: #ffdfba;
+    fill: #ffdfba;
   }
 
   40% {
-    color: #FFFFBA;
-    fill: #FFFFBA;
+    color: #ffffba;
+    fill: #ffffba;
   }
 
   60% {
-    color: #BAFFC9;
-    fill: #BAFFC9;
+    color: #baffc9;
+    fill: #baffc9;
   }
 
   80% {
-    color: #BAE1FF;
-    fill: #BAE1FF;
+    color: #bae1ff;
+    fill: #bae1ff;
   }
 
   100% {
-    color: #FFB3BA;
-    fill: #FFB3BA;
+    color: #ffb3ba;
+    fill: #ffb3ba;
   }
 }
 
@@ -230,7 +266,6 @@ input,
 
 /* Bubble Float Animation */
 @keyframes bubble-float {
-
   0%,
   100% {
     transform: translateY(0) rotate(0deg);
@@ -256,7 +291,8 @@ input,
   }
 
   50% {
-    transform: translateY(-20px) rotate(calc(var(--bubble-rotate, 0deg) + 5deg));
+    transform: translateY(-20px)
+      rotate(calc(var(--bubble-rotate, 0deg) + 5deg));
   }
 
   100% {
@@ -290,7 +326,6 @@ input,
 
 /* Jelly Bounce Animation */
 @keyframes jelly {
-
   0%,
   100% {
     transform: scale(1, 1);
@@ -319,7 +354,6 @@ input,
 
 /* Wiggle Animation */
 @keyframes wiggle {
-
   0%,
   100% {
     transform: rotate(0deg);
@@ -376,14 +410,17 @@ input,
 
 /* Pulse Glow Animation */
 @keyframes pulse-glow {
-
   0%,
   100% {
-    box-shadow: 0 0 20px rgba(255, 105, 180, 0.5), 0 0 40px rgba(155, 89, 182, 0.3);
+    box-shadow:
+      0 0 20px rgba(255, 105, 180, 0.5),
+      0 0 40px rgba(155, 89, 182, 0.3);
   }
 
   50% {
-    box-shadow: 0 0 30px rgba(255, 105, 180, 0.7), 0 0 60px rgba(155, 89, 182, 0.5);
+    box-shadow:
+      0 0 30px rgba(255, 105, 180, 0.7),
+      0 0 60px rgba(155, 89, 182, 0.5);
   }
 }
 
@@ -403,12 +440,31 @@ input,
 }
 
 .rainbow-text {
-  background: linear-gradient(90deg, #FF69B4, #FFE135, #32CD32, #00D9FF, #4169E1, #9B59B6, #FF69B4);
+  background: linear-gradient(
+    90deg,
+    #ff69b4,
+    #ffe135,
+    #32cd32,
+    #00d9ff,
+    #4169e1,
+    #9b59b6,
+    #ff69b4
+  );
   background-size: 200% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   animation: rainbow-shimmer 3s linear infinite;
+}
+
+/* Rainbow Background Pan for Avatar Frames */
+@keyframes rainbow-bg-pan {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 400% 400%;
+  }
 }
 
 /* 90s Button Styles */
@@ -418,7 +474,8 @@ input,
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  transition: transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
+  transition:
+    transform 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55),
     box-shadow 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   box-shadow:
     0 4px 0 rgba(0, 0, 0, 0.2),
@@ -453,7 +510,7 @@ input,
     0 20px 40px rgba(0, 0, 0, 0.1),
     inset 0 2px 0 rgba(255, 255, 255, 1);
   border: 4px solid;
-  border-image: linear-gradient(135deg, #FF69B4, #00D9FF) 1;
+  border-image: linear-gradient(135deg, #ff69b4, #00d9ff) 1;
   overflow: hidden;
 }
 
@@ -497,7 +554,6 @@ input,
 
 /* Sparkle Effect */
 @keyframes sparkle {
-
   0%,
   100% {
     opacity: 0;
@@ -512,7 +568,7 @@ input,
 
 .sparkle::before,
 .sparkle::after {
-  content: '✨';
+  content: "✨";
   position: absolute;
   animation: sparkle 1.5s ease-in-out infinite;
 }
@@ -536,9 +592,7 @@ input,
   padding: 1rem 1.5rem;
   font-size: 1.25rem;
   font-weight: 600;
-  transition: border-color 0.3s ease,
-    box-shadow 0.3s ease,
-    transform 0.3s ease;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
   box-shadow:
     0 4px 0 rgba(155, 89, 182, 0.3),
     inset 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -547,7 +601,7 @@ input,
 
 .input-90s:focus {
   outline: none;
-  border-color: #FF69B4;
+  border-color: #ff69b4;
   box-shadow:
     0 4px 0 rgba(255, 105, 180, 0.5),
     0 0 20px rgba(255, 105, 180, 0.3),
@@ -570,7 +624,6 @@ input,
 
 /* Bounce Scale */
 @keyframes bounce-scale {
-
   0%,
   100% {
     transform: scale(1);
@@ -586,41 +639,40 @@ input,
 }
 
 /* Stagger children animation */
-.stagger-children>*:nth-child(1) {
+.stagger-children > *:nth-child(1) {
   animation-delay: 0.1s;
 }
 
-.stagger-children>*:nth-child(2) {
+.stagger-children > *:nth-child(2) {
   animation-delay: 0.2s;
 }
 
-.stagger-children>*:nth-child(3) {
+.stagger-children > *:nth-child(3) {
   animation-delay: 0.3s;
 }
 
-.stagger-children>*:nth-child(4) {
+.stagger-children > *:nth-child(4) {
   animation-delay: 0.4s;
 }
 
-.stagger-children>*:nth-child(5) {
+.stagger-children > *:nth-child(5) {
   animation-delay: 0.5s;
 }
 
-.stagger-children>*:nth-child(6) {
+.stagger-children > *:nth-child(6) {
   animation-delay: 0.6s;
 }
 
-.stagger-children>*:nth-child(7) {
+.stagger-children > *:nth-child(7) {
   animation-delay: 0.7s;
 }
 
-.stagger-children>*:nth-child(8) {
+.stagger-children > *:nth-child(8) {
   animation-delay: 0.8s;
 }
 
 /* Timer Urgent Animation */
 @keyframes timer-urgent {
-
   0%,
   100% {
     transform: scale(1);
@@ -669,7 +721,6 @@ input,
 
 /* Reduced Motion Support */
 @media (prefers-reduced-motion: reduce) {
-
   *,
   *::before,
   *::after {
@@ -689,18 +740,18 @@ input,
 }
 
 ::-webkit-scrollbar-track {
-  background: linear-gradient(180deg, #FF69B4 0%, #9B59B6 100%);
+  background: linear-gradient(180deg, #ff69b4 0%, #9b59b6 100%);
   border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #00D9FF 0%, #32CD32 100%);
+  background: linear-gradient(180deg, #00d9ff 0%, #32cd32 100%);
   border-radius: 10px;
-  border: 3px solid #FF69B4;
+  border: 3px solid #ff69b4;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #FFE135 0%, #FF8C00 100%);
+  background: linear-gradient(180deg, #ffe135 0%, #ff8c00 100%);
 }
 
 /* Chat Input Expansion */
@@ -718,7 +769,9 @@ input,
 }
 
 .chat-icon-btn {
-  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+  transition:
+    transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.3s ease;
 }
 
 .chat-icon-btn.hidden-icon {
@@ -743,7 +796,6 @@ input,
 
 /* Breathing Glow Animation */
 @keyframes breathe {
-
   0%,
   100% {
     opacity: 0.2;
@@ -766,8 +818,20 @@ input,
 
 /* Utility for fading scroll edges */
 .mask-gradient-x {
-  mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
 }
 
 /* ========================================
@@ -800,7 +864,6 @@ input,
 }
 
 @keyframes rotate-phone {
-
   0%,
   100% {
     transform: rotate(0deg);

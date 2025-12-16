@@ -53,13 +53,64 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
         }
     }
 
-    // Helper to resolve frame class from ID (or use raw string if legacy/direct)
-    const resolveFrameClass = (frameId?: string) => {
-        if (!frameId) return '';
-        const found = FRAMES.find(f => f.id === frameId);
-        return found ? found.className : frameId;
+    // Helper to resolve frame data from ID
+    const resolveFrame = (frameId?: string) => {
+        if (!frameId) return null;
+        return FRAMES.find(f => f.id === frameId) || null;
     };
-    const frameClass = resolveFrameClass(frame);
+    const frameData = resolveFrame(frame);
+    const frameClass = frameData?.className || '';
+    const frameType = (frameData as { type?: string })?.type;
+
+    // Render special frame backgrounds (rainbow, wood)
+    const renderSpecialFrameBackground = () => {
+        if (frameType === 'rainbow') {
+            return (
+                <div 
+                    className="absolute inset-0 z-0 rounded-[inherit]"
+                    style={{
+                        background: 'linear-gradient(135deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #9400d3, #ff0000)',
+                        backgroundSize: '400% 400%',
+                        animation: 'rainbow-bg-pan 4s linear infinite'
+                    }}
+                />
+            );
+        }
+        if (frameType === 'wood') {
+            return (
+                <div 
+                    className="absolute inset-0 z-0 rounded-[inherit]"
+                    style={{
+                        background: `
+                            repeating-linear-gradient(
+                                90deg,
+                                #8B4513 0px,
+                                #A0522D 2px,
+                                #CD853F 4px,
+                                #8B4513 6px,
+                                #D2691E 8px,
+                                #8B4513 10px
+                            ),
+                            repeating-linear-gradient(
+                                0deg,
+                                transparent 0px,
+                                rgba(0,0,0,0.1) 1px,
+                                transparent 2px
+                            )
+                        `,
+                        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3), inset 0 -2px 4px rgba(255,255,255,0.1)'
+                    }}
+                />
+            );
+        }
+        return null;
+    };
+
+    // Check if frame needs inner padding (rainbow/wood fill the container)
+    const frameNeedsPadding = frameType === 'rainbow' || frameType === 'wood';
+
+    // Calculate padding for special frames
+    const framePadding = frameNeedsPadding ? Math.max(3, size * 0.08) : 0;
 
     // If we have an image URL, use that for best performance (no strokes rendering)
     if (imageUrl) {
@@ -70,21 +121,44 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
                     width: size,
                     height: size,
                     borderColor: color,
-                    borderWidth: frameClass ? 0 : 2, // Only show border if no frame
+                    borderWidth: (frameClass || frameType) ? 0 : 2, // Only show border if no frame
                     color: color,
-                    background: bgColor
+                    background: frameNeedsPadding ? 'transparent' : bgColor
                 }}
             >
-                {/* Frame Layer */}
-                {frameClass && (
-                    <div className={`absolute inset-0 z-20 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
+                {/* Special Frame Background (rainbow/wood) */}
+                {renderSpecialFrameBackground()}
+                
+                {/* Inner content container for special frames */}
+                {frameNeedsPadding ? (
+                    <div 
+                        className="absolute rounded-xl overflow-hidden z-10"
+                        style={{
+                            inset: framePadding,
+                            background: bgColor
+                        }}
+                    >
+                        <img 
+                            src={imageUrl} 
+                            alt="Avatar" 
+                            className="w-full h-full object-contain pointer-events-none select-none"
+                            loading="lazy" 
+                        />
+                    </div>
+                ) : (
+                    <>
+                        {/* Frame Layer */}
+                        {frameClass && (
+                            <div className={`absolute inset-0 z-20 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
+                        )}
+                        <img 
+                            src={imageUrl} 
+                            alt="Avatar" 
+                            className="w-full h-full object-contain pointer-events-none select-none relative z-10"
+                            loading="lazy" 
+                        />
+                    </>
                 )}
-                <img 
-                    src={imageUrl} 
-                    alt="Avatar" 
-                    className="w-full h-full object-contain pointer-events-none select-none relative z-10"
-                    loading="lazy" 
-                />
             </div>
         );
     }
@@ -104,30 +178,57 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
                     color: color,
                     width: size,
                     height: size,
-                    background: bgColor,
+                    background: frameNeedsPadding ? 'transparent' : bgColor,
                     fontSize: size * 0.6
                 }}
             >
-                {/* Frame Layer */}
-                {frameClass && (
-                    <div className={`absolute inset-0 z-20 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
-                )}
-                {isLoading ? (
-                    // Loading spinner
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/30 backdrop-blur-[1px] z-10">
-                        <div
-                            className="border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"
-                            style={{ width: size * 0.4, height: size * 0.4 }}
-                        />
+                {/* Special Frame Background (rainbow/wood) */}
+                {renderSpecialFrameBackground()}
+                
+                {/* Inner content container for special frames */}
+                {frameNeedsPadding ? (
+                    <div 
+                        className="absolute rounded-xl overflow-hidden z-10 flex items-center justify-center"
+                        style={{
+                            inset: framePadding,
+                            background: bgColor,
+                            fontSize: size * 0.5
+                        }}
+                    >
+                        {isLoading ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-white/30 backdrop-blur-[1px]">
+                                <div
+                                    className="border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"
+                                    style={{ width: size * 0.3, height: size * 0.3 }}
+                                />
+                            </div>
+                        ) : (
+                            <span>{avatar || '👤'}</span>
+                        )}
                     </div>
                 ) : (
-                    <span className="relative z-10">{avatar || '👤'}</span>
+                    <>
+                        {/* Frame Layer */}
+                        {frameClass && (
+                            <div className={`absolute inset-0 z-20 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
+                        )}
+                        {isLoading ? (
+                            <div className="absolute inset-0 flex items-center justify-center bg-white/30 backdrop-blur-[1px] z-10">
+                                <div
+                                    className="border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"
+                                    style={{ width: size * 0.4, height: size * 0.4 }}
+                                />
+                            </div>
+                        ) : (
+                            <span className="relative z-10">{avatar || '👤'}</span>
+                        )}
+                    </>
                 )}
             </div>
         );
     }
 
-    // Optimized Image Rendering
+    // Optimized Image Rendering (this branch is actually unreachable since imageUrl is handled above, but keeping for safety)
     if (imageUrl && !imageError) {
         return (
             <div
@@ -135,22 +236,44 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
                 style={{
                     width: size,
                     height: size,
-                    background: backgroundColor || '#ffffff',
-                    border: frameClass ? undefined : `2px solid ${color || '#000000'}`,
+                    background: frameNeedsPadding ? 'transparent' : (backgroundColor || '#ffffff'),
+                    border: (frameClass || frameType) ? undefined : `2px solid ${color || '#000000'}`,
                 }}
             >
-                {/* Frame Layer */}
-                {frameClass && (
-                    <div className={`absolute inset-0 z-20 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
+                {/* Special Frame Background (rainbow/wood) */}
+                {renderSpecialFrameBackground()}
+                
+                {frameNeedsPadding ? (
+                    <div 
+                        className="absolute rounded-xl overflow-hidden z-10"
+                        style={{
+                            inset: framePadding,
+                            background: backgroundColor || '#ffffff'
+                        }}
+                    >
+                        <img
+                            src={imageUrl}
+                            alt="Avatar"
+                            className="w-full h-full object-contain pointer-events-none select-none"
+                            loading="lazy"
+                            onError={() => setImageError(true)}
+                        />
+                    </div>
+                ) : (
+                    <>
+                        {/* Frame Layer */}
+                        {frameClass && (
+                            <div className={`absolute inset-0 z-20 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
+                        )}
+                        <img
+                            src={imageUrl}
+                            alt="Avatar"
+                            className="w-full h-full object-contain pointer-events-none select-none relative z-10"
+                            loading="lazy"
+                            onError={() => setImageError(true)}
+                        />
+                    </>
                 )}
-
-                <img
-                    src={imageUrl}
-                    alt="Avatar"
-                    className="w-full h-full object-contain pointer-events-none select-none relative z-10"
-                    loading="lazy"
-                    onError={() => setImageError(true)}
-                />
             </div>
         );
     }
@@ -161,51 +284,103 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
             style={{
                 width: size,
                 height: size,
-                background: backgroundColor || '#ffffff',
-                border: frameClass ? undefined : `2px solid ${color || '#000000'}`,
+                background: frameNeedsPadding ? 'transparent' : (backgroundColor || '#ffffff'),
+                border: (frameClass || frameType) ? undefined : `2px solid ${color || '#000000'}`,
             }}
         >
-            {/* Frame Layer */}
-            {frameClass && (
-                <div className={`absolute inset-0 z-20 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
+            {/* Special Frame Background (rainbow/wood) */}
+            {renderSpecialFrameBackground()}
+            
+            {frameNeedsPadding ? (
+                <div 
+                    className="absolute rounded-xl overflow-hidden z-10"
+                    style={{
+                        inset: framePadding,
+                        background: backgroundColor || '#ffffff'
+                    }}
+                >
+                    <svg
+                        viewBox="0 0 100 100"
+                        className="w-full h-full"
+                        style={{ pointerEvents: 'none' }}
+                    >
+                        {displayStrokes.map((stroke, i) => {
+                            if (!stroke || !stroke.points || stroke.points.length === 0) return null;
+
+                            if (stroke.points.length === 1) {
+                                const p = stroke.points[0];
+                                return (
+                                    <circle
+                                        key={i}
+                                        cx={p.x}
+                                        cy={p.y}
+                                        r={(stroke.size / 3) / 2}
+                                        fill={stroke.color}
+                                    />
+                                );
+                            }
+
+                            return (
+                                <path
+                                    key={i}
+                                    d={stroke.points.map((p, j) =>
+                                        p ? `${j === 0 ? 'M' : 'L'} ${p.x} ${p.y}` : ''
+                                    ).join(' ')}
+                                    stroke={stroke.color}
+                                    strokeWidth={stroke.size / 3}
+                                    fill="none"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            );
+                        })}
+                    </svg>
+                </div>
+            ) : (
+                <>
+                    {/* Frame Layer */}
+                    {frameClass && (
+                        <div className={`absolute inset-0 z-20 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
+                    )}
+
+                    <svg
+                        viewBox="0 0 100 100"
+                        className="w-full h-full absolute inset-0 z-10"
+                        style={{ pointerEvents: 'none' }}
+                    >
+                        {displayStrokes.map((stroke, i) => {
+                            if (!stroke || !stroke.points || stroke.points.length === 0) return null;
+
+                            if (stroke.points.length === 1) {
+                                const p = stroke.points[0];
+                                return (
+                                    <circle
+                                        key={i}
+                                        cx={p.x}
+                                        cy={p.y}
+                                        r={(stroke.size / 3) / 2}
+                                        fill={stroke.color}
+                                    />
+                                );
+                            }
+
+                            return (
+                                <path
+                                    key={i}
+                                    d={stroke.points.map((p, j) =>
+                                        p ? `${j === 0 ? 'M' : 'L'} ${p.x} ${p.y}` : ''
+                                    ).join(' ')}
+                                    stroke={stroke.color}
+                                    strokeWidth={stroke.size / 3}
+                                    fill="none"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                />
+                            );
+                        })}
+                    </svg>
+                </>
             )}
-
-            <svg
-                viewBox="0 0 100 100"
-                className="w-full h-full absolute inset-0 z-10"
-                style={{ pointerEvents: 'none' }}
-            >
-                {displayStrokes.map((stroke, i) => {
-                    if (!stroke || !stroke.points || stroke.points.length === 0) return null;
-
-                    if (stroke.points.length === 1) {
-                        const p = stroke.points[0];
-                        return (
-                            <circle
-                                key={i}
-                                cx={p.x}
-                                cy={p.y}
-                                r={(stroke.size / 3) / 2} // Scaled down to match editor look
-                                fill={stroke.color}
-                            />
-                        );
-                    }
-
-                    return (
-                        <path
-                            key={i}
-                            d={stroke.points.map((p, j) =>
-                                p ? `${j === 0 ? 'M' : 'L'} ${p.x} ${p.y}` : ''
-                            ).join(' ')}
-                            stroke={stroke.color}
-                            strokeWidth={stroke.size / 3} // Scaled down to match editor look
-                            fill="none"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        />
-                    );
-                })}
-            </svg>
         </div>
     );
 };

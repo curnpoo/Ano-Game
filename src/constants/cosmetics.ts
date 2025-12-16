@@ -73,21 +73,22 @@ export const FONTS = [
 ];
 
 // Avatar Frames (New) - CSS classes or style IDs
+// Note: Some frames use special types that require custom rendering logic in AvatarDisplay
 export const FRAMES = [
     { id: 'none', name: 'None', preview: '⬜', description: 'No frame', price: 0 },
     
     // Legacy / Basic Frames (Cheap)
-    { id: 'glow', name: 'Glow', preview: '✨', description: 'Soft outline', price: 50, className: 'shadow-[0_0_15px_currentColor]' },
+    { id: 'glow', name: 'Glow', preview: '✨', description: 'Soft outline', price: 50, className: 'shadow-[0_0_12px_4px_currentColor,0_0_20px_8px_currentColor]' },
     { id: 'border', name: 'Bold', preview: '🔲', description: 'Thick border', price: 50, className: 'border-4 border-current' },
     { id: 'dash', name: 'Dash', preview: '➖', description: 'Dashed line', price: 75, className: 'border-4 border-dashed border-current' },
     { id: 'double', name: 'Double', preview: '══', description: 'Double border', price: 100, className: 'border-double border-8 border-current' },
     { id: 'ring', name: 'Ring', preview: '⭕', description: 'Offset ring', price: 100, className: 'ring-4 ring-current ring-offset-2' },
 
     // Premium Frames
-    { id: 'gold_glow', name: 'Golden Glow', preview: '🌟', description: 'Radiate energy', price: 500, className: 'shadow-[0_0_15px_gold] border-yellow-400 border-2' },
-    { id: 'neon_pink', name: 'Neon Pink', preview: '💖', description: 'Cyberpunk vibes', price: 400, className: 'shadow-[0_0_10px_#ff00ff] border-[#ff00ff] border-2' },
-    { id: 'rainbow', name: 'Rainbow', preview: '🌈', description: 'Multicolor border', price: 600, className: 'bg-gradient-to-r from-red-500 via-green-500 to-blue-500 p-1 rounded-full' }, // Requires wrapper logic
-    { id: 'wood', name: 'Wooden', preview: '🪵', description: 'Classic feel', price: 200, className: 'border-amber-800 border-4' }
+    { id: 'gold_glow', name: 'Golden Glow', preview: '🌟', description: 'Radiate energy', price: 500, className: 'shadow-[0_0_20px_8px_#ffd700,0_0_40px_16px_#ffb300,0_0_60px_24px_rgba(255,215,0,0.5)] border-yellow-400 border-2' },
+    { id: 'neon_pink', name: 'Neon Pink', preview: '💖', description: 'Cyberpunk vibes', price: 400, className: 'shadow-[0_0_15px_6px_#ff00ff,0_0_30px_12px_rgba(255,0,255,0.6)] border-[#ff00ff] border-2' },
+    { id: 'rainbow', name: 'Rainbow', preview: '🌈', description: 'Multicolor border', price: 600, type: 'rainbow' },
+    { id: 'wood', name: 'Wooden', preview: '🪵', description: 'Classic feel', price: 200, type: 'wood' }
 ];
 
 // Avatar Background Themes (New) - CSS gradients

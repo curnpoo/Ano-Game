@@ -319,36 +319,112 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
 };
 
 
-// Casino Stats Modal Component (Refreshed)
+// Casino Stats Modal Component (Expanded with Real-Time Updates)
 const CasinoStatsModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
-    const stats = CasinoService.getStats();
-    const winRate = CasinoService.getWinRate();
-    // const roi = CasinoService.getROI();
+    const [stats, setStats] = useState(CasinoService.getStats());
+    const [winRate, setWinRate] = useState(CasinoService.getWinRate());
+    const [roi, setRoi] = useState(CasinoService.getROI());
 
-    const statItems = [
-        { label: 'Total Spins', value: stats.totalSpins, emoji: '🎰' },
-        { label: 'Win Rate', value: `${winRate}%`, emoji: '📈' },
-        { label: 'Net Profit', value: `${stats.netProfit >= 0 ? '+' : ''}${formatCurrency(stats.netProfit)}`, emoji: stats.netProfit >= 0 ? '🤑' : '💸', color: stats.netProfit >= 0 ? '#4ade80' : '#f87171' },
+    // Real-time updates
+    useEffect(() => {
+        const updateStats = () => {
+            setStats(CasinoService.getStats());
+            setWinRate(CasinoService.getWinRate());
+            setRoi(CasinoService.getROI());
+        };
+
+        // Update every 500ms for real-time feel
+        const interval = setInterval(updateStats, 500);
+        return () => clearInterval(interval);
+    }, []);
+
+    const statGroups = [
+        {
+            title: 'Overview',
+            items: [
+                { label: 'Total Spins', value: stats.totalSpins, emoji: '🎰' },
+                { label: 'Win Rate', value: `${winRate}%`, emoji: '📈' },
+                { label: 'ROI', value: `${roi >= 0 ? '+' : ''}${roi}%`, emoji: roi >= 0 ? '💰' : '📉', color: roi >= 0 ? '#4ade80' : '#f87171' },
+            ]
+        },
+        {
+            title: 'Winnings',
+            items: [
+                { label: 'Jackpots (3x)', value: stats.jackpotWins, emoji: '💎' },
+                { label: 'Pairs (2x)', value: stats.twoOfAKindWins, emoji: '✨' },
+                { label: 'Biggest Win', value: formatCurrency(stats.biggestWin), emoji: '🏆', color: '#facc15' },
+            ]
+        },
+        {
+            title: 'Betting',
+            items: [
+                { label: 'Total Wagered', value: formatCurrency(stats.totalBetAmount), emoji: '💵' },
+                { label: 'Total Won', value: formatCurrency(stats.totalWinnings), emoji: '💰', color: '#4ade80' },
+                { label: 'Total Lost', value: formatCurrency(stats.totalLosses), emoji: '💸', color: '#f87171' },
+                { label: 'Biggest Bet', value: formatCurrency(stats.biggestBet), emoji: '🎲' },
+            ]
+        },
+        {
+            title: 'Streaks',
+            items: [
+                { 
+                    label: 'Current Streak', 
+                    value: stats.currentStreak > 0 ? `${stats.currentStreak} wins` : stats.currentStreak < 0 ? `${Math.abs(stats.currentStreak)} losses` : '-',
+                    emoji: stats.currentStreak > 0 ? '🔥' : stats.currentStreak < 0 ? '❄️' : '➖',
+                    color: stats.currentStreak > 0 ? '#4ade80' : stats.currentStreak < 0 ? '#f87171' : undefined
+                },
+                { label: 'Best Win Streak', value: stats.longestWinStreak, emoji: '🏅', color: '#4ade80' },
+                { label: 'Worst Lose Streak', value: stats.longestLoseStreak, emoji: '😢', color: '#f87171' },
+            ]
+        },
+        {
+            title: 'Net Profit',
+            items: [
+                { 
+                    label: 'Net Profit', 
+                    value: `${stats.netProfit >= 0 ? '+' : ''}${formatCurrency(stats.netProfit)}`, 
+                    emoji: stats.netProfit >= 0 ? '🤑' : '💸', 
+                    color: stats.netProfit >= 0 ? '#4ade80' : '#f87171',
+                    large: true
+                },
+            ]
+        }
     ];
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in" onClick={onClose}>
             <div
-                className="relative z-10 w-full max-w-xs bg-gray-900 border-2 border-yellow-500/30 rounded-3xl p-6 shadow-2xl pop-in text-center"
+                className="relative z-10 w-full max-w-sm bg-gray-900 border-2 border-yellow-500/30 rounded-3xl p-5 shadow-2xl pop-in max-h-[85vh] overflow-y-auto"
                 onClick={e => e.stopPropagation()}
             >
-                <div className="text-4xl mb-2">📊</div>
-                <h2 className="text-2xl font-black text-white mb-6 uppercase tracking-widest">Stats</h2>
+                <div className="text-center mb-4">
+                    <div className="text-4xl mb-1">📊</div>
+                    <h2 className="text-xl font-black text-white uppercase tracking-widest">Casino Stats</h2>
+                    <div className="text-xs text-white/50">Updates in real-time</div>
+                </div>
 
-                <div className="space-y-3">
-                    {statItems.map((item, i) => (
-                        <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-white/5 border border-white/5">
-                            <div className="flex items-center gap-3 text-white/70 font-bold">
-                                <span>{item.emoji}</span>
-                                <span className="text-sm">{item.label}</span>
-                            </div>
-                            <div className="font-mono font-black text-lg text-white" style={item.color ? { color: item.color } : {}}>
-                                {item.value}
+                <div className="space-y-4">
+                    {statGroups.map((group, gi) => (
+                        <div key={gi}>
+                            <div className="text-xs uppercase tracking-wider text-yellow-500/70 font-bold mb-2">{group.title}</div>
+                            <div className="space-y-1.5">
+                                {group.items.map((item, i) => (
+                                    <div 
+                                        key={i} 
+                                        className={`flex items-center justify-between p-2.5 rounded-xl bg-white/5 border border-white/5 ${(item as any).large ? 'py-4' : ''}`}
+                                    >
+                                        <div className="flex items-center gap-2 text-white/70 font-bold">
+                                            <span>{item.emoji}</span>
+                                            <span className="text-xs">{item.label}</span>
+                                        </div>
+                                        <div 
+                                            className={`font-mono font-black text-white ${(item as any).large ? 'text-xl' : 'text-sm'}`} 
+                                            style={item.color ? { color: item.color } : {}}
+                                        >
+                                            {item.value}
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     ))}
@@ -356,7 +432,7 @@ const CasinoStatsModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 
                 <button
                     onClick={onClose}
-                    className="w-full mt-6 py-3 rounded-xl bg-white/10 text-white font-bold hover:bg-white/20 transition-colors"
+                    className="w-full mt-5 py-3 rounded-xl bg-white/10 text-white font-bold hover:bg-white/20 transition-colors"
                 >
                     Close
                 </button>
