@@ -13,7 +13,7 @@ images and vote for the best additions.
 | Attribute       | Value                                                    |
 | --------------- | -------------------------------------------------------- |
 | **URL**         | [anogame.xyz](https://anogame.xyz)                       |
-| **Version**     | 0.8 Alpha                                                |
+| **Version**     | 0.9 Alpha                                                |
 | **Platform**    | Mobile-first PWA (Portrait only)                         |
 | **Tech Stack**  | React 19, TypeScript, Firebase Realtime DB, Tailwind CSS |
 | **Target Feel** | **Native iOS app** — fluid, responsive, premium          |
@@ -122,19 +122,18 @@ cubic-bezier(0.34, 1.56, 0.64, 1) /* Bouncy popup */
 
 ```css
 --bubble-pink: #ff69b4 --bubble-purple: #9b59b6 --bubble-cyan: #00d9ff
-    --bubble-yellow: #ffe135 --bubble-lime: #32cd32 --bubble-orange: #ff8c00
-    --bubble-blue: #4169e1 --bubble-teal: #20b2aa;
+   --bubble-yellow: #ffe135 --bubble-lime: #32cd32 --bubble-orange: #ff8c00
+   --bubble-blue: #4169e1 --bubble-teal: #20b2aa;
 ```
 
 ### Gradients
 
 ```css
 --gradient-90s: linear-gradient(135deg, #ff69b4 0%, #9b59b6 25%, #4169e1 50%,
-    #00d9ff 75%, #32cd32 100%) --gradient-sunset: linear-gradient(135deg,
-    #ff8c00 0%, #ff69b4 50%, #9b59b6 100%) --gradient-ocean:
-    linear-gradient(135deg, #00d9ff 0%, #4169e1 50%, #9b59b6 100%)
-    --gradient-candy: linear-gradient(135deg, #ff69b4 0%, #ffe135 50%, #00d9ff
-    100%);
+   #00d9ff 75%, #32cd32 100%) --gradient-sunset: linear-gradient(135deg, #ff8c00
+   0%, #ff69b4 50%, #9b59b6 100%) --gradient-ocean: linear-gradient(135deg,
+   #00d9ff 0%, #4169e1 50%, #9b59b6 100%) --gradient-candy:
+   linear-gradient(135deg, #ff69b4 0%, #ffe135 50%, #00d9ff 100%);
 ```
 
 ### Glass Panels (Dark Mode Default)
@@ -154,7 +153,7 @@ border: 1px solid rgba(255, 255, 255, 0.15);
 
 ```css
 --radius-main: 1.5rem /* 24px - Cards, buttons */ --radius-full:
-    9999px; /* Pills, circular buttons */
+   9999px; /* Pills, circular buttons */
 ```
 
 ---
@@ -292,7 +291,7 @@ For complex gestures, consider:
 
 | Version   | Date     | Notes   |
 | --------- | -------- | ------- |
-| 0.8 Alpha | Dec 2025 | Current |
+| 0.9 Alpha | Dec 2025 | Current |
 
 ---
 
