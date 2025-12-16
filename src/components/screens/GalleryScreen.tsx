@@ -109,15 +109,16 @@ export const GalleryScreen: React.FC<GalleryScreenProps> = ({ onBack, showToast,
                 >
                     <span className="text-xl">←</span>
                 </button>
-                <h1 className="text-xl font-bold ml-2">
+                <h1 className="text-xl font-bold ml-2" style={{ color: 'var(--theme-text)' }}>
                     Match History 
-                    <span className="text-white/30 text-xs font-normal ml-2">
+                    <span className="text-xs font-normal ml-2" style={{ color: 'var(--theme-text-secondary)', opacity: 0.6 }}>
                         (ID: {currentSessionId ? currentSessionId.slice(0, 6) : '?'}) • {games.length} Games
                     </span>
                 </h1>
                 <button 
                     onClick={loadGallery}
                     className="ml-auto px-3 py-1 bg-white/10 rounded-full text-xs font-bold active:bg-white/20"
+                    style={{ color: 'var(--theme-text)' }}
                 >
                     ↻ Refresh
                 </button>
@@ -283,7 +284,7 @@ const GameCard: React.FC<{
                 <div className="flex justify-between items-start mb-2">
                     <div className="flex flex-col">
                         <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs font-bold text-white/40 uppercase tracking-wider">
+                            <span className="text-xs font-bold uppercase tracking-wider" style={{ color: 'var(--theme-text-secondary)' }}>
                                 {dateStr} • {timeStr}
                             </span>
                             {/* Countdown Badge */}
@@ -291,14 +292,14 @@ const GameCard: React.FC<{
                                 {formatTimeRemaining(timeRemaining)}
                             </span>
                         </div>
-                        <h3 className="font-bold text-lg leading-tight">
+                        <h3 className="font-bold text-lg leading-tight" style={{ color: 'var(--theme-text)' }}>
                             Game with {safePlayers.length} Players
                         </h3>
                     </div>
                     {winner && (
                         <div className="flex flex-col items-end">
-                            <span className="text-xs font-bold text-yellow-400 uppercase tracking-wide">Winner</span>
-                            <span className="font-bold text-white">{winner.name}</span>
+                            <span className="text-xs font-bold text-yellow-500 uppercase tracking-wide">Winner</span>
+                            <span className="font-bold" style={{ color: 'var(--theme-text)' }}>{winner.name}</span>
                         </div>
                     )}
                 </div>
@@ -307,8 +308,8 @@ const GameCard: React.FC<{
                 <div className="flex flex-wrap gap-2 mt-2">
                     {sortedPlayers.slice(0, 3).map((p, i) => (
                         <div key={p.id} className={`text-xs px-2 py-1 rounded-md font-bold ${
-                            i === 0 ? 'bg-yellow-400/20 text-yellow-300 border border-yellow-400/30' : 'bg-white/10 text-white/60'
-                        }`}>
+                            i === 0 ? 'bg-yellow-400/30 text-yellow-600 border border-yellow-400/50' : 'bg-black/10 border border-black/10'
+                        }`} style={i !== 0 ? { color: 'var(--theme-text-secondary)' } : undefined}>
                             {i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉'} {p.name}
                         </div>
                     ))}
@@ -340,12 +341,12 @@ const GameCard: React.FC<{
                                                 {round.roundNumber}
                                             </div>
                                             <div className="flex flex-col items-start">
-                                                <span className="font-bold text-sm">Round {round.roundNumber}</span>
-                                                <span className="text-xs text-white/50">Winner: {roundWinnerName}</span>
+                                                <span className="font-bold text-sm" style={{ color: 'var(--theme-text)' }}>Round {round.roundNumber}</span>
+                                                <span className="text-xs" style={{ color: 'var(--theme-text-secondary)' }}>Winner: {roundWinnerName}</span>
                                             </div>
                                         </div>
-                                        <span className={`text-white/40 transition-transform duration-300 ${isRoundExpanded ? 'rotate-180' : ''}`}>
-                                            ▼
+                                        <span className="transition-transform duration-300" style={{ color: 'var(--theme-text-secondary)' }}>
+                                            {isRoundExpanded ? '▲' : '▼'}
                                         </span>
                                     </button>
 

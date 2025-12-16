@@ -146,11 +146,11 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
 
             {/* Picker Container */}
             <div
-                className="relative overflow-hidden rounded-2xl"
+                className="relative overflow-hidden rounded-2xl backdrop-blur-md"
                 style={{
-                    background: 'linear-gradient(180deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.2) 50%, rgba(0,0,0,0.4) 100%)',
-                    border: '2px solid rgba(255, 215, 0, 0.3)',
-                    boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.3), 0 0 20px rgba(255, 215, 0, 0.1)'
+                    background: 'var(--theme-glass-bg)',
+                    border: '2px solid var(--theme-accent)',
+                    boxShadow: 'inset 0 2px 10px rgba(0,0,0,0.1)'
                 }}
             >
                 {/* Center Highlight */}
@@ -158,24 +158,24 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
                     className="absolute left-1/2 top-0 bottom-0 -translate-x-1/2 z-10 pointer-events-none"
                     style={{
                         width: `${itemWidth}px`,
-                        background: 'linear-gradient(180deg, rgba(255, 215, 0, 0.2) 0%, rgba(255, 215, 0, 0.1) 50%, rgba(255, 215, 0, 0.2) 100%)',
-                        borderLeft: '2px solid rgba(255, 215, 0, 0.5)',
-                        borderRight: '2px solid rgba(255, 215, 0, 0.5)',
-                        boxShadow: '0 0 30px rgba(255, 215, 0, 0.3)'
+                        background: 'linear-gradient(180deg, var(--theme-accent) 0%, transparent 50%, var(--theme-accent) 100%)',
+                        opacity: 0.2,
+                        borderLeft: '2px solid var(--theme-accent)',
+                        borderRight: '2px solid var(--theme-accent)',
                     }}
                 />
 
                 {/* Fade edges */}
                 <div
-                    className="absolute left-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
+                    className="absolute left-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
                     style={{
-                        background: 'linear-gradient(to right, var(--theme-bg-primary, #1a1a1a) 0%, transparent 100%)'
+                        background: 'linear-gradient(to right, var(--theme-glass-bg) 0%, transparent 100%)'
                     }}
                 />
                 <div
-                    className="absolute right-0 top-0 bottom-0 w-24 z-10 pointer-events-none"
+                    className="absolute right-0 top-0 bottom-0 w-16 z-10 pointer-events-none"
                     style={{
-                        background: 'linear-gradient(to left, var(--theme-bg-primary, #1a1a1a) 0%, transparent 100%)'
+                        background: 'linear-gradient(to left, var(--theme-glass-bg) 0%, transparent 100%)'
                     }}
                 />
 
@@ -220,8 +220,8 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
                                     className="font-bold transition-all duration-150"
                                     style={{
                                         fontSize: isSelected ? '1.75rem' : '1.25rem',
-                                        color: isSelected ? '#FFD700' : 'var(--theme-text)',
-                                        textShadow: isSelected ? '0 0 20px rgba(255, 215, 0, 0.5)' : 'none',
+                                        color: isSelected ? 'var(--theme-accent)' : 'var(--theme-text)',
+                                        textShadow: isSelected ? '0 0 10px var(--theme-accent)' : 'none',
                                     }}
                                 >
                                     {prefix}{val}{suffix}
@@ -237,8 +237,8 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
                 <div
                     className="text-center mt-4 font-black text-3xl"
                     style={{
-                        color: '#FFD700',
-                        textShadow: '0 0 20px rgba(255, 215, 0, 0.5), 0 2px 4px rgba(0,0,0,0.3)'
+                        color: 'var(--theme-accent)',
+                        textShadow: '0 2px 4px rgba(0,0,0,0.2)'
                     }}
                 >
                     {prefix}{value}{suffix}

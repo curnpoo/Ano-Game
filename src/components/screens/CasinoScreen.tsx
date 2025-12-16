@@ -3,7 +3,7 @@ import { CurrencyService, formatCurrency } from '../../services/currency';
 import { CasinoService } from '../../services/casino';
 import type { SpinResult } from '../../services/casino';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
-import { HorizontalPicker } from '../common/HorizontalPicker';
+import { BetSelector } from '../common/BetSelector';
 
 interface CasinoScreenProps {
     onClose: () => void;
@@ -18,6 +18,15 @@ const WINNING_COMBOS: { [key: string]: number } = {
     '🍋': 2,   // Triple lemons = 2x
     '🍊': 2    // Triple oranges = 2x
 };
+
+// Payout reference data
+const PAYOUT_INFO = [
+    { symbols: '7️⃣7️⃣7️⃣', multiplier: 10, label: 'Triple 7s' },
+    { symbols: '💎💎💎', multiplier: 7, label: 'Diamonds' },
+    { symbols: '🎰🎰🎰', multiplier: 5, label: 'Jackpot' },
+    { symbols: '🍒🍒🍒', multiplier: 3, label: 'Cherries' },
+    { symbols: '2 Match', multiplier: 1.5, label: 'Any Pair' },
+];
 
 export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
     const [balance, setBalance] = useState(CurrencyService.getCurrency());
@@ -125,7 +134,7 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
 
     return (
         <div
-            className="fixed inset-0 overflow-hidden flex flex-col items-center bg-black"
+            className="fixed inset-0 overflow-y-auto flex flex-col items-center bg-black"
             style={{ height: '100dvh' }}
         >
             {/* Background Atmosphere */}
@@ -145,14 +154,13 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
 
             {/* Content Container */}
             <div
-                className="relative z-10 w-full max-w-md h-full flex flex-col px-4"
+                className="relative z-10 w-full max-w-md flex flex-col px-4 pb-6"
                 style={{
-                    paddingTop: 'max(1.5rem, env(safe-area-inset-top) + 1rem)',
-                    paddingBottom: 'max(1.5rem, env(safe-area-inset-bottom) + 1rem)',
+                    paddingTop: 'max(1rem, env(safe-area-inset-top) + 0.5rem)',
                 }}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-4">
                     <button
                         onClick={onClose}
                         className="w-12 h-12 rounded-full flex items-center justify-center text-xl bg-white/10 text-white border border-white/20 active:scale-95 transition-all shadow-[0_0_15px_rgba(255,255,255,0.1)]"
@@ -164,91 +172,134 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
                     </div>
                 </div>
 
-                <div className="flex-1 flex flex-col items-center justify-center relative -mt-10">
+                {/* Logo - Compact */}
+                <div className="mb-4 relative text-center">
+                    <h1
+                        className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 via-yellow-500 to-yellow-700 tracking-tighter"
+                        style={{ filter: 'drop-shadow(0 0 10px rgba(255,215,0,0.5))' }}
+                    >
+                        CASINO
+                    </h1>
+                    <div className="text-pink-500 font-cursive text-xl -mt-2 transform -rotate-6 filter drop-shadow-[0_0_5px_rgba(236,72,153,0.8)]">
+                        Night
+                    </div>
+                </div>
 
-                    {/* Logo */}
-                    <div className="mb-8 relative text-center">
-                        <h1
-                            className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-300 via-yellow-500 to-yellow-700 tracking-tighter"
-                            style={{ filter: 'drop-shadow(0 0 10px rgba(255,215,0,0.5))' }}
-                        >
-                            CASINO
-                        </h1>
-                        <div className="text-pink-500 font-cursive text-3xl -mt-4 transform -rotate-6 filter drop-shadow-[0_0_5px_rgba(236,72,153,0.8)]">
-                            Night
-                        </div>
+                {/* Slot Machine Frame - Polished */}
+                <div 
+                    className="w-full relative p-4 rounded-3xl border-4 border-yellow-600 shadow-[0_0_50px_rgba(255,165,0,0.3),inset_0_2px_20px_rgba(255,215,0,0.1)]"
+                    style={{
+                        background: 'linear-gradient(180deg, #2a2218 0%, #1a1510 50%, #0d0a08 100%)',
+                    }}
+                >
+                    {/* Gold Texture Overlay */}
+                    <div 
+                        className="absolute inset-0 rounded-3xl opacity-20 pointer-events-none"
+                        style={{
+                            backgroundImage: 'url(/textures/slot_machine_texture.png)',
+                            backgroundSize: 'cover',
+                            mixBlendMode: 'overlay'
+                        }}
+                    />
+
+                    {/* Decorative Rivets */}
+                    <div className="absolute top-2 left-2 right-2 flex justify-between">
+                        {[...Array(5)].map((_, i) => (
+                            <div key={`top-${i}`} className="w-3 h-3 rounded-full bg-gradient-to-b from-yellow-400 to-yellow-700 shadow-inner" />
+                        ))}
+                    </div>
+                    <div className="absolute bottom-2 left-2 right-2 flex justify-between">
+                        {[...Array(5)].map((_, i) => (
+                            <div key={`bot-${i}`} className="w-3 h-3 rounded-full bg-gradient-to-b from-yellow-400 to-yellow-700 shadow-inner" />
+                        ))}
                     </div>
 
-                    {/* Slot Machine Frame */}
-                    <div className="w-full relative p-3 rounded-3xl border-4 border-yellow-600/50 bg-gradient-to-b from-gray-900 to-black shadow-[0_0_50px_rgba(255,165,0,0.2)]">
-                        {/* Lights Top */}
-                        <div className="absolute top-1 left-4 right-4 flex justify-between px-2">
-                            {[...Array(6)].map((_, i) => (
-                                <div key={i} className={`w-2 h-2 rounded-full ${spinning ? 'animate-pulse bg-red-500 shadow-[0_0_10px_red]' : 'bg-red-900'}`} style={{ animationDelay: `${i * 100}ms` }} />
+                    {/* Animated Lights */}
+                    <div className="absolute top-6 left-6 right-6 flex justify-between px-2">
+                        {[...Array(6)].map((_, i) => (
+                            <div 
+                                key={i} 
+                                className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${spinning ? 'animate-pulse bg-red-500 shadow-[0_0_12px_red]' : 'bg-red-900'}`} 
+                                style={{ animationDelay: `${i * 100}ms` }} 
+                            />
+                        ))}
+                    </div>
+
+                    {/* Reels Window */}
+                    <div className="mt-8 mb-3 bg-gradient-to-b from-gray-200 to-white rounded-xl p-1 shadow-[inset_0_4px_12px_rgba(0,0,0,0.3)] border-4 border-gray-700 relative overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/50 pointer-events-none z-10" />
+                        <div className="flex bg-gradient-to-b from-gray-100 to-gray-50 rounded-lg overflow-hidden">
+                            {reels.map((symbol, i) => (
+                                <div
+                                    key={i}
+                                    className={`flex-1 h-20 flex items-center justify-center text-5xl border-r last:border-r-0 border-gray-300
+                                    ${spinningReels[i] ? 'animate-slot-spin blur-sm' : 'animate-bounce-short'}`}
+                                >
+                                    {spinningReels[i] ? '🎰' : symbol}
+                                </div>
                             ))}
                         </div>
 
-                        {/* Reels Window */}
-                        <div className="mt-4 mb-2 bg-white rounded-lg p-1 shadow-inner border-y-4 border-gray-800 relative overflow-hidden">
-                            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40 pointer-events-none z-10" />
-                            <div className="flex bg-gray-100">
-                                {reels.map((symbol, i) => (
-                                    <div
-                                        key={i}
-                                        className={`flex-1 h-24 flex items-center justify-center text-5xl border-r last:border-r-0 border-gray-300
-                                        ${spinningReels[i] ? 'animate-slot-spin blur-sm' : 'animate-bounce-short'}`}
-                                    >
-                                        {spinningReels[i] ? '🎰' : symbol}
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Win Line */}
-                            <div className="absolute top-1/2 left-0 right-0 h-1 bg-red-500/50 z-20 pointer-events-none" />
-                        </div>
-
-                        {/* Result Display */}
-                        <div className="h-8 text-center flex items-center justify-center">
-                            {result ? (
-                                <div className={`font-black text-lg animate-pop-in ${result.win > 0 ? 'text-green-400 drop-shadow-[0_0_5px_lime]' : 'text-red-400'}`}>
-                                    {result.message}
-                                    {result.win > 0 && <span className="block text-xl text-yellow-400">+{formatCurrency(result.win)}</span>}
-                                </div>
-                            ) : (
-                                <div className="text-gray-500 font-bold tracking-widest text-[10px] uppercase opacity-50">Good Luck!</div>
-                            )}
-                        </div>
+                        {/* Win Line */}
+                        <div className="absolute top-1/2 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent z-20 pointer-events-none shadow-[0_0_8px_red]" />
                     </div>
 
-                    {/* Controls */}
-                    <div className="w-full mt-4 space-y-3">
-                        <div className="bg-white/5 rounded-xl p-1.5 border border-white/10 backdrop-blur-md">
-                            <HorizontalPicker
-                                min={1}
-                                max={500}
-                                step={1}
-                                value={bet}
-                                onChange={setBet}
-                                prefix="$"
-                                disabled={spinning}
-                                maxAllowed={Math.min(balance, 500)}
-                            />
-                        </div>
+                    {/* Result Display */}
+                    <div className="h-10 text-center flex items-center justify-center">
+                        {result ? (
+                            <div className={`font-black text-lg animate-pop-in ${result.win > 0 ? 'text-green-400 drop-shadow-[0_0_8px_lime]' : 'text-red-400'}`}>
+                                {result.message}
+                                {result.win > 0 && <span className="block text-xl text-yellow-400">+{formatCurrency(result.win)}</span>}
+                            </div>
+                        ) : (
+                            <div className="text-yellow-600/50 font-bold tracking-widest text-xs uppercase">Good Luck!</div>
+                        )}
+                    </div>
 
-                        <button
-                            onClick={spin}
-                            disabled={spinning || balance < bet}
-                            className={`w-full py-4 rounded-xl font-black text-xl tracking-widest uppercase transition-all
-                                ${spinning
-                                    ? 'bg-gray-800 text-gray-500 cursor-not-allowed scale-95'
-                                    : balance < bet
-                                        ? 'bg-red-900/50 text-red-500 border border-red-500/50'
-                                        : 'bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500 text-black shadow-[0_0_20px_rgba(255,165,0,0.5)] animate-shimmer bg-[length:200%_auto] hover:scale-[1.02] active:scale-95'
-                                }
-                            `}
-                        >
-                            {spinning ? 'Spinning...' : balance < bet ? 'Add Funds' : 'SPIN'}
-                        </button>
+                    {/* SPIN Button - Inside machine frame for premium feel */}
+                    <button
+                        onClick={spin}
+                        disabled={spinning || balance < bet}
+                        className={`w-full py-4 rounded-2xl font-black text-xl tracking-widest uppercase transition-all border-2
+                            ${spinning
+                                ? 'bg-gray-800 text-gray-500 cursor-not-allowed scale-95 border-gray-700'
+                                : balance < bet
+                                    ? 'bg-red-900/50 text-red-500 border-red-500/50'
+                                    : 'bg-gradient-to-r from-yellow-500 via-orange-500 to-yellow-500 text-black border-yellow-400 shadow-[0_0_25px_rgba(255,165,0,0.6)] animate-shimmer bg-[length:200%_auto] hover:scale-[1.02] active:scale-95'
+                            }
+                        `}
+                    >
+                        {spinning ? '🎰 Spinning...' : balance < bet ? '💸 Add Funds' : '★ SPIN ★'}
+                    </button>
+                </div>
+
+                {/* Bet Selector */}
+                <div className="mt-4 bg-black/40 rounded-2xl p-4 border border-white/10 backdrop-blur-md">
+                    <BetSelector
+                        value={bet}
+                        onChange={setBet}
+                        maxBet={Math.min(balance, 500)}
+                        disabled={spinning}
+                    />
+                </div>
+
+                {/* Payout Reference */}
+                <div className="mt-4 bg-black/40 rounded-2xl p-4 border border-white/10 backdrop-blur-md">
+                    <div className="text-center text-xs uppercase tracking-widest text-yellow-500/70 font-bold mb-3">
+                        📊 Payout Table (Bet: {formatCurrency(bet)})
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                        {PAYOUT_INFO.map((info, i) => (
+                            <div 
+                                key={i} 
+                                className="flex items-center justify-between px-3 py-2 rounded-lg bg-white/5 border border-white/5"
+                            >
+                                <span className="text-sm">{info.symbols}</span>
+                                <span className="font-mono font-bold text-yellow-400 text-sm">
+                                    {formatCurrency(Math.floor(bet * info.multiplier))}
+                                </span>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
@@ -266,6 +317,7 @@ export const CasinoScreen: React.FC<CasinoScreenProps> = ({ onClose }) => {
         </div>
     );
 };
+
 
 // Casino Stats Modal Component (Refreshed)
 const CasinoStatsModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {

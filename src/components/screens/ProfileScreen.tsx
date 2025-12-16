@@ -177,42 +177,56 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                             />
                         </div>
 
-                        {/* Avatar Display */}
-                        <div className="flex-1 rounded-[2rem] p-4 shadow-lg flex flex-col min-h-0"
+                        {/* Avatar Display - Horizontal Panel */}
+                        <div className="rounded-[2rem] p-4 shadow-lg"
                             style={{
                                 backgroundColor: 'var(--theme-card-bg)',
                                 border: '2px solid var(--theme-border)'
                             }}>
-                            <label className="block text-sm font-bold mb-2 shrink-0" style={{ color: 'var(--theme-text-secondary)' }}>YOUR AVATAR</label>
-                            <button
-                                onClick={onEditAvatar}
-                                className="flex-1 w-full flex flex-col items-center justify-center p-4 rounded-3xl border-2 border-dashed transition-all group hover:scale-[1.02]"
+                            <label className="block text-sm font-bold mb-3" style={{ color: 'var(--theme-text-secondary)' }}>YOUR AVATAR</label>
+                            <div
+                                className="flex items-center gap-4 p-3 rounded-2xl"
                                 style={{
-                                    borderColor: 'var(--theme-border)',
-                                    backgroundColor: 'var(--theme-bg-secondary)'
+                                    backgroundColor: 'var(--theme-bg-secondary)',
+                                    border: '1px solid var(--theme-border)'
                                 }}
                             >
-                                <div className="flex items-center gap-4 relative z-10">
-                                        <div className="relative">
-                                            <AvatarDisplay
-                                                strokes={player.avatarStrokes}
-                                                avatar={player.avatar}
-                                                frame={player.frame}
-                                                color={player.color}
-                                                backgroundColor={backgroundColor}
-                                                cosmetics={player.cosmetics} // Pass cosmetics for theme matching
-                                                size={56}
-                                                imageUrl={player.avatarImageUrl}
-                                            />
-                                        </div>
-                                    <div className="absolute -bottom-2 -right-2 text-2xl text-white p-3 rounded-full shadow-lg border-2 border-white"
-                                        style={{ backgroundColor: 'var(--theme-accent)' }}>
-                                        ✏️
+                                {/* Avatar Preview */}
+                                <div className="shrink-0">
+                                    <AvatarDisplay
+                                        strokes={player.avatarStrokes}
+                                        avatar={player.avatar}
+                                        frame={player.frame}
+                                        color={player.color}
+                                        backgroundColor={backgroundColor}
+                                        cosmetics={player.cosmetics}
+                                        size={64}
+                                        imageUrl={player.avatarImageUrl}
+                                    />
+                                </div>
+                                
+                                {/* Info */}
+                                <div className="flex-1 min-w-0">
+                                    <div className="font-bold text-lg truncate" style={{ color: 'var(--theme-text)' }}>
+                                        {name || 'Your Avatar'}
+                                    </div>
+                                    <div className="text-sm opacity-60" style={{ color: 'var(--theme-text)' }}>
+                                        Tap to customize
                                     </div>
                                 </div>
-                                <span className="font-black text-xl" style={{ color: 'var(--theme-accent)' }}>TAP TO EDIT</span>
-                                <span className="text-sm font-medium opacity-60" style={{ color: 'var(--theme-text)' }}>Customize your look</span>
-                            </button>
+                                
+                                {/* Edit Button */}
+                                <button
+                                    onClick={onEditAvatar}
+                                    className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-white shadow-lg hover:scale-105 active:scale-95 transition-all"
+                                    style={{
+                                        background: 'linear-gradient(135deg, var(--theme-accent) 0%, #FFD700 100%)'
+                                    }}
+                                >
+                                    <span>✏️</span>
+                                    <span>Edit</span>
+                                </button>
+                            </div>
                         </div>
 
                         {/* Background Color Picker */}
