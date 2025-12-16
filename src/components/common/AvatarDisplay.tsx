@@ -54,7 +54,7 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
     if (imageUrl) {
         return (
             <div
-                className={`rounded-2xl overflow-hidden relative shadow-sm flex items-center justify-center ${frameClass || ''} ${className}`}
+                className={`rounded-2xl overflow-hidden relative shadow-sm flex items-center justify-center ${className}`}
                 style={{
                     width: size,
                     height: size,
@@ -64,10 +64,14 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
                     background: bgColor
                 }}
             >
+                {/* Frame Layer */}
+                {frameClass && (
+                    <div className={`absolute inset-0 z-20 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
+                )}
                 <img 
                     src={imageUrl} 
                     alt="Avatar" 
-                    className="w-full h-full object-contain pointer-events-none select-none"
+                    className="w-full h-full object-contain pointer-events-none select-none relative z-10"
                     loading="lazy" 
                 />
             </div>
@@ -84,7 +88,7 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
     if (!displayStrokes || displayStrokes.length === 0) {
         return (
             <div
-                className={`rounded-2xl flex items-center justify-center shadow-sm relative overflow-hidden ${frameClass || ''} ${className}`}
+                className={`rounded-2xl flex items-center justify-center shadow-sm relative overflow-hidden ${className}`}
                 style={{
                     color: color,
                     width: size,
@@ -93,16 +97,20 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
                     fontSize: size * 0.6
                 }}
             >
+                {/* Frame Layer */}
+                {frameClass && (
+                    <div className={`absolute inset-0 z-20 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
+                )}
                 {isLoading ? (
                     // Loading spinner
-                    <div className="absolute inset-0 flex items-center justify-center bg-white/30 backdrop-blur-[1px]">
+                    <div className="absolute inset-0 flex items-center justify-center bg-white/30 backdrop-blur-[1px] z-10">
                         <div
                             className="border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin"
                             style={{ width: size * 0.4, height: size * 0.4 }}
                         />
                     </div>
                 ) : (
-                    avatar || '👤'
+                    <span className="relative z-10">{avatar || '👤'}</span>
                 )}
             </div>
         );
@@ -112,7 +120,7 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
     if (imageUrl && !imageError) {
         return (
             <div
-                className={`relative rounded-full overflow-hidden ${className || ''}`}
+                className={`relative rounded-2xl overflow-hidden ${className || ''}`}
                 style={{
                     width: size,
                     height: size,
@@ -122,7 +130,7 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
             >
                 {/* Frame Layer */}
                 {frameClass && (
-                    <div className={`absolute inset-0 z-20 pointer-events-none ${frameClass}`} style={{ color: color }}></div>
+                    <div className={`absolute inset-0 z-20 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
                 )}
 
                 <img
@@ -138,7 +146,7 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
 
     return (
         <div
-            className={`relative rounded-full overflow-hidden ${className || ''}`}
+            className={`relative rounded-2xl overflow-hidden ${className || ''}`}
             style={{
                 width: size,
                 height: size,
@@ -148,7 +156,7 @@ const AvatarDisplayBase: React.FC<AvatarDisplayProps> = ({
         >
             {/* Frame Layer */}
             {frameClass && (
-                <div className={`absolute inset-0 z-20 pointer-events-none ${frameClass}`} style={{ color: color }}></div>
+                <div className={`absolute inset-0 z-20 pointer-events-none rounded-[inherit] ${frameClass}`} style={{ color: color }}></div>
             )}
 
             <svg

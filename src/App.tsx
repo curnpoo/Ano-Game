@@ -1218,8 +1218,10 @@ const App = () => {
           id: authUser.id,
           name: authUser.username,
           color: authUser.color,
+          backgroundColor: authUser.backgroundColor,
           frame: authUser.frame || 'none',
           avatarStrokes: authUser.avatarStrokes,
+          avatarImageUrl: authUser.avatarImageUrl,
           joinedAt: authUser.createdAt,
           lastSeen: Date.now(),
           cosmetics: authUser.cosmetics

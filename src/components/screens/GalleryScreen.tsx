@@ -243,18 +243,47 @@ const GameCard: React.FC<{
     const uniqueRounds = Array.from(new Map((game.rounds || []).map(r => [r.roundNumber, r])).values())
         .sort((a, b) => a.roundNumber - b.roundNumber);
 
+    // --- Expiration Logic ---
+    const now = Date.now();
+    // Default to 48h if not set (backward compatibility)
+    const expiresAt = game.expiresAt || (game.completedAt + 48 * 60 * 60 * 1000);
+    const timeRemaining = expiresAt - now;
+    const isExpired = timeRemaining <= 0;
+
+    const formatTimeRemaining = (ms: number) => {
+        if (ms <= 0) return '😵';
+        const hours = Math.ceil(ms / (1000 * 60 * 60));
+        if (hours >= 1) return `${hours}hrs`;
+        const minutes = Math.ceil(ms / (1000 * 60));
+        return `${minutes}min`;
+    };
+
+    const getBadgeStyle = () => {
+        if (isExpired) return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+        const hours = timeRemaining / (1000 * 60 * 60);
+        if (hours > 24) return 'bg-green-500/20 text-green-400 border-green-500/30';
+        if (hours > 1) return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+        return 'bg-red-500/20 text-red-400 border-red-500/30 animate-pulse';
+    };
 
     return (
-        <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden transition-all duration-300">
+        <div className={`bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl overflow-hidden transition-all duration-300 ${isExpired ? 'opacity-50 grayscale' : ''}`}>
             <button
-                onClick={onToggle}
-                className="w-full p-5 text-left active:bg-white/5 transition-colors"
+                onClick={!isExpired ? onToggle : undefined}
+                disabled={isExpired}
+                className={`w-full p-5 text-left transition-colors ${!isExpired ? 'active:bg-white/5' : 'cursor-default'}`}
             >
                 <div className="flex justify-between items-start mb-2">
                     <div className="flex flex-col">
-                        <span className="text-xs font-bold text-white/40 uppercase tracking-wider mb-1">
-                            {dateStr} • {timeStr}
-                        </span>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="text-xs font-bold text-white/40 uppercase tracking-wider">
+                                {dateStr} • {timeStr}
+                            </span>
+                            {/* Countdown Badge */}
+                            <span className={`text-[10px] px-1.5 py-0.5 rounded border font-bold ${getBadgeStyle()}`}>
+                                {formatTimeRemaining(timeRemaining)}
+                            </span>
+                        </div>
                         <h3 className="font-bold text-lg leading-tight">
                             Game with {safePlayers.length} Players
                         </h3>
@@ -280,7 +309,7 @@ const GameCard: React.FC<{
             </button>
 
             {/* Expanded Rounds */}
-            {isExpanded && (
+            {isExpanded && !isExpired && (
                 <div className="border-t border-white/10 bg-black/20">
                     <div className="p-2 space-y-2">
                         {uniqueRounds.map((round) => {

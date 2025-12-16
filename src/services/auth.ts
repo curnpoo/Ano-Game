@@ -156,8 +156,12 @@ export const AuthService = {
             localStorage.setItem(LOCAL_USER_KEY, JSON.stringify(updatedUser));
 
             // Sync Currency
-            // Sync Currency
             CurrencyService.setCurrency(updatedUser.currency);
+
+            // Sync Purchased Items (for cosmetic ownership checks)
+            if (updatedUser.purchasedItems && updatedUser.purchasedItems.length > 0) {
+                localStorage.setItem('player_purchased_items', JSON.stringify(updatedUser.purchasedItems));
+            }
 
             // Sync XP - Use XPService for correct progressive level calculation
             const xp = updatedUser.xp || 0;

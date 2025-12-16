@@ -374,6 +374,7 @@ export interface GalleryGame {
     gameId: string;             // Unique ID for this game
     roomCode: string;           // Original room code
     completedAt: number;        // Timestamp
+    expiresAt: number;          // 48 hours after completedAt - images available until this time
     playerIds: string[];        // Who participated (for access control)
     players: { id: string; name: string; color: string }[];
     rounds: GalleryRound[];

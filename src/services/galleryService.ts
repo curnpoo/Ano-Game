@@ -1,5 +1,5 @@
 import { ref, set, get, remove } from 'firebase/database';
-import { ref as storageRef, uploadString, getDownloadURL } from 'firebase/storage';
+import { ref as storageRef, uploadString, getDownloadURL, uploadBytes, listAll, deleteObject } from 'firebase/storage';
 import { database, storage } from '../firebase';
 import { AuthService } from './auth';
 import type { GalleryGame, GalleryRound, GalleryDrawing, DrawingStroke, GameRoom } from '../types';
@@ -7,6 +7,39 @@ import type { GalleryGame, GalleryRound, GalleryDrawing, DrawingStroke, GameRoom
 
 const GALLERY_PATH = 'gallery';
 const MAX_GALLERY_GAMES = 10;
+const EXPIRATION_HOURS = 48;
+
+/**
+ * Copy an image from game-images to gallery-images for persistence
+ * Returns the new persistent URL
+ */
+async function copyImageToGallery(sourceUrl: string, gameId: string, roundNumber: number): Promise<string> {
+    try {
+        // Fetch the image data
+        const response = await fetch(sourceUrl);
+        if (!response.ok) {
+            console.warn('[Gallery] Could not fetch image for copying:', sourceUrl);
+            return sourceUrl; // Return original URL if copy fails
+        }
+        
+        const blob = await response.blob();
+        const arrayBuffer = await blob.arrayBuffer();
+        const uint8Array = new Uint8Array(arrayBuffer);
+        
+        // Upload to persistent gallery path
+        const destPath = `gallery-images/${gameId}/round_${roundNumber}.jpg`;
+        const destRef = storageRef(storage, destPath);
+        await uploadBytes(destRef, uint8Array, { contentType: blob.type || 'image/jpeg' });
+        
+        // Get the new download URL
+        const newUrl = await getDownloadURL(destRef);
+        console.log('[Gallery] Copied image to:', destPath);
+        return newUrl;
+    } catch (error) {
+        console.warn('[Gallery] Image copy failed, using original URL:', error);
+        return sourceUrl; // Fallback to original URL
+    }
+}
 
 export const GalleryService = {
     /**
@@ -114,13 +147,26 @@ export const GalleryService = {
         );
         const overallWinner = sortedPlayers[0];
 
+        // Copy images to persistent storage
+        const persistedRounds: GalleryRound[] = [];
+        for (const round of rounds) {
+            if (round.imageUrl) {
+                const persistedUrl = await copyImageToGallery(round.imageUrl, gameId, round.roundNumber);
+                persistedRounds.push({ ...round, imageUrl: persistedUrl });
+            } else {
+                persistedRounds.push(round);
+            }
+        }
+
+        const now = Date.now();
         const galleryGame: GalleryGame = {
             gameId,
             roomCode: room.roomCode,
-            completedAt: Date.now(),
+            completedAt: now,
+            expiresAt: now + (EXPIRATION_HOURS * 60 * 60 * 1000), // 48 hours from now
             playerIds,
             players: room.players.map(p => ({ id: p.id, name: p.name, color: p.color })),
-            rounds,
+            rounds: persistedRounds,
             finalScores: room.scores,
             winner: {
                 playerId: overallWinner?.id || '',
@@ -172,6 +218,12 @@ export const GalleryService = {
         }
 
         if (!userId) return [];
+
+        // Trigger cleanup in background (don't await to keep UI fast)
+        // This ensures expired images are deleted even if user doesn't play new games
+        GalleryService.pruneOldGames(userId).catch(e => 
+            console.warn('[Gallery] Background prune failed:', e)
+        );
 
         const fullPath = `${GALLERY_PATH}/${userId}`;
         console.log('[Gallery] Reading from path:', fullPath);
@@ -475,6 +527,7 @@ export const GalleryService = {
 
     /**
      * Remove old games to keep only the last MAX_GALLERY_GAMES
+     * Also cleans up images for expired games
      */
     pruneOldGames: async (playerId: string): Promise<void> => {
         const galleryRef = ref(database, `${GALLERY_PATH}/${playerId}`);
@@ -484,18 +537,46 @@ export const GalleryService = {
 
         const data = snapshot.val();
         const games: GalleryGame[] = Object.values(data);
+        const now = Date.now();
 
         // Sort by completedAt descending
         games.sort((a, b) => b.completedAt - a.completedAt);
 
-        // Remove games beyond the limit
-        if (games.length > MAX_GALLERY_GAMES) {
-            const gamesToRemove = games.slice(MAX_GALLERY_GAMES);
+        // Split into kept and removed
+        const gamesToKeep = games.slice(0, MAX_GALLERY_GAMES);
+        const gamesToRemove = games.slice(MAX_GALLERY_GAMES);
 
-            for (const game of gamesToRemove) {
-                const gameRef = ref(database, `${GALLERY_PATH}/${playerId}/${game.gameId}`);
-                await remove(gameRef);
+        // 1. For KEPT games: Check for expiration and delete images only
+        for (const game of gamesToKeep) {
+            const expiresAt = game.expiresAt || (game.completedAt + 48 * 60 * 60 * 1000);
+            if (now > expiresAt) {
+                console.log('[Gallery] Game expired, cleaning up images:', game.gameId);
+                await GalleryService.deleteGameImages(game.gameId);
             }
+        }
+
+        // 2. For REMOVED games: Delete data AND images
+        for (const game of gamesToRemove) {
+            console.log('[Gallery] Pruning old game:', game.gameId);
+            await GalleryService.deleteGameImages(game.gameId); // Clean images
+            
+            const gameRef = ref(database, `${GALLERY_PATH}/${playerId}/${game.gameId}`);
+            await remove(gameRef); // Clean DB
+        }
+    },
+
+    /**
+     * Delete all images for a specific game
+     */
+    deleteGameImages: async (gameId: string): Promise<void> => {
+        const folderRef = storageRef(storage, `gallery-images/${gameId}`);
+        try {
+            const list = await listAll(folderRef);
+            // Delete all files in the folder
+            await Promise.all(list.items.map(item => deleteObject(item)));
+        } catch (error) {
+            // Silent fail if path doesn't exist or empty
+            console.warn('[Gallery] Note: Could not delete images (might already be gone) for:', gameId);
         }
     },
 
@@ -506,6 +587,10 @@ export const GalleryService = {
         const currentUser = AuthService.getCurrentUser();
         if (!currentUser) return;
 
+        // Delete images first
+        await GalleryService.deleteGameImages(gameId);
+
+        // Delete DB entry
         const gameRef = ref(database, `${GALLERY_PATH}/${currentUser.id}/${gameId}`);
         await remove(gameRef);
     }
