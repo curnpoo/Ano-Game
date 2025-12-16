@@ -35,7 +35,39 @@
     >
     <meta name="theme-color" content="#000000">
     <title>ANO: The Party Drawing Game</title>
-  </head>
+    
+    <!-- Preconnect to Font Origins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Load Critical Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=Comic+Neue:wght@400;700&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;700&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    
+    <!-- Critical Preference Script (Prevents FOUT/Layout Shift) -->
+    <script>
+      (function() {
+        try {
+          // 1. Font Preference
+          var session = localStorage.getItem('aic_game_session');
+          if (session) {
+            var player = JSON.parse(session);
+            var font = (player.cosmetics && player.cosmetics.activeFont) || 'default';
+            var fontMap = {
+              'default': "'Inter', sans-serif",
+              'comic': "'Comic Neue', cursive",
+              'pixel': "'Press Start 2P', cursive",
+              'mono': "'JetBrains Mono', monospace",
+              'handwritten': "'Caveat', cursive",
+              'retro': "'VT323', monospace"
+            };
+            var fontFamily = fontMap[font] || fontMap['default'];
+            document.documentElement.style.setProperty('--theme-font', fontFamily);
+          }
+        } catch (e) {
+          console.error('Fast-load error:', e);
+        }
+      })();
+    </script>
 
   <body>
     <!-- Landscape orientation blocker - shown via CSS media query -->

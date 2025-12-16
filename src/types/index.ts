@@ -252,7 +252,7 @@ export interface GameRoom {
     sabotageRound?: number | null; // Which round has sabotage (1-indexed)
     saboteurId?: string | null; // Player doing the sabotaging
     sabotageTargetId?: string | null; // Player being sabotaged
-    sabotageEffect?: SabotageEffect;
+    sabotageEffect?: SabotageEffect | null;
     sabotageTriggered?: boolean; // Has the effect started?
 
     // Double Points (random chance per round)

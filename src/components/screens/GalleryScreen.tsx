@@ -101,7 +101,7 @@ export const GalleryScreen: React.FC<GalleryScreenProps> = ({ onBack, showToast,
                 >
                     <span className="text-xl">←</span>
                 </button>
-                <h1 className="text-2xl font-black tracking-tight">Match History</h1>
+                <h1 className="text-xl font-bold ml-2">Match History <span className="text-white/30 text-xs font-normal">(ID: {currentSessionId ? currentSessionId.slice(0, 6) : '?'})</span></h1>
             </div>
 
             {/* Main Content */}

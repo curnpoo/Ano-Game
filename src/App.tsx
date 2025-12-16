@@ -17,7 +17,7 @@ const GameInviteCard = lazy(() => import('./components/common/GameInviteCard').t
 const TurnReminderCard = lazy(() => import('./components/common/TurnReminderCard').then(module => ({ default: module.TurnReminderCard })));
 const NotificationPromptModal = lazy(() => import('./components/common/NotificationPromptModal').then(module => ({ default: module.NotificationPromptModal })));
 
-import { FontLoader } from './components/common/FontLoader';
+
 import { AuthService } from './services/auth';
 import { StorageService } from './services/storage';
 import { ImageService } from './services/image';
@@ -1810,7 +1810,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen w-full bg-black text-white touch-none select-none overflow-hidden relative" style={{ colorScheme: 'dark' }}>
-      <FontLoader />
+
       <SpeedInsights />
       {/* Background (Persists across some routes) */}
       {/* Note: User requested safe storage of this background with subtle settings for screens */}

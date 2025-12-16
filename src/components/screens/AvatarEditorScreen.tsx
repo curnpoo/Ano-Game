@@ -174,10 +174,10 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
                     </button>
                 </div>
 
-                {/* Frames - More prominent UI */}
+                {/* Frames - More prominent UI - Filtered by Ownership */}
                 <div className="overflow-x-auto no-scrollbar py-2">
                     <div className="flex gap-3 min-w-min px-2">
-                        {FRAMES.map(f => (
+                        {FRAMES.filter(f => f.price === 0 || CosmeticsService.isUnlocked(f.id, f.price)).map(f => (
                             <button
                                 key={f.id}
                                 onClick={() => setSelectedFrame(f.id)}
@@ -185,7 +185,7 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
                                     ${selectedFrame === f.id ? 'bg-purple-500/20 border-purple-500' : 'bg-gray-700/50 border-transparent hover:bg-gray-700'}`}
                             >
                                 <div className={`w-10 h-10 rounded-full bg-gray-800 ${f.className || ''} flex items-center justify-center text-lg`}>
-                                    {f.preview}
+                                    {f.id !== 'none' && !f.className?.includes('border') && !f.className?.includes('shadow') ? f.preview : null}
                                 </div>
                                 <span className="text-[10px] font-bold text-gray-300 whitespace-nowrap">{f.name}</span>
                             </button>
@@ -231,7 +231,9 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
                      <div className="absolute bottom-8 left-4 right-4 bg-gray-900/95 backdrop-blur-xl p-4 rounded-3xl shadow-2xl border border-white/10 animate-fade-in z-20">
                          <h3 className="text-white font-bold mb-3 text-center">Choose Theme</h3>
                          <div className="grid grid-cols-5 gap-3 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
-                             {backgroundOptions.map(option => (
+                             {backgroundOptions
+                                .filter(o => o.type === 'color' || (o.type === 'theme' && CosmeticsService.isUnlocked(o.id, THEMES.find(t => t.id === o.id)?.price || 0)))
+                                .map(option => (
                                  <button
                                      key={option.id}
                                      onClick={() => setBackgroundColor(option.value)}

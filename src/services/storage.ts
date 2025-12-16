@@ -902,6 +902,7 @@ export const StorageService = {
                 // Sabotage state
                 saboteurId,
                 sabotageTargetId: null, // Saboteur picks this
+                sabotageEffect: null, // Clear any previous effects
                 sabotageTriggered: false
             };
         });

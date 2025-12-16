@@ -372,7 +372,11 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
             <div className="mt-4 flex flex-col items-center gap-2">
                 <div className="flex items-center gap-2 text-sm text-white/50">
                     {saveStatus === 'saving' && <span className="animate-pulse">Saving to Gallery...</span>}
-                    {saveStatus === 'success' && <span className="text-green-400">✓ Saved to History</span>}
+                    {saveStatus === 'success' && (
+                        <span className="text-green-400">
+                            ✓ Saved to History <span className="text-white/30 text-xs">({currentPlayerId ? currentPlayerId.slice(0, 6) : '?'})</span>
+                        </span>
+                    )}
                     {saveStatus === 'error' && (
                         <div className="flex flex-col items-center gap-1">
                             <span className="text-red-400">⚠ Save Failed</span>

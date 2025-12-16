@@ -132,12 +132,12 @@ export const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ onComple
                 </div>
 
                 {/* Avatar Editor Area - Flexible Height */}
-                <div className="flex-1 min-h-0 relative flex flex-col items-center justify-center mb-4">
+                <div className="flex-1 min-h-0 relative flex flex-col items-center justify-center mb-8 gap-y-6">
                     
                     {/* Canvas Container */}
                     <div 
                         {...bind()} 
-                        className="relative aspect-square w-full max-w-[280px] max-h-[40vh] touch-none mb-4"
+                        className="relative aspect-square w-full max-w-[280px] max-h-[35vh] touch-none"
                     >
                         {/* Zoom Reset */}
                         <ZoomResetButton 
@@ -175,34 +175,37 @@ export const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ onComple
                     </div>
 
                     {/* Controls Section */}
-                    <div className="w-full space-y-3">
+                    <div className="w-full space-y-5">
                         
                         {/* Mode Switcher Buttons */}
-                        <div className="flex justify-center gap-3">
+                        <div className="flex justify-center gap-4">
                             <button
                                 onClick={() => setColorMode('brush')}
-                                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${colorMode === 'brush' ? 'bg-blue-500 text-white shadow-lg scale-105' : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'}`}
+                                className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${colorMode === 'brush' ? 'bg-blue-500 text-white shadow-lg scale-105' : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'}`}
                             >
                                 🖌️ Brush
                             </button>
                             <button
                                 onClick={() => setColorMode('background')}
-                                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${colorMode === 'background' ? 'bg-purple-500 text-white shadow-lg scale-105' : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'}`}
+                                className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${colorMode === 'background' ? 'bg-purple-500 text-white shadow-lg scale-105' : 'bg-white/5 text-white/70 hover:bg-white/10 border border-white/10'}`}
                             >
                                 🎨 Theme
                             </button>
                         </div>
 
-                        {/* Frames (Horizontal Scroll) */}
-                        <div className="w-full overflow-x-auto no-scrollbar pb-1">
-                            <div className="flex gap-2 min-w-min px-2 justify-center">
-                                {FRAMES.map(f => (
+                        {/* Frames (Horizontal Scroll) - Filtered by Ownership */}
+                        <div className="w-full overflow-x-auto no-scrollbar pb-2">
+                            <div className="flex gap-3 min-w-min px-2 justify-center">
+                                {FRAMES.filter(f => f.price === 0 || CosmeticsService.isUnlocked(f.id, f.price)).map(f => (
                                     <button
                                         key={f.id}
                                         onClick={() => setSelectedFrame(f.id)}
-                                        className={`w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center text-lg border-2 transition-all ${selectedFrame === f.id ? 'border-purple-500 scale-110 shadow-lg' : 'border-gray-700 opacity-70 hover:opacity-100'}`}
+                                        className={`w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center text-xl border-2 transition-all ${selectedFrame === f.id ? 'border-purple-500 scale-110 shadow-lg' : 'border-gray-700 opacity-70 hover:opacity-100'}`}
+                                        title={f.name}
                                     >
-                                        <div className={`${f.className} w-full h-full rounded-full`}></div>
+                                        <div className={`${f.className} w-full h-full rounded-full flex items-center justify-center`}>
+                                           {f.id !== 'none' && !f.className?.includes('border') && !f.className?.includes('shadow') ? f.preview : null}
+                                        </div>
                                     </button>
                                 ))}
                             </div>
@@ -244,7 +247,9 @@ export const ProfileSetupScreen: React.FC<ProfileSetupScreenProps> = ({ onComple
                                 <div className="absolute inset-0 bg-gray-900/95 backdrop-blur-md rounded-[1.5rem] p-4 z-20 animate-fade-in border border-white/10 flex flex-col">
                                     <h3 className="text-white text-xs font-bold uppercase tracking-wider text-center mb-3">Choose Background</h3>
                                     <div className="grid grid-cols-5 gap-3 overflow-y-auto pr-1 custom-scrollbar flex-1 content-start">
-                                        {backgroundOptions.map(option => (
+                                        {backgroundOptions
+                                            .filter(o => o.type === 'color' || (o.type === 'theme' && CosmeticsService.isUnlocked(o.id, THEMES.find(t => t.id === o.id)?.price || 0)))
+                                            .map(option => (
                                             <button
                                                 key={option.id}
                                                 onClick={() => setBackgroundColor(option.value)}
