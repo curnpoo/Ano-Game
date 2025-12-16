@@ -23,7 +23,7 @@ export const GameSettingsPanel: React.FC<GameSettingsPanelProps> = ({
                 border: '2px solid var(--theme-border)'
             }}>
             {/* Centered Heading */}
-            <h3 className=\"text-base font-bold text-center\" style={{ color: 'var(--theme-text)' }}>
+            <h3 className="text-base font-bold text-center" style={{ color: 'var(--theme-text)' }}>
                 ⚙️ Game Settings
             </h3>
 
