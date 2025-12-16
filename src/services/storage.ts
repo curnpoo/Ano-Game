@@ -1066,7 +1066,7 @@ export const StorageService = {
         const drawingRef = ref(database, `drawings/${roomCode}/${room.roundNumber}/${drawing.playerId}`);
         await set(drawingRef, drawing);
 
-        // Then update room state (without the drawing data)
+        // Then update room state (WITH the drawing data for round result capture)
         return StorageService.updateRoom(roomCode, (r) => {
             // ATOMIC Guard: Prevent duplicate submissions (inside transaction)
             if (r.playerStates[drawing.playerId]?.status === 'submitted') {
@@ -1076,8 +1076,15 @@ export const StorageService = {
             const newPlayerStates = {
                 ...r.playerStates,
                 [drawing.playerId]: {
-                    status: 'submitted' as const
-                    // NOTE: drawing data is now stored separately
+                    status: 'submitted' as const,
+                    // Include drawing data so it can be captured for match history/gallery
+                    drawing: {
+                        playerId: drawing.playerId,
+                        playerName: drawing.playerName,
+                        playerColor: drawing.playerColor,
+                        strokes: drawing.strokes,
+                        submittedAt: drawing.submittedAt
+                    }
                 }
             };
 

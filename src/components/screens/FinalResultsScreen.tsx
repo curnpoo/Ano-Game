@@ -250,10 +250,11 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                              <AvatarDisplay
                                 playerId={second.id}
                                 avatar={second.avatar}
+                                frame={second.frame}
                                 strokes={second.avatarStrokes}
                                 color={second.color}
                                 backgroundColor={second.backgroundColor || '#ffffff'}
-                                size={96} // w-24 = 96px
+                                size={96}
                                 className="border-4 border-white shadow-xl"
                                 imageUrl={second.avatarImageUrl}
                             />
@@ -279,10 +280,11 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                             <AvatarDisplay
                                 playerId={first.id}
                                 avatar={first.avatar}
+                                frame={first.frame}
                                 strokes={first.avatarStrokes}
                                 color={first.color}
                                 backgroundColor={first.backgroundColor || '#ffffff'}
-                                size={128} // w-32 = 128px
+                                size={128}
                                 className="border-4 border-yellow-300 shadow-xl"
                                 imageUrl={first.avatarImageUrl}
                             />
@@ -308,10 +310,11 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                             <AvatarDisplay
                                 playerId={third.id}
                                 avatar={third.avatar}
+                                frame={third.frame}
                                 strokes={third.avatarStrokes}
                                 color={third.color}
                                 backgroundColor={third.backgroundColor || '#ffffff'}
-                                size={80} // w-20 = 80px
+                                size={80}
                                 className="border-4 border-white shadow-xl"
                                 imageUrl={third.avatarImageUrl}
                             />
@@ -352,6 +355,7 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                                 <AvatarDisplay
                                     playerId={player.id}
                                     avatar={player.avatar}
+                                    frame={player.frame}
                                     strokes={player.avatarStrokes}
                                     color={player.color}
                                     backgroundColor={player.backgroundColor || '#ffffff'}

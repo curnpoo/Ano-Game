@@ -127,6 +127,7 @@ export const SabotageSelectionScreen: React.FC<SabotageSelectionScreenProps> = (
                                 <AvatarDisplay
                                     strokes={p.avatarStrokes}
                                     avatar={p.avatar}
+                                    frame={p.frame}
                                     color={p.color}
                                     backgroundColor={p.backgroundColor}
                                     size={48}
