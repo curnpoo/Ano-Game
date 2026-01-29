@@ -55,6 +55,18 @@ const doneItems: RoadmapTask[] = [
     { id: 'd33', type: 'FEAT', title: 'Game start notifications', description: 'In-app modal + push notification when host starts game, deep link to jump into round', completedDate: 'Dec 16' },
     { id: 'd34', type: 'FEAT', title: 'Deep Linking', description: 'Invite links bypass home screen and drop users directly into specific game lobby', completedDate: 'Dec 16' },
     { id: 'd35', type: 'FEAT', title: 'Post-game Account Prompt', description: 'Guest restrictions with prompts to create account to save stats/drawings', completedDate: 'Dec 16' },
+    { id: 'd36', type: 'FEAT', title: 'Avatar Frames System', description: 'Added 4 frame types (Glow, Border, Rainbow, Wood) with proper z-index layering and rainbow animation', completedDate: 'Dec 16' },
+    { id: 'd37', type: 'FIX', title: 'Avatar Frame Visibility', description: 'Fixed frame rendering across all screens and components with proper persistence', completedDate: 'Dec 16' },
+    { id: 'd38', type: 'FEAT', title: 'Casino Bet Improvements', description: 'Removed $500 bet limit, added BetSelector component with direct input and horizontal picker', completedDate: 'Dec 16' },
+    { id: 'd39', type: 'FEAT', title: 'Powerup System', description: 'Implemented consumable and permanent powerups with consolidated storage', completedDate: 'Dec 16' },
+    { id: 'd40', type: 'FEAT', title: 'Expanded Cosmetic Themes', description: 'Significantly expanded themes with global backgrounds and dynamic accent colors', completedDate: 'Dec 16' },
+    { id: 'd41', type: 'FEAT', title: 'Extended Round Timers', description: 'Increased round duration options up to 60 seconds (previously capped at 20s)', completedDate: 'Dec 16' },
+    { id: 'd42', type: 'FEAT', title: 'Gallery Image Persistence', description: '48-hour image persistence with automatic expiration and cleanup', completedDate: 'Dec 16' },
+    { id: 'd43', type: 'FIX', title: 'Text Contrast for Light Themes', description: 'Fixed contrast for Friends, Store, Match History, and other text on light backgrounds', completedDate: 'Dec 16' },
+    { id: 'd44', type: 'FIX', title: 'Theme-Aware Blur Effects', description: 'Fixed blur to be static, theme-adaptive, and properly masked behind interactive elements', completedDate: 'Dec 16' },
+    { id: 'd45', type: 'FIX', title: 'Gold Glow Clipping', description: 'Prevented gold glow from overflowing curved container corners', completedDate: 'Dec 16' },
+    { id: 'd46', type: 'REFACTOR', title: 'Profile Drawing Canvas', description: 'Made canvas square with rounded corners for better UX', completedDate: 'Dec 16' },
+    { id: 'd47', type: 'FIX', title: 'Build Errors & Lint Cleanup', description: 'Resolved TypeScript errors, removed unused imports, fixed duplicate declarations', completedDate: 'Dec 16' },
 ];
 
 const roadmapData: RoadmapColumn[] = [

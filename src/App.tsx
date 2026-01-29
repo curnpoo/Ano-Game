@@ -52,6 +52,7 @@ import { useNotifications } from './hooks/useNotifications';
 import { usePlayerSession } from './hooks/usePlayerSession';
 import { useLoadingProgress } from './hooks/useLoadingProgress';
 import { useInAppNotifications } from './hooks/useInAppNotifications';
+import { addToastListener } from './utils/toastBus';
 import type { Player, GameSettings, PlayerDrawing, GameRoom, Screen, FriendRequest, GameInvite, UserAccount } from './types';
 
 
@@ -264,6 +265,12 @@ const App = () => {
     showNotificationPrompt,
     setShowNotificationPrompt
   } = useNotifications();
+
+  useEffect(() => {
+    return addToastListener(({ message, type = 'info', action }) => {
+      showToast(message, type, action);
+    });
+  }, [showToast]);
 
   // 4. Drawing State
   const {

@@ -48,9 +48,13 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
     // Calculate item width (each item is 80px)
     const itemWidth = 80;
 
+    // Flag to track if a click interaction is in progress
+    const clickInProgress = useRef(false);
+
     // Scroll to correct position when value changes externally
     useEffect(() => {
-        if (scrollRef.current && !isDragging) {
+        // If it's a click interaction, we allow scrolling even if 'isDragging' is true (triggered by the scroll itself)
+        if (scrollRef.current && (!isDragging || clickInProgress.current)) {
             const targetScroll = currentIndex * itemWidth;
             scrollRef.current.scrollTo({
                 left: targetScroll,
@@ -62,6 +66,7 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
     // Handle scroll to snap to nearest value
     const handleScroll = useCallback(() => {
         if (!scrollRef.current || disabled) return;
+        if (clickInProgress.current) return; // Completely ignore scroll events during click interaction
 
         const scrollLeft = scrollRef.current.scrollLeft;
         const index = Math.round(scrollLeft / itemWidth);
@@ -87,6 +92,8 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
     // Handle scroll end to snap
     const handleScrollEnd = useCallback(() => {
         if (!scrollRef.current || disabled) return;
+        // If a click initiated this scroll, do NOT snap or update value
+        if (clickInProgress.current) return;
 
         const scrollLeft = scrollRef.current.scrollLeft;
         const index = Math.round(scrollLeft / itemWidth);
@@ -129,7 +136,7 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
         scrollTimeout.current = setTimeout(() => {
             setIsDragging(false);
             handleScrollEnd();
-        }, 100);
+        }, 300); // increased timeout to allow smooth scroll to finish
     }, [handleScroll, handleScrollEnd]);
 
     return (
@@ -146,7 +153,7 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
 
             {/* Picker Container */}
             <div
-                className="relative overflow-hidden rounded-2xl backdrop-blur-md"
+                className={`relative overflow-hidden rounded-2xl backdrop-blur-md ${disabled ? 'opacity-50 pointer-events-none' : ''}`}
                 style={{
                     background: 'var(--theme-glass-bg)',
                     border: '2px solid var(--theme-accent)',
@@ -194,8 +201,8 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
                     {values.map((val, index) => {
                         const isSelected = val === value;
                         const distance = Math.abs(index - currentIndex);
-                        const scale = isSelected ? 1.2 : Math.max(0.6, 1 - distance * 0.15);
-                        const opacity = isSelected ? 1 : Math.max(0.3, 1 - distance * 0.2);
+                        const scale = isSelected ? 1.2 : Math.max(0.8, 1 - distance * 0.1);
+                        const opacity = isSelected ? 1 : Math.max(0.7, 1 - distance * 0.15);
                         const isMaxRestricted = maxAllowed !== undefined && val > maxAllowed;
 
                         return (
@@ -208,11 +215,34 @@ export const HorizontalPicker: React.FC<HorizontalPickerProps> = ({
                                     scrollSnapAlign: 'center',
                                     transform: `scale(${scale})`,
                                     opacity: isMaxRestricted ? 0.2 : opacity,
+                                    zIndex: 30 // Ensure items are clickable above overlays
                                 }}
                                 onClick={() => {
+                                    console.log('HorizontalPicker Clicked:', val, 'disabled:', disabled);
                                     if (!disabled && !isMaxRestricted) {
+                                        // Set flag to ignore all scroll-based updates during this interaction
+                                        clickInProgress.current = true;
+                                        
+                                        // Scroll to the clicked value
+                                        if (scrollRef.current) {
+                                            const targetScroll = index * itemWidth;
+                                            scrollRef.current.scrollTo({
+                                                left: targetScroll,
+                                                behavior: 'smooth'
+                                            });
+                                        }
+
+                                        // Update the value immediately
+                                        console.log('HorizontalPicker Calling onChange:', val);
                                         onChange(val);
                                         vibrate(HapticPatterns.medium);
+
+                                        // Clear the flag after the scroll animation finishes (approx 350ms)
+                                        setTimeout(() => {
+                                            clickInProgress.current = false;
+                                        }, 400);
+                                    } else {
+                                        console.log('HorizontalPicker Click Ignored - Disabled/Restricted');
                                     }
                                 }}
                             >

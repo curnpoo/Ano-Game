@@ -38,7 +38,8 @@ export default defineConfig({
         type: 'classic' // Use classic mode to support importScripts()
       },
       injectManifest: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        globPatterns: ['**/*.{js,css,ico,png,svg,woff2}'],
+        globIgnores: ['**/*.html'],
       },
       manifest: {
         name: 'ANO Draw',
@@ -60,4 +61,3 @@ export default defineConfig({
     })
   ],
 })
-

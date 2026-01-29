@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import QRCode from 'react-qr-code';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
+import { emitToastMessage } from '../../utils/toastBus';
 
 interface ShareModalProps {
     isOpen: boolean;
@@ -39,6 +40,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
             setTimeout(() => setCopied(false), 2000);
         } catch (err) {
             console.error('Failed to copy:', err);
+            emitToastMessage('Failed to copy link', 'error');
         }
     };
 
@@ -55,6 +57,7 @@ export const ShareModal: React.FC<ShareModalProps> = ({
                 // User cancelled or share failed
                 if ((err as Error).name !== 'AbortError') {
                     console.error('Share failed:', err);
+                    emitToastMessage('Share failed', 'error');
                 }
             }
         } else {

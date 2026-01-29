@@ -230,7 +230,7 @@ export const AvatarEditorScreen: React.FC<AvatarEditorScreenProps> = ({
                  {colorMode === 'background' && (
                      <div className="absolute bottom-8 left-4 right-4 bg-gray-900/95 backdrop-blur-xl p-4 rounded-3xl shadow-2xl border border-white/10 animate-fade-in z-20">
                          <h3 className="text-white font-bold mb-3 text-center">Choose Theme</h3>
-                         <div className="grid grid-cols-5 gap-3 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                         <div className="grid grid-cols-4 gap-4 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
                              {backgroundOptions
                                 .filter(o => o.type === 'color' || (o.type === 'theme' && CosmeticsService.isUnlocked(o.id, THEMES.find(t => t.id === o.id)?.price || 0)))
                                 .map(option => (

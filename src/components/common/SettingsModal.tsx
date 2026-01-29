@@ -5,6 +5,7 @@ import { AuthService } from '../../services/auth';
 import { StorageService } from '../../services/storage';
 import './transitions.css';
 import { vibrate } from '../../utils/haptics';
+import { emitErrorToast } from '../../utils/toastBus';
 
 interface SettingsModalProps {
     player: Player;
@@ -128,6 +129,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             }
         } catch (error) {
             console.error('Failed to enable notifications:', error);
+            emitErrorToast(error, 'Failed to enable notifications');
         }
     };
 

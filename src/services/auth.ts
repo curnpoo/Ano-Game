@@ -5,6 +5,7 @@ import type { UserAccount, PlayerStats, PlayerCosmetics } from '../types';
 import { CurrencyService } from './currency';
 import { XPService } from './xp';
 import { AvatarService } from './avatarService';
+import { emitErrorToast } from '../utils/toastBus';
 
 const USERS_PATH = 'users';
 const LOCAL_USER_KEY = 'logged_in_user';
@@ -223,6 +224,7 @@ export const AuthService = {
             }
         } catch (error) {
             console.error('Failed to update user:', error);
+            emitErrorToast(error, 'Failed to update your profile');
         }
     },
 
@@ -297,6 +299,7 @@ export const AuthService = {
             }
         } catch (error) {
             console.error('Failed to sync user:', error);
+            emitErrorToast(error, 'Failed to sync your account');
         }
         return local;
     },

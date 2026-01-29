@@ -5,15 +5,34 @@
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
 import { clientsClaim } from 'workbox-core';
 import { registerRoute } from 'workbox-routing';
-import { CacheFirst } from 'workbox-strategies';
+import { CacheFirst, NetworkFirst } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 
 declare let self: ServiceWorkerGlobalScope;
 declare const firebase: any;
 
-// Standard PWA precaching
-precacheAndRoute(self.__WB_MANIFEST);
+// Standard PWA precaching (exclude HTML to prevent stale shell after deploys)
+const precacheManifest = self.__WB_MANIFEST.filter((entry: { url?: string } | string) => {
+    if (typeof entry === 'string') return !entry.endsWith('.html');
+    return !entry.url?.endsWith('.html');
+});
+precacheAndRoute(precacheManifest);
 cleanupOutdatedCaches();
+
+// Network-first for navigation to avoid stale HTML after deployments
+registerRoute(
+    ({ request }) => request.mode === 'navigate',
+    new NetworkFirst({
+        cacheName: 'html-cache',
+        networkTimeoutSeconds: 5,
+        plugins: [
+            new ExpirationPlugin({
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
+            })
+        ]
+    })
+);
 
 // Cache Google fonts
 registerRoute(
@@ -134,4 +153,3 @@ self.addEventListener('notificationclick', (event: NotificationEvent) => {
 });
 
 console.log('[SW] Custom service worker with FCM support loaded');
-
