@@ -39,6 +39,7 @@ export const StorageService = {
         // else if (!Array.isArray(data.chatEvents)) data.chatEvents = Object.values(data.chatEvents);
 
         if (!data.settings) data.settings = DEFAULT_SETTINGS;
+        if (data.sabotageRound === undefined) data.sabotageRound = null;
 
         return data as GameRoom;
     },
@@ -893,7 +894,7 @@ export const StorageService = {
             const newSettings = { ...r.settings, ...settings };
             
             // Recalculate Sabotage Round if settings change
-            let newSabotageRound = r.sabotageRound;
+            let newSabotageRound = r.sabotageRound ?? null;
             
             // If toggling sabotage or changing round count, reset sabotage round
             if (settings.enableSabotage !== undefined || settings.totalRounds !== undefined) {
