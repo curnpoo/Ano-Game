@@ -86,7 +86,7 @@ messaging.onBackgroundMessage((payload: any) => {
         return;
     }
 
-    const notificationTitle = payload.data?.title || payload.notification?.title || 'ANO Game';
+    const notificationTitle = payload.data?.title || payload.notification?.title || 'Ano Game';
     const roomCode = payload.data?.roomCode;
     const clickUrl = payload.data?.click_action || (roomCode ? `/?invite=${roomCode}` : '/');
     

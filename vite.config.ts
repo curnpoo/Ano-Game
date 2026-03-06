@@ -42,9 +42,9 @@ export default defineConfig({
         globIgnores: ['**/*.html'],
       },
       manifest: {
-        name: 'ANO Draw',
-        short_name: 'ANO',
-        description: 'The party drawing game!',
+        name: 'Ano Game',
+        short_name: 'Ano',
+        description: 'The party drawing game for busy friends.',
         theme_color: '#000000',
         background_color: '#000000',
         display: 'standalone',

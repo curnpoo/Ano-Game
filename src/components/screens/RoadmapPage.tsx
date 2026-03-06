@@ -161,7 +161,7 @@ export const RoadmapPage: React.FC = () => {
                 </div>
                 <div className="header-content">
                     <h1>🗺️ Roadmap</h1>
-                    <p className="subtitle">What's coming to ANO</p>
+                    <p className="subtitle">What's coming to Ano Game</p>
                     <p className="last-updated">Last updated: December 16, 2025</p>
                 </div>
             </header>

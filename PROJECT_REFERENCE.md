@@ -1,4 +1,4 @@
-# 📖 ANO Game — Project Reference
+# 📖 Ano Game — Project Reference
 
 > **Master reference document for all agents and contributors.**\
 > Keep this document updated as the project evolves.
@@ -7,7 +7,7 @@
 
 ## 🎮 Project Overview
 
-**ANO** is a real-time, mobile-first party drawing game where players annotate
+**Ano Game** is a real-time, mobile-first party drawing game where players annotate
 images and vote for the best additions.
 
 | Attribute       | Value                                                    |

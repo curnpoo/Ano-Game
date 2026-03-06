@@ -1,6 +1,6 @@
 {
     "name": "ano-game-functions",
-    "description": "Cloud Functions for ANO game notifications",
+    "description": "Cloud Functions for Ano Game notifications",
     "scripts": {
         "lint": "eslint --ext .js,.ts .",
         "build": "tsc",

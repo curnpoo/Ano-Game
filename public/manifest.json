@@ -1,6 +1,6 @@
 {
-    "name": "ANO: The Party Drawing Game",
-    "short_name": "ANO",
+    "name": "Ano Game",
+    "short_name": "Ano",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#000000",

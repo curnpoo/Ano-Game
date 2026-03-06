@@ -19,7 +19,7 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
     console.log('[SW] Received background message:', payload);
 
-    const notificationTitle = payload.notification?.title || 'Image Ano Game';
+    const notificationTitle = payload.notification?.title || 'Ano Game';
     const notificationOptions = {
         body: payload.notification?.body || 'You have a new notification!',
         icon: '/pwa-icon.png',

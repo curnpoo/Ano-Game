@@ -1,8 +1,8 @@
-# ANO: The Party Drawing Game 🎨
+# Ano Game 🎨
 
 Visit the full game at anogame.xyz
 
-**ANO** is a real-time, mobile-first party drawing game where players annotate
+**Ano Game** is a real-time, mobile-first party drawing game where players annotate
 images and vote for the best additions. Built for the moment you miss your
 friends but don't have time for a 30-minute commitment.
 
@@ -10,7 +10,7 @@ friends but don't have time for a 30-minute commitment.
 
 ## 🚀 The Vibe: "Laughter Per Minute"
 
-We built **ANO** because we missed our friends but are too busy for long game
+We built **Ano Game** because we missed our friends but are too busy for long game
 sessions. No accounts. No friction. Just instant shared laughter.
 
 It's **Mobile-First Chaos**. The UI mimics a premium **native iOS
