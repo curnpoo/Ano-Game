@@ -1,4 +1,4 @@
-# Ano Game 🎨
+# Ano Game
 
 Visit the full game at anogame.xyz
 
@@ -8,7 +8,7 @@ friends but don't have time for a 30-minute commitment.
 
 ![Cover Image](./public/og-image.png)
 
-## 🚀 The Vibe: "Laughter Per Minute"
+## The Vibe: "Laughter Per Minute"
 
 We built **Ano Game** because we missed our friends but are too busy for long game
 sessions. No accounts. No friction. Just instant shared laughter.
@@ -17,20 +17,20 @@ It's **Mobile-First Chaos**. The UI mimics a premium **native iOS
 application**—fluid gestures, glassmorphism, and haptic feedback—delivered
 instantly via the web.
 
-## ✨ Features
+## Features
 
 - **Zero-Friction Entry**: Click a link, joined in 5 seconds. No sign-up, no
   install.
 - **Async-Friendly**: Play a full round in 5 minutes, or leave it running all
-  day for "play when you can" moments.
+day for "play when you can" moments.
 - **The Saboteur**: One player is secretly trying to ruin the drawing. The "WTF"
   conversations in your group chat will be legendary.
 - **Viral Souvenirs**: Every match ends with a beautiful, shareable image of the
-  group's "masterpiece."
+group's "masterpiece."
 - **iOS Native Feel**: 60fps animations, spring physics, and intuitive gestures
   (pinch-to-zoom, swipe-to-dismiss).
 
-## 🎮 How to Play
+## How to Play
 
 1. **Start a Party**: One person hosts and shares the 4-letter code (or QR
    code).
@@ -42,7 +42,7 @@ instantly via the web.
 5. **Vote**: Pick your favorite addition. You can't vote for yourself!
 6. **Win**: Earn points, level up, and unlock new badges.
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Frontend**: React 19, TypeScript, Hex Engine (Custom Canvas)
 - **Styling**: Tailwind CSS, Framer Motion
@@ -52,11 +52,11 @@ instantly via the web.
 
 - **Resolution Independence**: All drawings use a percentage-based coordinate
   system (0-100%), ensuring your masterpiece looks the same on an iPhone and a
-  desktop.
+desktop.
 - **State Machine Architecture**: The game logic is driven by a strict state
   machine, ensuring all 10+ players stay perfectly in sync through every phase
   of the game.
 
 ---
 
-_Built with ❤️ by Curren_
+_Built with care by Curren_
