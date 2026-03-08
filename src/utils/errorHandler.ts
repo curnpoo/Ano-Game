@@ -72,13 +72,21 @@ export const analyzeError = (error: any): GameError => {
 export const formatErrorMessage = (error: any): string => {
     const analyzed = analyzeError(error);
     const friendly = getFriendlyErrorMessage(analyzed.code);
-    // Combine friendly message with code for display
-    // e.g. "Connection lost [ERR_NET_001]"
-    // If the original message has more specific info, maybe use that?
-    // user wants: "if it's a minor issue it should show the error code in the small top banner error message"
+    const hasSpecificMessage =
+        analyzed.message &&
+        analyzed.message !== 'Unknown error occurred' &&
+        analyzed.message !== friendly;
 
-    // If generic "Unknown Error", try to show the actual message if it's safe
-    const displayMsg = analyzed.code === ERROR_CODES.UNKNOWN_ERROR ? analyzed.message : friendly;
+    // Keep specific actionable upload/canvas/storage messages instead of collapsing them
+    // into the generic friendly copy. Otherwise the user only sees ERR_GAME_003 again.
+    const shouldPreferSpecificMessage =
+        analyzed.code === ERROR_CODES.UNKNOWN_ERROR ||
+        analyzed.code === ERROR_CODES.IMAGE_UPLOAD_FAILED ||
+        analyzed.code === ERROR_CODES.CANVAS_ERROR;
+
+    const displayMsg = shouldPreferSpecificMessage && hasSpecificMessage
+        ? analyzed.message
+        : friendly;
 
     return `${displayMsg} [${analyzed.code}]`;
 };

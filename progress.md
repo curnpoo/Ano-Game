@@ -26,3 +26,4 @@ Original prompt: I just tried to do a test run with some friends and when I trie
 - Verified on a clean dev restart that a real sample HEIC converts and uploads to Cloudinary, with loading-stage events: convert -> compress -> upload.
 - Verified shared winner-image rendering returns a composite data URL and uploads successfully to Cloudinary.
 - Clean dev reload no longer shows the earlier hook-order crash from Fast Refresh.
+- User still hit the upload failure in-app after the migration. Re-checking the full round-start path beyond Cloudinary upload.
