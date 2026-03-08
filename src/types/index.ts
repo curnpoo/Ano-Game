@@ -373,7 +373,7 @@ export interface GalleryDrawing {
     playerName: string;
     playerColor: string;
     strokes: DrawingStroke[];
-    renderedImageUrl?: string;  // Firebase Storage URL of combined image+strokes
+    renderedImageUrl?: string;  // Persisted combined image URL
     votes: number;
 }
 

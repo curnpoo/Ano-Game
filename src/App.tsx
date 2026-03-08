@@ -197,6 +197,7 @@ const App = () => {
     isOnline,
     isSlow,
     updateStage: updateLoadingStage,
+    completeAllStages,
     clearStages: _clearLoadingStages,
     startScenario: startLoadingScenario,
   } = useLoadingProgress();
@@ -212,16 +213,11 @@ const App = () => {
 
   // Complete all remaining stages and dismiss loading with 500ms pause
   const stopLoadingWithDelay = useCallback(() => {
-    // First, mark ALL remaining stages as complete
-    loadingStages.forEach(stage => {
-      if (stage.status !== 'completed') {
-        updateLoadingStage(stage.id, 'completed');
-      }
-    });
+    completeAllStages();
 
     // Wait 500ms so user sees all green checkmarks before dismissing
     setTimeout(() => setIsLoading(false), 500);
-  }, [loadingStages, updateLoadingStage]);
+  }, [completeAllStages]);
 
   const {
     player, setPlayer,
@@ -1446,14 +1442,18 @@ const App = () => {
     startLoading('upload'); // Smart Loading Checklist
 
     try {
-      // 1. Process
-      updateLoadingStage('process', 'completed');
-      updateLoadingStage('upload', 'loading');
+      let activeStage: 'process' | 'convert' | 'compress' | 'upload' = 'process';
+      const advanceStage = (nextStage: 'convert' | 'compress' | 'upload') => {
+        updateLoadingStage(activeStage, 'completed');
+        updateLoadingStage(nextStage, 'loading');
+        activeStage = nextStage;
+      };
 
-      const imageUrl = await ImageService.processImage(file, roomCode); // Changed from uploadImage to processImage
+      const imageUrl = await ImageService.processImage(file, roomCode, {
+        onStageChange: advanceStage
+      });
 
-      // 2. Upload
-      updateLoadingStage('upload', 'completed');
+      updateLoadingStage(activeStage, 'completed');
       updateLoadingStage('verify', 'loading');
 
       await StorageService.startRound(roomCode, imageUrl, player.id);
@@ -1466,7 +1466,7 @@ const App = () => {
 
     } catch (err: any) {
       console.error('Upload failed:', err);
-      updateLoadingStage('upload', 'error');
+      updateLoadingStage(err?.loadingStage || 'upload', 'error', err?.message);
       showError(err?.message || 'Failed to upload image');
       setIsLoading(false);
     }

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { AuthService } from '../services/auth';
 import { StorageService } from '../services/storage';
 import { XPService } from '../services/xp';
@@ -15,6 +15,7 @@ export const usePlayerSession = ({ setCurrentScreen, onProgress, onComplete }: U
     const [player, setPlayer] = useState<Player | null>(null);
     const [roomCode, setRoomCode] = useState<string | null>(null);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const hasInitializedRef = useRef(false);
 
     // Initial loading state (removed artificial delay)
     useEffect(() => {
@@ -23,6 +24,9 @@ export const usePlayerSession = ({ setCurrentScreen, onProgress, onComplete }: U
 
     // Restore session
     useEffect(() => {
+        if (hasInitializedRef.current) return;
+        hasInitializedRef.current = true;
+
         const initSession = async () => {
             try {
                 // 0. Cleanup old rooms (>24 hours)

@@ -1,113 +1,201 @@
-import { ref, uploadString, getDownloadURL, listAll, deleteObject } from 'firebase/storage';
-import { storage } from '../firebase';
+import { CloudinaryService } from './cloudinary';
+
+const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
+const SUPPORTED_MIME_TYPES = new Set([
+    'image/jpeg',
+    'image/png',
+    'image/webp',
+    'image/gif',
+    'image/heic',
+    'image/heif',
+    'image/heic-sequence',
+    'image/heif-sequence'
+]);
+
+const HEIC_TYPES = new Set([
+    'image/heic',
+    'image/heif',
+    'image/heic-sequence',
+    'image/heif-sequence'
+]);
+
+export type ImageUploadStage = 'convert' | 'compress' | 'upload';
+
+class ImageUploadError extends Error {
+    loadingStage: ImageUploadStage;
+
+    constructor(message: string, loadingStage: ImageUploadStage) {
+        super(message);
+        this.name = 'ImageUploadError';
+        this.loadingStage = loadingStage;
+    }
+}
+
+export const SUPPORTED_UPLOAD_ACCEPT = '.jpg,.jpeg,.png,.webp,.gif,.heic,.heif,image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif';
+
+function getNormalizedMimeType(file: File): string {
+    const explicitType = file.type?.toLowerCase().trim();
+    if (explicitType) return explicitType;
+
+    const extension = file.name.split('.').pop()?.toLowerCase();
+    switch (extension) {
+        case 'jpg':
+        case 'jpeg':
+            return 'image/jpeg';
+        case 'png':
+            return 'image/png';
+        case 'webp':
+            return 'image/webp';
+        case 'gif':
+            return 'image/gif';
+        case 'heic':
+            return 'image/heic';
+        case 'heif':
+            return 'image/heif';
+        default:
+            return '';
+    }
+}
+
+function loadImageFromFile(file: File): Promise<HTMLImageElement> {
+    return new Promise((resolve, reject) => {
+        const objectUrl = URL.createObjectURL(file);
+        const img = new Image();
+
+        img.onload = () => {
+            URL.revokeObjectURL(objectUrl);
+            resolve(img);
+        };
+
+        img.onerror = () => {
+            URL.revokeObjectURL(objectUrl);
+            reject(new Error('Failed to decode image.'));
+        };
+
+        img.src = objectUrl;
+    });
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement, type: string, quality?: number): Promise<Blob> {
+    return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+            if (!blob) {
+                reject(new Error('Failed to export image.'));
+                return;
+            }
+
+            resolve(blob);
+        }, type, quality);
+    });
+}
+
+async function convertHeicToJpeg(file: File): Promise<File> {
+    try {
+        const heic2anyModule = await import('heic2any');
+        const heic2any = heic2anyModule.default;
+        const converted = await heic2any({
+            blob: file,
+            toType: 'image/jpeg',
+            quality: 0.92
+        });
+
+        const outputBlob = Array.isArray(converted) ? converted[0] : converted;
+        if (!(outputBlob instanceof Blob)) {
+            throw new Error('HEIC conversion returned an unexpected result.');
+        }
+
+        const baseName = file.name.replace(/\.(heic|heif)$/i, '') || 'upload';
+        return new File([outputBlob], `${baseName}.jpg`, {
+            type: 'image/jpeg',
+            lastModified: Date.now()
+        });
+    } catch (error: any) {
+        throw new ImageUploadError(
+            error?.message || 'Failed to convert HEIC photo. Please try another image.',
+            'convert'
+        );
+    }
+}
+
+async function normalizeInputFile(file: File): Promise<File> {
+    const normalizedMimeType = getNormalizedMimeType(file);
+    if (!HEIC_TYPES.has(normalizedMimeType)) {
+        return file;
+    }
+
+    return convertHeicToJpeg(file);
+}
 
 export const ImageService = {
-    processImage: (file: File, roomCode: string): Promise<string> => {
+    processImage: (
+        file: File,
+        roomCode: string,
+        options?: { onStageChange?: (stage: ImageUploadStage) => void }
+    ): Promise<string> => {
         return new Promise((resolve, reject) => {
-            // Check size (max 20MB)
-            if (file.size > 20 * 1024 * 1024) {
-                reject(new Error('Image too large (max 20MB)'));
+            const normalizedMimeType = getNormalizedMimeType(file);
+
+            if (file.size > MAX_IMAGE_BYTES) {
+                reject(new ImageUploadError('Image too large (max 20MB)', 'convert'));
                 return;
             }
 
-            // Check file type
-            if (!file.type.match(/^image\/(jpeg|png|webp|gif)$/)) {
-                reject(new Error('Invalid file format. Use JPG, PNG, GIF or WebP'));
+            if (!SUPPORTED_MIME_TYPES.has(normalizedMimeType)) {
+                reject(new ImageUploadError('Invalid file format. Use JPG, PNG, GIF, WebP, or HEIC', 'convert'));
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const result = e.target?.result as string;
+            (async () => {
+                try {
+                    options?.onStageChange?.('convert');
+                    const normalizedFile = await normalizeInputFile(file);
 
-                // Create an image to get dimensions
-                const img = new Image();
-                img.onload = async () => {
-                    try {
-                        // Crop to square (center crop)
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        if (!ctx) {
-                            reject(new Error('Failed to create canvas context'));
-                            return;
-                        }
-
-                        // Determine the square size (use the smaller dimension)
-                        const size = Math.min(img.width, img.height);
-
-                        // Calculate the crop offset (center the crop)
-                        const offsetX = (img.width - size) / 2;
-                        const offsetY = (img.height - size) / 2;
-
-                        // Set canvas to a reasonable max size (e.g., 600x600 for storage optimization)
-                        const maxSize = 600;
-                        const outputSize = Math.min(size, maxSize);
-                        canvas.width = outputSize;
-                        canvas.height = outputSize;
-
-                        // Draw the cropped and resized image
-                        ctx.drawImage(
-                            img,
-                            offsetX, offsetY, size, size,  // Source: crop from center
-                            0, 0, outputSize, outputSize    // Dest: fill canvas
-                        );
-
-                        // Convert to base64 with compression (0.6 quality for WebP)
-                        const squareBase64 = canvas.toDataURL('image/webp', 0.6);
-
-                        // UPLOAD TO FIREBASE STORAGE
-                        const timestamp = Date.now();
-                        const fileName = `${timestamp}_${Math.random().toString(36).substr(2, 9)}.webp`;
-                        const storageRef = ref(storage, `game-images/${roomCode}/${fileName}`);
-
-                        // console.log('Uploading processed image to Firebase Storage...');
-                        const snapshot = await uploadString(storageRef, squareBase64, 'data_url');
-                        const downloadURL = await getDownloadURL(snapshot.ref);
-
-                        // console.log('Image uploaded successfully:', downloadURL);
-                        resolve(downloadURL);
-
-                    } catch (error: any) {
-                        console.error('Error processing/uploading image:', error);
-
-                        // Check for Firebase Storage permission errors
-                        if (error?.code === 'storage/unauthorized' ||
-                            error?.message?.includes('403') ||
-                            error?.message?.includes('Forbidden') ||
-                            error?.serverResponse?.includes('403')) {
-                            reject(new Error('Storage permission denied. Please check Firebase Storage rules.'));
-                        } else if (error?.code === 'storage/unknown') {
-                            reject(new Error('Storage error. Please try again.'));
-                        } else {
-                            reject(new Error(error?.message || 'Failed to upload image'));
-                        }
+                    options?.onStageChange?.('compress');
+                    const img = await loadImageFromFile(normalizedFile);
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    if (!ctx) {
+                        reject(new ImageUploadError('Failed to create canvas context', 'compress'));
+                        return;
                     }
-                };
 
-                img.onerror = () => reject(new Error('Failed to load image'));
-                img.src = result;
-            };
-            reader.onerror = (e) => reject(e);
-            reader.readAsDataURL(file);
+                    const size = Math.min(img.width, img.height);
+                    const offsetX = (img.width - size) / 2;
+                    const offsetY = (img.height - size) / 2;
+                    const maxSize = 600;
+                    const outputSize = Math.min(size, maxSize);
+
+                    canvas.width = outputSize;
+                    canvas.height = outputSize;
+                    ctx.drawImage(img, offsetX, offsetY, size, size, 0, 0, outputSize, outputSize);
+
+                    const processedBlob = await canvasToBlob(canvas, 'image/jpeg', 0.86);
+                    const timestamp = Date.now();
+                    const fileName = `${timestamp}_${Math.random().toString(36).slice(2, 11)}.jpg`;
+                    const publicId = fileName.replace(/\.jpg$/i, '');
+
+                    options?.onStageChange?.('upload');
+                    const downloadUrl = await CloudinaryService.uploadImage(processedBlob, {
+                        folder: `game-images/${roomCode}`,
+                        publicId,
+                        fileName,
+                        tags: ['ano-game', 'round-image', `room-${roomCode.toLowerCase()}`]
+                    });
+
+                    resolve(downloadUrl);
+                } catch (error: any) {
+                    console.error('Error processing/uploading image:', error);
+                    if (error instanceof ImageUploadError) {
+                        reject(error);
+                        return;
+                    }
+                    reject(new ImageUploadError(error?.message || 'Failed to upload image', 'upload'));
+                }
+            })();
         });
     },
 
-    // Delete all images for a room (called when room is closed)
     deleteRoomImages: async (roomCode: string): Promise<void> => {
-        try {
-            const folderRef = ref(storage, `game-images/${roomCode}`);
-            const fileList = await listAll(folderRef);
-
-            // Delete all files in the folder
-            const deletePromises = fileList.items.map(fileRef => deleteObject(fileRef));
-            await Promise.all(deletePromises);
-
-            console.log(`Deleted ${fileList.items.length} images for room ${roomCode}`);
-        } catch (error: any) {
-            // Ignore "not found" errors (folder doesn't exist)
-            if (error?.code !== 'storage/object-not-found') {
-                console.error('Error deleting room images:', error);
-            }
-        }
+        console.info(`[ImageService] Skipping room image cleanup for ${roomCode}. Cloudinary unsigned uploads require server-side deletion.`);
     }
 };

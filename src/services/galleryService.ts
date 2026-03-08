@@ -1,8 +1,9 @@
 import { ref, set, get, remove } from 'firebase/database';
-import { ref as storageRef, uploadString, getDownloadURL, uploadBytes, listAll, deleteObject } from 'firebase/storage';
-import { database, storage } from '../firebase';
+import { database } from '../firebase';
 import { AuthService } from './auth';
 import type { GalleryGame, GalleryRound, GalleryDrawing, DrawingStroke, GameRoom } from '../types';
+import { CloudinaryService } from './cloudinary';
+import { drawBlockToContext, loadImageElement, renderStrokeToContext } from '../utils/drawingRenderer';
 
 
 const GALLERY_PATH = 'gallery';
@@ -10,7 +11,7 @@ const MAX_GALLERY_GAMES = 10;
 const EXPIRATION_HOURS = 48;
 
 /**
- * Copy an image from game-images to gallery-images for persistence
+ * Copy an image from the round upload path to a stable gallery asset
  * Returns the new persistent URL
  */
 async function copyImageToGallery(sourceUrl: string, gameId: string, roundNumber: number): Promise<string> {
@@ -23,17 +24,14 @@ async function copyImageToGallery(sourceUrl: string, gameId: string, roundNumber
         }
         
         const blob = await response.blob();
-        const arrayBuffer = await blob.arrayBuffer();
-        const uint8Array = new Uint8Array(arrayBuffer);
-        
-        // Upload to persistent gallery path
-        const destPath = `gallery-images/${gameId}/round_${roundNumber}.jpg`;
-        const destRef = storageRef(storage, destPath);
-        await uploadBytes(destRef, uint8Array, { contentType: blob.type || 'image/jpeg' });
-        
-        // Get the new download URL
-        const newUrl = await getDownloadURL(destRef);
-        console.log('[Gallery] Copied image to:', destPath);
+        const newUrl = await CloudinaryService.uploadImage(blob, {
+            folder: `gallery-images/${gameId}`,
+            publicId: `round_${roundNumber}`,
+            fileName: `round_${roundNumber}.jpg`,
+            tags: ['ano-game', 'gallery-image', `game-${gameId}`]
+        });
+
+        console.log('[Gallery] Copied image to Cloudinary for game:', gameId);
         return newUrl;
     } catch (error) {
         console.warn('[Gallery] Image copy failed, using original URL:', error);
@@ -124,6 +122,24 @@ export const GalleryService = {
             // Find winner of this round
             const sortedRankings = [...(result.rankings || [])].sort((a, b) => b.votes - a.votes);
             const winner = sortedRankings[0] || { playerId: '', playerName: 'Unknown', votes: 0 };
+
+            const winnerDrawing = drawings.find(d => d.playerId === winner.playerId);
+            if (result.imageUrl && winnerDrawing?.strokes?.length) {
+                try {
+                    winnerDrawing.renderedImageUrl = await GalleryService.renderAndUploadDrawing(
+                        result.imageUrl,
+                        winnerDrawing.strokes,
+                        gameId,
+                        result.roundNumber,
+                        winner.playerId,
+                        {
+                            block: result.block
+                        }
+                    );
+                } catch (error) {
+                    console.warn('[Gallery] Failed to persist round winner render:', error);
+                }
+            }
 
             roundsMap.set(result.roundNumber, {
                 roundNumber: result.roundNumber,
@@ -271,11 +287,7 @@ export const GalleryService = {
                 return;
             }
 
-            // Load base image
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-
-            img.onload = () => {
+            loadImageElement(baseImageUrl).then((img) => {
                 // === STEP 1: Draw gradient border ===
                 if (watermark) {
                     // Iridescent gradient border
@@ -302,43 +314,37 @@ export const GalleryService = {
                 ctx.restore();
 
                 // === STEP 3: Draw Block (if present) ===
-                if (block) {
-                    ctx.fillStyle = '#ffffff';
-                    
-                    const bx = borderWidth + (block.x / 100) * canvasSize;
-                    const by = borderWidth + (block.y / 100) * canvasSize;
-                    const bSize = (block.size / 100) * canvasSize;
+                drawBlockToContext(ctx, block || null, canvasSize, borderWidth);
 
-                    if (block.type === 'circle') {
-                        ctx.beginPath();
-                        ctx.arc(bx + bSize / 2, by + bSize / 2, bSize / 2, 0, Math.PI * 2);
-                        ctx.fill();
-                    } else {
-                        ctx.fillRect(bx, by, bSize, bSize);
-                    }
+                // === STEP 4: Replay strokes on a transparent overlay so erasing only affects drawings ===
+                const overlayCanvas = document.createElement('canvas');
+                overlayCanvas.width = totalSize;
+                overlayCanvas.height = totalSize;
+                const overlayCtx = overlayCanvas.getContext('2d');
+
+                if (!overlayCtx) {
+                    reject(new Error('Failed to create drawing overlay'));
+                    return;
                 }
 
-                // === STEP 4: Replay strokes ===
                 for (const stroke of strokes) {
                     if (!stroke.points || stroke.points.length === 0) continue;
-
-                    ctx.beginPath();
-                    ctx.strokeStyle = stroke.isEraser ? '#ffffff' : stroke.color;
-                    ctx.lineWidth = (stroke.size || 4) * (canvasSize / 600) * 1.5;
-                    ctx.lineCap = 'round';
-                    ctx.lineJoin = 'round';
 
                     const points = stroke.points.map(p => ({
                         x: borderWidth + (p.x / 100) * canvasSize,
                         y: borderWidth + (p.y / 100) * canvasSize
                     }));
 
-                    ctx.moveTo(points[0].x, points[0].y);
-                    for (let i = 1; i < points.length; i++) {
-                        ctx.lineTo(points[i].x, points[i].y);
-                    }
-                    ctx.stroke();
+                    const scaledStroke: DrawingStroke = {
+                        ...stroke,
+                        size: (stroke.size || 4) * (canvasSize / 600) * 1.5
+                    };
+
+                    renderStrokeToContext(overlayCtx, scaledStroke, points);
                 }
+
+                overlayCtx.globalCompositeOperation = 'source-over';
+                ctx.drawImage(overlayCanvas, 0, 0);
 
                 // === STEP 5: Draw frosted glass pill with blur (if watermark enabled) ===
                 if (watermark) {
@@ -434,13 +440,9 @@ export const GalleryService = {
                 }
                 
                 resolve(canvas.toDataURL('image/png'));
-            };
-
-            img.onerror = () => {
+            }).catch(() => {
                 reject(new Error('Failed to load base image'));
-            };
-
-            img.src = baseImageUrl;
+            });
         });
     },
 
@@ -452,19 +454,25 @@ export const GalleryService = {
         strokes: DrawingStroke[],
         gameId: string,
         roundNumber: number,
-        playerId: string
+        playerId: string,
+        options: {
+            block?: { type: 'square' | 'circle'; x: number; y: number; size: number };
+            watermark?: boolean;
+        } = {}
     ): Promise<string> => {
         // Render the drawing
-        const dataUrl = await GalleryService.renderDrawingToDataUrl(baseImageUrl, strokes);
+        const dataUrl = await GalleryService.renderDrawingToDataUrl(baseImageUrl, strokes, options);
 
-        // Upload to Firebase Storage
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
         const fileName = `${roundNumber}_${playerId}.png`;
-        const fileRef = storageRef(storage, `gallery-images/${gameId}/${fileName}`);
 
-        const snapshot = await uploadString(fileRef, dataUrl, 'data_url');
-        const downloadUrl = await getDownloadURL(snapshot.ref);
-
-        return downloadUrl;
+        return CloudinaryService.uploadImage(blob, {
+            folder: `gallery-images/${gameId}`,
+            publicId: `${roundNumber}_${playerId}`,
+            fileName,
+            tags: ['ano-game', 'gallery-drawing', `game-${gameId}`]
+        });
     },
 
     /**
@@ -569,15 +577,7 @@ export const GalleryService = {
      * Delete all images for a specific game
      */
     deleteGameImages: async (gameId: string): Promise<void> => {
-        const folderRef = storageRef(storage, `gallery-images/${gameId}`);
-        try {
-            const list = await listAll(folderRef);
-            // Delete all files in the folder
-            await Promise.all(list.items.map(item => deleteObject(item)));
-        } catch (error) {
-            // Silent fail if path doesn't exist or empty
-            console.warn('[Gallery] Note: Could not delete images (might already be gone) for:', gameId);
-        }
+        console.info(`[Gallery] Skipping Cloudinary image cleanup for ${gameId}. Unsigned uploads require server-side deletion.`);
     },
 
     /**

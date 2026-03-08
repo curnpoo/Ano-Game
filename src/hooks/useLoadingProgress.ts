@@ -9,6 +9,7 @@ export interface UseLoadingProgressReturn {
     addStage: (id: string, label: string) => void;
     updateStage: (id: string, status: LoadingStage['status'], error?: string) => void;
     completeCurrentStage: () => void;
+    completeAllStages: () => void;
     clearStages: () => void;
     startScenario: (scenario: 'initial' | 'join' | 'start' | 'upload' | 'create') => void;
 }
@@ -21,9 +22,8 @@ const SCENARIO_STAGES: Record<string, { id: string; label: string }[]> = {
     ],
     join: [
         { id: 'connect', label: 'Connecting to server...' },
-        { id: 'room', label: 'Fetching room data...' },
-        { id: 'players', label: 'Loading player profiles...' },
         { id: 'sync', label: 'Syncing game state...' },
+        { id: 'verify', label: 'Verifying room state...' },
     ],
     create: [
         { id: 'connect', label: 'Connecting to server...' },
@@ -32,11 +32,12 @@ const SCENARIO_STAGES: Record<string, { id: string; label: string }[]> = {
     ],
     start: [
         { id: 'init', label: 'Initializing round...' },
-        { id: 'roles', label: 'Assigning player roles...' },
+        { id: 'assign', label: 'Assigning player roles...' },
         { id: 'sync', label: 'Syncing all players...' },
     ],
     upload: [
-        { id: 'process', label: 'Processing image...' },
+        { id: 'process', label: 'Preparing image...' },
+        { id: 'convert', label: 'Normalizing image format...' },
         { id: 'compress', label: 'Compressing for upload...' },
         { id: 'upload', label: 'Uploading to cloud...' },
         { id: 'verify', label: 'Verifying upload...' },
@@ -164,6 +165,10 @@ export const useLoadingProgress = (): UseLoadingProgressReturn => {
         });
     }, []);
 
+    const completeAllStages = useCallback(() => {
+        setStages(prev => prev.map(stage => ({ ...stage, status: 'completed', error: undefined })));
+    }, []);
+
     const clearStages = useCallback(() => {
         setStages([]);
         setIsSlow(false);
@@ -195,6 +200,7 @@ export const useLoadingProgress = (): UseLoadingProgressReturn => {
         addStage,
         updateStage,
         completeCurrentStage,
+        completeAllStages,
         clearStages,
         startScenario,
     };

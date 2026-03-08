@@ -1,6 +1,7 @@
 import React from 'react';
 import type { GameRoom } from '../../types';
 import { AvatarDisplay } from '../common/AvatarDisplay';
+import { SUPPORTED_UPLOAD_ACCEPT } from '../../services/image';
 
 interface UploadScreenProps {
     room: GameRoom;
@@ -67,7 +68,7 @@ export const UploadScreen: React.FC<UploadScreenProps> = ({
                                 }}>
                                 <input
                                     type="file"
-                                    accept="image/*"
+                                    accept={SUPPORTED_UPLOAD_ACCEPT}
                                     onChange={handleFileChange}
                                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                                 />

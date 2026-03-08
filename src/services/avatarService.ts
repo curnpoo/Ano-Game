@@ -1,7 +1,7 @@
-import { ref as storageRef, uploadString, getDownloadURL } from 'firebase/storage';
 import { ref, get, set, child } from 'firebase/database';
-import { storage, database } from '../firebase';
+import { database } from '../firebase';
 import type { DrawingStroke } from '../types';
+import { CloudinaryService } from './cloudinary';
 
 /**
  * Service for rendering and managing avatar images
@@ -250,7 +250,7 @@ export const AvatarService = {
     },
 
     /**
-     * Render avatar and upload to Firebase Storage, return download URL
+     * Render avatar and upload to Cloudinary, return download URL
      */
     renderAndUpload: async (
         userId: string,
@@ -263,13 +263,15 @@ export const AvatarService = {
             throw new Error('Failed to render avatar');
         }
 
-        // Upload to Firebase Storage
         const fileName = `${Date.now()}.png`;
-        const storageRefPath = storageRef(storage, `avatars/${userId}/${fileName}`); // Fixed import name collision
+        const response = await fetch(dataUrl);
+        const blob = await response.blob();
 
-        const snapshot = await uploadString(storageRefPath, dataUrl, 'data_url');
-        const downloadUrl = await getDownloadURL(snapshot.ref);
-
-        return downloadUrl;
+        return CloudinaryService.uploadImage(blob, {
+            folder: `avatars/${userId}`,
+            publicId: fileName.replace(/\.png$/i, ''),
+            fileName,
+            tags: ['ano-game', 'avatar', `user-${userId}`]
+        });
     }
 };

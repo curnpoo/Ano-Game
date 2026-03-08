@@ -58,6 +58,16 @@ export const GalleryScreen: React.FC<GalleryScreenProps> = ({ onBack, showToast,
     const handleViewDrawing = async (round: GalleryRound) => {
         // Find winner's drawing (safe access)
         const winnerDrawing = round.drawings?.find(d => d.playerId === round.winner?.playerId);
+
+        if (winnerDrawing?.renderedImageUrl) {
+            setViewingImage({
+                url: winnerDrawing.renderedImageUrl,
+                round,
+                winnerName: round.winner.playerName
+            });
+            vibrate(HapticPatterns.light);
+            return;
+        }
         
         setIsGeneratingImage(true);
         vibrate(HapticPatterns.light);
@@ -364,9 +374,9 @@ const GameCard: React.FC<{
                                             >
                                                 {winnerDrawing || round.imageUrl ? (
                                                     <DrawingDisplay
-                                                        imageUrl={round.imageUrl}
-                                                        strokes={winnerDrawing?.strokes || []}
-                                                        block={round.block}
+                                                        imageUrl={winnerDrawing?.renderedImageUrl || round.imageUrl}
+                                                        strokes={winnerDrawing?.renderedImageUrl ? [] : winnerDrawing?.strokes || []}
+                                                        block={winnerDrawing?.renderedImageUrl ? null : round.block}
                                                     />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-400">
@@ -399,73 +409,33 @@ const DrawingDisplay: React.FC<{
     strokes: DrawingStroke[];
     block?: BlockInfo | null;
 }> = ({ imageUrl, strokes, block }) => {
-    const canvasRef = React.useRef<HTMLCanvasElement>(null);
-    const [loaded, setLoaded] = React.useState(false);
+    const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
 
     React.useEffect(() => {
-        const canvas = canvasRef.current;
-        if (!canvas || !imageUrl) return;
-        
-        const ctx = canvas.getContext('2d');
-        if (!ctx) return;
+        let cancelled = false;
 
-        const img = new Image();
-        img.crossOrigin = 'anonymous';
-        
-        img.onload = () => {
-            const size = canvas.width;
-            
-            // 1. Draw base image
-            ctx.drawImage(img, 0, 0, size, size);
-            
-            // 2. Draw block (white circle/square)
-            if (block && typeof block.x === 'number') {
-                ctx.fillStyle = '#ffffff';
-                const bx = (block.x / 100) * size;
-                const by = (block.y / 100) * size;
-                const bSize = (block.size / 100) * size;
+        if (!imageUrl) {
+            setPreviewUrl(null);
+            return;
+        }
 
-                if (block.type === 'circle') {
-                    ctx.beginPath();
-                    ctx.arc(bx + bSize / 2, by + bSize / 2, bSize / 2, 0, Math.PI * 2);
-                    ctx.fill();
-                } else {
-                    ctx.fillRect(bx, by, bSize, bSize);
-                }
+        GalleryService.renderDrawingToDataUrl(imageUrl, strokes, {
+            block: block || undefined,
+            canvasSize: 400
+        }).then((dataUrl) => {
+            if (!cancelled) {
+                setPreviewUrl(dataUrl);
             }
-            
-            // 3. Draw strokes
-            if (Array.isArray(strokes)) {
-                for (const stroke of strokes) {
-                    if (!stroke.points || stroke.points.length === 0) continue;
-
-                    ctx.beginPath();
-                    ctx.strokeStyle = stroke.isEraser ? '#ffffff' : stroke.color;
-                    ctx.lineWidth = (stroke.size || 4) * (size / 600) * 1.5;
-                    ctx.lineCap = 'round';
-                    ctx.lineJoin = 'round';
-
-                    const points = stroke.points.map(p => ({
-                        x: (p.x / 100) * size,
-                        y: (p.y / 100) * size
-                    }));
-
-                    ctx.moveTo(points[0].x, points[0].y);
-                    for (let i = 1; i < points.length; i++) {
-                        ctx.lineTo(points[i].x, points[i].y);
-                    }
-                    ctx.stroke();
-                }
+        }).catch(() => {
+            if (!cancelled) {
+                console.warn('[DrawingDisplay] Failed to render preview image');
+                setPreviewUrl(null);
             }
-            
-            setLoaded(true);
+        });
+
+        return () => {
+            cancelled = true;
         };
-        
-        img.onerror = () => {
-            console.warn('[DrawingDisplay] Failed to load image');
-        };
-        
-        img.src = imageUrl;
     }, [imageUrl, strokes, block]);
 
     if (!imageUrl) {
@@ -477,11 +447,16 @@ const DrawingDisplay: React.FC<{
     }
 
     return (
-        <canvas 
-            ref={canvasRef} 
-            width={400} 
-            height={400} 
-            className={`w-full h-full object-cover bg-white ${!loaded ? 'animate-pulse' : ''}`}
-        />
+        previewUrl ? (
+            <img
+                src={previewUrl}
+                alt="Round winner"
+                className="w-full h-full object-cover bg-white"
+            />
+        ) : (
+            <div className="w-full h-full flex items-center justify-center bg-gray-200 text-gray-500 text-sm animate-pulse">
+                Loading preview...
+            </div>
+        )
     );
 };
