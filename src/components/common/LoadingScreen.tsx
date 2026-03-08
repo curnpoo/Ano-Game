@@ -97,6 +97,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
     const effectiveStages = stages.length > 0 ? stages : [{ id: 'default-load', label: 'Loading...', status: 'loading' } as LoadingStage];
     const visibleStages = effectiveStages.slice(0, 5);
     const hasMoreStages = effectiveStages.length > 5;
+    const stagePanelHeightClass = effectiveStages.length >= 5 ? 'min-h-[16.5rem] max-h-72' : 'max-h-52';
 
     return (
         <div
@@ -158,7 +159,7 @@ export const LoadingScreen: React.FC<LoadingScreenProps> = ({
                 {/* Stages List - Glass Panel Style */}
                 {hasStages && (
                     <div
-                        className="w-full backdrop-blur-xl rounded-2xl border border-white/10 p-4 mb-6 max-h-52 overflow-y-auto"
+                        className={`w-full backdrop-blur-xl rounded-2xl border border-white/10 p-4 mb-6 overflow-y-auto ${stagePanelHeightClass}`}
                         style={{ backgroundColor: 'rgba(255, 255, 255, 0.03)' }}
                     >
                         <div className="space-y-1">
