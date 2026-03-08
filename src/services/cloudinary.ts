@@ -17,8 +17,18 @@ interface CloudinaryUploadResponse {
 }
 
 function getConfiguredUploadUrl(): string {
-    if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_UPLOAD_PRESET) {
-        throw new Error('Cloudinary is not configured. Add VITE_CLOUDINARY_CLOUD_NAME and VITE_CLOUDINARY_UPLOAD_PRESET to your .env file.');
+    const missingKeys: string[] = [];
+
+    if (!CLOUDINARY_CLOUD_NAME) {
+        missingKeys.push('VITE_CLOUDINARY_CLOUD_NAME');
+    }
+
+    if (!CLOUDINARY_UPLOAD_PRESET) {
+        missingKeys.push('VITE_CLOUDINARY_UPLOAD_PRESET');
+    }
+
+    if (missingKeys.length > 0) {
+        throw new Error(`Cloudinary is not configured. Missing: ${missingKeys.join(', ')}.`);
     }
 
     return `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
