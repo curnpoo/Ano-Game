@@ -1,9 +1,16 @@
+let lastLightHapticAt = 0;
+
 export const vibrate = (pattern: number | number[] = 10) => {
     // Check for support
     if (typeof navigator !== 'undefined' && navigator.vibrate) {
         try {
+            const current = Date.now();
+            if (typeof pattern === 'number' && current - lastLightHapticAt < 80) {
+                return;
+            }
+            lastLightHapticAt = current;
             navigator.vibrate(pattern);
-        } catch (e) {
+        } catch {
             // Ignore errors (some browsers restrict vibration)
         }
     }

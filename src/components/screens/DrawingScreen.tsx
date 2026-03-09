@@ -11,6 +11,8 @@ import { useZoomPan } from '../../hooks/useZoomPan';
 import { CosmeticsService } from '../../services/cosmetics';
 import { PowerupHUD } from '../game/PowerupHUD';
 import type { DrawingStroke } from '../../types';
+import { useDevicePerformance } from '../../utils/devicePerformance';
+import { usePerfRenderCounter } from '../../utils/perf';
 
 interface DrawingScreenProps {
     room: GameRoom;
@@ -80,6 +82,8 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
     strokes,
     hasSubmitted: propHasSubmitted
 }) => {
+    usePerfRenderCounter('DrawingScreen');
+    const devicePerformance = useDevicePerformance();
     const playerState = room.playerStates?.[player.id];
     // Use prop if available (includes optimistic state), otherwise fall back to room state
     const hasSubmitted = propHasSubmitted ?? (playerState?.status === 'submitted' || false);
@@ -238,14 +242,18 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
 
     // Determine if we should show UI elements (timer/toolbar)
     const showDrawingUI = isMyTimerRunning && !hasSubmitted;
+    const reduceEffects = devicePerformance.disableHeavyBlur || isPinching;
+    const showAmbientBubbles = !devicePerformance.disableAnimatedBackgrounds && !showDrawingUI;
 
     return (
         <div className={containerClass}>
             {/* Background Bubbles (Ported from Entry Flow for consistency) */}
-            <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-                <div className="bubble bg-white/10 w-64 h-64 -left-10 -top-10 animation-delay-0 blur-xl rounded-full absolute animate-float"></div>
-                <div className="bubble bg-purple-500/10 w-96 h-96 right-0 bottom-0 animation-delay-2000 blur-3xl rounded-full absolute animate-float-slow"></div>
-            </div>
+            {showAmbientBubbles && (
+                <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+                    <div className="bubble bg-white/10 w-64 h-64 -left-10 -top-10 animation-delay-0 blur-xl rounded-full absolute animate-float"></div>
+                    <div className="bubble bg-purple-500/10 w-96 h-96 right-0 bottom-0 animation-delay-2000 blur-3xl rounded-full absolute animate-float-slow"></div>
+                </div>
+            )}
 
 
 
@@ -276,6 +284,7 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
                     {/* Zoom container with pinch gesture handlers */}
                     <div
                         {...bind()}
+                        data-zoom-container
                         className="relative w-[95%] aspect-square"
                         style={{ touchAction: 'none', overflow: 'hidden' }}
                     >
@@ -332,8 +341,8 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
 
                             {/* Submitted Overlay */}
                             {hasSubmitted && (
-                                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-30 animate-fade-in">
-                                    <div className="bg-white/95 backdrop-blur-xl rounded-3xl p-8 text-center max-w-xs mx-4 shadow-2xl animate-bounce-gentle border border-white/50 relative overflow-hidden">
+                                <div className={`absolute inset-0 bg-black/40 flex items-center justify-center z-30 animate-fade-in ${reduceEffects ? '' : 'backdrop-blur-[2px]'}`}>
+                                    <div className={`bg-white/95 rounded-3xl p-8 text-center max-w-xs mx-4 shadow-2xl animate-bounce-gentle border border-white/50 relative overflow-hidden ${reduceEffects ? '' : 'backdrop-blur-xl'}`}>
                                         <div className="absolute inset-0 bg-gradient-to-tr from-green-400/10 to-transparent pointer-events-none"></div>
                                         <div className="text-6xl mb-4 animate-pulse-slow drop-shadow-md">✅</div>
                                         <h3 className="font-black text-transparent bg-clip-text bg-gradient-to-r from-green-500 to-emerald-600 text-3xl mb-2">Done!</h3>
@@ -420,8 +429,8 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
 
             {/* Idle State: "I'm Ready" */}
             {transitionState === 'idle' && !isMyTimerRunning && !hasSubmitted && (
-                <div className="absolute inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 animate-fade-in safe-area-padding">
-                    <div className="bg-white/95 backdrop-blur-xl rounded-[2.5rem] p-8 text-center max-w-sm mx-6 shadow-2xl pop-in border-4 border-white/30 relative overflow-hidden">
+                <div className={`absolute inset-0 bg-black/60 flex items-center justify-center z-50 animate-fade-in safe-area-padding ${reduceEffects ? '' : 'backdrop-blur-md'}`}>
+                    <div className={`bg-white/95 rounded-[2.5rem] p-8 text-center max-w-sm mx-6 shadow-2xl pop-in border-4 border-white/30 relative overflow-hidden ${reduceEffects ? '' : 'backdrop-blur-xl'}`}>
                         <div className="absolute inset-0 bg-gradient-to-br from-purple-500/5 to-pink-500/5 pointer-events-none"></div>
 
                         <div className="relative">
@@ -444,7 +453,7 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
 
             {/* Countdown State: 3D Numbers */}
             {transitionState === 'countdown' && countdownValue > 0 && (
-                <div className="absolute inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
+                <div className={`absolute inset-0 bg-black/40 flex items-center justify-center z-50 animate-fade-in ${reduceEffects ? '' : 'backdrop-blur-sm'}`}>
                     <div className="text-[12rem] font-black text-white drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)] animate-ping-once rainbow-text" key={countdownValue}>
                         {countdownValue}
                     </div>
@@ -454,7 +463,7 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
             {/* GO! State */}
             {(transitionState === 'go' || transitionState === 'fading') && (
                 <div
-                    className={`absolute inset-0 bg-gradient-to-br from-lime-400/90 to-emerald-600/90 backdrop-blur-md flex items-center justify-center z-50 transition-opacity duration-500 ${transitionState === 'fading' ? 'backdrop-blur-none' : ''}`}
+                    className={`absolute inset-0 bg-gradient-to-br from-lime-400/90 to-emerald-600/90 flex items-center justify-center z-50 transition-opacity duration-500 ${(transitionState === 'fading' || reduceEffects) ? '' : 'backdrop-blur-md'}`}
                     style={{ 
                         opacity: transitionState === 'fading' ? 0 : 1,
                         pointerEvents: transitionState === 'fading' ? 'none' : 'auto'

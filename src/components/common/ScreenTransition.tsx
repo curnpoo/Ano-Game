@@ -523,6 +523,7 @@ interface GlobalBlurTransitionProps {
     children: React.ReactNode;
     screenKey: string;
     duration?: number;
+    disabled?: boolean;
 }
 
 /**
@@ -532,13 +533,21 @@ interface GlobalBlurTransitionProps {
 export const GlobalBlurTransition: React.FC<GlobalBlurTransitionProps> = ({
     children,
     screenKey,
-    duration = 200
+    duration = 200,
+    disabled = false,
 }) => {
     const [displayedKey, setDisplayedKey] = useState(screenKey);
     const [displayedChildren, setDisplayedChildren] = useState(children);
     const [phase, setPhase] = useState<'idle' | 'blur-out' | 'blur-in'>('idle');
 
     useEffect(() => {
+        if (disabled) {
+            setDisplayedChildren(children);
+            setDisplayedKey(screenKey);
+            setPhase('idle');
+            return;
+        }
+
         if (screenKey !== displayedKey) {
             // Screen is changing - start blur-out
             setPhase('blur-out');
@@ -563,7 +572,7 @@ export const GlobalBlurTransition: React.FC<GlobalBlurTransitionProps> = ({
             // Same screen, just update children
             setDisplayedChildren(children);
         }
-    }, [screenKey, children, displayedKey, duration]);
+    }, [screenKey, children, displayedKey, disabled, duration]);
 
     return (
         <div

@@ -2,6 +2,7 @@ import React, { useRef, useEffect, useState, useCallback } from 'react';
 import type { DrawingStroke } from '../../types';
 import { vibrate, HapticPatterns } from '../../utils/haptics';
 import { renderStrokeToContext } from '../../utils/drawingRenderer';
+import { usePerfRenderCounter } from '../../utils/perf';
 
 interface GameCanvasProps {
     imageUrl: string;
@@ -32,10 +33,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
     zoomScale: _zoomScale = 1,
     sabotageType
 }) => {
+    usePerfRenderCounter('GameCanvas');
+
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [isDrawing, setIsDrawing] = useState(false);
-    const [currentStroke, setCurrentStroke] = useState<DrawingStroke | null>(null);
+    const currentStrokeRef = useRef<DrawingStroke | null>(null);
+    const isDrawingRef = useRef(false);
+    const drawFrameRef = useRef<number | null>(null);
     
     // Track active touch count to prevent drawing during multi-touch gestures
     const touchCountRef = useRef(0);
@@ -88,13 +93,21 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
 
         strokes.forEach(renderStroke);
 
-        if (currentStroke && currentStroke.points.length > 0) {
-            renderStroke(currentStroke);
+        if (currentStrokeRef.current && currentStrokeRef.current.points.length > 0) {
+            renderStroke(currentStrokeRef.current);
         }
 
         // Restore context
         ctx.globalCompositeOperation = 'source-over';
-    }, [strokes, currentStroke]);
+    }, [strokes]);
+
+    const scheduleDraw = useCallback(() => {
+        if (drawFrameRef.current !== null) return;
+        drawFrameRef.current = window.requestAnimationFrame(() => {
+            drawFrameRef.current = null;
+            drawAll();
+        });
+    }, [drawAll]);
 
     // Handle resize - match resolution to container size
     useEffect(() => {
@@ -106,11 +119,16 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             // Simply match the container's size (controlled by parent CSS)
             const width = container.clientWidth;
             const height = container.clientHeight;
+            const maxDpr = Math.min(window.devicePixelRatio || 1, 2);
+            const nextWidth = Math.round(width * maxDpr);
+            const nextHeight = Math.round(height * maxDpr);
 
-            if (canvas.width !== width || canvas.height !== height) {
-                canvas.width = width;
-                canvas.height = height;
-                requestAnimationFrame(drawAll);
+            if (canvas.width !== nextWidth || canvas.height !== nextHeight) {
+                canvas.width = nextWidth;
+                canvas.height = nextHeight;
+                canvas.style.width = `${width}px`;
+                canvas.style.height = `${height}px`;
+                scheduleDraw();
             }
         };
 
@@ -118,12 +136,20 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         resizeCanvas();
 
         return () => window.removeEventListener('resize', resizeCanvas);
-    }, [drawAll]);
+    }, [scheduleDraw]);
 
     // Draw when strokes change
     useEffect(() => {
-        drawAll();
-    }, [drawAll]);
+        scheduleDraw();
+    }, [scheduleDraw]);
+
+    useEffect(() => {
+        return () => {
+            if (drawFrameRef.current !== null) {
+                window.cancelAnimationFrame(drawFrameRef.current);
+            }
+        };
+    }, []);
 
     const getPoint = (e: React.MouseEvent | React.TouchEvent) => {
         const canvas = canvasRef.current;
@@ -154,7 +180,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
                 // Cancel any in-progress drawing
                 if (isDrawing) {
                     setIsDrawing(false);
-                    setCurrentStroke(null);
+                    isDrawingRef.current = false;
+                    currentStrokeRef.current = null;
+                    scheduleDraw();
                 }
                 return;
             }
@@ -205,13 +233,15 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
         }
 
         setIsDrawing(true);
-        setCurrentStroke({
+        isDrawingRef.current = true;
+        currentStrokeRef.current = {
             color: brushColor,
             size: brushSize,
             points: [point],
             isEraser,
             type: brushType // Use prop
-        });
+        };
+        scheduleDraw();
     };
 
     const draw = (e: React.MouseEvent | React.TouchEvent) => {
@@ -222,19 +252,19 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
                 // Cancel in-progress drawing when second finger touches
                 if (isDrawing) {
                     setIsDrawing(false);
-                    setCurrentStroke(null);
+                    isDrawingRef.current = false;
+                    currentStrokeRef.current = null;
+                    scheduleDraw();
                 }
                 return;
             }
         }
         
-        if (!isDrawing || !currentStroke) return;
+        if (!isDrawingRef.current || !currentStrokeRef.current) return;
         e.preventDefault();
         const point = getPoint(e);
-        setCurrentStroke(prev => prev ? {
-            ...prev,
-            points: [...prev.points, point]
-        } : null);
+        currentStrokeRef.current.points.push(point);
+        scheduleDraw();
     };
 
     const stopDrawing = (e?: React.MouseEvent | React.TouchEvent) => {
@@ -243,12 +273,14 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({
             touchCountRef.current = e.touches.length;
         }
         
-        if (!isDrawing) return;
+        if (!isDrawingRef.current) return;
         setIsDrawing(false);
-        if (currentStroke && currentStroke.points.length > 0) {
-            onStrokesChange([...strokes, currentStroke]);
+        isDrawingRef.current = false;
+        if (currentStrokeRef.current && currentStrokeRef.current.points.length > 0) {
+            onStrokesChange([...strokes, currentStrokeRef.current]);
         }
-        setCurrentStroke(null);
+        currentStrokeRef.current = null;
+        scheduleDraw();
     };
 
     return (

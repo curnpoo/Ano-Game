@@ -14,6 +14,7 @@ export default defineConfig({
         manualChunks: {
           'vendor-react': ['react', 'react-dom'],
           'vendor-firebase': ['firebase/app', 'firebase/auth', 'firebase/database', 'firebase/storage', 'firebase/analytics', 'firebase/functions'],
+          'vendor-charts': ['recharts'],
           'vendor-ui': ['@use-gesture/react'],
           'vendor-utils': ['react-qr-code'],
         }

@@ -105,6 +105,23 @@ body.light-mode {
   --glass-text-secondary: rgba(0, 0, 0, 0.7);
 }
 
+:root[data-perf-tier="reduced"] [class*="backdrop-blur"] {
+  backdrop-filter: blur(8px) !important;
+  -webkit-backdrop-filter: blur(8px) !important;
+}
+
+:root[data-perf-tier="minimal"] [class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+:root[data-perf-tier="minimal"] .bubble,
+:root[data-perf-tier="minimal"] .transition-container,
+:root[data-perf-tier="minimal"] .tunnel-ring-3d,
+:root[data-perf-tier="minimal"] .tunnel-center {
+  animation: none !important;
+}
+
 /* Semantic Glass Utilities */
 .glass-panel {
   @apply shadow-xl border;

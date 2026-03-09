@@ -36,6 +36,7 @@ import { Toast } from './components/common/Toast';
 import { LoadingScreen } from './components/common/LoadingScreen';
 import { TunnelTransition, CasinoTransition, GlobalBlurTransition } from './components/common/ScreenTransition';
 import { GlobalBackground } from './components/common/GlobalBackground';
+import { PerfDiagnosticsOverlay } from './components/common/PerfDiagnosticsOverlay';
 
 import {
   notifyYourTurnToUpload,
@@ -52,7 +53,11 @@ import { useNotifications } from './hooks/useNotifications';
 import { usePlayerSession } from './hooks/usePlayerSession';
 import { useLoadingProgress } from './hooks/useLoadingProgress';
 import { useInAppNotifications } from './hooks/useInAppNotifications';
+import { useServiceWorkerNotifications } from './hooks/useServiceWorkerNotifications';
+import { useRoomViewModel } from './hooks/useRoomViewModel';
 import { addToastListener } from './utils/toastBus';
+import { useDevicePerformance } from './utils/devicePerformance';
+import { perfMark, perfMeasure, usePerfFrameMonitor, usePerfLongTaskObserver, usePerfRenderCounter } from './utils/perf';
 import type { Player, GameSettings, PlayerDrawing, GameRoom, Screen, FriendRequest, GameInvite, UserAccount } from './types';
 
 
@@ -63,10 +68,17 @@ import type { RoomHistoryEntry } from './types';
 
 
 const App = () => {
+  usePerfRenderCounter('App');
+  usePerfLongTaskObserver('app');
+  usePerfFrameMonitor('app');
+
   // --- PWA Update Detection ---
   const intervalMs = 60 * 1000; // Check for updates every 60 seconds
   const [updateAvailable, setUpdateAvailable] = useState(false);
   const initialBuildTime = useRef<string | null>(null);
+  const swUpdateIntervalRef = useRef<number | null>(null);
+  const screenTransitionStartRef = useRef<number | null>(null);
+  const devicePerformance = useDevicePerformance();
 
   const {
     needRefresh: [needRefresh, setNeedRefresh],
@@ -76,7 +88,10 @@ const App = () => {
       console.log('SW Registered:', r);
       // Check for updates periodically
       if (r) {
-        setInterval(() => {
+        if (swUpdateIntervalRef.current) {
+          window.clearInterval(swUpdateIntervalRef.current);
+        }
+        swUpdateIntervalRef.current = window.setInterval(() => {
           console.log('Checking for SW updates...');
           r.update();
         }, intervalMs);
@@ -116,6 +131,14 @@ const App = () => {
       console.log('Version validation failed:', error);
     }
   }, [setNeedRefresh]);
+
+  useEffect(() => {
+    return () => {
+      if (swUpdateIntervalRef.current) {
+        window.clearInterval(swUpdateIntervalRef.current);
+      }
+    };
+  }, []);
 
   // Fallback: Version check via fetch (for iOS Safari and browsers with restrictive SW behavior)
   useEffect(() => {
@@ -168,6 +191,8 @@ const App = () => {
 
   const [currentScreen, setCurrentScreen] = useState<Screen>('welcome');
   const [lastGameDetails, setLastGameDetails] = useState<RoomHistoryEntry | null>(null);
+  const isInteractionHeavyScreen = ['lobby', 'waiting', 'uploading', 'drawing', 'voting', 'results', 'final'].includes(currentScreen);
+  const shouldDisableGlobalBlur = devicePerformance.disableHeavyBlur || isInteractionHeavyScreen;
 
   // --- Auto-Refresh Logic (Only on Homescreen) ---
   // Screens where the user is considered "idle" and can be auto-refreshed
@@ -310,6 +335,7 @@ const App = () => {
   const lastStatusRef = useRef<string | null>(null);
   const lastRoundRef = useRef<number | null>(null);
   const lastWaitingRef = useRef<boolean>(false);
+  const lastPresenceStatusRef = useRef<string | null>(null);
   const submissionLockRef = useRef<boolean>(false); // Prevent concurrent submissions
 
   const [pendingGameStats, setPendingGameStats] = useState<{ xp: number, coins: number, isWinner: boolean, action: 'home' | 'replay' } | null>(null);
@@ -317,6 +343,14 @@ const App = () => {
 
   // Session Restriction State
   const [pendingConfirmation, setPendingConfirmation] = useState<{ type: 'host' | 'join', data?: any } | null>(null);
+
+  useEffect(() => {
+    if (screenTransitionStartRef.current !== null) {
+      perfMeasure('screen.transition', screenTransitionStartRef.current, { screen: currentScreen });
+    }
+    screenTransitionStartRef.current = performance.now();
+    perfMark('screen.change', { screen: currentScreen });
+  }, [currentScreen]);
 
   // Fetch last game details when on home screen
   useEffect(() => {
@@ -386,10 +420,10 @@ const App = () => {
     }
   }, [player, currentScreen, isLoading, isInitialLoading]);
 
-  const handleMinimizeGame = () => {
+  const handleMinimizeGame = useCallback(() => {
     setIsBrowsing(true);
     setCurrentScreen('home');
-  };
+  }, []);
 
   function handleResumeGame() {
     setIsBrowsing(false);
@@ -406,12 +440,12 @@ const App = () => {
         showGameRewards('replay');
       }
     }
-  };
+  }
 
-  const handleCloseHowToPlay = () => {
+  const handleCloseHowToPlay = useCallback(() => {
     setShowHowToPlay(false);
     localStorage.setItem('has_seen_onboarding', 'true');
-  };
+  }, []);
 
   // Onboarding Effect
   useEffect(() => {
@@ -422,19 +456,6 @@ const App = () => {
       return () => clearTimeout(timer);
     }
   }, [currentScreen, isInitialLoading]);
-
-  async function handleRejoin(code: string) {
-    if (!player) return;
-    if (roomCode === code && room) {
-      handleResumeGame();
-      return;
-    }
-    handleJoinRoom(code);
-  };
-
-
-
-
 
   // Theme Effect: Apply global theme class AND variables to body
   useEffect(() => {
@@ -466,6 +487,13 @@ const App = () => {
     document.documentElement.style.setProperty('--theme-font', fontFamily);
     document.body.style.fontFamily = fontFamily;
   }, [player?.cosmetics?.activeFont]);
+
+  useEffect(() => {
+    document.documentElement.dataset.perfTier = devicePerformance.tier;
+    return () => {
+      delete document.documentElement.dataset.perfTier;
+    };
+  }, [devicePerformance.tier]);
 
   // Calculated state for dependencies
   // Check if I am an active player (in the current game)
@@ -526,57 +554,19 @@ const App = () => {
     }
   };
 
-  // Derived State
-  // Derived State (Memoized)
-  const stats = useMemo(() => {
-    const myState = room?.playerStates?.[player?.id || ''];
-    const submitted = myState?.status === 'submitted';
-    const totalDuration = room?.settings?.timerDuration || 15;
-    // Add +5 seconds if player has time bonus
-    const hasTimeBonus = room?.timeBonusPlayerId === player?.id;
-    const isTimeSabotaged = room?.sabotageTargetId === player?.id && room?.sabotageEffect?.type === 'subtract_time';
-
-    // Calculate penalty (20% of total time, rounded up)
-    const penalty = Math.ceil(totalDuration * 0.20);
-    
-    // Powerup Bonuses
-    const powerupExtra = myState?.extraTime || 0;
-    const timekeeperBonus = player?.activePowerups?.includes('timekeeper') ? 5 : 0;
-
-    const bonusTime = (hasTimeBonus ? 5 : 0) + powerupExtra + timekeeperBonus - (isTimeSabotaged ? penalty : 0);
-
-    const effectiveStartedAt = myState?.timerStartedAt || optimisticTimerStart;
-
-    const endsAt = effectiveStartedAt
-      ? effectiveStartedAt + (totalDuration + bonusTime) * 1000
-      : null;
-
-    // Safety check for room existence
-    if (!room) return {
-      myPlayerState: myState,
-      hasSubmitted: submitted,
-      timerEndsAt: endsAt,
-      effectiveTotalDuration: totalDuration + bonusTime, // Default if no room
-      submittedCount: 0,
-      totalPlayers: 0,
-      unfinishedPlayers: []
-    };
-
-    // Calculate effective duration for timer consistency
-    const effectiveTotalDuration = (totalDuration + bonusTime);
-
-    return {
-      myPlayerState: myState,
-      hasSubmitted: submitted || optimisticHasSubmitted, // <--- Include optimistic state
-      timerEndsAt: endsAt,
-      effectiveTotalDuration, // Export for ScreenRouter
-      submittedCount: Object.values(room.playerStates || {}).filter(s => s.status === 'submitted').length,
-      totalPlayers: room.players.length,
-      unfinishedPlayers: room.players.filter(p => room.playerStates?.[p.id]?.status !== 'submitted')
-    };
-  }, [room, player?.id, optimisticTimerStart, optimisticHasSubmitted]);
-
-  const { myPlayerState, hasSubmitted, timerEndsAt, effectiveTotalDuration, submittedCount, totalPlayers } = stats;
+  const {
+    myPlayerState,
+    hasSubmitted,
+    timerEndsAt,
+    effectiveTotalDuration,
+    submittedCount,
+    totalPlayers,
+  } = useRoomViewModel({
+    room,
+    player,
+    optimisticTimerStart,
+    optimisticHasSubmitted,
+  });
 
   // Sync screen with room status
   // Sync screen with room status
@@ -697,11 +687,15 @@ const App = () => {
     // Conditions for being "in a game"
     // Must have a room code AND be connected to the room AND not be just browsing/on home screen
     const isPlaying = roomCode && room && !isBrowsing && ['lobby', 'uploading', 'sabotage-selection', 'drawing', 'voting', 'results', 'final', 'waiting'].includes(currentScreen);
-    
+
+    const nextPresence = isPlaying ? `playing:${roomCode}` : 'online';
+    if (lastPresenceStatusRef.current === nextPresence) return;
+
+    lastPresenceStatusRef.current = nextPresence;
+
     if (isPlaying) {
       PresenceService.setStatus('playing', roomCode!);
     } else {
-      // Revert to online if not playing
       PresenceService.setStatus('online');
     }
   }, [player?.id, roomCode, room, isBrowsing, currentScreen]);
@@ -855,11 +849,22 @@ const App = () => {
   useEffect(() => {
     if (!roomCode || !player) return;
 
-    const interval = setInterval(() => {
+    const sendHeartbeat = () => {
+      if (document.visibilityState !== 'visible') return;
       StorageService.heartbeat(roomCode, player.id);
+    };
+
+    sendHeartbeat();
+    const interval = setInterval(() => {
+      sendHeartbeat();
     }, 5000); // Every 5 seconds
 
-    return () => clearInterval(interval);
+    document.addEventListener('visibilitychange', sendHeartbeat);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', sendHeartbeat);
+    };
   }, [roomCode, player?.id]);
 
   // --- In-App Notification System (Friend Requests & Game Invites) ---
@@ -868,6 +873,13 @@ const App = () => {
   // --- Modal Notification State ---
   const [activeInvite, setActiveInvite] = useState<GameInvite | null>(null);
   const [activeTurnReminder, setActiveTurnReminder] = useState<{ roomCode?: string } | null>(null);
+  const openUserProfile = useCallback(async (userId: string) => {
+    const user = await FriendsService.getUserById(userId);
+    if (user) {
+      setViewProfileUser(user);
+    }
+    return user;
+  }, []);
 
   // --- Notification Handlers ---
   const handleFriendRequestNotification = useCallback((_request: FriendRequest) => {
@@ -941,82 +953,6 @@ const App = () => {
     onFriendRequest: handleFriendRequestNotification,
     onGameInvite: handleGameInviteNotification
   }), [handleFriendRequestNotification, handleGameInviteNotification]));
-
-  // Listen for messages from service worker (notification clicks)
-  useEffect(() => {
-    const handleServiceWorkerMessage = (event: MessageEvent) => {
-      console.log('[App] Received SW message:', event.data);
-      
-      if (event.data?.type === 'NOTIFICATION_CLICK') {
-        const { notificationType, data } = event.data;
-        
-        // Handle background click -> Modal Popup
-        if (notificationType === 'game-invite' || data?.type === 'game_invite') {
-          // Construct invite object from data
-          const invite: GameInvite = {
-             id: data.id || 'unknown',
-             fromUserId: data.fromUserId,
-             fromUsername: data.fromUsername || 'Someone',
-             toUserId: player?.id || '',
-             roomCode: data.roomCode,
-             sentAt: Date.now(),
-             status: 'pending'
-          };
-          setActiveInvite(invite);
-        }
-        else if (notificationType === 'turn_reminder' || data?.type === 'turn_reminder') {
-          setActiveTurnReminder({ roomCode: data.roomCode });
-        }
-        else if (notificationType === 'game_start' || data?.type === 'game_start') {
-          // Game started - go straight to the game (no modal for push notification clicks)
-          console.log('[App] Game start notification clicked, joining game:', data?.roomCode);
-          if (roomCode && room) {
-            // Already in this room, just resume
-            setIsBrowsing(false);
-            handleResumeGame();
-          } else if (data?.roomCode) {
-            // Not in room, join it
-            handleJoinRoom(data.roomCode);
-          }
-        }
-        else if (notificationType === 'friend-request' || data?.type === 'friend_request') {
-           // For friend requests, we can open the profile modal directly
-           if (data.fromUserId) {
-             FriendsService.getUserById(data.fromUserId).then(user => {
-               if (user) setViewProfileUser(user);
-             });
-           }
-        }
-        // Fallback for generic "join" clicks or legacy notifications
-        else if (data?.roomCode) {
-           console.log('[App] Fallback notification click - treating as invite:', data.roomCode);
-           // Do NOT auto-join. Show modal instead.
-           const fallbackInvite: GameInvite = {
-              id: data.id || 'fallback-invite',
-              fromUserId: 'unknown',
-              fromUsername: 'Game Invitation',
-              toUserId: player?.id || '',
-              roomCode: data.roomCode,
-              sentAt: Date.now(),
-              status: 'pending'
-           };
-           setActiveInvite(fallbackInvite);
-        }
-      }
-    };
-
-    if (navigator.serviceWorker) {
-      navigator.serviceWorker.addEventListener('message', handleServiceWorkerMessage);
-    }
-
-    return () => {
-      if (navigator.serviceWorker) {
-        navigator.serviceWorker.removeEventListener('message', handleServiceWorkerMessage);
-      }
-    };
-  }, [player?.id, handleJoinRoom]);
-
-
 
   // Check for pending invites/requests on app open (runs once when player loads)
   // Skip if user is joining via URL (they clicked a push notification)
@@ -1312,8 +1248,9 @@ const App = () => {
 
 
 
-  async function handleCreateRoom(force: boolean = false) {
+  const handleCreateRoom = useCallback(async (force: boolean = false) => {
     if (!player) return;
+    perfMark('room.create.start', { force });
 
     // SINGLE GAME RESTRICTION: Host Check
     if (!force && roomCode && room) {
@@ -1333,10 +1270,11 @@ const App = () => {
       showError(err);
     }
     setIsLoading(false);
-  };
+  }, [player, roomCode, room, showError, showToast]);
 
-  async function handleJoinRoom(code: string, force: boolean = false) {
+  const handleJoinRoom = useCallback(async (code: string, force: boolean = false) => {
     console.log('[App] handleJoinRoom called with:', code, 'Force:', force);
+    perfMark('room.join.start', { code, force });
     
     // If player is not loaded yet (race condition on wake), queue the join
     if (!player) {
@@ -1398,7 +1336,25 @@ const App = () => {
       showError(err);
       setIsLoading(false);
     }
-  };
+  }, [
+    player,
+    currentScreen,
+    roomCode,
+    room,
+    startLoading,
+    updateLoadingStage,
+    stopLoadingWithDelay,
+    showError,
+  ]);
+
+  const handleRejoin = useCallback(async (code: string) => {
+    if (!player) return;
+    if (roomCode === code && room) {
+      handleResumeGame();
+      return;
+    }
+    handleJoinRoom(code);
+  }, [player, roomCode, room, handleJoinRoom]);
 
   async function handleSettingsChange(settings: Partial<GameSettings>) {
     if (!roomCode) return;
@@ -1412,6 +1368,7 @@ const App = () => {
 
   async function handleStartGame() {
     if (!roomCode || !room) return;
+    perfMark('game.start-round', { roomCode });
 
     startLoading('start'); // Smart Loading Checklist
 
@@ -1438,6 +1395,7 @@ const App = () => {
 
   async function handleUploadImage(file: File) {
     if (!roomCode || !player) return;
+    perfMark('drawing.upload.start', { roomCode, type: file.type, size: file.size });
 
     startLoading('upload'); // Smart Loading Checklist
 
@@ -1475,6 +1433,7 @@ const App = () => {
   async function handleReady() {
     if (!roomCode || !player) return;
     try {
+      perfMark('drawing.ready', { roomCode });
       setIsReadying(true); // Immediate feedback
 
       // Optimistic Start
@@ -1561,6 +1520,7 @@ const App = () => {
   const handleVote = async (votedForId: string) => {
     if (!roomCode || !player) return;
     try {
+      perfMark('vote.submit', { roomCode, votedForId });
       await StorageService.submitVote(roomCode, player.id, votedForId);
       showToast('Vote submitted! 🗳️', 'success');
     } catch (err) {
@@ -1625,7 +1585,7 @@ const App = () => {
     }
   };
 
-  const handleLeaveGame = async (targetScreen: Screen = 'room-selection') => {
+  const handleLeaveGame = useCallback(async (targetScreen: Screen = 'room-selection') => {
     // 1. Capture state needed for cleanup
     const roomCodeToLeave = roomCode;
     const playerToLeave = player;
@@ -1654,7 +1614,7 @@ const App = () => {
         }
       }, 10);
     }
-  };
+  }, [player, roomCode, showToast]);
 
   const handleJoinCurrentRound = async () => {
     if (!roomCode || !player || !room) return;
@@ -1750,6 +1710,24 @@ const App = () => {
     }
   };
 
+  useServiceWorkerNotifications({
+    playerId: player?.id,
+    roomCode,
+    hasActiveRoom: Boolean(roomCode && room),
+    currentScreen,
+    onShowInvite: setActiveInvite,
+    onShowTurnReminder: setActiveTurnReminder,
+    onJoinRoom: handleJoinRoom,
+    onResumeGame: () => {
+      setIsBrowsing(false);
+      handleResumeGame();
+    },
+    onFinishCurrentGameNotice: () => {
+      showToast('Invite received! Finish your current game to join.', 'info');
+    },
+    onOpenProfile: openUserProfile,
+  });
+
 
 
   // Foreground Notification Listener
@@ -1781,39 +1759,50 @@ const App = () => {
         });
       }
     });
-    
-    // Service Worker Message Listener (for Notification Clicks)
-    const handleSWMessage = (event: MessageEvent) => {
-      if (event.data && event.data.type === 'NOTIFICATION_CLICK') {
-        const { notificationType, roomCode, data } = event.data;
-        console.log('App received notification click:', notificationType, roomCode);
-        
-        // Handle Game Invite Click
-        if (notificationType === 'game_invite' || data?.type === 'game_invite') {
-          if (roomCode) {
-            // Check if we are already in a game
-            if (currentScreen !== 'home' && currentScreen !== 'welcome' && currentScreen !== 'room-selection') {
-              showToast('Invite received! Finish your current game to join.', 'info');
-            } else {
-              // Direct Join
-              handleJoinRoom(roomCode);
-            }
-          }
-        }
-      }
-    };
-    
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('message', handleSWMessage);
-    }
-    
+
     return () => {
       unsubscribe();
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.removeEventListener('message', handleSWMessage);
-      }
     };
   }, [showToast, handleJoinRoom]);
+
+  const handleStoreBack = useCallback(() => {
+    const freshUser = AuthService.getCurrentUser();
+    if (freshUser && player) {
+      const updatedSession = { ...player, cosmetics: freshUser.cosmetics };
+      setPlayer(updatedSession);
+    }
+    setCurrentScreen('home');
+  }, [player, setPlayer]);
+
+  const handleOpenCasino = useCallback(() => {
+    perfMark('ui.open-casino');
+    if (devicePerformance.disableFancyTransitions) {
+      setShowCasino(true);
+      return;
+    }
+    setShowCasinoTransition(true);
+  }, [devicePerformance.disableFancyTransitions]);
+
+  const handleOpenSettings = useCallback(() => {
+    perfMark('ui.open-settings');
+    setShowSettings(true);
+  }, []);
+
+  const handlePlayWithTransition = useCallback(() => {
+    perfMark('ui.play-transition');
+    setCurrentScreen('room-selection');
+    if (!devicePerformance.disableFancyTransitions) {
+      setShowTunnelTransition(true);
+    }
+  }, [devicePerformance.disableFancyTransitions]);
+
+  const handleBackToHome = useCallback(() => {
+    setCurrentScreen('home');
+  }, []);
+
+  const handleLeaveToRoomSelection = useCallback(() => {
+    handleLeaveGame('room-selection');
+  }, [handleLeaveGame]);
 
   if (isLoading || isInitialLoading) {
     return <LoadingScreen onGoHome={handleSafeReset} stages={loadingStages} isOnline={isOnline} isSlow={isSlow} />;
@@ -1828,19 +1817,6 @@ const App = () => {
   if (isGameScreen && (!room || !player)) {
     return <LoadingScreen onGoHome={handleSafeReset} stages={loadingStages} isOnline={isOnline} isSlow={isSlow} />;
   }
-
-
-
-  // Handlers for ScreenRouter
-  const handleStoreBack = () => {
-    // Refresh player state when returning from store
-    const freshUser = AuthService.getCurrentUser();
-    if (freshUser && player) {
-      const updatedSession = { ...player, cosmetics: freshUser.cosmetics };
-      setPlayer(updatedSession);
-    }
-    setCurrentScreen('home');
-  };
 
   const handleKickPlayer = async (playerId: string) => {
     if (!roomCode) return;
@@ -1857,10 +1833,14 @@ const App = () => {
     <div className="min-h-screen w-full bg-transparent text-white touch-none select-none overflow-hidden relative" style={{ colorScheme: 'dark' }}>
 
       <SpeedInsights />
-      <GlobalBackground player={player} />
+      <GlobalBackground
+        player={player}
+        tier={devicePerformance.tier}
+        disableAnimatedBackgrounds={devicePerformance.disableAnimatedBackgrounds || isInteractionHeavyScreen}
+      />
 
       {/* Main Router with Transitions */}
-      <GlobalBlurTransition screenKey={currentScreen}>
+      <GlobalBlurTransition screenKey={currentScreen} disabled={shouldDisableGlobalBlur}>
         <ScreenRouter
           currentScreen={currentScreen}
           player={player}
@@ -1870,18 +1850,14 @@ const App = () => {
           onLoginComplete={handleLoginComplete}
           onProfileComplete={handleProfileComplete}
           onUpdateProfile={handleUpdateProfile}
-          onShowCasino={() => setShowCasinoTransition(true)}
-          onShowSettings={() => setShowSettings(true)}
+          onShowCasino={handleOpenCasino}
+          onShowSettings={handleOpenSettings}
           onRejoin={handleRejoin}
-          onPlayWithTransition={() => {
-            // Set screen immediately so it's ready behind the transition
-            setCurrentScreen('room-selection');
-            setShowTunnelTransition(true);
-          }}
+          onPlayWithTransition={handlePlayWithTransition}
           onNavigate={setCurrentScreen}
-          onBackToHome={() => setCurrentScreen('home')}
+          onBackToHome={handleBackToHome}
           onStoreBack={handleStoreBack}
-          onLeaveGame={() => handleLeaveGame('room-selection')}
+          onLeaveGame={handleLeaveToRoomSelection}
           onCreateRoom={handleCreateRoom}
           onJoinRoom={handleJoinRoom}
           onStartGame={handleStartGame}
@@ -1946,6 +1922,7 @@ const App = () => {
           messages={toast.messages}
           duration={toastDuration}
           onClose={hideToast}
+          blurStrength={devicePerformance.toastBlurStrength}
         />
       )}
 
@@ -2150,6 +2127,8 @@ const App = () => {
           />
         </Suspense>
       )}
+
+      <PerfDiagnosticsOverlay tier={devicePerformance.tier} />
 
       {/* Game Invite Modal - Shown from background notification click */}
       {activeInvite && (

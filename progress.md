@@ -27,3 +27,12 @@ Original prompt: I just tried to do a test run with some friends and when I trie
 - Verified shared winner-image rendering returns a composite data URL and uploads successfully to Cloudinary.
 - Clean dev reload no longer shows the earlier hook-order crash from Fast Refresh.
 - User still hit the upload failure in-app after the migration. Re-checking the full round-start path beyond Cloudinary upload.
+
+2026-03-09
+- Started performance stabilization implementation: added perf diagnostics utilities, device performance tier detection, room view model hook, and consolidated service worker notification handling.
+- Added adaptive blur/background degradation for the app shell and toasts, plus screen-transition disabling on gameplay/heavier device tiers.
+- Began drawing-path optimization: rAF-based canvas redraw scheduling, capped DPR resizing, zoom-container marker fix, and reduced heavy drawing overlays on interaction-heavy states.
+- Fixed a hook-order regression in App caused by callback hooks being declared below early returns.
+- Added PerfDiagnosticsOverlay and query-param-driven perf HUD (`?anoPerf=1`) for on-device profiling.
+- Split recharts into a dedicated vendor chunk and lazy-loaded Home/Lobby optional modals to shrink core screen bundles.
+- Verified production build after chunking work. HomeScreen dropped to ~23.8 kB, LobbyScreen to ~23.1 kB, and StatsScreen logic chunk to ~17.0 kB with charts isolated in vendor-charts.

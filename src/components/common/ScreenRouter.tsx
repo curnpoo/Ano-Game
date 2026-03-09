@@ -1,6 +1,7 @@
 import { AuthService } from '../../services/auth';
-import { Suspense, lazy } from 'react';
+import { Suspense, lazy, memo } from 'react';
 import type { Screen, Player, GameRoom, GameSettings, RoomHistoryEntry } from '../../types';
+import { usePerfRenderCounter } from '../../utils/perf';
 
 
 // Lazy Load Screens
@@ -112,7 +113,7 @@ interface ScreenRouterProps {
     onTimeUp: () => void;
 }
 
-export const ScreenRouter: React.FC<ScreenRouterProps> = ({
+const ScreenRouterBase: React.FC<ScreenRouterProps> = ({
     currentScreen,
     player,
     room,
@@ -172,6 +173,7 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
     totalTimerDuration,
     onTimeUp
 }) => {
+    usePerfRenderCounter('ScreenRouter', { screen: currentScreen });
 
     // Helper to render Drawing Layout (wrapper)
     const renderDrawingLayout = () => {
@@ -435,3 +437,5 @@ export const ScreenRouter: React.FC<ScreenRouterProps> = ({
         </Suspense>
     );
 };
+
+export const ScreenRouter = memo(ScreenRouterBase);

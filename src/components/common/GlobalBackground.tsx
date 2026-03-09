@@ -2,12 +2,19 @@ import React from 'react';
 import type { Player } from '../../types';
 import { THEMES } from '../../constants/cosmetics';
 import { MonogramBackground } from './MonogramBackground';
+import type { DevicePerformanceTier } from '../../utils/devicePerformance';
 
 interface GlobalBackgroundProps {
     player?: Player | null;
+    tier?: DevicePerformanceTier;
+    disableAnimatedBackgrounds?: boolean;
 }
 
-export const GlobalBackground: React.FC<GlobalBackgroundProps> = ({ player }) => {
+export const GlobalBackground: React.FC<GlobalBackgroundProps> = ({
+    player,
+    tier = 'full',
+    disableAnimatedBackgrounds = false,
+}) => {
     // Determine the background style
     // 1. If player has a specific background color/gradient set (from theme purchase), use it.
     // 2. Fallback to activeTheme lookup (if we store ID but not value, though store saves value).
@@ -26,6 +33,9 @@ export const GlobalBackground: React.FC<GlobalBackgroundProps> = ({ player }) =>
     };
 
     const background = getBackgroundStyle();
+    const showPattern = !disableAnimatedBackgrounds && tier === 'full';
+    const showOverlay = tier !== 'minimal';
+    const showNoise = tier === 'full';
 
     return (
         <div className="fixed inset-0 z-[-1] overflow-hidden pointer-events-none">
@@ -36,15 +46,17 @@ export const GlobalBackground: React.FC<GlobalBackgroundProps> = ({ player }) =>
             />
             
             {/* Monogram Pattern - Global (visible on all screens) */}
-            <MonogramBackground speed="slow" opacity={0.15} />
+            {showPattern && <MonogramBackground speed="slow" opacity={0.15} />}
             
             {/* Optional Overlay Texture/Effects (like the 'overlay' requested) */}
-            <div className="absolute inset-0 bg-black/20 mix-blend-overlay" />
+            {showOverlay && <div className="absolute inset-0 bg-black/20 mix-blend-overlay" />}
             
             {/* Subtle Noise/Grain if we want 'premium' feel */}
-            <div className="absolute inset-0 opacity-[0.03]" 
-                 style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }} 
-            />
+            {showNoise && (
+                <div className="absolute inset-0 opacity-[0.03]"
+                    style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
+                />
+            )}
         </div>
     );
 };

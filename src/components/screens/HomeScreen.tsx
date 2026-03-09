@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState } from 'react';
 import { ProfileStatusCard } from '../common/ProfileStatusCard';
 import { FriendsPanel } from '../common/FriendsPanel';
-import { AdminModal } from '../common/AdminModal';
-import { HelpGuideOverlay } from '../common/HelpGuideOverlay';
-import { GuestSignUpModal } from '../common/GuestSignUpModal';
 import { AuthService } from '../../services/auth';
 import type { Player } from '../../types';
+
+const AdminModal = lazy(() => import('../common/AdminModal').then((module) => ({ default: module.AdminModal })));
+const HelpGuideOverlay = lazy(() => import('../common/HelpGuideOverlay').then((module) => ({ default: module.HelpGuideOverlay })));
+const GuestSignUpModal = lazy(() => import('../common/GuestSignUpModal').then((module) => ({ default: module.GuestSignUpModal })));
 
 interface HomeScreenProps {
     player: Player;
@@ -41,11 +42,6 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     const [showAdminModal, setShowAdminModal] = useState(false);
     const [showHelpGuide, setShowHelpGuide] = useState(false);
     const [showGuestModal, setShowGuestModal] = useState(false);
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        setMounted(true);
-    }, []);
 
     // Helper for admin button
     const isAdmin = player.name.trim().toLowerCase() === 'curren';
@@ -61,7 +57,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
     return (
         <div
-            className={`fixed inset-0 overflow-y-auto overflow-x-hidden flex flex-col items-center select-none ${mounted ? 'pop-in' : 'opacity-0'}`}
+            className="fixed inset-0 overflow-y-auto overflow-x-hidden flex flex-col items-center select-none pop-in"
             style={{
                 background: 'transparent',
                 paddingTop: 'max(1rem, env(safe-area-inset-top))',
@@ -273,23 +269,29 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
             {/* Admin Modal */}
             {showAdminModal && (
-                <AdminModal onClose={() => setShowAdminModal(false)} />
+                <Suspense fallback={null}>
+                    <AdminModal onClose={() => setShowAdminModal(false)} />
+                </Suspense>
             )}
 
             {/* Help Guide Overlay */}
             {showHelpGuide && (
-                <HelpGuideOverlay onClose={() => setShowHelpGuide(false)} />
+                <Suspense fallback={null}>
+                    <HelpGuideOverlay onClose={() => setShowHelpGuide(false)} />
+                </Suspense>
             )}
 
             {/* Guest Sign Up Modal */}
-            <GuestSignUpModal
-                isOpen={showGuestModal}
-                onClose={() => setShowGuestModal(false)}
-                onConfirm={() => {
-                   setShowGuestModal(false);
-                   onRegister();
-                }}
-            />
+            <Suspense fallback={null}>
+                <GuestSignUpModal
+                    isOpen={showGuestModal}
+                    onClose={() => setShowGuestModal(false)}
+                    onConfirm={() => {
+                       setShowGuestModal(false);
+                       onRegister();
+                    }}
+                />
+            </Suspense>
 
             {/* Help Button - Adaptive Corner/Pill */}
             <button
@@ -333,4 +335,3 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
     );
 };
-

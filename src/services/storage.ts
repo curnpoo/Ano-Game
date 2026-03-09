@@ -727,6 +727,34 @@ export const StorageService = {
         });
     },
 
+    syncPlayerProfile: async (roomCode: string, player: Player): Promise<void> => {
+        const leanPlayer = await StorageService.preparePlayerForRoom({
+            ...player,
+            lastSeen: Date.now(),
+            cosmetics: player.cosmetics || DEFAULT_COSMETICS,
+        });
+
+        await StorageService.updateRoom(roomCode, (r) => {
+            const activeIndex = r.players.findIndex((currentPlayer) => currentPlayer.id === player.id);
+            if (activeIndex >= 0) {
+                r.players[activeIndex] = {
+                    ...r.players[activeIndex],
+                    ...leanPlayer,
+                };
+            }
+
+            const waitingIndex = r.waitingPlayers?.findIndex((currentPlayer) => currentPlayer.id === player.id) ?? -1;
+            if (waitingIndex >= 0 && r.waitingPlayers) {
+                r.waitingPlayers[waitingIndex] = {
+                    ...r.waitingPlayers[waitingIndex],
+                    ...leanPlayer,
+                };
+            }
+
+            return r;
+        });
+    },
+
     // --- Powerups ---
     triggerPowerup: async (roomCode: string, playerId: string, powerupId: string): Promise<void> => {
         await StorageService.updateRoom(roomCode, (r) => {

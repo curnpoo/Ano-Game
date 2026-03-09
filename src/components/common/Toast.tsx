@@ -5,9 +5,15 @@ interface ToastProps {
     messages: ToastMessage[];
     onClose: () => void;
     duration?: number;
+    blurStrength?: 'full' | 'reduced' | 'minimal';
 }
 
-export const Toast: React.FC<ToastProps> = ({ messages, onClose, duration = 3000 }) => {
+export const Toast: React.FC<ToastProps> = ({
+    messages,
+    onClose,
+    duration = 3000,
+    blurStrength = 'full',
+}) => {
     const [animationState, setAnimationState] = useState<'entering' | 'visible' | 'leaving'>('entering');
     const [swipeOffset, setSwipeOffset] = useState(0);
     const [isSwiping, setIsSwiping] = useState(false);
@@ -137,6 +143,9 @@ export const Toast: React.FC<ToastProps> = ({ messages, onClose, duration = 3000
     const primaryType = getPrimaryType();
     const primaryConfig = getTypeConfig(primaryType);
     const isSingleMessage = messages.length === 1;
+    const blurAmount = blurStrength === 'full' ? 40 : blurStrength === 'reduced' ? 20 : 0;
+    const toastBackground =
+        blurStrength === 'minimal' ? 'rgba(20, 20, 20, 0.95)' : 'rgba(30, 30, 30, 0.75)';
 
     // iOS-style spring animation
     const getTransform = () => {
@@ -180,9 +189,9 @@ export const Toast: React.FC<ToastProps> = ({ messages, onClose, duration = 3000
                 <div
                     className="rounded-[20px] overflow-hidden shadow-2xl"
                     style={{
-                        background: 'rgba(30, 30, 30, 0.75)',
-                        backdropFilter: 'blur(40px) saturate(180%)',
-                        WebkitBackdropFilter: 'blur(40px) saturate(180%)',
+                        background: toastBackground,
+                        backdropFilter: blurAmount > 0 ? `blur(${blurAmount}px) saturate(180%)` : undefined,
+                        WebkitBackdropFilter: blurAmount > 0 ? `blur(${blurAmount}px) saturate(180%)` : undefined,
                         border: '1px solid rgba(255, 255, 255, 0.12)',
                         boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05)'
                     }}

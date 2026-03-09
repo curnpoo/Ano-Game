@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect } from 'react';
 import type { GameRoom, GameSettings } from '../../types';
-import { SettingsModal } from '../common/SettingsModal';
 import { GameSettingsPanel } from '../game/GameSettingsPanel';
 import { LobbyPlayerRow } from '../game/LobbyPlayerRow';
 import { ShareDropdown } from '../common/ShareDropdown';
-import { InviteFriendsModal } from '../common/InviteFriendsModal';
 import { StorageService } from '../../services/storage';
 import { usePresence } from '../../hooks/usePresence';
+
+const SettingsModal = lazy(() => import('../common/SettingsModal').then((module) => ({ default: module.SettingsModal })));
+const InviteFriendsModal = lazy(() => import('../common/InviteFriendsModal').then((module) => ({ default: module.InviteFriendsModal })));
 
 interface LobbyScreenProps {
     room: GameRoom;
@@ -304,25 +305,29 @@ export const LobbyScreen: React.FC<LobbyScreenProps> = ({
             })()}
 
             {showSettings && currentPlayer && (
-                <SettingsModal
-                    player={currentPlayer}
-                    roomCode={room.roomCode}
-                    players={room.players}
-                    isHost={isHost}
-                    onClose={() => setShowSettings(false)}
-                    onUpdateProfile={() => { /* Profile updates handled internally */ }}
-                    onLeaveGame={onLeave}
-                    onEndGame={isHost ? () => StorageService.closeRoom(room.roomCode) : undefined}
-                    onKick={isHost ? (playerId: string) => StorageService.kickPlayer(room.roomCode, playerId) : undefined}
-                    onGoHome={onBack}
-                />
+                <Suspense fallback={null}>
+                    <SettingsModal
+                        player={currentPlayer}
+                        roomCode={room.roomCode}
+                        players={room.players}
+                        isHost={isHost}
+                        onClose={() => setShowSettings(false)}
+                        onUpdateProfile={() => { /* Profile updates handled internally */ }}
+                        onLeaveGame={onLeave}
+                        onEndGame={isHost ? () => StorageService.closeRoom(room.roomCode) : undefined}
+                        onKick={isHost ? (playerId: string) => StorageService.kickPlayer(room.roomCode, playerId) : undefined}
+                        onGoHome={onBack}
+                    />
+                </Suspense>
             )}
 
             {showInviteModal && (
-                <InviteFriendsModal
-                    roomCode={room.roomCode}
-                    onClose={() => setShowInviteModal(false)}
-                />
+                <Suspense fallback={null}>
+                    <InviteFriendsModal
+                        roomCode={room.roomCode}
+                        onClose={() => setShowInviteModal(false)}
+                    />
+                </Suspense>
             )}
         </div>
     );

@@ -17,6 +17,19 @@ export const usePlayerSession = ({ setCurrentScreen, onProgress, onComplete }: U
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const hasInitializedRef = useRef(false);
 
+    const hasPlayerChanged = (current: Player, next: Player) => {
+        return (
+            current.name !== next.name ||
+            current.color !== next.color ||
+            current.frame !== next.frame ||
+            current.backgroundColor !== next.backgroundColor ||
+            current.avatarImageUrl !== next.avatarImageUrl ||
+            current.avatarStrokes !== next.avatarStrokes ||
+            current.cosmetics !== next.cosmetics ||
+            current.permanentPowerups !== next.permanentPowerups
+        );
+    };
+
     // Initial loading state (removed artificial delay)
     useEffect(() => {
         setIsInitialLoading(false);
@@ -164,7 +177,7 @@ export const usePlayerSession = ({ setCurrentScreen, onProgress, onComplete }: U
                         permanentPowerups: authUser.permanentPowerups || player.permanentPowerups
                     };
 
-                    if (JSON.stringify(updatedSession) !== JSON.stringify(player)) {
+                    if (hasPlayerChanged(player, updatedSession)) {
                         StorageService.saveSession(updatedSession);
                         setPlayer(updatedSession);
                     }
@@ -200,7 +213,7 @@ export const usePlayerSession = ({ setCurrentScreen, onProgress, onComplete }: U
         });
 
         if (roomCode) {
-            StorageService.joinRoom(roomCode, updatedPlayer);
+            StorageService.syncPlayerProfile(roomCode, updatedPlayer);
         }
     }, [player, roomCode]);
 
