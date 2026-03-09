@@ -36,3 +36,11 @@ Original prompt: I just tried to do a test run with some friends and when I trie
 - Added PerfDiagnosticsOverlay and query-param-driven perf HUD (`?anoPerf=1`) for on-device profiling.
 - Split recharts into a dedicated vendor chunk and lazy-loaded Home/Lobby optional modals to shrink core screen bundles.
 - Verified production build after chunking work. HomeScreen dropped to ~23.8 kB, LobbyScreen to ~23.1 kB, and StatsScreen logic chunk to ~17.0 kB with charts isolated in vendor-charts.
+- Auditing sabotage mechanic against roadmap item: saboteur assignment, vote/result flow, sabotage round selection, and reveal flow.
+- Moved shield and mirror-shield resolution out of `SabotageSelectionScreen.tsx` into `StorageService.setSabotageTarget()` so room state, not local UI, decides sabotage outcome.
+- Added explicit sabotage outcome/attempted-target state plus round-result sabotage summaries so voting/results/final screens can reveal what actually happened.
+- Hardened vote submission to reject self-votes and votes for non-submitters, and restricted rankings to submitted artists so late joiners or empty entries cannot place on the podium.
+- Adjusted sabotage round reselection to prefer future rounds when settings change mid-game and randomized lowest-score saboteur tie breaks fairly.
+- Verified `npm run build` passes after sabotage changes.
+- `npm run lint` still fails on broad pre-existing repo issues unrelated to sabotage (legacy `any`s, effect linting, generated `dev-dist` rules, and older hook-order/set-state-in-effect findings). No new sabotage-specific lint failures were isolated beyond those existing file-level issues.
+- Local dev server boots at `http://127.0.0.1:5173/`, but Playwright browser automation was blocked by the machine's existing Chrome session, so interactive sabotage flow verification was limited to code-path review plus build validation this pass.

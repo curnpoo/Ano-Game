@@ -26,6 +26,7 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
 }) => {
     const [mounted, setMounted] = useState(false);
     const [showConfetti, setShowConfetti] = useState(false);
+    const sabotageSucceeded = room.sabotageOutcome === 'landed' || room.sabotageOutcome === 'reflected';
 
     useEffect(() => {
         setMounted(true);
@@ -84,7 +85,7 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                 // Track sabotage stats only if sabotage round was the final round
                 // (Earlier rounds' sabotage is tracked in ResultsScreen)
                 if (room.sabotageRound === room.roundNumber) {
-                    if (room.saboteurId === currentPlayerId) {
+                    if (room.saboteurId === currentPlayerId && sabotageSucceeded) {
                         await StatsService.recordWasSaboteur();
                          ChallengeService.updateProgress('sabotage', 1);
                     }
@@ -109,7 +110,35 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
 
 
         processFinalStats();
-    }, [room.roomCode, currentPlayerId, room.players, room.scores, showToast]);
+    }, [room.roomCode, currentPlayerId, room.players, room.scores, room.roundNumber, room.sabotageRound, room.saboteurId, room.sabotageTargetId, room.sabotageTriggered, room.sabotageOutcome, showToast, sabotageSucceeded]);
+
+    const finalSabotageSummary = room.roundResults[room.roundResults.length - 1]?.sabotageSummary;
+    const sabotageSaboteur = room.players.find((player) => player.id === finalSabotageSummary?.saboteurId);
+    const sabotageTarget = room.players.find((player) => player.id === finalSabotageSummary?.targetId);
+    const sabotageAttemptedTarget = room.players.find((player) => player.id === finalSabotageSummary?.attemptedTargetId);
+
+    const sabotageRevealText = (() => {
+        if (!finalSabotageSummary?.saboteurId || !finalSabotageSummary.outcome) return null;
+
+        switch (finalSabotageSummary.outcome) {
+            case 'landed':
+                return sabotageTarget
+                    ? `${sabotageSaboteur?.name || 'The saboteur'} sabotaged ${sabotageTarget.name}`
+                    : `${sabotageSaboteur?.name || 'The saboteur'} landed the sabotage`;
+            case 'reflected':
+                return sabotageAttemptedTarget
+                    ? `${sabotageAttemptedTarget.name} reflected ${sabotageSaboteur?.name || 'the saboteur'}`
+                    : 'The sabotage got reflected';
+            case 'blocked':
+                return sabotageAttemptedTarget
+                    ? `${sabotageAttemptedTarget.name} blocked the sabotage`
+                    : 'The sabotage was blocked';
+            case 'skipped':
+                return `${sabotageSaboteur?.name || 'The saboteur'} skipped the sabotage`;
+            default:
+                return null;
+        }
+    })();
 
     const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
     const [saveError, setSaveError] = useState<string>('');
@@ -239,6 +268,15 @@ export const FinalResultsScreen: React.FC<FinalResultsScreenProps> = ({
                     After {room.settings.totalRounds} rounds...
                 </p>
             </div>
+
+            {sabotageRevealText && (
+                <div className="w-full max-w-md mb-5 rounded-[2rem] border border-red-400/30 bg-red-500/10 px-5 py-4 text-center shadow-xl backdrop-blur-md z-10">
+                    <div className="text-[11px] font-black uppercase tracking-[0.3em] text-red-200/80">Final Sabotage</div>
+                    <div className="mt-2 text-lg font-black" style={{ color: 'var(--theme-text)' }}>
+                        {sabotageRevealText}
+                    </div>
+                </div>
+            )}
 
             {/* Grand Podium */}
             <div className="flex items-end justify-center gap-6 mb-8 z-10">

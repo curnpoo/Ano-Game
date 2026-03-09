@@ -204,6 +204,13 @@ export interface RoundResult {
     roundNumber: number;
     imageUrl?: string; // Base image for this round
     block?: BlockInfo; // The white block/mask used in this round
+    sabotageSummary?: {
+        saboteurId: string | null;
+        targetId: string | null;
+        attemptedTargetId: string | null;
+        effectType: SabotageType | null;
+        outcome: 'pending' | 'skipped' | 'blocked' | 'reflected' | 'landed' | null;
+    };
     rankings: {
         playerId: string;
         playerName: string;
@@ -260,8 +267,10 @@ export interface GameRoom {
     sabotageRound?: number | null; // Which round has sabotage (1-indexed)
     saboteurId?: string | null; // Player doing the sabotaging
     sabotageTargetId?: string | null; // Player being sabotaged
+    sabotageAttemptedTargetId?: string | null; // Original target before any shield/mirror resolution
     sabotageEffect?: SabotageEffect | null;
     sabotageTriggered?: boolean; // Has the effect started?
+    sabotageOutcome?: 'pending' | 'skipped' | 'blocked' | 'reflected' | 'landed' | null;
 
     // Double Points (random chance per round)
     isDoublePoints?: boolean; // This round has 2x points

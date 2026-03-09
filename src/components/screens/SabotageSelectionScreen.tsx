@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { Player, SabotageType, SabotageEffect } from '../../types';
 import { AvatarDisplay } from '../common/AvatarDisplay';
 
@@ -6,8 +6,8 @@ interface SabotageSelectionScreenProps {
     players: Player[];
     saboteurId: string;
     currentPlayerId: string;
-    onSelect: (targetId: string, effect: SabotageEffect) => void;
-    onSkip: () => void;
+    onSelect: (targetId: string, effect: SabotageEffect) => void | Promise<void>;
+    onSkip: () => void | Promise<void>;
 }
 
 const SABOTAGE_TYPES: { type: SabotageType; label: string; icon: string; description: string }[] = [
@@ -41,8 +41,6 @@ export const SabotageSelectionScreen: React.FC<SabotageSelectionScreenProps> = (
     const [selectedTargetId, setSelectedTargetId] = useState<string | null>(null);
     const [selectedType, setSelectedType] = useState<SabotageType | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [reflectionMessage, setReflectionMessage] = useState<string | null>(null);
-    const reflectionTimeoutRef = useRef<number | null>(null);
 
     const isSaboteur = currentPlayerId === saboteurId;
 
@@ -50,47 +48,16 @@ export const SabotageSelectionScreen: React.FC<SabotageSelectionScreenProps> = (
     const targets = players.filter(p => p.id !== saboteurId);
 
     useEffect(() => {
-        return () => {
-            if (reflectionTimeoutRef.current) {
-                window.clearTimeout(reflectionTimeoutRef.current);
-            }
-        };
+        setSelectedTargetId(null);
+        setSelectedType(null);
+        setIsSubmitting(false);
     }, []);
 
-    const handleConfirm = () => {
+    const handleConfirm = async () => {
         if (selectedTargetId && selectedType && !isSubmitting) {
             setIsSubmitting(true);
             try {
-                let finalTargetId = selectedTargetId;
-                const targetPlayer = players.find(p => p.id === selectedTargetId);
-
-                // Mirror Shield Check (30% chance to reflect)
-                if (targetPlayer?.permanentPowerups?.includes('mirror_shield')) {
-                    const roll = Math.random();
-                    console.log('[Mirror Shield] Checking reflection...', roll);
-                    if (roll < 0.3) {
-                        console.log(`[Mirror Shield] REFLECTED! Saboteur ${saboteurId} is now the target.`);
-                        finalTargetId = saboteurId;
-                        setReflectionMessage('Mirror Shield reflected your sabotage!');
-                        if (reflectionTimeoutRef.current) {
-                            window.clearTimeout(reflectionTimeoutRef.current);
-                        }
-                        reflectionTimeoutRef.current = window.setTimeout(() => {
-                            setReflectionMessage(null);
-                        }, 2000);
-                    }
-                }
-
-                // Shield Check (Consumable)
-                // If target has 'shield' equipped, block the sabotage (reduce intensity to 0)
-                if (targetPlayer?.activePowerups?.includes('shield')) {
-                    console.log(`[Shield] Sabotage blocked by Shield check on ${finalTargetId}`);
-                    // We send intensity 0 to indicate blocked
-                    onSelect(finalTargetId, { type: selectedType, intensity: 0 });
-                    return;
-                }
-
-                onSelect(finalTargetId, { type: selectedType, intensity: 5 });
+                await onSelect(selectedTargetId, { type: selectedType, intensity: 5 });
             } finally {
                 setIsSubmitting(false);
             }
@@ -121,11 +88,6 @@ export const SabotageSelectionScreen: React.FC<SabotageSelectionScreenProps> = (
             </button>
 
             <header className="text-center">
-                {reflectionMessage && (
-                    <div className="mx-auto mb-3 w-fit px-4 py-2 rounded-full bg-emerald-500/20 text-emerald-200 text-sm font-bold border border-emerald-400/40 animate-pulse">
-                        {reflectionMessage}
-                    </div>
-                )}
                 <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-purple-600 mb-2">
                     REVENGE TIME 😈
                 </h1>

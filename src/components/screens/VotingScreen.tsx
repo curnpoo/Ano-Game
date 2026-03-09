@@ -84,6 +84,27 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
     const currentDrawing = drawings[selectedIndex];
     const isOwnDrawing = currentDrawing?.player.id === currentPlayerId;
     const alreadyVoted = !!room.votes[currentPlayerId];
+    const sabotageTarget = room.players.find((currentPlayer) => currentPlayer.id === room.sabotageTargetId);
+    const sabotageAttemptedTarget = room.players.find((currentPlayer) => currentPlayer.id === room.sabotageAttemptedTargetId);
+
+    const sabotageStatus = (() => {
+        switch (room.sabotageOutcome) {
+            case 'landed':
+                return sabotageTarget ? `${sabotageTarget.name} was sabotaged` : 'A sabotage landed';
+            case 'reflected':
+                return sabotageAttemptedTarget
+                    ? `${sabotageAttemptedTarget.name}'s Mirror Shield reflected the sabotage`
+                    : 'The sabotage bounced back';
+            case 'blocked':
+                return sabotageAttemptedTarget
+                    ? `${sabotageAttemptedTarget.name} blocked the sabotage`
+                    : 'The sabotage was blocked';
+            case 'skipped':
+                return 'The saboteur stood down';
+            default:
+                return null;
+        }
+    })();
 
     useEffect(() => {
         setHasVoted(alreadyVoted);
@@ -195,10 +216,10 @@ export const VotingScreen: React.FC<VotingScreenProps> = ({
                 </div>
 
                 {/* Sub-header info */}
-                {room.sabotageTargetId && (
+                {sabotageStatus && (
                     <div className="bg-red-500/20 border border-red-500/40 text-red-200 rounded-full px-4 py-1 font-bold text-xs inline-flex items-center gap-2 animate-pulse shadow-md backdrop-blur-md">
                         <span>⚠️</span>
-                        <span>{room.players.find(p => p.id === room.sabotageTargetId)?.name || 'Someone'} was SABOTAGED!</span>
+                        <span>{sabotageStatus}</span>
                     </div>
                 )}
                 {(totalPlayers - votedCount) <= 2 && (totalPlayers - votedCount) > 0 && (

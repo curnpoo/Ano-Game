@@ -1,7 +1,7 @@
 import { ref, set, get, onValue, runTransaction, remove } from 'firebase/database';
 import { database } from '../firebase';
 import { ImageService } from './image';
-import type { GameRoom, Player, GameSettings, BlockInfo, PlayerState, PlayerDrawing, RoundResult, RoomHistoryEntry, PlayerCosmetics, ActiveEffect } from '../types';
+import type { GameRoom, Player, GameSettings, BlockInfo, PlayerState, PlayerDrawing, RoundResult, RoomHistoryEntry, PlayerCosmetics, ActiveEffect, SabotageEffect } from '../types';
 import { AuthService } from './auth';
 import { AvatarService } from './avatarService';
 
@@ -18,6 +18,31 @@ const DEFAULT_COSMETICS: PlayerCosmetics = {
     badges: [],
     activeBrush: 'default',
     activeColor: '#000000'
+};
+
+const pickRandomRound = (totalRounds: number, minRound = 1): number | null => {
+    const startRound = Math.max(1, Math.min(minRound, totalRounds));
+    if (startRound > totalRounds) return null;
+    const availableRounds = totalRounds - startRound + 1;
+    return startRound + Math.floor(Math.random() * availableRounds);
+};
+
+const chooseSaboteur = (
+    players: Player[],
+    scores: Record<string, number>,
+    uploadedBy: string,
+    roundNumber: number
+): string | null => {
+    const eligibleSaboteurs = players.filter((player) => player.id !== uploadedBy);
+    if (eligibleSaboteurs.length === 0) return null;
+
+    if (players.length <= 3 || roundNumber <= 1) {
+        return eligibleSaboteurs[Math.floor(Math.random() * eligibleSaboteurs.length)]?.id ?? null;
+    }
+
+    const lowestScore = Math.min(...eligibleSaboteurs.map((player) => scores[player.id] || 0));
+    const lowestRankedPlayers = eligibleSaboteurs.filter((player) => (scores[player.id] || 0) === lowestScore);
+    return lowestRankedPlayers[Math.floor(Math.random() * lowestRankedPlayers.length)]?.id ?? null;
 };
 
 export const StorageService = {
@@ -40,6 +65,8 @@ export const StorageService = {
 
         if (!data.settings) data.settings = DEFAULT_SETTINGS;
         if (data.sabotageRound === undefined) data.sabotageRound = null;
+        if (data.sabotageAttemptedTargetId === undefined) data.sabotageAttemptedTargetId = null;
+        if (data.sabotageOutcome === undefined) data.sabotageOutcome = null;
 
         return data as GameRoom;
     },
@@ -519,7 +546,7 @@ export const StorageService = {
         // Pick a random sabotage round (1 to totalRounds) if enabled
         let sabotageRound: number | null = null;
         if (settings.enableSabotage) {
-             sabotageRound = Math.floor(Math.random() * settings.totalRounds) + 1;
+            sabotageRound = pickRandomRound(settings.totalRounds);
         }
 
         const newRoom: GameRoom = {
@@ -932,7 +959,7 @@ export const StorageService = {
                     // If we're already past round 1, try to pick a future round if possible? 
                     // For simplicity, just pick any random round for now. 
                     // Ideally: Math.max(r.roundNumber + 1, random...)
-                    newSabotageRound = Math.floor(Math.random() * newSettings.totalRounds) + 1;
+                    newSabotageRound = pickRandomRound(newSettings.totalRounds, r.roundNumber + 1);
                 } else {
                     newSabotageRound = null; // Disabled
                 }
@@ -972,28 +999,13 @@ export const StorageService = {
             // Check if this is the sabotage round (MUST be enabled in settings)
             const nextRoundNumber = r.roundNumber + 1;
             const isSabotageRound = r.settings.enableSabotage && r.sabotageRound === nextRoundNumber;
-            let saboteurId: string | null = null;
+            const saboteurId = isSabotageRound
+                ? chooseSaboteur(r.players, r.scores, uploadedBy, nextRoundNumber)
+                : null;
             let nextStatus: 'drawing' | 'sabotage-selection' = 'drawing';
 
-            if (isSabotageRound) {
-                const eligibleSaboteurs = r.players.filter(p => p.id !== uploadedBy);
-                
-                if (eligibleSaboteurs.length > 0) {
-                    if (r.players.length > 3 && nextRoundNumber > 1) {
-                         // > 3 Players: Lowest ranked player gets to sabotage
-                         // Sort by score (ascending)
-                         const sortedByScore = [...eligibleSaboteurs].sort((a, b) => (r.scores[a.id] || 0) - (r.scores[b.id] || 0));
-                         // Take the first one (lowest score)
-                         saboteurId = sortedByScore[0].id;
-                    } else {
-                        // <= 3 Players or Round 1: Random saboteur
-                        saboteurId = eligibleSaboteurs[Math.floor(Math.random() * eligibleSaboteurs.length)].id;
-                    }
-
-                    if (saboteurId) {
-                        nextStatus = 'sabotage-selection';
-                    }
-                }
+            if (saboteurId) {
+                nextStatus = 'sabotage-selection';
             }
 
             return {
@@ -1013,8 +1025,10 @@ export const StorageService = {
                 // Sabotage state
                 saboteurId,
                 sabotageTargetId: null, // Saboteur picks this
+                sabotageAttemptedTargetId: null,
                 sabotageEffect: null, // Clear any previous effects
-                sabotageTriggered: false
+                sabotageTriggered: false,
+                sabotageOutcome: saboteurId ? 'pending' : null
             };
         });
     },
@@ -1035,13 +1049,43 @@ export const StorageService = {
     },
 
     // Saboteur sets their target
-    setSabotageTarget: async (roomCode: string, targetId: string, effect: any): Promise<GameRoom | null> => {
-        return StorageService.updateRoom(roomCode, (r) => ({
-            ...r,
-            sabotageTargetId: targetId,
-            sabotageEffect: effect,
-            status: 'drawing' // Move to drawing phase
-        }));
+    setSabotageTarget: async (roomCode: string, targetId: string, effect: SabotageEffect): Promise<GameRoom | null> => {
+        return StorageService.updateRoom(roomCode, (r) => {
+            if (r.status !== 'sabotage-selection' || !r.saboteurId) {
+                return r;
+            }
+
+            const attemptedTarget = r.players.find((player) => player.id === targetId);
+            if (!attemptedTarget || attemptedTarget.id === r.saboteurId) {
+                return r;
+            }
+
+            let finalTargetId: string | null = targetId;
+            let finalEffect: SabotageEffect | null = effect;
+            let sabotageOutcome: GameRoom['sabotageOutcome'] = 'landed';
+
+            if (attemptedTarget.permanentPowerups?.includes('mirror_shield') && Math.random() < 0.3) {
+                finalTargetId = r.saboteurId;
+                sabotageOutcome = 'reflected';
+            }
+
+            const finalTargetPlayer = r.players.find((player) => player.id === finalTargetId);
+            if (finalTargetPlayer?.activePowerups?.includes('shield')) {
+                finalTargetId = null;
+                finalEffect = null;
+                sabotageOutcome = 'blocked';
+            }
+
+            return {
+                ...r,
+                sabotageAttemptedTargetId: targetId,
+                sabotageTargetId: finalTargetId,
+                sabotageEffect: finalEffect,
+                sabotageOutcome,
+                sabotageTriggered: false,
+                status: 'drawing'
+            };
+        });
     },
 
     // Saboteur skips (or time runs out)
@@ -1049,17 +1093,26 @@ export const StorageService = {
         return StorageService.updateRoom(roomCode, (r) => ({
             ...r,
             sabotageTargetId: null,
-            sabotageEffect: null as any,
+            sabotageAttemptedTargetId: null,
+            sabotageEffect: null,
+            sabotageTriggered: false,
+            sabotageOutcome: 'skipped',
             status: 'drawing'
         }));
     },
 
     // Trigger sabotage effect when target starts drawing
     triggerSabotage: async (roomCode: string): Promise<GameRoom | null> => {
-        return StorageService.updateRoom(roomCode, (r) => ({
-            ...r,
-            sabotageTriggered: true
-        }));
+        return StorageService.updateRoom(roomCode, (r) => {
+            if (!r.sabotageTargetId || !r.sabotageEffect) {
+                return r;
+            }
+
+            return {
+                ...r,
+                sabotageTriggered: true
+            };
+        });
     },
 
     updatePlayerCosmetics: async (roomCode: string, playerId: string, updates: Partial<PlayerCosmetics>): Promise<GameRoom | null> => {
@@ -1133,6 +1186,13 @@ export const StorageService = {
     // Submit vote
     submitVote: async (roomCode: string, voterId: string, votedForId: string): Promise<GameRoom | null> => {
         return StorageService.updateRoom(roomCode, (r) => {
+            if (r.status !== 'voting') return r;
+            if (!r.players.some((player) => player.id === voterId)) return r;
+            if (voterId === votedForId) return r;
+
+            const rankedPlayers = r.players.filter((player) => r.playerStates[player.id]?.status === 'submitted');
+            if (!rankedPlayers.some((player) => player.id === votedForId)) return r;
+
             const newVotes = { ...r.votes, [voterId]: votedForId };
 
             // Check if all players have voted
@@ -1142,13 +1202,13 @@ export const StorageService = {
             if (allVoted) {
                 // Count votes
                 const voteCounts: { [playerId: string]: number } = {};
-                r.players.forEach(p => { voteCounts[p.id] = 0; });
+                rankedPlayers.forEach(p => { voteCounts[p.id] = 0; });
                 Object.values(newVotes).forEach(votedFor => {
                     voteCounts[votedFor] = (voteCounts[votedFor] || 0) + 1;
                 });
 
                 // Sort by votes
-                const rankings = r.players
+                const rankings = rankedPlayers
                     .map(p => ({
                         playerId: p.id,
                         playerName: p.name,
@@ -1183,6 +1243,13 @@ export const StorageService = {
                 const roundResult: RoundResult = {
                     roundNumber: r.roundNumber,
                     imageUrl: r.currentImage?.url || '',
+                    sabotageSummary: {
+                        saboteurId: r.saboteurId || null,
+                        targetId: r.sabotageTargetId || null,
+                        attemptedTargetId: r.sabotageAttemptedTargetId || null,
+                        effectType: r.sabotageEffect?.type || null,
+                        outcome: r.sabotageOutcome || null
+                    },
                     rankings,
                     drawings,
                     block: r.block ?? undefined // Capture block for Match History
@@ -1230,7 +1297,13 @@ export const StorageService = {
                 currentImage: null,
                 block: null, // Firebase doesn't accept undefined
                 playerStates: {},
-                votes: {}
+                votes: {},
+                saboteurId: null,
+                sabotageTargetId: null,
+                sabotageAttemptedTargetId: null,
+                sabotageEffect: null,
+                sabotageTriggered: false,
+                sabotageOutcome: null
             };
         });
     },
@@ -1261,7 +1334,14 @@ export const StorageService = {
                 playerStates: {},
                 votes: {},
                 scores: {},
-                roundResults: []
+                roundResults: [],
+                sabotageRound: r.settings.enableSabotage ? pickRandomRound(r.settings.totalRounds) : null,
+                saboteurId: null,
+                sabotageTargetId: null,
+                sabotageAttemptedTargetId: null,
+                sabotageEffect: null,
+                sabotageTriggered: false,
+                sabotageOutcome: null
             };
         });
     },

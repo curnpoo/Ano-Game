@@ -38,6 +38,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
 
     // Track if we've already processed this round's results to avoid double XP
     const [processedRound, setProcessedRound] = useState<number>(-1);
+    const sabotageSucceeded = room.sabotageOutcome === 'landed' || room.sabotageOutcome === 'reflected';
 
     useEffect(() => {
         if (!room.roundResults || room.roundResults.length === 0) return;
@@ -96,7 +97,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
                 };
 
                 // Track sabotage stats if applicable for this round
-                if (room.saboteurId === player.id && room.roundNumber === room.sabotageRound) {
+                if (room.saboteurId === player.id && room.roundNumber === room.sabotageRound && sabotageSucceeded) {
                     StatsService.recordWasSaboteur();
                     ChallengeService.updateProgress('sabotage', 1);
                 }
@@ -125,7 +126,7 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
                 }
             }
         }
-    }, [room.roundResults, processedRound, player.id, room.isDoublePoints, showToast, room.roundNumber]);
+    }, [room.roundResults, processedRound, player.id, room.isDoublePoints, showToast, room.roundNumber, room.sabotageOutcome, room.sabotageRound, room.saboteurId, room.sabotageTargetId, room.sabotageTriggered, room.votes, sabotageSucceeded]);
 
     useEffect(() => {
         setMounted(true);
@@ -182,6 +183,49 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
         return playerAwards;
     }, [room.players, room.playerStates]);
 
+    const sabotageSummary = latestResult?.sabotageSummary;
+    const sabotageSaboteur = room.players.find((currentPlayer) => currentPlayer.id === sabotageSummary?.saboteurId);
+    const sabotageTarget = room.players.find((currentPlayer) => currentPlayer.id === sabotageSummary?.targetId);
+    const sabotageAttemptedTarget = room.players.find((currentPlayer) => currentPlayer.id === sabotageSummary?.attemptedTargetId);
+
+    const sabotageHeadline = (() => {
+        if (!sabotageSummary?.saboteurId || !sabotageSummary.outcome) return null;
+
+        switch (sabotageSummary.outcome) {
+            case 'landed':
+                return sabotageTarget
+                    ? `${sabotageSaboteur?.name || 'The saboteur'} hit ${sabotageTarget.name}`
+                    : `${sabotageSaboteur?.name || 'The saboteur'} landed the sabotage`;
+            case 'reflected':
+                return sabotageAttemptedTarget
+                    ? `${sabotageAttemptedTarget.name} reflected it back`
+                    : 'The sabotage was reflected';
+            case 'blocked':
+                return sabotageAttemptedTarget
+                    ? `${sabotageAttemptedTarget.name} blocked the sabotage`
+                    : 'The sabotage was blocked';
+            case 'skipped':
+                return `${sabotageSaboteur?.name || 'The saboteur'} skipped the sabotage`;
+            default:
+                return null;
+        }
+    })();
+
+    const sabotageDetail = (() => {
+        if (!sabotageSummary?.effectType) return null;
+
+        switch (sabotageSummary.effectType) {
+            case 'subtract_time':
+                return 'Effect: Time Thief';
+            case 'reduce_colors':
+                return 'Effect: Monochrome Madness';
+            case 'visual_distortion':
+                return 'Effect: Shake & Blur';
+            default:
+                return null;
+        }
+    })();
+
     if (!latestResult) {
         return (
             <div className="min-h-screen flex items-center justify-center"
@@ -229,6 +273,18 @@ export const ResultsScreen: React.FC<ResultsScreenProps> = ({
                         Round {room.roundNumber} of {room.settings.totalRounds}
                     </p>
                 </div>
+
+                {sabotageHeadline && (
+                    <div className="w-full max-w-md mb-5 rounded-3xl border border-red-400/30 bg-red-500/10 px-5 py-4 text-center shadow-xl backdrop-blur-md">
+                        <div className="text-[11px] font-black uppercase tracking-[0.3em] text-red-200/80">Sabotage Reveal</div>
+                        <div className="mt-2 text-lg font-black" style={{ color: 'var(--theme-text)' }}>
+                            {sabotageHeadline}
+                        </div>
+                        {sabotageDetail && (
+                            <div className="mt-1 text-sm font-semibold text-red-100/80">{sabotageDetail}</div>
+                        )}
+                    </div>
+                )}
 
                 {/* Podium - Responsive Height */}
                 <div className={`flex items-end justify-center w-full max-w-lg mb-8 shrink-0 relative perspective-1000 min-h-[180px] ${showPodium ? 'opacity-100' : 'opacity-0'}`}>

@@ -213,19 +213,6 @@ export const DrawingScreen: React.FC<DrawingScreenProps> = ({
         return CosmeticsService.getAvailableColors();
     }, [isSabotaged, sabotageEffect]);
 
-    // Effect: Sabotage Notification
-    useEffect(() => {
-        if (isSabotaged) {
-             // Dispatch a custom event or use a toast if available via props (not available here directly?)
-             // DrawingScreen doesn't have showToast prop, but we can standard alerts or just rely on the visual overlay.
-             // Actually, the overlay already says "SABOTAGED!" in SabotageOverlay.tsx which is likely rendered by GameCanvas or above?
-             // Wait, SabotageOverlay.tsx is NOT used in DrawingScreen.tsx yet. I need to check where it is used.
-             // It seems I need to add SabotageOverlay to DrawingScreen.tsx or verify if it's there.
-             // Looking at previous file view of DrawingScreen.tsx, it DOES NOT import SabotageOverlay.
-             // I should add it.
-        }
-    }, [isSabotaged]);
-
     // Effect: Visual Distortion & Animation
     const baseContainerClass = "fixed inset-0 w-full h-[100dvh] overflow-hidden flex flex-col items-center justify-center bg-black/5"; // Added bg for depth
     const sabotageClass = (isSabotaged && sabotageEffect?.type === 'visual_distortion')
